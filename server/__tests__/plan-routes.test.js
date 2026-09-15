@@ -257,6 +257,15 @@ describe("POST tick / log / export", () => {
     assert.equal(last.agent, "af01d6844fb0e1968");
     assert.ok(model.agents[last.agent], "events key into model.agents the way the v2 page does");
     assert.equal((await post("/api/plans/ledgerflow/export", { dir: "relative" })).status, 400);
+    const elsewhere = path.resolve(path.sep, "ccam-export-elsewhere");
+    assert.equal((await post("/api/plans/ledgerflow/export", { dir: elsewhere })).status, 400);
+    assert.equal(fs.existsSync(elsewhere), false);
+    // the project itself is allowed
+    assert.equal(
+      (await post(at("/api/plans/ledgerflow/export"), { dir: path.join(cwd, ".local", "board") }))
+        .status,
+      200
+    );
   });
 });
 
@@ -350,7 +359,8 @@ describe("websocket pusher", () => {
     assert.ok(mine()[0].data.model.totals.live >= 1, "the hook-driven subagent is live now");
     push.poll(t + 100);
     assert.equal(mine().length, 1, "nothing changed, nothing sent");
-    push.touch(liveSlug);
+    // a log insert bumps the version; the send waits out the 300 ms
+    await post(`/api/plans/${liveSlug}/log`, { agent: "D", key: "D5", status: "note", note: "x" });
     push.poll(t + 200);
     assert.equal(mine().length, 1, "debounced");
     push.poll((t += 400));
@@ -359,8 +369,7 @@ describe("websocket pusher", () => {
     assert.equal(mine().length, 2);
     push.poll(t + 5000);
     assert.equal(mine().length, 3, "5 s tick while an agent works");
-    // an insert bumps the version → sent on the next poll past the debounce
-    await post(`/api/plans/${liveSlug}/log`, { agent: "D", key: "D5", status: "note", note: "x" });
+    await post(`/api/plans/${liveSlug}/log`, { agent: "D", key: "D5", status: "note", note: "y" });
     push.poll(t + 5400);
     assert.equal(mine().length, 4);
     ws.getConnectionCount = () => 0;

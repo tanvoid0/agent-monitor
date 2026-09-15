@@ -355,6 +355,8 @@ including upstream's suite, and the PR for §4.1 is open upstream.
 | `client/src/App.tsx:129` | `<Route path="plan/:slug?" element={<Plan />} />` | 2 |
 | `client/src/components/Sidebar.tsx:99` | `{ to: "/plan", icon: SquareKanban, key: "nav:plan" }` + import | 2 |
 | `client/src/i18n/index.ts` | `plan` namespace: five imports, five resource lines, one `ns` entry | 11 |
+| `client/src/components/DocumentTitle.tsx` | `/plan` → `nav:plan` tab title (the route map lives there) | 2 |
+| `scripts/import-history.js` ~`:774` | stop-time JSONL back-fill tries `claude_agent_id` before the type + start-time heuristic (part of the §4.1 PR) | ~6 |
 | `client/src/i18n/locales/*/nav.json` | `nav:plan` (five locales, parity rule) | 5 × 1 |
 
 Everything else is a new file. After the upstream PR merges, the `hooks.js` line count goes to zero.
@@ -370,6 +372,15 @@ Everything else is a new file. After the upstream PR merges, the `hooks.js` line
   the rule is: expand first, then dispatch, then tick.
 - The artifact is a snapshot. The desktop app or a hosted CCAM (its `DEPLOYMENT.md`) is the live board.
 - One Node process per hook (CCAM's fire-and-forget handler, ~50 ms); ledgerflow's Python hooks double it until §8.
+  Hooks get dropped under load — the live smoke lost a dispatch's `PreToolUse Agent` while a test suite ran. The
+  `SubagentStart` row insert and the `PostToolUse Agent` back-fill cover a missed dispatch hook; a missed
+  `SubagentStart` falls back to the heuristics until the stop-time scan.
+- Errors are invisible live: `PostToolUseFailure` is not installed, so a failed call has no post event until the
+  stop-time JSONL scan writes `data.is_error`. Adding it to `HOOKS_WITH_MATCHER` is a one-line upstream follow-up.
+- Events while the server is down land in whichever step is in force when it comes back; `plans.step_since` and
+  the step's first `plan_log` line anchor the window, nothing else can.
+- FIFO binding assumes the `Agent` hooks and the `SubagentStart`s arrive in the same order. Same-type parallel
+  dispatches whose hooks cross bind name/task swapped for the run (events still 1:1); the stop-time scan repairs it.
 - Two projects with the same basename get `parent-basename` slugs; a renamed directory is a new project.
 - Keys must not repeat across a step and a sandbox that are open at once.
 

@@ -1,7 +1,8 @@
 /**
- * @file server/plan/watcher.js — discovery from sessions.cwd, the one-time
- * .local/log.md import, slug collisions, re-parse on change with
- * `plan_updated`, and the 7-day window.
+ * @file server/plan/watcher.js — discovery from sessions.cwd, the
+ * .local/log.md import and its re-import on change, slug collisions, re-parse
+ * on change with `plan_updated`, the half-written and gone-file guards, and
+ * the 7-day window.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -63,7 +64,7 @@ after(() => {
 });
 
 describe("plan watcher", () => {
-  it("discovers plans from recent sessions.cwd and imports .local/log.md once", () => {
+  it("discovers plans from recent sessions.cwd and imports .local/log.md", () => {
     watcher.scan(nowMs);
     const plans = watcher.list();
     assert.deepEqual(
@@ -141,5 +142,78 @@ describe("plan watcher", () => {
 
   it("a cwd without PROGRESS.md is left alone", () => {
     assert.equal(watcher.refresh(os.tmpdir()), null);
+  });
+
+  it("re-imports .local/log.md on change, only the lines not already stored", () => {
+    const plan = watcher.get(cwd);
+    const file = path.join(cwd, ".local", "log.md");
+    const before = db.prepare("SELECT COUNT(*) n FROM plan_log WHERE cwd = ?").get(plan.cwd).n;
+    const NL = String.fromCharCode(10);
+    fs.appendFileSync(
+      file,
+      [
+        "- 2026-09-15T14:10:00Z · G · G1 · done · smoke box finished",
+        "- 2026-09-15T13:42:37Z · main · I3 · note · CI on 28cfc8a failed: ./mvnw Permission denied (mode 100644 from Windows); +x set on mvnw + 8 scripts, pushed f2bef6f, CI rerunning",
+        "",
+      ].join(NL)
+    );
+    fs.utimesSync(file, new Date(), new Date(Date.now() + 15000));
+    sent.length = 0;
+    watcher.scan(nowMs);
+    const after = db.prepare("SELECT COUNT(*) n FROM plan_log WHERE cwd = ?").get(plan.cwd).n;
+    assert.equal(after, before + 1, "the duplicate of an existing line is skipped");
+    const rows = sent.filter((m) => m.type === "plan_log");
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].data.slug, "ledgerflow");
+    assert.equal(rows[0].data.row.key, "G1");
+    assert.equal(rows[0].data.row.step, 17, "appended under the file's `## step 17` heading");
+    // unchanged file, nothing twice
+    sent.length = 0;
+    watcher.scan(nowMs);
+    assert.equal(sent.length, 0);
+  });
+
+  it("keeps the stored plan while PROGRESS.md is half-written", () => {
+    const plan = watcher.get(cwd);
+    const file = path.join(cwd, "PROGRESS.md");
+    const full = fs.readFileSync(file, "utf8");
+    fs.writeFileSync(file, full.slice(0, full.indexOf("## Milestones") + 14)); // truncated mid-write
+    fs.utimesSync(file, new Date(), new Date(Date.now() + 20000));
+    sent.length = 0;
+    watcher.scan(nowMs);
+    const kept = watcher.get(cwd);
+    assert.equal(kept.step, 18);
+    assert.equal(kept.parsed, plan.parsed);
+    assert.equal(kept.step_since, plan.step_since);
+    assert.equal(sent.filter((m) => m.type === "plan_updated").length, 0);
+    fs.writeFileSync(file, full);
+    fs.utimesSync(file, new Date(), new Date(Date.now() + 25000));
+    watcher.scan(nowMs);
+    assert.equal(sent.filter((m) => m.type === "plan_updated").length, 1);
+  });
+
+  it("stops watching a PROGRESS.md gone for 10 s but keeps the row and its log", () => {
+    const file = path.join(twin, "PROGRESS.md");
+    const logRows = db
+      .prepare("SELECT COUNT(*) n FROM plan_log WHERE cwd = ?")
+      .get(path.resolve(twin)).n;
+    fs.unlinkSync(file);
+    watcher.scan(nowMs);
+    assert.ok(watcher.get(twin), "a moment's absence (editor rename) changes nothing");
+    watcher.scan(nowMs + 9000);
+    sent.length = 0;
+    watcher.scan(nowMs + 11000);
+    // A branch without the file, a stash, a rename: the history must survive.
+    assert.ok(watcher.get(twin), "the row stays");
+    assert.equal(
+      db.prepare("SELECT COUNT(*) n FROM plan_log WHERE cwd = ?").get(path.resolve(twin)).n,
+      logRows
+    );
+    assert.deepEqual(sent, [
+      { type: "plan_updated", data: { slug: `${path.basename(path.dirname(twin))}-ledgerflow` } },
+    ]);
+    // Announced once, not on every poll while it stays gone.
+    watcher.scan(nowMs + 13000);
+    assert.equal(sent.length, 1);
   });
 });

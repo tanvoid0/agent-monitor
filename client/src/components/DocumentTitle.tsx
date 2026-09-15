@@ -38,6 +38,8 @@ export function DocumentTitle() {
     title = t("run");
   } else if (path.startsWith("/settings")) {
     title = t("settings");
+  } else if (path.startsWith("/plan")) {
+    title = t("plan");
   } else if (path !== "/") {
     title = t("notFound");
   }

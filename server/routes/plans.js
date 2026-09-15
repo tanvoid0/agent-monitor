@@ -10,6 +10,7 @@
  */
 
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
 const { Router } = require("express");
 const { db } = require("../db");
@@ -185,10 +186,13 @@ router.post("/:slug/tick", (req, res) => {
   }
   const out = tick(md, key.trim(), !!done);
   if (out === null) return notFound(res, "no such key");
-  fs.writeFileSync(file, out);
+  try {
+    fs.writeFileSync(file, out);
+  } catch (err) {
+    return res.status(500).json({ error: { code: "TICK_FAILED", message: err.message } });
+  }
   const fresh = watcher.refresh(plan.cwd, true) || plan;
   const m = modelOf(req, fresh);
-  push.touch(fresh.slug);
   send(req, res, text.summary(m), {
     ok: true,
     key: key.trim(),
@@ -219,7 +223,6 @@ router.post("/:slug/log", (req, res) => {
   );
   const row = getLog.get(info.lastInsertRowid);
   ws.broadcast("plan_log", { slug: plan.slug, row });
-  push.touch(plan.slug);
   res.status(201).json({ ok: true, row });
 });
 
@@ -232,8 +235,17 @@ router.post("/:slug/export", (req, res) => {
   if (typeof dir !== "string" || !dir.trim() || !path.isAbsolute(dir)) {
     return bad(res, "dir must be an absolute path");
   }
-  const m = modelOf(req, plan);
+  // The route is unauthenticated by default: only the temp dir (where a
+  // session's scratchpad lives) or the project itself may be written.
   const target = path.resolve(dir);
+  const under = (root) => {
+    const rel = path.relative(path.resolve(root), target);
+    return rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel));
+  };
+  if (!under(os.tmpdir()) && !under(plan.cwd)) {
+    return bad(res, "dir must be under the temp directory or the project");
+  }
+  const m = modelOf(req, plan);
   try {
     fs.mkdirSync(target, { recursive: true });
     const html = fs

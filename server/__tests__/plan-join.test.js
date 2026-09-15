@@ -100,6 +100,112 @@ describe("plan join — ledgerflow fixture", () => {
     assert.match(last.cmd, /^cd "D:\/projects\/practice\/microservices\/ledgerflow" && bash -n/);
   });
 
+  it("a dispatch whose PreToolUse was dropped still maps the lane from its PostToolUse", () => {
+    const { db, stmts } = dbModule;
+    stmts.insertSession.run("drop-sess", null, "active", cwd, null, null);
+    stmts.insertAgent.run(
+      "drop-main",
+      "drop-sess",
+      "main",
+      "main",
+      null,
+      "working",
+      null,
+      null,
+      null
+    );
+    stmts.insertAgent.run(
+      "drop-w1",
+      "drop-sess",
+      "crew:quick",
+      "subagent",
+      "crew:quick",
+      "working",
+      null,
+      "drop-main",
+      null
+    );
+    db.prepare("UPDATE agents SET started_at = ? WHERE id IN ('drop-main', 'drop-w1')").run(NOW);
+    const ins = db.prepare(
+      "INSERT INTO events (session_id, agent_id, event_type, tool_name, summary, data, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)"
+    );
+    const input = { subagent_type: "crew:quick", description: "Lane W", prompt: "Lane W — Walk" };
+    ins.run(
+      "drop-sess",
+      "drop-main",
+      "PostToolUse",
+      "Agent",
+      "Tool completed: Agent",
+      JSON.stringify({ tool_use_id: "toolu_w", tool_input: input, tool_response: {} }),
+      NOW
+    );
+    ins.run(
+      "drop-sess",
+      "drop-w1",
+      "PreToolUse",
+      "Bash",
+      "Using tool: Bash",
+      JSON.stringify({ tool_use_id: "toolu_b", tool_input: { command: "ls" } }),
+      NOW
+    );
+    const m = join.model(plan, { now: new Date(NOW), transcriptCache });
+    assert.equal(m.agents["drop-w1"].lane, "W");
+    assert.equal(m.agents["drop-w1"].title, "Walk");
+    assert.equal(m.agents["drop-main"].tools, 0, "a Post is not a tool call");
+    // a Pre with the same tool_use_id would not double the dispatch
+    ins.run(
+      "drop-sess",
+      "drop-main",
+      "PreToolUse",
+      "Agent",
+      "Using tool: Agent",
+      JSON.stringify({ tool_use_id: "toolu_w", tool_input: input }),
+      NOW
+    );
+    const m2 = join.model(plan, { now: new Date(NOW), transcriptCache });
+    assert.equal(m2.stories[0].lanes[3].agents.length, 1);
+    db.prepare("DELETE FROM sessions WHERE id = 'drop-sess'").run();
+  });
+
+  it("a main with only a reaper Stop in the window is off the step; a waiting main with a tool call is live", () => {
+    const { db, stmts } = dbModule;
+    stmts.insertSession.run("reap-sess", null, "active", cwd, null, null);
+    stmts.insertAgent.run(
+      "reap-main",
+      "reap-sess",
+      "main",
+      "main",
+      null,
+      "waiting",
+      null,
+      null,
+      null
+    );
+    db.prepare(
+      "UPDATE agents SET started_at = '2026-09-15T12:00:00.000Z' WHERE id = 'reap-main'"
+    ).run();
+    const ins = db.prepare(
+      "INSERT INTO events (session_id, agent_id, event_type, tool_name, summary, data, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)"
+    );
+    ins.run("reap-sess", "reap-main", "Stop", null, "Session - stopped", "{}", NOW);
+    let m = join.model(plan, { now: new Date(NOW), transcriptCache });
+    assert.equal(m.agents["reap-main"], undefined);
+    assert.equal(m.totals.out, model.totals.out);
+    ins.run(
+      "reap-sess",
+      "reap-main",
+      "PreToolUse",
+      "Bash",
+      "Using tool: Bash",
+      JSON.stringify({ tool_input: { command: "ls" } }),
+      NOW
+    );
+    m = join.model(plan, { now: new Date(NOW), transcriptCache });
+    assert.equal(m.agents["reap-main"].live, true, "waiting on a subagent is live (v2 rule)");
+    assert.equal(m.agents["reap-main"].lane, "C");
+    db.prepare("DELETE FROM sessions WHERE id = 'reap-sess'").run();
+  });
+
   it("tail figures for the live agent's transcript", () => {
     const meta = JSON.parse(dbModule.stmts.getAgent.get("af01d6844fb0e1968").metadata);
     const f = figures(meta.transcript_path, { transcriptCache });

@@ -20,12 +20,6 @@ const state = new Map(); // slug -> { version, dirty, sentAt, live }
 let timer = null;
 let transcriptCache = null;
 
-/** Mark a plan changed by a route write (tick, log) without waiting for the poll. */
-function touch(slug) {
-  const s = state.get(slug);
-  if (s) s.dirty = true;
-}
-
 function poll(now = Date.now()) {
   if (ws.getConnectionCount() === 0) return 0;
   let sent = 0;
@@ -67,4 +61,4 @@ function stop() {
   state.clear();
 }
 
-module.exports = { start, stop, poll, touch };
+module.exports = { start, stop, poll };

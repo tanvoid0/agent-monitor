@@ -24,6 +24,12 @@ const q = {
   log: db.prepare(
     "SELECT id, key, agent, status, note, created_at AS ts FROM plan_log WHERE cwd = ? AND step = ? ORDER BY created_at, id"
   ),
+  // New rows and late transcript_path stamps are the only sessions changes
+  // the join cares about. Ceiling: a session deleted and another inserted in
+  // the same rowid with an older started_at would not be noticed.
+  sessionsKey: db.prepare(
+    "SELECT COUNT(*) AS n, MAX(rowid) AS r, MAX(started_at) AS s, SUM(transcript_path IS NOT NULL) AS t FROM sessions"
+  ),
   version: db.prepare(
     `SELECT (SELECT MAX(id) FROM events WHERE session_id IN (SELECT id FROM sessions WHERE cwd IN (SELECT value FROM json_each(?)))) AS e,
             (SELECT MAX(updated_at) FROM agents WHERE session_id IN (SELECT id FROM sessions WHERE cwd IN (SELECT value FROM json_each(?)))) AS a,
@@ -105,14 +111,23 @@ function waitingOf(message) {
   return { kind: /permission/i.test(m) ? "permission" : "input", tool: tool ? tool[1] : null };
 }
 
-/** The raw sessions.cwd spellings that resolve to this plan's cwd. */
+// The raw sessions.cwd spellings that resolve to this plan's cwd. Memoised
+// per cwd: the pusher asks every 250 ms and the table only matters to the join
+// when a session is added or gets its transcript path.
+const sessionsCache = new Map(); // cwd -> { key, value }
 function sessionsOf(plan) {
+  const k = q.sessionsKey.get();
+  const key = `${k.n}|${k.r}|${k.s}|${k.t}`;
+  const hit = sessionsCache.get(plan.cwd);
+  if (hit && hit.key === key) return hit.value;
   const rows = q.cwds.all().filter((s) => path.resolve(s.cwd) === plan.cwd);
-  return {
+  const value = {
     ids: rows.map((s) => s.id),
     cwds: [...new Set(rows.map((s) => s.cwd))],
     transcript: Object.fromEntries(rows.map((s) => [s.id, s.transcript_path])),
   };
+  sessionsCache.set(plan.cwd, { key, value });
+  return value;
 }
 
 function version(plan, sessions = sessionsOf(plan)) {
@@ -160,22 +175,32 @@ function build(plan, now, sessions, transcriptCache) {
         .all(...sessions.ids)
     : [];
   const byId = new Map(rows.map((r) => [r.id, r]));
-  // Agent dispatches, for agent → lane. A live-hook spawn event is attributed
-  // to the spawned row (remembered in `spawnOf`) and then, for the plan, moved
-  // to the dispatcher — its tool call, as in the JSONL import and v2.
+  for (const e of events) {
+    e.tsMs = ms(e.created_at);
+    e.isTool = e.event_type === "PreToolUse" || e.event_type === "PostToolUse";
+  }
+  // Agent dispatches, for agent → lane — the PreToolUse, or the PostToolUse
+  // when the Pre was dropped (same tool_input; deduplicated by tool_use_id). A
+  // live-hook spawn event is attributed to the spawned row (remembered in
+  // `spawnOf`) and then, for the plan, moved to the dispatcher — its tool
+  // call, as in the JSONL import and v2.
   const dispatches = {}; // session -> [{ts, lane, title, claimed}]
   const spawnOf = {}; // spawned row id -> its dispatch
+  const dispatchByUse = new Map(); // tool_use_id -> dispatch
   for (const e of events) {
-    if (e.event_type !== "PreToolUse" || e.tool_name !== "Agent") continue;
-    const lo = laneOf(parseJson(e.data).tool_input?.prompt);
+    if (!e.isTool || e.tool_name !== "Agent") continue;
+    const data = parseJson(e.data);
+    if (data.tool_use_id && dispatchByUse.has(data.tool_use_id)) continue;
+    const lo = laneOf(data.tool_input?.prompt);
     const d = {
-      ts: ms(e.created_at),
+      ts: e.tsMs,
       lane: lo ? lo.lane : null,
       title: lo ? lo.title : "",
       claimed: false,
     };
     (dispatches[e.session_id] ||= []).push(d);
-    if (/^Subagent spawned:/.test(e.summary || "")) {
+    if (data.tool_use_id) dispatchByUse.set(data.tool_use_id, d);
+    if (e.event_type === "PreToolUse" && /^Subagent spawned:/.test(e.summary || "")) {
       const row = byId.get(e.agent_id);
       if (row && row.parent_agent_id) {
         spawnOf[row.id] = d;
@@ -199,12 +224,17 @@ function build(plan, now, sessions, transcriptCache) {
     return d;
   };
 
-  // Agents on this step: any event in the window, or started/stopped inside it.
+  // Agents on this step: a tool call inside the window, or a subagent that
+  // started or stopped inside it. A main whose only event is a reaper Stop is
+  // not on the step.
   const agents = {};
   for (const r of rows) {
     const mine = eventsByAgent.get(r.id) || [];
-    if (!mine.length && ms(r.started_at) < sinceMs && !(ms(r.ended_at) >= sinceMs)) continue;
     const isMain = r.type === "main";
+    const inWindow =
+      mine.some((e) => e.isTool) ||
+      (!isMain && (ms(r.started_at) >= sinceMs || ms(r.ended_at) >= sinceMs));
+    if (!inWindow) continue;
     const meta = parseJson(r.metadata);
     const a = {
       id: r.id,
@@ -252,7 +282,7 @@ function build(plan, now, sessions, transcriptCache) {
     }
     let lastNotification = null;
     for (const e of mine) {
-      if (ms(e.created_at) > ms(a.lastTs)) a.lastTs = e.created_at;
+      if (e.tsMs > ms(a.lastTs)) a.lastTs = e.created_at;
       if (e.event_type === "PreToolUse") {
         const f = toolFields(e.tool_name, parseJson(e.data).tool_input || {}, plan.cwd);
         a.tools += 1;
@@ -264,9 +294,14 @@ function build(plan, now, sessions, transcriptCache) {
         lastNotification = e;
       }
     }
+    // v2's rule: not finished, and active within 30 min (subagent) / 10 min
+    // (main). A main waiting on its subagents is live.
     const age = nowMs - ms(a.lastTs);
+    a.live =
+      r.status !== "completed" &&
+      r.status !== "error" &&
+      age < (isMain ? LIVE_MAIN_MS : LIVE_AGENT_MS);
     const blocked = r.status === "waiting" && r.awaiting_reason === "notification";
-    a.live = (r.status === "working" || blocked) && age < (isMain ? LIVE_MAIN_MS : LIVE_AGENT_MS);
     if (blocked && r.awaiting_input_since) {
       a.waiting = {
         ...waitingOf(lastNotification ? parseJson(lastNotification.data).message : ""),
@@ -361,13 +396,13 @@ function build(plan, now, sessions, transcriptCache) {
         let errors = 0;
         for (const w of windows) {
           if (w.key !== t.key) continue;
-          for (const e of events) {
-            const ts = ms(e.created_at);
-            if (ts < w.t0 || (w.t1 && ts >= w.t1)) continue;
-            const ag = agents[e.agent_id];
-            if (!ag || ag.lane !== l.letter || !labelMatches(w.label, ag)) continue;
-            if (e.event_type === "PreToolUse") tools += 1;
-            else if (e.event_type === "PostToolUse" && isErrorPost(parseJson(e.data))) errors += 1;
+          for (const ag of laneAgents) {
+            if (!labelMatches(w.label, ag)) continue;
+            for (const e of eventsByAgent.get(ag.id) || []) {
+              if (!e.isTool || e.tsMs < w.t0 || (w.t1 && e.tsMs >= w.t1)) continue;
+              if (e.event_type === "PreToolUse") tools += 1;
+              else if (isErrorPost(parseJson(e.data))) errors += 1;
+            }
           }
         }
         t.tools = tools;
