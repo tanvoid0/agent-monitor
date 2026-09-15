@@ -46,7 +46,7 @@ upstream as a pull request — it is a bug there too — and the rest lives in n
 
 ## 2. Fork strategy — keep the pull open
 
-- `upstream` = hoangsonww; `origin` = the fork. Track upstream release tags; rebase `main` onto each.
+- `upstream` = hoangsonww; `origin` = the fork. Track upstream release tags; rebase `master` (upstream's default branch; there is no `main`) onto each.
 - Everything of ours lives under `server/plan/`, `server/routes/plans.js`, `client/src/plan/`, `docs/plan-layer.md`,
   `test/fixtures/plan/`. Upstream files are touched in exactly the places listed in §6 — a one-line require, a
   one-line `app.use`, a route, a nav item, a locale block, one migration, and the ingest patch.
@@ -241,7 +241,10 @@ The v2 page in CCAM's components and Tailwind, one route, one nav item (`nav:pla
   swimlane timeline of tool ticks (d3 is already a dependency).
 - **Detail** (drawer): breadcrumb `Step 17 › Lane D › D1`, status, text, log lines, attributed tool events with
   stdout/stderr tails (from `events.data`), link to the CCAM session and agent pages — the deep dive is already built.
-- Strings in `client/src/i18n/locales/en/plan.json`; other locales fall back to `en`.
+- Strings in `client/src/i18n/locales/<xx>/plan.json` for **all five locales** — the repo's i18n-parity rule and
+  `bash .claude/skills/i18n-parity/scripts/i18n-audit.sh` require every namespace file in every locale dir with the
+  same keys (an `en`-only file fails the audit). Registered at runtime from `client/src/plan/i18n.ts` via
+  `i18n.addResourceBundle(lng, "plan", …)` so `client/src/i18n/index.ts` is not touched.
 - 400 px: rail and agents collapse into drawers; board scrolls.
 
 Dark/light follows CCAM's theme. No new theming.
@@ -269,7 +272,10 @@ the contract; the v2 server's `/api/summary` and `/api/wip` output for that fixt
 
 **Fixture (main thread, first):** `test/fixtures/plan/ledgerflow/` — `PROGRESS.md`, `log.md`, the v2 `events.jsonl`
 translated into `sessions`/`agents`/`events` rows (a seed script, `test/fixtures/plan/seed.js`), the referenced
-subagent transcripts with paths rewritten, `now.txt`, `expected/summary.txt`, `expected/wip.txt`.
+subagent transcripts with paths rewritten, `now.txt`, `expected/summary.txt`, `expected/wip.txt`. As built
+(2026-09-15, `test/fixtures/plan/ledgerflow/README.md`): every transcript the events name — main sessions too — is
+included, **trimmed to `type: "assistant"` lines** (all either tailer reads; 13.9 MB → 5.2 MB); two step-16 subagent
+transcripts were already gone from disk and are absent on both sides.
 
 ### Lane S — ingest patch + server · serial · `crew:coder` on **opus**
 _touches: `scripts/install-hooks.js`, `server/routes/hooks.js`, `server/db.js` (two lines), `server/index.js` (two lines), `server/plan/**`, `server/routes/plans.js`, `server/__tests__/plan-*.test.js`, `server/__tests__/hooks-agent-id.test.js`_
@@ -284,7 +290,7 @@ _touches: `scripts/install-hooks.js`, `server/routes/hooks.js`, `server/db.js` (
 - [ ] S8 upstream PR text for S1 in `docs/upstream-pr-agent-id.md` — diff, the probe, the three-concurrent test
 
 ### Lane P — page · parallel · `crew:coder` on sonnet
-_touches: `client/src/plan/**`, `client/src/App.tsx` (one route), `client/src/components/Sidebar.tsx` (one item), `client/src/i18n/locales/en/plan.json`, `client/src/plan/__tests__/**`_
+_touches: `client/src/plan/**`, `client/src/App.tsx` (one route), `client/src/components/Sidebar.tsx` (one item), `client/src/i18n/locales/*/plan.json` (five, new), `client/src/i18n/locales/*/nav.json` (`nav:plan`, five one-liners), `client/src/plan/__tests__/**`_
 
 - [ ] P1 `Plan.tsx` renders `expected/model.json` from a mock fetch: rail, board, agents, detail — screenshot beside the v2 page
 - [ ] P2 picker + route param + `localStorage`
@@ -293,8 +299,8 @@ _touches: `client/src/plan/**`, `client/src/App.tsx` (one route), `client/src/co
 - [ ] P5 waiting chips, `say` line, `$` on badges/lanes/totals
 - [ ] P6 400 px; dark + light; `npm run test:client` green
 
-### Lane D — docs, skill, fixture glue · parallel · `crew:quick`
-_touches: `docs/plan-layer-skill.md`, `docs/PLUGINS.md` (one section), `README.md` (one section + screenshot slot), `test/fixtures/plan/seed.js`_
+### Lane D — docs, skill, fixture glue · parallel · `crew:coder` on sonnet (`crew:quick` refuses three-plus files; this lane touches eight)
+_touches: `docs/plan-layer-skill.md`, `docs/PLUGINS.md` (one section), `README.md` (one section + screenshot slot) mirrored into `README-CN.md`, `README-VN.md`, `README-KO.md`, `README-ES.md` (repo rule), `test/fixtures/plan/seed.js`_
 
 - [ ] D1 `seed.js`: v2 `events.jsonl` → CCAM rows (the mapping table in a comment)
 - [ ] D2 `plan-layer-skill.md` per §4.7; the ledgerflow `CLAUDE.local.md` replacement block
@@ -305,7 +311,11 @@ _touches: `docs/plan-layer-skill.md`, `docs/PLUGINS.md` (one section), `README.m
 - after S7 + P6: smoke — hooks installed, ledgerflow open, one `Lane X —` subagent dispatched, the box goes `doing`
   with the right agent within 2 s, an `AskUserQuestion` shows amber and clears, `/api/plans/ledgerflow/summary`
   equals v2's `/api/summary` line for line
-- commit per lane as it lands; tag `plan-0.1.0` on the fork
+- commit per lane as it lands (on `master`); tag `plan-0.1.0` on the fork
+- gate baseline on Windows, 2026-09-15, before any plan code: server 1211 tests / 4 fail (`ccam-cli.test.js:463`
+  subprocess exit `0xC0000409`, `codex-process-overlay.test.js:104` and `remote-sources.test.js:157` expect POSIX
+  paths, `codex-sweep-perf.test.js:30` EPERM on temp rm); client 470 / 3 fail (`screens.snapshot` renders `13:00:00`
+  where the baseline has `1:00:00 PM` — machine locale). All platform-only; "green" here means no new failures
 
 **Done when:** the fork runs from `npm start`, hooks are global, the ledgerflow plan renders with correct live
 attribution under three concurrent subagents, the text API reproduces v2 for the fixture, `npm test` is green
@@ -321,7 +331,7 @@ including upstream's suite, and the PR for §4.1 is open upstream.
 | `server/index.js:73,105` | `require("./routes/plans")`; `app.use("/api/plans", plansRouter)` | 2 |
 | `client/src/App.tsx:129` | `<Route path="plan/:slug?" element={<Plan />} />` | 2 |
 | `client/src/components/Sidebar.tsx:99` | `{ to: "/plan", icon: KanbanSquare, key: "nav:plan" }` | 1 |
-| `client/src/i18n/locales/en/*.json` | `nav:plan` | 1 |
+| `client/src/i18n/locales/*/nav.json` | `nav:plan` (five locales, parity rule) | 5 × 1 |
 
 Everything else is a new file. After the upstream PR merges, the `hooks.js` line count goes to zero.
 
