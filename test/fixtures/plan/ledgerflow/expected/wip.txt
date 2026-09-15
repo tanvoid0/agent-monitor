@@ -1,0 +1,4 @@
+crew:coder@e1968 (sonnet 5, ctx 81%) · lane D  · box D3 · up 25m · 106 tools, 3 errors, 3736 tokens out · last event 0s ago
+    14:08:25 Read  scripts/scenario-fraud-flagged.sh
+    14:08:42 Edit 0s scripts/scenario-fraud-flagged.sh
+    14:09:01 Bash  cd "D:/projects/practice/microservices/ledgerflow" && bash -n scripts/scenario-fraud-flagged.sh && e

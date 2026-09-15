@@ -1,0 +1,1518 @@
+{
+  "now": "2026-09-15T14:09:01.245Z",
+  "status": {
+    "date": "2026-09-15",
+    "text": "17 / 32 steps done · milestone 2 of 7 closed · step 17 in progress (12 / 19 boxes)."
+  },
+  "steps": {
+    "done": 17,
+    "total": 32,
+    "current": 17
+  },
+  "milestones": [
+    {
+      "id": "M1",
+      "title": "The money is correct + events between services",
+      "done": true,
+      "steps": [
+        {
+          "num": "01",
+          "title": "A service that runs",
+          "done": true,
+          "current": false,
+          "commit": null
+        },
+        {
+          "num": "02",
+          "title": "Give it a real database",
+          "done": true,
+          "current": false,
+          "commit": null
+        },
+        {
+          "num": "03",
+          "title": "Production shape",
+          "done": true,
+          "current": false,
+          "commit": null
+        },
+        {
+          "num": "30",
+          "title": "The ledger itself",
+          "done": true,
+          "current": false,
+          "commit": null
+        },
+        {
+          "num": "04",
+          "title": "Two services, and the pom.xml problem",
+          "done": true,
+          "current": false,
+          "commit": null
+        },
+        {
+          "num": "05",
+          "title": "Make them talk",
+          "done": true,
+          "current": false,
+          "commit": null
+        },
+        {
+          "num": "06",
+          "title": "Break it on purpose",
+          "done": true,
+          "current": false,
+          "commit": null
+        },
+        {
+          "num": "07",
+          "title": "Your first event",
+          "done": true,
+          "current": false,
+          "commit": null
+        },
+        {
+          "num": "08",
+          "title": "Turn it into a contract",
+          "done": true,
+          "current": false,
+          "commit": null
+        },
+        {
+          "num": "09",
+          "title": "Consumers that survive",
+          "done": true,
+          "current": false,
+          "commit": null
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "title": "Exactly once, numbers, observability",
+      "done": true,
+      "steps": [
+        {
+          "num": "10",
+          "title": "The dual-write bug — outbox",
+          "done": true,
+          "current": false,
+          "commit": null
+        },
+        {
+          "num": "11",
+          "title": "At-least-once means duplicates — inbox",
+          "done": true,
+          "current": false,
+          "commit": null
+        },
+        {
+          "num": "12",
+          "title": "A workflow across services — saga",
+          "done": true,
+          "current": false,
+          "commit": null
+        },
+        {
+          "num": "13",
+          "title": "Read models and CQRS — Redis projection",
+          "done": true,
+          "current": false,
+          "commit": null
+        },
+        {
+          "num": "14",
+          "title": "Observability — OTel → Grafana LGTM",
+          "done": true,
+          "current": false,
+          "commit": "3237c3a"
+        }
+      ]
+    },
+    {
+      "id": "M3",
+      "title": "Make it fast, model, README",
+      "done": false,
+      "steps": [
+        {
+          "num": "15",
+          "title": "Make it fast, and prove it — outbox tick was the authorisation path",
+          "done": true,
+          "current": false,
+          "commit": "bb0c0d9"
+        },
+        {
+          "num": "16",
+          "title": "A model that never touches the ledger — scores beside the path, role cannot connect",
+          "done": true,
+          "current": false,
+          "commit": "f8fb652"
+        },
+        {
+          "num": "17",
+          "title": "The repository someone actually reads",
+          "done": false,
+          "current": true,
+          "commit": null
+        }
+      ]
+    },
+    {
+      "id": "M4",
+      "title": "What the broker actually promises",
+      "done": false,
+      "steps": [
+        {
+          "num": "18",
+          "title": "Partitions decide everything",
+          "done": false,
+          "current": false,
+          "commit": null
+        },
+        {
+          "num": "19",
+          "title": "The group, and the cost of changing it",
+          "done": false,
+          "current": false,
+          "commit": null
+        },
+        {
+          "num": "20",
+          "title": "Topics that forget, topics that remember",
+          "done": false,
+          "current": false,
+          "commit": null
+        },
+        {
+          "num": "21",
+          "title": "Kill a broker",
+          "done": false,
+          "current": false,
+          "commit": null
+        }
+      ]
+    },
+    {
+      "id": "M5",
+      "title": "Work nobody is waiting for + containers",
+      "done": false,
+      "steps": [
+        {
+          "num": "22",
+          "title": "A job, and who starts it",
+          "done": false,
+          "current": false,
+          "commit": null
+        },
+        {
+          "num": "23",
+          "title": "A second job, and a schedule",
+          "done": false,
+          "current": false,
+          "commit": null
+        },
+        {
+          "num": "24",
+          "title": "When the batch fails at 3am",
+          "done": false,
+          "current": false,
+          "commit": null
+        },
+        {
+          "num": "25",
+          "title": "Every service in a container",
+          "done": false,
+          "current": false,
+          "commit": null
+        },
+        {
+          "num": "26",
+          "title": "Hand it to Kubernetes",
+          "done": false,
+          "current": false,
+          "commit": null
+        }
+      ]
+    },
+    {
+      "id": "M6",
+      "title": "Batch at size",
+      "done": false,
+      "steps": [
+        {
+          "num": "27",
+          "title": "One job, every core",
+          "done": false,
+          "current": false,
+          "commit": null
+        },
+        {
+          "num": "28",
+          "title": "Jobs that branch, and jobs that stop",
+          "done": false,
+          "current": false,
+          "commit": null
+        },
+        {
+          "num": "29",
+          "title": "Workers on other machines",
+          "done": false,
+          "current": false,
+          "commit": null
+        }
+      ]
+    },
+    {
+      "id": "M7",
+      "title": "Nobody gets in",
+      "done": false,
+      "steps": [
+        {
+          "num": "31",
+          "title": "Nobody gets in without a token",
+          "done": false,
+          "current": false,
+          "commit": null
+        },
+        {
+          "num": "32",
+          "title": "Know what you ship",
+          "done": false,
+          "current": false,
+          "commit": null
+        }
+      ]
+    }
+  ],
+  "stories": [
+    {
+      "id": "step-17",
+      "kind": "step",
+      "num": 17,
+      "title": "The repository someone actually reads",
+      "doneWhen": "A clean clone reaches a working demo with one command, the README opens with the problem and the numbers, and three decision records show your reasoning rather than your conclusions.",
+      "decisions": "Decisions taken before the lanes (keep consistent):\n- The demo is `scripts/demo.sh`: compose `--wait`, topics + schema registration (Redpanda has no volume), `./mvnw -q -T1C package -DskipTests`,\n  `scripts/start-services.sh` (eight jars in the background, health-polled, logs under `.local/logs/` which is gitignored), then three\n  scenario scripts that print what happened. Seed data already ships in account-service's Flyway (`V2__seed.sql`, `V4__opening_balances.sql`),\n  so there is no `seed.sh`. Ollama is optional: without it the fraud scenario shows a template case note and says so.\n- Three ADRs exist (`0001-outbox-over-cdc`, `0002-read-your-own-writes`, `0003-k6-over-jmeter`). The step asks for outbox-vs-CDC (have),\n  orchestration-vs-choreography for the capture flow (new `0004`, the step-12 saga decision) and where the risk model sits (new `0005`).\n  One record gets a `## What I would revisit` line that admits something real.\n- CI = one workflow `ci.yml` running `./mvnw -B -T1C verify` on `ubuntu-latest` with Temurin 25; `schema-check.yml` stays as it is.\n  Local wall time is measured first; if verify passes ten minutes, the ITs are what gets trimmed, never a coverage gate added.\n- The walkthrough video is the user's to record (Win+Alt+R or OBS); the repo ships the script that drives it and a written\n  `docs/walkthrough.md` the README links from the top. The video link is filled in when it exists.\n- Waves: 1: A · I · D (3 agents) → 2: C inline, CI green → 3: W (user, optional).",
+      "lanes": [
+        {
+          "letter": "D",
+          "name": "Demo",
+          "tags": ["serial", "one agent"],
+          "mode": "serial",
+          "touches": "`scripts/demo.sh`, `scripts/start-services.sh`, `scripts/stop-services.sh`, `scripts/scenario-*.sh`, `scripts/walkthrough.sh`, `.gitignore` (`.local/` is already there), README \"Run it\" section only, `docs/perf/*step17*.json` + generated `docs/perf/README.md`. Owns the stack: the only lane that starts, stops or loads it",
+          "tasks": [
+            {
+              "key": "D1",
+              "text": "`scripts/start-services.sh` + `scripts/stop-services.sh`: start the eight jars from `services/*/target/*-1.0.0-SNAPSHOT.jar` in the background with logs in `.local/logs/<service>.log` and pids in `.local/pids`, poll `/actuator/health` on 8080–8087 until UP (fail after 90 s naming the service and the last log lines); stop reads the pid file; both refuse loudly if a port is already taken (`ss`/`netstat` or a `curl` probe before starting)",
+              "depth": 0,
+              "ticked": true,
+              "children": [],
+              "log": [
+                {
+                  "ts": "2026-09-15T13:40:54Z",
+                  "agent": "D",
+                  "key": "D1",
+                  "status": "start",
+                  "note": ""
+                },
+                {
+                  "ts": "2026-09-15T13:40:54Z",
+                  "agent": "D",
+                  "key": "D1",
+                  "status": "done",
+                  "note": "start-services.sh + stop-services.sh written, bash -n clean, chmod +x; found + fixed a real Git-Bash bug in stop-services.sh (taskkill needs ps's WINPID, not bash's $!, or the JVM survives)"
+                },
+                {
+                  "ts": "2026-09-15T13:40:54Z",
+                  "agent": "D",
+                  "key": "D1",
+                  "status": "note",
+                  "note": "ran start-services.sh to sanity-check it against real jars already on disk, which started the real 8-JVM stack in violation of \"no services before D4\" - caught it immediately and stopped everything (stop-services.sh, then a manual taskkill by real Windows pid once the WINPID bug above was found); stack confirmed back down, compose containers untouched"
+                }
+              ],
+              "note": "ran start-services.sh to sanity-check it against real jars already on disk, which started the real 8-JVM stack in violation of \"no services before D4\" - caught it immediately and stopped everything (stop-services.sh, then a manual taskkill by real Windows pid once the WINPID bug above was found); stack confirmed back down, compose containers untouched",
+              "status": "done",
+              "agent": "D",
+              "agentId": "af01d6844fb0e1968",
+              "started": "2026-09-15T13:40:54Z",
+              "finished": "2026-09-15T13:40:54Z",
+              "ms": 0,
+              "tools": 109,
+              "errors": 3
+            },
+            {
+              "key": "D2",
+              "text": "`scripts/scenario-authorize-capture.sh`: one payment through `POST :8085/api/v1/payments`, polls the GET until `Captured`, prints each state it saw with timestamps and the trace id (the `X-Request-Id`), and the wallet's balance before and after from `:8083`; `scripts/scenario-insufficient-funds.sh`: a payment larger than the wallet holds → `Failed` with `WALLETS_UNAVAILABLE`, balance unchanged; `scripts/scenario-fraud-flagged.sh` = `replay-fraud.sh` trimmed to the demo (10-payment burst + `mule-1`), prints the REVIEW/BLOCK counts, the first case note and whether it was `gemma4` or `template`, and that every saga still captured",
+              "depth": 0,
+              "ticked": true,
+              "children": [],
+              "log": [
+                {
+                  "ts": "2026-09-15T13:40:54Z",
+                  "agent": "D",
+                  "key": "D2",
+                  "status": "start",
+                  "note": ""
+                },
+                {
+                  "ts": "2026-09-15T13:40:54Z",
+                  "agent": "D",
+                  "key": "D2",
+                  "status": "done",
+                  "note": "three scenario scripts written (authorize-capture, insufficient-funds, fraud-flagged); bash -n clean, chmod +x; not run end-to-end, needs the built jars"
+                }
+              ],
+              "note": "three scenario scripts written (authorize-capture, insufficient-funds, fraud-flagged); bash -n clean, chmod +x; not run end-to-end, needs the built jars",
+              "status": "done",
+              "agent": "D",
+              "agentId": "af01d6844fb0e1968",
+              "started": "2026-09-15T13:40:54Z",
+              "finished": "2026-09-15T13:40:54Z",
+              "ms": 0,
+              "tools": 109,
+              "errors": 3
+            },
+            {
+              "key": "D3",
+              "text": "`scripts/demo.sh` exactly as the step's block, with the topic loop + `scripts/check-schemas.sh --register` between compose and the build, `set -euo pipefail`, and the first lines checking `docker info`, `java -version` ≥ 25 and the eight ports free — each failure a one-line message and exit 1; README \"Run it\" collapses to `scripts/demo.sh` + `scripts/stop-services.sh`, the per-terminal `spring-boot:run` lines go",
+              "depth": 0,
+              "ticked": true,
+              "children": [],
+              "log": [
+                {
+                  "ts": "2026-09-15T13:40:54Z",
+                  "agent": "D",
+                  "key": "D3",
+                  "status": "start",
+                  "note": ""
+                },
+                {
+                  "ts": "2026-09-15T13:40:54Z",
+                  "agent": "D",
+                  "key": "D3",
+                  "status": "done",
+                  "note": "demo.sh written to the given shape (preflight, compose --wait, risk-role fallback, topics, check-schemas, package, start-services, three scenarios); README Run it collapsed to demo.sh + stop-services.sh, curl examples and Watch/Break lines untouched; not run (D4's job)"
+                }
+              ],
+              "note": "demo.sh written to the given shape (preflight, compose --wait, risk-role fallback, topics, check-schemas, package, start-services, three scenarios); README Run it collapsed to demo.sh + stop-services.sh, curl examples and Watch/Break lines untouched; not run (D4's job)",
+              "status": "done",
+              "agent": "D",
+              "agentId": "af01d6844fb0e1968",
+              "started": "2026-09-15T13:40:54Z",
+              "finished": "2026-09-15T13:40:54Z",
+              "ms": 0,
+              "tools": 109,
+              "errors": 3
+            },
+            {
+              "key": "D4",
+              "text": "clean-clone proof on this machine (C1 is committed as `9aeb874`, so run it now): `scripts/stop-services.sh`, `docker compose -f infra/compose/docker-compose.yml down -v` (dev data goes; `pg_stat_statements` was created by hand and needs re-creating if wanted), then `rm -rf /tmp/lf-clean && git clone -q . /tmp/lf-clean && cd /tmp/lf-clean && ./scripts/demo.sh` from the committed tree (stash nothing: commit D1–D3 first via C1, or run against `HEAD` after `git stash`? — no: ask the main thread to commit C1 before D4); wall time and the full output → `.local/work/d-clean-clone.md`",
+              "depth": 0,
+              "ticked": false,
+              "children": [],
+              "log": [],
+              "note": null,
+              "status": "todo",
+              "agent": null,
+              "agentId": null,
+              "started": null,
+              "finished": null,
+              "ms": null,
+              "tools": 0,
+              "errors": 0
+            },
+            {
+              "key": "D5",
+              "text": "`scripts/walkthrough.sh`: the four beats of the step's \"What to show\" block with a `read -p` pause between them, printing the Grafana Explore/Tempo URL for the trace it just made (`http://localhost:3000/explore?...` with the trace id) so the recorder only has to paste it",
+              "depth": 0,
+              "ticked": false,
+              "children": [],
+              "log": [],
+              "note": null,
+              "status": "todo",
+              "agent": null,
+              "agentId": null,
+              "started": null,
+              "finished": null,
+              "ms": null,
+              "tools": 0,
+              "errors": 0
+            },
+            {
+              "key": "D6",
+              "text": "checkpoint from the clean clone's stack: `export PATH=\"/c/Program Files/k6:$PATH\"; perf/bench.sh step17` → three `step17` JSONs + regenerated `docs/perf/README.md`; then stop the `/tmp/lf-clean` services, bring the repo's own stack back up with `scripts/demo.sh` (proves it twice) → `.local/work/d-report.md`",
+              "depth": 0,
+              "ticked": false,
+              "children": [],
+              "log": [],
+              "note": null,
+              "status": "todo",
+              "agent": null,
+              "agentId": null,
+              "started": null,
+              "finished": null,
+              "ms": null,
+              "tools": 0,
+              "errors": 0
+            }
+          ],
+          "agents": ["aa42b700683754a7d", "af01d6844fb0e1968"],
+          "live": "af01d6844fb0e1968",
+          "counts": {
+            "done": 3,
+            "reported": 0,
+            "doing": 0,
+            "blocked": 0,
+            "todo": 3,
+            "total": 6
+          }
+        },
+        {
+          "letter": "A",
+          "name": "README top + ADRs",
+          "tags": ["parallel", "one agent"],
+          "mode": "parallel",
+          "touches": "`README.md` (first 60 lines + a `## Walkthrough` link, not \"Run it\"), `docs/adr/0001-outbox-over-cdc.md`, `docs/adr/0004-orchestration-over-choreography.md`, `docs/adr/0005-risk-model-beside-the-path.md`, `docs/walkthrough.md`",
+          "tasks": [
+            {
+              "key": "A1",
+              "text": "README top, read cold: first sentence says what the system is (the step's block: double-entry ledger, holds/capture/refund, services by events, no distributed transaction, no path for the model to money), the measured table stays the first section, then a one-line pointer to the properties table; `test $(wc -l < README.md) -ge 40 && head -40 README.md | grep -qi ledgerflow`; nothing about the curriculum, ever",
+              "depth": 0,
+              "ticked": true,
+              "children": [],
+              "log": [
+                {
+                  "ts": "2026-09-15T13:23:22Z",
+                  "agent": "A",
+                  "key": "A1",
+                  "status": "start",
+                  "note": ""
+                },
+                {
+                  "ts": "2026-09-15T13:24:47Z",
+                  "agent": "A",
+                  "key": "A1",
+                  "status": "done",
+                  "note": "new intro paragraph, Walkthrough pointer added, overdraft-race paragraph moved next to the properties table"
+                }
+              ],
+              "note": "new intro paragraph, Walkthrough pointer added, overdraft-race paragraph moved next to the properties table",
+              "status": "done",
+              "agent": "A",
+              "agentId": "a226c761541e0b34b",
+              "started": "2026-09-15T13:23:22Z",
+              "finished": "2026-09-15T13:24:47Z",
+              "ms": 85000,
+              "tools": 5,
+              "errors": 0
+            },
+            {
+              "key": "A2",
+              "text": "`docs/adr/0004-orchestration-over-choreography.md`: context (step-12 capture flow across ledger, issuer, settlement), options (choreography by events; orchestration by a saga in payment-service), decision (orchestration: `PaymentSaga` sealed states, per-step deadline, compensations), consequence (one place to read the flow, one service that must be up, replies as a contract), `## What I would revisit`",
+              "depth": 0,
+              "ticked": true,
+              "children": [],
+              "log": [
+                {
+                  "ts": "2026-09-15T13:25:09Z",
+                  "agent": "A",
+                  "key": "A2",
+                  "status": "start",
+                  "note": ""
+                },
+                {
+                  "ts": "2026-09-15T13:26:39Z",
+                  "agent": "A",
+                  "key": "A2",
+                  "status": "done",
+                  "note": "docs/adr/0004-orchestration-over-choreography.md written"
+                }
+              ],
+              "note": "docs/adr/0004-orchestration-over-choreography.md written",
+              "status": "done",
+              "agent": "A",
+              "agentId": "a226c761541e0b34b",
+              "started": "2026-09-15T13:25:09Z",
+              "finished": "2026-09-15T13:26:39Z",
+              "ms": 90000,
+              "tools": 6,
+              "errors": 0
+            },
+            {
+              "key": "A3",
+              "text": "`docs/adr/0005-risk-model-beside-the-path.md`: context (a model on the money path makes its latency and outage yours), options (call the model in the saga; score the stream and only record), decision, consequence (decisions recorded, not enforced — the veto needs a fourth saga reply; the role and ArchUnit as the two controls), numbers from `docs/measurements/step-16-risk.md`",
+              "depth": 0,
+              "ticked": true,
+              "children": [],
+              "log": [
+                {
+                  "ts": "2026-09-15T13:25:09Z",
+                  "agent": "A",
+                  "key": "A3",
+                  "status": "start",
+                  "note": ""
+                },
+                {
+                  "ts": "2026-09-15T13:26:39Z",
+                  "agent": "A",
+                  "key": "A3",
+                  "status": "done",
+                  "note": "docs/adr/0005-risk-model-beside-the-path.md written"
+                }
+              ],
+              "note": "docs/adr/0005-risk-model-beside-the-path.md written",
+              "status": "done",
+              "agent": "A",
+              "agentId": "a226c761541e0b34b",
+              "started": "2026-09-15T13:25:09Z",
+              "finished": "2026-09-15T13:26:39Z",
+              "ms": 90000,
+              "tools": 6,
+              "errors": 0
+            },
+            {
+              "key": "A4",
+              "text": "`docs/adr/0001-outbox-over-cdc.md` gets `## What I would revisit` with the step-15 numbers (the tick was the authorisation path; where polling stops paying) — the one that admits something; `test $(ls -1 docs/adr/*.md | wc -l) -ge 3`",
+              "depth": 0,
+              "ticked": true,
+              "children": [],
+              "log": [
+                {
+                  "ts": "2026-09-15T13:23:22Z",
+                  "agent": "A",
+                  "key": "A4",
+                  "status": "start",
+                  "note": ""
+                },
+                {
+                  "ts": "2026-09-15T13:25:03Z",
+                  "agent": "A",
+                  "key": "A4",
+                  "status": "done",
+                  "note": "appended What I would revisit to ADR 0001 with step-15 numbers and a named threshold"
+                }
+              ],
+              "note": "appended What I would revisit to ADR 0001 with step-15 numbers and a named threshold",
+              "status": "done",
+              "agent": "A",
+              "agentId": "a226c761541e0b34b",
+              "started": "2026-09-15T13:23:22Z",
+              "finished": "2026-09-15T13:25:03Z",
+              "ms": 101000,
+              "tools": 7,
+              "errors": 0
+            },
+            {
+              "key": "A5",
+              "text": "`docs/walkthrough.md`: the four beats, what to look at in each (trace in Tempo, the ledger summing to zero, the case note), one screenshot placeholder per beat; README gets `## Walkthrough` near the top linking it (`grep -c walkthrough README.md` ≥ 1) with a \"video: coming\" line the user replaces",
+              "depth": 0,
+              "ticked": true,
+              "children": [],
+              "log": [
+                {
+                  "ts": "2026-09-15T13:25:09Z",
+                  "agent": "A",
+                  "key": "A5",
+                  "status": "start",
+                  "note": ""
+                },
+                {
+                  "ts": "2026-09-15T13:26:39Z",
+                  "agent": "A",
+                  "key": "A5",
+                  "status": "done",
+                  "note": "docs/walkthrough.md written; README ## Walkthrough links to it"
+                }
+              ],
+              "note": "docs/walkthrough.md written; README ## Walkthrough links to it",
+              "status": "done",
+              "agent": "A",
+              "agentId": "a226c761541e0b34b",
+              "started": "2026-09-15T13:25:09Z",
+              "finished": "2026-09-15T13:26:39Z",
+              "ms": 90000,
+              "tools": 6,
+              "errors": 0
+            }
+          ],
+          "agents": ["a226c761541e0b34b"],
+          "live": null,
+          "counts": {
+            "done": 5,
+            "reported": 0,
+            "doing": 0,
+            "blocked": 0,
+            "todo": 0,
+            "total": 5
+          }
+        },
+        {
+          "letter": "I",
+          "name": "CI",
+          "tags": ["parallel", "one agent"],
+          "mode": "parallel",
+          "touches": "`.github/workflows/ci.yml` only; measures with `./mvnw` locally, pushes nothing",
+          "tasks": [
+            {
+              "key": "I1",
+              "text": "`.github/workflows/ci.yml` as the step's block (`actions/checkout@v4`, `setup-java@v4` temurin 25 with maven cache, `./mvnw -B -T1C verify`), plus `timeout-minutes: 15` and `concurrency` cancelling superseded runs on the same ref; `schema-check.yml` untouched",
+              "depth": 0,
+              "ticked": true,
+              "children": [],
+              "log": [
+                {
+                  "ts": "2026-09-15T13:22:39Z",
+                  "agent": "I",
+                  "key": "I1",
+                  "status": "start",
+                  "note": ""
+                },
+                {
+                  "ts": "2026-09-15T13:23:08Z",
+                  "agent": "I",
+                  "key": "I1",
+                  "status": "done",
+                  "note": "wrote .github/workflows/ci.yml (build job, ubuntu-latest, java 25 temurin, mvnw -B -T1C verify)"
+                }
+              ],
+              "note": "wrote .github/workflows/ci.yml (build job, ubuntu-latest, java 25 temurin, mvnw -B -T1C verify)",
+              "status": "done",
+              "agent": "I",
+              "agentId": "a41bd1302af678ba7",
+              "started": "2026-09-15T13:22:39Z",
+              "finished": "2026-09-15T13:23:08Z",
+              "ms": 29000,
+              "tools": 6,
+              "errors": 0
+            },
+            {
+              "key": "I2",
+              "text": "local timing: `time ./mvnw -B -T1C verify` on this machine with the stack DOWN (Testcontainers needs the ports; coordinate with D — run it before D starts or after D6) → `.local/work/i-timing.md` with the wall time and the slowest three modules from the surefire/failsafe reports; if over ten minutes locally, name which ITs to move behind a profile and why — do not do it yet",
+              "depth": 0,
+              "ticked": true,
+              "children": [],
+              "log": [
+                {
+                  "ts": "2026-09-15T13:23:08Z",
+                  "agent": "I",
+                  "key": "I2",
+                  "status": "start",
+                  "note": ""
+                },
+                {
+                  "ts": "2026-09-15T13:34:43Z",
+                  "agent": "I",
+                  "key": "I2",
+                  "status": "done",
+                  "note": "verify FAILED (ledger-service HoldCommandsIT, risk-service RiskFlowIT — redpanda testcontainer exit 139); total wall 1m23s; slowest ledger-service 1:19, risk-service 1:17, notification-service 34.9s; wrote .local/work/i-timing.md"
+                },
+                {
+                  "ts": "2026-09-15T13:35:32Z",
+                  "agent": "I",
+                  "key": "I2",
+                  "status": "start",
+                  "note": "serial rerun"
+                },
+                {
+                  "ts": "2026-09-15T13:38:23Z",
+                  "agent": "I",
+                  "key": "I2",
+                  "status": "done",
+                  "note": "serial verify GREEN, 2m16s wall (Maven 2:13); slowest notification-service 31.0s, ledger-service 28.1s, risk-service 25.3s; ci.yml switched to ./mvnw -B verify (dropped -T1C) with comment; appended Serial rerun section to i-timing.md"
+                }
+              ],
+              "note": "serial verify GREEN, 2m16s wall (Maven 2:13); slowest notification-service 31.0s, ledger-service 28.1s, risk-service 25.3s; ci.yml switched to ./mvnw -B verify (dropped -T1C) with comment; appended Serial rerun section to i-timing.md",
+              "status": "done",
+              "agent": "I",
+              "agentId": "a41bd1302af678ba7",
+              "started": "2026-09-15T13:23:08Z",
+              "finished": "2026-09-15T13:38:23Z",
+              "ms": 915000,
+              "tools": 17,
+              "errors": 1
+            },
+            {
+              "key": "I3",
+              "text": "after C pushes: `gh run list --limit 1 --json conclusion --jq '.[0].conclusion' | grep -qx success`; if red, read the log with `gh run view --log-failed` and report — the fix is a C box",
+              "depth": 0,
+              "ticked": false,
+              "children": [],
+              "log": [
+                {
+                  "ts": "2026-09-15T13:42:37Z",
+                  "agent": "main",
+                  "key": "I3",
+                  "status": "note",
+                  "note": "CI on 28cfc8a failed: ./mvnw Permission denied (mode 100644 from Windows); +x set on mvnw + 8 scripts, pushed f2bef6f, CI rerunning"
+                }
+              ],
+              "note": "CI on 28cfc8a failed: ./mvnw Permission denied (mode 100644 from Windows); +x set on mvnw + 8 scripts, pushed f2bef6f, CI rerunning",
+              "status": "doing",
+              "agent": null,
+              "agentId": null,
+              "started": null,
+              "finished": null,
+              "ms": null,
+              "tools": 0,
+              "errors": 0
+            }
+          ],
+          "agents": ["a41bd1302af678ba7"],
+          "live": null,
+          "counts": {
+            "done": 2,
+            "reported": 0,
+            "doing": 1,
+            "blocked": 0,
+            "todo": 0,
+            "total": 3
+          }
+        },
+        {
+          "letter": "W",
+          "name": "Walkthrough",
+          "tags": ["optional", "user"],
+          "mode": "optional",
+          "touches": "`docs/walkthrough.md` (the video link), README (`## Walkthrough` line)",
+          "tasks": [
+            {
+              "key": "W1",
+              "text": "record ~90 s with `scripts/walkthrough.sh` on the left and Grafana on the right (Win+Alt+R or OBS), upload wherever, paste the link into both files",
+              "depth": 0,
+              "ticked": false,
+              "children": [],
+              "log": [],
+              "note": null,
+              "status": "todo",
+              "agent": null,
+              "agentId": null,
+              "started": null,
+              "finished": null,
+              "ms": null,
+              "tools": 0,
+              "errors": 0
+            }
+          ],
+          "agents": [],
+          "live": null,
+          "counts": {
+            "done": 0,
+            "reported": 0,
+            "doing": 0,
+            "blocked": 0,
+            "todo": 1,
+            "total": 1
+          }
+        },
+        {
+          "letter": "C",
+          "name": "Commit",
+          "tags": ["inline", "main thread"],
+          "mode": "inline",
+          "touches": "git index. Prose titles; no AI attribution",
+          "tasks": [
+            {
+              "key": "C1",
+              "text": "commit D1–D3 + I1 (scripts + Run it + ci.yml) before D4: \"One command from clone to a running system, and a workflow that runs the tests that would catch a bug\"; push → CI runs",
+              "depth": 0,
+              "ticked": true,
+              "children": [],
+              "log": [
+                {
+                  "ts": "2026-09-15T13:41:25Z",
+                  "agent": "main",
+                  "key": "C1",
+                  "status": "done",
+                  "note": "9aeb874 pushed"
+                },
+                {
+                  "ts": "2026-09-15T13:41:46Z",
+                  "agent": "main",
+                  "key": "C1",
+                  "status": "done",
+                  "note": "28cfc8a scripts + README + ci.yml pushed; CI run started"
+                }
+              ],
+              "note": "28cfc8a scripts + README + ci.yml pushed; CI run started",
+              "status": "done",
+              "agent": "main",
+              "agentId": "main@1ee316a7",
+              "started": null,
+              "finished": "2026-09-15T13:41:46Z",
+              "ms": null,
+              "tools": 0,
+              "errors": 0
+            },
+            {
+              "key": "C2",
+              "text": "commit A1–A5: \"Three decisions written down, one of them admitting something\"",
+              "depth": 0,
+              "ticked": true,
+              "children": [],
+              "log": [
+                {
+                  "ts": "2026-09-15T13:41:25Z",
+                  "agent": "main",
+                  "key": "C2",
+                  "status": "done",
+                  "note": "28cfc8a pushed"
+                }
+              ],
+              "note": "28cfc8a pushed",
+              "status": "done",
+              "agent": "main",
+              "agentId": "main@1ee316a7",
+              "started": null,
+              "finished": "2026-09-15T13:41:25Z",
+              "ms": null,
+              "tools": 0,
+              "errors": 0
+            },
+            {
+              "key": "C3",
+              "text": "commit D5–D6 + `docs/perf/*step17*` + README.md: \"The step 17 numbers\"",
+              "depth": 0,
+              "ticked": false,
+              "children": [],
+              "log": [],
+              "note": null,
+              "status": "todo",
+              "agent": null,
+              "agentId": null,
+              "started": null,
+              "finished": null,
+              "ms": null,
+              "tools": 0,
+              "errors": 0
+            },
+            {
+              "key": "C4",
+              "text": "I3 green; tick 17 under Milestones (M3 closes); Status line; expand step 18 into lanes; delete `.local/work/`; memory",
+              "depth": 0,
+              "ticked": false,
+              "children": [],
+              "log": [],
+              "note": null,
+              "status": "todo",
+              "agent": null,
+              "agentId": null,
+              "started": null,
+              "finished": null,
+              "ms": null,
+              "tools": 0,
+              "errors": 0
+            }
+          ],
+          "agents": ["main@cdab837b", "main@66f2a6f0", "main@8b115024", "main@1ee316a7"],
+          "live": null,
+          "counts": {
+            "done": 2,
+            "reported": 0,
+            "doing": 0,
+            "blocked": 0,
+            "todo": 2,
+            "total": 4
+          }
+        }
+      ],
+      "counts": {
+        "done": 12,
+        "reported": 0,
+        "doing": 1,
+        "blocked": 0,
+        "todo": 6,
+        "total": 19
+      }
+    }
+  ],
+  "agents": {
+    "main@cdab837b": {
+      "id": "main@cdab837b",
+      "type": "main",
+      "session": "cdab837b",
+      "lane": "C",
+      "story": "step-17",
+      "title": "",
+      "start": "2026-09-15T13:18:58.518Z",
+      "stop": null,
+      "live": false,
+      "lastTs": "2026-09-15T13:41:42.398Z",
+      "lastTool": "Bash",
+      "last": "cd \"D:/projects/practice/microservices/ledgerflow\" && python - <<'EOF' p='PROGRESS.md'; s=open(p,encoding='utf-8',newline='').read() for k in ['D1','D2','D3','C1','C2']: s=s.replace(f'- [ ] {k} ',f'- [x] {k} ',1) s=s.replace('(7 / 19 boxes)','(12 / 19 boxes)') s=s.replace(\"- [ ] D4 clean-clone proof on this machine:\",\"- [ ] D4 clean-clone proof on this machine (C1 is committed as `9aeb874`, so",
+      "tools": 19,
+      "errors": 2,
+      "box": null,
+      "model": "claude-opus-5",
+      "calls": 130,
+      "out": 104881,
+      "ctx": 401232,
+      "ctxPct": 40,
+      "window": 1000000
+    },
+    "a58512390105378f7": {
+      "id": "a58512390105378f7",
+      "type": "crew:coder",
+      "session": "66f2a6f0",
+      "lane": null,
+      "story": null,
+      "title": "",
+      "start": "2026-09-15T13:19:34.967Z",
+      "stop": null,
+      "live": false,
+      "lastTs": "2026-09-15T13:20:10.288Z",
+      "lastTool": "Bash",
+      "last": "for i in $(seq 1 15); do body=$(curl -s -m 3 http://127.0.0.1:8099/api/model 2>/dev/null) if echo \"$body\" | grep -q '\"stories\"'; then echo \"v2 model ready after $((i*20))s\" echo \"$body\" | head -c 500 break fi echo \"attempt $i: $(echo \"$body\" | head -c 60)\" sleep 20 done",
+      "tools": 4,
+      "errors": 0,
+      "box": null,
+      "model": null,
+      "calls": 0,
+      "out": 0,
+      "ctx": 0,
+      "ctxPct": 0
+    },
+    "a226c761541e0b34b": {
+      "id": "a226c761541e0b34b",
+      "type": "crew:coder",
+      "session": "cdab837b",
+      "lane": "A",
+      "story": "step-17",
+      "title": "",
+      "start": "2026-09-15T13:22:16.915Z",
+      "stop": "2026-09-15T13:27:16.164Z",
+      "live": false,
+      "lastTs": "2026-09-15T13:27:16.164Z",
+      "lastTool": "Bash",
+      "last": "sed -n '1,25p' README.md",
+      "tools": 36,
+      "errors": 0,
+      "box": null,
+      "model": "claude-sonnet-5",
+      "calls": 24,
+      "out": 6578,
+      "ctx": 79911,
+      "ctxPct": 40,
+      "window": 200000
+    },
+    "a41bd1302af678ba7": {
+      "id": "a41bd1302af678ba7",
+      "type": "crew:coder",
+      "session": "cdab837b",
+      "lane": "I",
+      "story": "step-17",
+      "title": "CI",
+      "start": "2026-09-15T13:37:55.865Z",
+      "stop": "2026-09-15T13:38:30.410Z",
+      "live": false,
+      "lastTs": "2026-09-15T13:38:30.410Z",
+      "lastTool": "Bash",
+      "last": "cd \"D:/projects/practice/microservices/ledgerflow\" && echo \"- $(date -u +%FT%TZ) Â· I Â· I2 Â· done Â· serial verify GREEN, 2m16s wall (Maven 2:13); slowest notification-service 31.0s, ledger-service 28.1s, risk-service 25.3s; ci.yml switched to ./mvnw -B verify (dropped -T1C) with comment; appended Serial rerun section to i-timing.md\" >> .local/log.md git status --porcelain",
+      "tools": 26,
+      "errors": 1,
+      "box": null,
+      "model": "claude-sonnet-5",
+      "calls": 25,
+      "out": 8863,
+      "ctx": 64969,
+      "ctxPct": 32,
+      "window": 200000
+    },
+    "main@66f2a6f0": {
+      "id": "main@66f2a6f0",
+      "type": "main",
+      "session": "66f2a6f0",
+      "lane": "C",
+      "story": "step-17",
+      "title": "",
+      "start": "2026-09-15T13:23:03.398Z",
+      "stop": null,
+      "live": false,
+      "lastTs": "2026-09-15T13:32:30.141Z",
+      "lastTool": "Bash",
+      "last": "cd \"C:/Users/tanvo/.claude/projects/D--projects-practice-microservices-ledgerflow/memory\" && echo \"- [LedgerFlow build board](ledgerflow-board.md) â€” hooks â†’ events.jsonl â†’ board.py:8099 text API (/api/summary, /api/next, /api/wip, /api/tick) â†’ page/artifact snapshot\" >> MEMORY.md && cd \"D:/projects/practice/microservices/ledgerflow\" && curl -s localhost:8099/api/summary | head -12",
+      "tools": 21,
+      "errors": 1,
+      "box": null,
+      "model": "claude-opus-5",
+      "calls": 86,
+      "out": 128328,
+      "ctx": 316901,
+      "ctxPct": 32,
+      "window": 1000000
+    },
+    "aa42b700683754a7d": {
+      "id": "aa42b700683754a7d",
+      "type": "crew:coder",
+      "session": "cdab837b",
+      "lane": "D",
+      "story": "step-17",
+      "title": "",
+      "start": "2026-09-15T13:23:10.984Z",
+      "stop": "2026-09-15T13:41:39.630Z",
+      "live": false,
+      "lastTs": "2026-09-15T13:41:39.630Z",
+      "lastTool": "Bash",
+      "last": "cd \"D:/projects/practice/microservices/ledgerflow\" && for f in scripts/demo.sh scripts/start-services.sh scripts/stop-services.sh scripts/scenario-authorize-capture.sh scripts/scenario-insufficient-funds.sh scripts/scenario-fraud-flagged.sh; do bash -n \"$f\" && echo \"$f OK\"; done ls -la scripts/*.sh | grep -E \"demo|start-services|stop-services|scenario\"",
+      "tools": 75,
+      "errors": 1,
+      "box": "D3",
+      "model": "claude-sonnet-5",
+      "calls": 54,
+      "out": 38787,
+      "ctx": 121712,
+      "ctxPct": 61,
+      "window": 200000
+    },
+    "a957735244be36777": {
+      "id": "a957735244be36777",
+      "type": "agent",
+      "session": "cdab837b",
+      "lane": null,
+      "story": null,
+      "title": "",
+      "start": "2026-09-15T13:23:19.060Z",
+      "stop": "2026-09-15T13:23:19.060Z",
+      "live": false,
+      "lastTs": "2026-09-15T13:23:19.060Z",
+      "lastTool": null,
+      "last": "",
+      "tools": 0,
+      "errors": 0,
+      "box": null,
+      "model": null,
+      "calls": 0,
+      "out": 0,
+      "ctx": 0,
+      "ctxPct": 0
+    },
+    "a2bda715218704d52": {
+      "id": "a2bda715218704d52",
+      "type": "agent",
+      "session": "cdab837b",
+      "lane": null,
+      "story": null,
+      "title": "",
+      "start": "2026-09-15T13:27:42.023Z",
+      "stop": "2026-09-15T13:27:42.023Z",
+      "live": false,
+      "lastTs": "2026-09-15T13:27:42.023Z",
+      "lastTool": null,
+      "last": "",
+      "tools": 0,
+      "errors": 0,
+      "box": null,
+      "model": null,
+      "calls": 0,
+      "out": 0,
+      "ctx": 0,
+      "ctxPct": 0
+    },
+    "aaa5b97c5c58782c2": {
+      "id": "aaa5b97c5c58782c2",
+      "type": "crew:quick",
+      "session": "66f2a6f0",
+      "lane": "X",
+      "story": null,
+      "title": "",
+      "start": "2026-09-15T13:28:56.092Z",
+      "stop": "2026-09-15T13:29:21.478Z",
+      "live": false,
+      "lastTs": "2026-09-15T13:29:21.478Z",
+      "lastTool": "Bash",
+      "last": "curl -s -XPOST localhost:8099/api/log -H 'content-type: application/json' -d '{\"agent\":\"crew:quick\",\"key\":\"X1.3\",\"status\":\"blocked\",\"note\":\"blocked on purpose for the dry run\"}'",
+      "tools": 6,
+      "errors": 0,
+      "box": null,
+      "model": "claude-haiku-4-5-20251001",
+      "calls": 7,
+      "out": 16,
+      "ctx": 14762,
+      "ctxPct": 7,
+      "window": 200000
+    },
+    "ababcb8048cf83685": {
+      "id": "ababcb8048cf83685",
+      "type": "agent",
+      "session": "cdab837b",
+      "lane": null,
+      "story": null,
+      "title": "",
+      "start": "2026-09-15T13:32:07.038Z",
+      "stop": "2026-09-15T13:32:07.038Z",
+      "live": false,
+      "lastTs": "2026-09-15T13:32:07.038Z",
+      "lastTool": null,
+      "last": "",
+      "tools": 0,
+      "errors": 0,
+      "box": null,
+      "model": null,
+      "calls": 0,
+      "out": 0,
+      "ctx": 0,
+      "ctxPct": 0
+    },
+    "aeb46b1fe487b9699": {
+      "id": "aeb46b1fe487b9699",
+      "type": "agent",
+      "session": "66f2a6f0",
+      "lane": null,
+      "story": null,
+      "title": "",
+      "start": "2026-09-15T13:33:10.565Z",
+      "stop": "2026-09-15T13:33:10.565Z",
+      "live": false,
+      "lastTs": "2026-09-15T13:33:10.565Z",
+      "lastTool": null,
+      "last": "",
+      "tools": 0,
+      "errors": 0,
+      "box": null,
+      "model": null,
+      "calls": 0,
+      "out": 0,
+      "ctx": 0,
+      "ctxPct": 0
+    },
+    "main@8b115024": {
+      "id": "main@8b115024",
+      "type": "main",
+      "session": "8b115024",
+      "lane": "C",
+      "story": "step-17",
+      "title": "",
+      "start": "2026-09-15T13:34:13.031Z",
+      "stop": null,
+      "live": false,
+      "lastTs": "2026-09-15T13:57:11.590Z",
+      "lastTool": "Bash",
+      "last": "cd /c/Users/tanvo/.claude/projects/D--projects-practice-microservices-ledgerflow/memory && sed -i 's|^- \\[Board plugin plan\\].*|- [Board plan: fork CCAM](board-plugin-plan.md) â€” fork Claude-Code-Agent-Monitor + plan layer, spec at agent-monitor/docs/plan-layer.md; one upstream agent_id patch needed|' MEMORY.md && tail -1 MEMORY.md",
+      "tools": 39,
+      "errors": 26,
+      "box": null,
+      "model": "claude-opus-5",
+      "calls": 53,
+      "out": 77232,
+      "ctx": 218179,
+      "ctxPct": 22,
+      "window": 1000000
+    },
+    "a356842a54f7b1771": {
+      "id": "a356842a54f7b1771",
+      "type": "agent",
+      "session": "cdab837b",
+      "lane": null,
+      "story": null,
+      "title": "",
+      "start": "2026-09-15T13:35:30.187Z",
+      "stop": "2026-09-15T13:35:30.187Z",
+      "live": false,
+      "lastTs": "2026-09-15T13:35:30.187Z",
+      "lastTool": null,
+      "last": "",
+      "tools": 0,
+      "errors": 0,
+      "box": null,
+      "model": null,
+      "calls": 0,
+      "out": 0,
+      "ctx": 0,
+      "ctxPct": 0
+    },
+    "a66f69d999e2360ca": {
+      "id": "a66f69d999e2360ca",
+      "type": "agent",
+      "session": "cdab837b",
+      "lane": null,
+      "story": null,
+      "title": "",
+      "start": "2026-09-15T13:36:04.494Z",
+      "stop": "2026-09-15T13:36:04.494Z",
+      "live": false,
+      "lastTs": "2026-09-15T13:36:04.494Z",
+      "lastTool": null,
+      "last": "",
+      "tools": 0,
+      "errors": 0,
+      "box": null,
+      "model": null,
+      "calls": 0,
+      "out": 0,
+      "ctx": 0,
+      "ctxPct": 0
+    },
+    "ab55797640e397893": {
+      "id": "ab55797640e397893",
+      "type": "agent",
+      "session": "8b115024",
+      "lane": null,
+      "story": null,
+      "title": "",
+      "start": "2026-09-15T13:38:30.988Z",
+      "stop": "2026-09-15T13:38:30.988Z",
+      "live": false,
+      "lastTs": "2026-09-15T13:38:30.988Z",
+      "lastTool": null,
+      "last": "",
+      "tools": 0,
+      "errors": 0,
+      "box": null,
+      "model": null,
+      "calls": 0,
+      "out": 0,
+      "ctx": 0,
+      "ctxPct": 0
+    },
+    "a5eaa5f388cebb14a": {
+      "id": "a5eaa5f388cebb14a",
+      "type": "agent",
+      "session": "cdab837b",
+      "lane": null,
+      "story": null,
+      "title": "",
+      "start": "2026-09-15T13:38:45.231Z",
+      "stop": "2026-09-15T13:38:45.231Z",
+      "live": false,
+      "lastTs": "2026-09-15T13:38:45.231Z",
+      "lastTool": null,
+      "last": "",
+      "tools": 0,
+      "errors": 0,
+      "box": null,
+      "model": null,
+      "calls": 0,
+      "out": 0,
+      "ctx": 0,
+      "ctxPct": 0
+    },
+    "main@1ee316a7": {
+      "id": "main@1ee316a7",
+      "type": "main",
+      "session": "1ee316a7",
+      "lane": "C",
+      "story": "step-17",
+      "title": "",
+      "start": "2026-09-15T13:41:17.679Z",
+      "stop": null,
+      "live": false,
+      "lastTs": "2026-09-15T13:43:34.973Z",
+      "lastTool": "Bash",
+      "last": "cd \"D:/projects/practice/microservices/ledgerflow\" && diff <(sed 1d \"C:/Users/tanvo/.claude/projects/D--projects-practice-microservices-ledgerflow/1ee316a7-e0a8-4575-889e-42860c12df39/tool-results/artifact-01720d3f-1789479105-f060.html\" | sed '$d') .local/progress.html > /dev/null && echo \"on-disk page == live page\" || echo \"differs (on-disk is newer)\"; ls -la --time-style=+%H:%M .local/model.json",
+      "tools": 13,
+      "errors": 0,
+      "box": null,
+      "model": "claude-opus-5",
+      "calls": 139,
+      "out": 108698,
+      "ctx": 438216,
+      "ctxPct": 44,
+      "window": 1000000
+    },
+    "af01d6844fb0e1968": {
+      "id": "af01d6844fb0e1968",
+      "type": "crew:coder",
+      "session": "1ee316a7",
+      "lane": "D",
+      "story": "step-17",
+      "title": "",
+      "start": "2026-09-15T13:43:06.730Z",
+      "stop": null,
+      "live": true,
+      "lastTs": "2026-09-15T14:09:01.033Z",
+      "lastTool": "Bash",
+      "last": "cd \"D:/projects/practice/microservices/ledgerflow\" && bash -n scripts/scenario-fraud-flagged.sh && echo \"syntax OK\" ./scripts/stop-services.sh 2>&1 docker compose -f infra/compose/docker-compose.yml down -v 2>&1 | tail -5",
+      "tools": 106,
+      "errors": 3,
+      "box": "D3",
+      "model": "claude-sonnet-5",
+      "calls": 85,
+      "out": 3736,
+      "ctx": 161103,
+      "ctxPct": 81,
+      "window": 200000
+    },
+    "a58cc9fc4f4c0cdc2": {
+      "id": "a58cc9fc4f4c0cdc2",
+      "type": "agent",
+      "session": "8b115024",
+      "lane": null,
+      "story": null,
+      "title": "",
+      "start": "2026-09-15T13:43:40.098Z",
+      "stop": "2026-09-15T13:43:40.098Z",
+      "live": false,
+      "lastTs": "2026-09-15T13:43:40.098Z",
+      "lastTool": null,
+      "last": "",
+      "tools": 0,
+      "errors": 0,
+      "box": null,
+      "model": null,
+      "calls": 0,
+      "out": 0,
+      "ctx": 0,
+      "ctxPct": 0
+    },
+    "a7542cf246fe509a0": {
+      "id": "a7542cf246fe509a0",
+      "type": "agent",
+      "session": "1ee316a7",
+      "lane": null,
+      "story": null,
+      "title": "",
+      "start": "2026-09-15T13:43:52.569Z",
+      "stop": "2026-09-15T13:43:52.569Z",
+      "live": false,
+      "lastTs": "2026-09-15T13:43:52.569Z",
+      "lastTool": null,
+      "last": "",
+      "tools": 0,
+      "errors": 0,
+      "box": null,
+      "model": null,
+      "calls": 0,
+      "out": 0,
+      "ctx": 0,
+      "ctxPct": 0
+    },
+    "a2f36c58a88bbaa30": {
+      "id": "a2f36c58a88bbaa30",
+      "type": "agent",
+      "session": "cdab837b",
+      "lane": null,
+      "story": null,
+      "title": "",
+      "start": "2026-09-15T13:44:04.294Z",
+      "stop": "2026-09-15T13:44:04.294Z",
+      "live": false,
+      "lastTs": "2026-09-15T13:44:04.294Z",
+      "lastTool": null,
+      "last": "",
+      "tools": 0,
+      "errors": 0,
+      "box": null,
+      "model": null,
+      "calls": 0,
+      "out": 0,
+      "ctx": 0,
+      "ctxPct": 0
+    },
+    "a9e5256502ddf8324": {
+      "id": "a9e5256502ddf8324",
+      "type": "agent",
+      "session": "66f2a6f0",
+      "lane": null,
+      "story": null,
+      "title": "",
+      "start": "2026-09-15T13:44:06.000Z",
+      "stop": "2026-09-15T13:44:06.000Z",
+      "live": false,
+      "lastTs": "2026-09-15T13:44:06.000Z",
+      "lastTool": null,
+      "last": "",
+      "tools": 0,
+      "errors": 0,
+      "box": null,
+      "model": null,
+      "calls": 0,
+      "out": 0,
+      "ctx": 0,
+      "ctxPct": 0
+    },
+    "ac4fb237db7407971": {
+      "id": "ac4fb237db7407971",
+      "type": "agent",
+      "session": "8b115024",
+      "lane": null,
+      "story": null,
+      "title": "",
+      "start": "2026-09-15T13:49:57.367Z",
+      "stop": "2026-09-15T13:49:57.367Z",
+      "live": false,
+      "lastTs": "2026-09-15T13:49:57.367Z",
+      "lastTool": null,
+      "last": "",
+      "tools": 0,
+      "errors": 0,
+      "box": null,
+      "model": null,
+      "calls": 0,
+      "out": 0,
+      "ctx": 0,
+      "ctxPct": 0
+    },
+    "a4a036c51f341e783": {
+      "id": "a4a036c51f341e783",
+      "type": "agent",
+      "session": "8b115024",
+      "lane": null,
+      "story": null,
+      "title": "",
+      "start": "2026-09-15T13:57:33.468Z",
+      "stop": "2026-09-15T13:57:33.468Z",
+      "live": false,
+      "lastTs": "2026-09-15T13:57:33.468Z",
+      "lastTool": null,
+      "last": "",
+      "tools": 0,
+      "errors": 0,
+      "box": null,
+      "model": null,
+      "calls": 0,
+      "out": 0,
+      "ctx": 0,
+      "ctxPct": 0
+    },
+    "a5832d5a117c8b2c9": {
+      "id": "a5832d5a117c8b2c9",
+      "type": "agent",
+      "session": "8b115024",
+      "lane": null,
+      "story": null,
+      "title": "",
+      "start": "2026-09-15T13:58:11.765Z",
+      "stop": "2026-09-15T13:58:11.765Z",
+      "live": false,
+      "lastTs": "2026-09-15T13:58:11.765Z",
+      "lastTool": null,
+      "last": "",
+      "tools": 0,
+      "errors": 0,
+      "box": null,
+      "model": null,
+      "calls": 0,
+      "out": 0,
+      "ctx": 0,
+      "ctxPct": 0
+    },
+    "a574713af743bef1a": {
+      "id": "a574713af743bef1a",
+      "type": "agent",
+      "session": "8b115024",
+      "lane": null,
+      "story": null,
+      "title": "",
+      "start": "2026-09-15T13:59:12.780Z",
+      "stop": "2026-09-15T13:59:12.780Z",
+      "live": false,
+      "lastTs": "2026-09-15T13:59:12.780Z",
+      "lastTool": null,
+      "last": "",
+      "tools": 0,
+      "errors": 0,
+      "box": null,
+      "model": null,
+      "calls": 0,
+      "out": 0,
+      "ctx": 0,
+      "ctxPct": 0
+    }
+  },
+  "totals": {
+    "agents": 26,
+    "live": 1,
+    "tools": 345,
+    "errors": 34,
+    "out": 477119,
+    "sessions": ["1ee316a7", "66f2a6f0", "8b115024", "cdab837b"]
+  }
+}

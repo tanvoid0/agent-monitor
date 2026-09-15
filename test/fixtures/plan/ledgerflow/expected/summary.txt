@@ -1,0 +1,11 @@
+17 / 32 steps done · milestone 2 of 7 closed · step 17 in progress (12 / 19 boxes). (as of 2026-09-15)
+step 17 — The repository someone actually reads · 12/19 done, 0 reported, 1 doing, 0 blocked
+  lane D Demo · serial · 3/6 · live crew:coder@e1968 (sonnet 5, ctx 81%) on D3 · last: cd "D:/projects/practice/microservices/ledgerflow" && bash -n scripts/scenario-f (0s ago)
+  lane A README top + ADRs · parallel · 5/5
+  lane I CI · parallel · 2/3
+  lane W Walkthrough · optional · 0/1
+  lane C Commit · inline · 2/4
+blocked: —
+reported (awaiting tick): —
+next: D4, W1, C3
+agents live: 1 · tool calls: 345 · errors: 34 · tokens out: 477119
