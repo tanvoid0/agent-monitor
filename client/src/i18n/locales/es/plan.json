@@ -1,0 +1,59 @@
+{
+  "title": "Plan",
+  "picker": {
+    "label": "Proyecto",
+    "empty": "Aún no hay planes",
+    "emptyDesc": "Un plan aparece aquí en cuanto se detecta el PROGRESS.md del proyecto.",
+    "liveCount": "{{count}} en curso",
+    "waitingCount": "{{count}} en espera"
+  },
+  "loading": "Cargando el plan…",
+  "error": "No se pudo cargar este plan: {{message}}",
+  "rail": {
+    "title": "Historias",
+    "milestones": "Hitos",
+    "lanes": "Carriles",
+    "stepProgress": "{{done}} / {{total}} pasos",
+    "clearLaneFilter": "Mostrar todos los carriles"
+  },
+  "board": {
+    "title": "Tablero",
+    "empty": "Todavía no hay nada en el tablero",
+    "columns": {
+      "todo": "Por hacer",
+      "doing": "En curso",
+      "reported": "Informado",
+      "done": "Hecho"
+    }
+  },
+  "agents": {
+    "title": "Agentes",
+    "empty": "Este plan no tiene agentes",
+    "say": "Último mensaje",
+    "waiting": "en espera",
+    "elapsed": "Tiempo transcurrido",
+    "last": "Último comando"
+  },
+  "detail": {
+    "title": "Detalle",
+    "stepLabel": "Paso {{num}}",
+    "laneLabel": "Carril {{letter}}",
+    "log": "Registro",
+    "noLog": "Todavía no hay líneas de registro",
+    "toolEvents": "Eventos de herramientas",
+    "noToolEvents": "No hay eventos de herramientas atribuidos",
+    "openSession": "Abrir sesión"
+  },
+  "status": {
+    "todo": "Por hacer",
+    "doing": "En curso",
+    "reported": "Informado",
+    "blocked": "Bloqueado",
+    "done": "Hecho"
+  },
+  "tick": {
+    "error": "No se pudo actualizar la casilla: {{message}}"
+  },
+  "toggleRail": "Mostrar u ocultar el panel de historias",
+  "toggleAgents": "Mostrar u ocultar el panel de agentes"
+}

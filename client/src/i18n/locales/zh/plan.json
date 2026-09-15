@@ -1,0 +1,59 @@
+{
+  "title": "计划",
+  "picker": {
+    "label": "项目",
+    "empty": "暂无计划",
+    "emptyDesc": "发现项目的 PROGRESS.md 后，计划会显示在这里。",
+    "liveCount": "{{count}} 个进行中",
+    "waitingCount": "{{count}} 个等待中"
+  },
+  "loading": "正在加载计划…",
+  "error": "无法加载此计划：{{message}}",
+  "rail": {
+    "title": "故事线",
+    "milestones": "里程碑",
+    "lanes": "分道",
+    "stepProgress": "{{done}} / {{total}} 个步骤",
+    "clearLaneFilter": "显示所有分道"
+  },
+  "board": {
+    "title": "看板",
+    "empty": "看板上暂无内容",
+    "columns": {
+      "todo": "待办",
+      "doing": "进行中",
+      "reported": "已上报",
+      "done": "已完成"
+    }
+  },
+  "agents": {
+    "title": "Agent",
+    "empty": "此计划暂无 Agent",
+    "say": "最近发言",
+    "waiting": "等待中",
+    "elapsed": "已用时",
+    "last": "最近命令"
+  },
+  "detail": {
+    "title": "详情",
+    "stepLabel": "第 {{num}} 步",
+    "laneLabel": "分道 {{letter}}",
+    "log": "日志",
+    "noLog": "暂无日志",
+    "toolEvents": "工具事件",
+    "noToolEvents": "暂无归因的工具事件",
+    "openSession": "打开会话"
+  },
+  "status": {
+    "todo": "待办",
+    "doing": "进行中",
+    "reported": "已上报",
+    "blocked": "已阻塞",
+    "done": "已完成"
+  },
+  "tick": {
+    "error": "无法更新复选框：{{message}}"
+  },
+  "toggleRail": "切换故事线面板",
+  "toggleAgents": "切换 Agent 面板"
+}

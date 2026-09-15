@@ -1,0 +1,59 @@
+{
+  "title": "Plan",
+  "picker": {
+    "label": "Project",
+    "empty": "No plans yet",
+    "emptyDesc": "A plan appears here once a project's PROGRESS.md is discovered.",
+    "liveCount": "{{count}} live",
+    "waitingCount": "{{count}} waiting"
+  },
+  "loading": "Loading plan…",
+  "error": "Couldn't load this plan: {{message}}",
+  "rail": {
+    "title": "Stories",
+    "milestones": "Milestones",
+    "lanes": "Lanes",
+    "stepProgress": "{{done}} / {{total}} steps",
+    "clearLaneFilter": "Show all lanes"
+  },
+  "board": {
+    "title": "Board",
+    "empty": "Nothing on the board yet",
+    "columns": {
+      "todo": "To do",
+      "doing": "Doing",
+      "reported": "Reported",
+      "done": "Done"
+    }
+  },
+  "agents": {
+    "title": "Agents",
+    "empty": "No agents on this plan",
+    "say": "Last said",
+    "waiting": "waiting",
+    "elapsed": "Elapsed",
+    "last": "Last command"
+  },
+  "detail": {
+    "title": "Detail",
+    "stepLabel": "Step {{num}}",
+    "laneLabel": "Lane {{letter}}",
+    "log": "Log",
+    "noLog": "No log lines yet",
+    "toolEvents": "Tool events",
+    "noToolEvents": "No attributed tool events",
+    "openSession": "Open session"
+  },
+  "status": {
+    "todo": "To do",
+    "doing": "Doing",
+    "reported": "Reported",
+    "blocked": "Blocked",
+    "done": "Done"
+  },
+  "tick": {
+    "error": "Couldn't update the checkbox: {{message}}"
+  },
+  "toggleRail": "Toggle stories panel",
+  "toggleAgents": "Toggle agents panel"
+}

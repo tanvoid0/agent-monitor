@@ -1,0 +1,59 @@
+{
+  "title": "Kế hoạch",
+  "picker": {
+    "label": "Dự án",
+    "empty": "Chưa có kế hoạch nào",
+    "emptyDesc": "Kế hoạch sẽ xuất hiện ở đây khi tìm thấy PROGRESS.md của dự án.",
+    "liveCount": "{{count}} đang chạy",
+    "waitingCount": "{{count}} đang chờ"
+  },
+  "loading": "Đang tải kế hoạch…",
+  "error": "Không thể tải kế hoạch này: {{message}}",
+  "rail": {
+    "title": "Mạch truyện",
+    "milestones": "Cột mốc",
+    "lanes": "Làn",
+    "stepProgress": "{{done}} / {{total}} bước",
+    "clearLaneFilter": "Hiện tất cả các làn"
+  },
+  "board": {
+    "title": "Bảng",
+    "empty": "Chưa có gì trên bảng",
+    "columns": {
+      "todo": "Cần làm",
+      "doing": "Đang làm",
+      "reported": "Đã báo cáo",
+      "done": "Hoàn thành"
+    }
+  },
+  "agents": {
+    "title": "Agent",
+    "empty": "Kế hoạch này chưa có Agent nào",
+    "say": "Vừa nói",
+    "waiting": "đang chờ",
+    "elapsed": "Thời gian đã chạy",
+    "last": "Lệnh gần nhất"
+  },
+  "detail": {
+    "title": "Chi tiết",
+    "stepLabel": "Bước {{num}}",
+    "laneLabel": "Làn {{letter}}",
+    "log": "Nhật ký",
+    "noLog": "Chưa có dòng nhật ký nào",
+    "toolEvents": "Sự kiện công cụ",
+    "noToolEvents": "Không có sự kiện công cụ nào được gán",
+    "openSession": "Mở phiên"
+  },
+  "status": {
+    "todo": "Cần làm",
+    "doing": "Đang làm",
+    "reported": "Đã báo cáo",
+    "blocked": "Bị chặn",
+    "done": "Hoàn thành"
+  },
+  "tick": {
+    "error": "Không thể cập nhật ô chọn: {{message}}"
+  },
+  "toggleRail": "Bật/tắt bảng mạch truyện",
+  "toggleAgents": "Bật/tắt bảng Agent"
+}
