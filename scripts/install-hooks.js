@@ -90,8 +90,10 @@ const HOOKS_WITH_MATCHER = ["PreToolUse", "PostToolUse", "Stop", "SubagentStop",
 // fire until Claude calls a tool, which never happens for plain-text replies).
 // Without it the Waiting badge persists through the entire generation of a
 // text response. SessionStart / SessionEnd / UserPromptSubmit don't take
-// tool-name matchers, hence the separate list.
-const HOOKS_WITHOUT_MATCHER = ["SessionStart", "SessionEnd", "UserPromptSubmit"];
+// tool-name matchers, hence the separate list. SubagentStart carries the
+// subagent's own agent_id — the only hook that lets the dashboard bind an
+// Agent-spawned row to the id later tool hooks report.
+const HOOKS_WITHOUT_MATCHER = ["SessionStart", "SessionEnd", "UserPromptSubmit", "SubagentStart"];
 const HOOK_TYPES = [...HOOKS_WITH_MATCHER, ...HOOKS_WITHOUT_MATCHER];
 
 function makeHookEntry(hookType) {

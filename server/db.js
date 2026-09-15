@@ -1171,6 +1171,19 @@ try {
   }
 }
 
+// Migrate: store Claude Code's own subagent id on agent rows. SubagentStart
+// and the tool hooks fired inside a subagent carry `agent_id`; binding it to
+// the row the Agent PreToolUse created lets routes/hooks.js attribute tool
+// events exactly, instead of guessing the deepest working subagent.
+try {
+  db.prepare("SELECT claude_agent_id FROM agents LIMIT 1").get();
+} catch {
+  db.prepare("ALTER TABLE agents ADD COLUMN claude_agent_id TEXT").run();
+}
+db.prepare(
+  "CREATE INDEX IF NOT EXISTS idx_agents_claude_id ON agents(session_id, claude_agent_id)"
+).run();
+
 // Migrate: add compaction baseline columns to token_usage.
 // When conversation compaction rewrites the JSONL, pre-compaction token counts
 // are lost from the transcript. Baselines preserve those counts so the effective
