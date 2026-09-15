@@ -1349,6 +1349,13 @@
                   </p>
                 </div>
                 <div class="feature-card">
+                  <div class="feature-icon ic-amber">🛡️</div>
+                  <h3 id="feat-permission-relay">Permission Relay</h3>
+                  <p>
+                    Answer Claude Code permission prompts from the dashboard — for any hook-monitored session, not only ones the dashboard spawned. The <code>PermissionRequest</code> hook is installed as an <code>http</code> hook that blocks on <code>POST /api/hooks/permission-request</code>; a floating card shows the tool and its full input with Allow, Allow always, Deny, or Answer in terminal, and the answer returns as the hook's decision. No answer within <code>DASHBOARD_PERMISSION_HOLD_MS</code> (60 s) or a dashboard that is down falls back to the normal terminal prompt; nothing is ever auto-allowed.
+                  </p>
+                </div>
+                <div class="feature-card">
                   <div class="feature-icon ic-cyan">⌨️</div>
                   <h3 id="feat-ccam-cli">ccam CLI</h3>
                   <p>
@@ -1729,6 +1736,13 @@
                     >. Evicts the session's transcript from the shared cache.
                   </td>
                 </tr>
+                <tr>
+                  <td><code>PermissionRequest</code></td>
+                  <td>Claude is about to ask for tool permission</td>
+                  <td>
+                    The one hook that talks back. Installed as an <code>http</code> hook, so Claude Code blocks the prompt on <code>POST /api/hooks/permission-request</code>; the dashboard shows an <strong>Allow / Allow always / Deny / Answer in terminal</strong> card and its answer is returned as the hook's <code>decision</code>. No answer within <code>DASHBOARD_PERMISSION_HOLD_MS</code> (60 s) returns <code>{}</code> and the normal terminal prompt appears; a dashboard that is down is a connection failure Claude Code ignores.
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -2030,6 +2044,13 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
                   <td><code>120</code></td>
                   <td>
                     Idle-working timeout the watchdog uses to recover an <code>Esc</code> cancel that left no transcript marker
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>DASHBOARD_PERMISSION_HOLD_MS</code></td>
+                  <td><code>60000</code></td>
+                  <td>
+                    How long a Claude Code permission prompt routed through the Permission Relay waits for a dashboard Allow/Deny before falling through to the terminal prompt; the installed hook's own timeout is this + 15 s
                   </td>
                 </tr>
                 <tr>
@@ -7126,7 +7147,7 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=96" defer></script>
+    <script src="i18n-content.js?v=97" defer></script>
     <script src="script.js?v=58" defer></script>
     <script>
       (function () {

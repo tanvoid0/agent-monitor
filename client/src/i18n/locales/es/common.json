@@ -240,5 +240,15 @@
     "send": "Enviar",
     "mute": "Silenciar burbujas",
     "unmute": "Activar burbujas"
+  },
+  "permissions": {
+    "title": "Solicitudes de permiso",
+    "wants": "Claude quiere ejecutar {{tool}}",
+    "expiresIn": "{{seconds}}s",
+    "allow": "Permitir",
+    "allowAlways": "Permitir siempre",
+    "deny": "Denegar",
+    "inTerminal": "Responder en la terminal",
+    "alwaysRule": "Siempre: {{rule}} → {{destination}}"
   }
 }

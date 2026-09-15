@@ -537,6 +537,48 @@ Triggered when a Claude Code session ends.
 
 ---
 
+### 9. PermissionRequest (http hook — the one that talks back)
+
+Every hook above is fire-and-forget: the handler POSTs and exits 0, and the dashboard can only _observe_. `PermissionRequest` is different. The installer writes it as a Claude Code **`http` hook** (no handler script) pointing at `POST /api/hooks/permission-request`, and Claude Code **blocks the permission prompt until that request returns**. The dashboard parks the response (`server/lib/permission-relay.js`), pushes the prompt to the UI as a `permission_request` WebSocket message, and answers once the user clicks **Allow**, **Allow always**, **Deny**, or **Answer in terminal** (`POST /api/permissions/:id/decision`).
+
+**Installed entry (`~/.claude/settings.json`):**
+
+```json
+{
+  "PermissionRequest": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "type": "http",
+          "url": "http://127.0.0.1:4820/api/hooks/permission-request",
+          "timeout": 75
+        }
+      ]
+    }
+  ]
+}
+```
+
+The URL uses `DASHBOARD_PORT` at install time (default 4820); the hook `timeout` is always `DASHBOARD_PERMISSION_HOLD_MS` + 15 s so Claude Code never cancels the request before the relay answers.
+
+**Payload (from Claude Code):** `session_id`, `cwd`, `permission_mode`, `tool_name`, `tool_input`, and an optional `permission_suggestions` array of permission-update entries (e.g. an `addRules` allow rule for this exact command).
+
+**Response the relay sends back:**
+
+| User action                                         | Body returned to Claude Code                                                                                         | Effect                                                                              |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Allow                                               | `{"hookSpecificOutput":{"hookEventName":"PermissionRequest","decision":{"behavior":"allow"}}}`                       | Tool runs; Claude Code still evaluates its own deny/ask rules                       |
+| Allow always                                        | same, plus `"updatedPermissions": [<one of permission_suggestions>]`                                                 | Tool runs and the suggested allow rule is written (`destination` decides where)     |
+| Deny                                                | `{"hookSpecificOutput":{"hookEventName":"PermissionRequest","decision":{"behavior":"deny","message":"…"}}}`          | Tool call refused; `message` is shown to Claude                                     |
+| Answer in terminal / hold expired / UI disconnected | `{}`                                                                                                                 | No decision — Claude Code shows its normal terminal prompt                          |
+
+**Fail-safe properties** (per Claude Code's http-hook contract): a dashboard that is not running is a connection failure, a crash mid-hold is a reset, and `{}` is "no output" — all three leave the permission flow unchanged, so the terminal prompt always appears eventually. `DASHBOARD_PERMISSION_HOLD_MS` (default `60000`) bounds how long a prompt waits for the dashboard before falling through; pending prompts live in memory only and are dropped on restart.
+
+**Security:** `/api/permissions/*` reuses the same-origin / loopback-Origin guard as `/api/run` (browser requests must originate from `localhost`, `127.0.0.1`, `::1`, or `0.0.0.0`) and the `DASHBOARD_TOKEN` guard when configured. The card shows the full `tool_input` before any button is enabled; nothing is ever auto-allowed. In non-interactive sessions (`claude -p`) Claude Code runs this hook too and **denies** the tool when no hook returns a decision — so the relay is the only way to approve a tool for a headless run without `--allowedTools`.
+
+---
+
 ## Hook Handler Implementation
 
 ### Hook transport architecture

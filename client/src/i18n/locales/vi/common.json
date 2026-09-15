@@ -240,5 +240,15 @@
     "send": "Gửi",
     "mute": "Tắt bong bóng",
     "unmute": "Bật bong bóng"
+  },
+  "permissions": {
+    "title": "Yêu cầu quyền",
+    "wants": "Claude muốn chạy {{tool}}",
+    "expiresIn": "{{seconds}}s",
+    "allow": "Cho phép",
+    "allowAlways": "Luôn cho phép",
+    "deny": "Từ chối",
+    "inTerminal": "Trả lời trong terminal",
+    "alwaysRule": "Luôn cho phép: {{rule}} → {{destination}}"
   }
 }

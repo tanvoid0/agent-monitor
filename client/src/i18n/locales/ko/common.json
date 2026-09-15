@@ -240,5 +240,15 @@
     "send": "보내기",
     "mute": "말풍선 끄기",
     "unmute": "말풍선 켜기"
+  },
+  "permissions": {
+    "title": "권한 요청",
+    "wants": "Claude가 {{tool}} 실행을 원합니다",
+    "expiresIn": "{{seconds}}초",
+    "allow": "허용",
+    "allowAlways": "항상 허용",
+    "deny": "거부",
+    "inTerminal": "터미널에서 답변",
+    "alwaysRule": "항상 허용: {{rule}} → {{destination}}"
   }
 }

@@ -240,5 +240,15 @@
     "send": "Send",
     "mute": "Mute bubbles",
     "unmute": "Unmute bubbles"
+  },
+  "permissions": {
+    "title": "Permission requests",
+    "wants": "Claude wants to run {{tool}}",
+    "expiresIn": "{{seconds}}s",
+    "allow": "Allow",
+    "allowAlways": "Allow always",
+    "deny": "Deny",
+    "inTerminal": "Answer in terminal",
+    "alwaysRule": "Always: {{rule}} → {{destination}}"
   }
 }

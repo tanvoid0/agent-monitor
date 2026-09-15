@@ -72,6 +72,7 @@ const webhooksRouter = require("./routes/webhooks");
 const remoteSourcesRouter = require("./routes/remote-sources");
 const metricsRouter = require("./routes/metrics");
 const plansRouter = require("./routes/plans");
+const permissionsRouter = require("./routes/permissions");
 
 const APP_VERSION = (() => {
   try {
@@ -94,6 +95,13 @@ function createApp() {
   // allowlist (anti DNS-rebinding), and an optional bearer-token gate on /api/*.
   app.use(cors(corsOptions()));
   app.use(hostGuard);
+  // Anti-clickjacking: the permission relay renders Allow buttons that grant a
+  // real tool call in a live CLI, so a hostile page must not be able to frame
+  // the dashboard over a decoy. SAMEORIGIN keeps the same-origin docs pages working.
+  app.use((_req, res, next) => {
+    res.setHeader("X-Frame-Options", "SAMEORIGIN");
+    next();
+  });
   app.use(express.json({ limit: "1mb" }));
   app.use("/api", tokenGuard);
   app.use("/api/hooks", hookGuard);
@@ -118,6 +126,7 @@ function createApp() {
   app.use("/api/remote-sources", remoteSourcesRouter);
   app.use("/api/metrics", metricsRouter);
   app.use("/api/plans", plansRouter);
+  app.use("/api/permissions", permissionsRouter);
   app.get("/favicon.svg", (_req, res) => {
     res.type("image/svg+xml").sendFile(DASHBOARD_FAVICON_PATH);
   });

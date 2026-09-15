@@ -7728,3 +7728,60 @@ Object.assign(window.__WIKI_CONTENT_I18N.es, {
 Object.assign(window.__WIKI_CONTENT_I18N.plain.es, {
   "Remote Push Ingestion": "Ingesta por remote push",
 });
+
+Object.assign(window.__WIKI_CONTENT_I18N.zh, {
+  "Answer Claude Code permission prompts from the dashboard — for any hook-monitored session, not only ones the dashboard spawned. The <code>PermissionRequest</code> hook is installed as an <code>http</code> hook that blocks on <code>POST /api/hooks/permission-request</code>; a floating card shows the tool and its full input with Allow, Allow always, Deny, or Answer in terminal, and the answer returns as the hook's decision. No answer within <code>DASHBOARD_PERMISSION_HOLD_MS</code> (60 s) or a dashboard that is down falls back to the normal terminal prompt; nothing is ever auto-allowed.":
+    "直接在仪表盘上回答 Claude Code 的权限提示——适用于任何被 Hook 监控的会话，而不只是仪表盘自己启动的会话。<code>PermissionRequest</code> Hook 以 <code>http</code> Hook 形式安装，会在 <code>POST /api/hooks/permission-request</code> 上阻塞；一张浮动卡片展示工具及其完整输入，并提供允许、始终允许、拒绝或在终端中回答，答案作为 Hook 的 decision 返回。在 <code>DASHBOARD_PERMISSION_HOLD_MS</code>（60 秒）内无人回答或仪表盘未运行时，回退到正常的终端提示；绝不会自动允许任何操作。",
+  "Claude is about to ask for tool permission": "Claude 即将请求工具权限",
+  "The one hook that talks back. Installed as an <code>http</code> hook, so Claude Code blocks the prompt on <code>POST /api/hooks/permission-request</code>; the dashboard shows an <strong>Allow / Allow always / Deny / Answer in terminal</strong> card and its answer is returned as the hook's <code>decision</code>. No answer within <code>DASHBOARD_PERMISSION_HOLD_MS</code> (60 s) returns <code>{}</code> and the normal terminal prompt appears; a dashboard that is down is a connection failure Claude Code ignores.":
+    "唯一会回话的 Hook。以 <code>http</code> Hook 形式安装，因此 Claude Code 会在 <code>POST /api/hooks/permission-request</code> 上阻塞该提示；仪表盘显示<strong>允许 / 始终允许 / 拒绝 / 在终端中回答</strong>卡片，答案作为 Hook 的 <code>decision</code> 返回。<code>DASHBOARD_PERMISSION_HOLD_MS</code>（60 秒）内无回答则返回 <code>{}</code>，出现正常的终端提示；仪表盘未运行则是 Claude Code 忽略的连接失败。",
+  "How long a Claude Code permission prompt routed through the Permission Relay waits for a dashboard Allow/Deny before falling through to the terminal prompt; the installed hook's own timeout is this + 15 s":
+    "经由权限中继转发的 Claude Code 权限提示等待仪表盘允许/拒绝的时长，超时后回退到终端提示；已安装 Hook 自身的 timeout 为该值 + 15 秒",
+});
+
+Object.assign(window.__WIKI_CONTENT_I18N.plain.zh, {
+  "Permission Relay": "权限中继",
+});
+
+Object.assign(window.__WIKI_CONTENT_I18N.vi, {
+  "Answer Claude Code permission prompts from the dashboard — for any hook-monitored session, not only ones the dashboard spawned. The <code>PermissionRequest</code> hook is installed as an <code>http</code> hook that blocks on <code>POST /api/hooks/permission-request</code>; a floating card shows the tool and its full input with Allow, Allow always, Deny, or Answer in terminal, and the answer returns as the hook's decision. No answer within <code>DASHBOARD_PERMISSION_HOLD_MS</code> (60 s) or a dashboard that is down falls back to the normal terminal prompt; nothing is ever auto-allowed.":
+    "Trả lời lời nhắc cấp quyền của Claude Code ngay từ dashboard — cho mọi phiên được hook theo dõi, không chỉ phiên do dashboard khởi chạy. Hook <code>PermissionRequest</code> được cài dưới dạng hook <code>http</code> và chặn trên <code>POST /api/hooks/permission-request</code>; một thẻ nổi hiển thị công cụ cùng toàn bộ đầu vào với Cho phép, Luôn cho phép, Từ chối hoặc Trả lời trong terminal, và câu trả lời được trả về như decision của hook. Không có câu trả lời trong <code>DASHBOARD_PERMISSION_HOLD_MS</code> (60 giây) hoặc dashboard không chạy thì rơi về lời nhắc terminal bình thường; không bao giờ tự động cho phép.",
+  "Claude is about to ask for tool permission": "Claude sắp xin quyền dùng công cụ",
+  "The one hook that talks back. Installed as an <code>http</code> hook, so Claude Code blocks the prompt on <code>POST /api/hooks/permission-request</code>; the dashboard shows an <strong>Allow / Allow always / Deny / Answer in terminal</strong> card and its answer is returned as the hook's <code>decision</code>. No answer within <code>DASHBOARD_PERMISSION_HOLD_MS</code> (60 s) returns <code>{}</code> and the normal terminal prompt appears; a dashboard that is down is a connection failure Claude Code ignores.":
+    "Hook duy nhất nói ngược lại. Cài dưới dạng hook <code>http</code>, nên Claude Code chặn lời nhắc trên <code>POST /api/hooks/permission-request</code>; dashboard hiển thị thẻ <strong>Cho phép / Luôn cho phép / Từ chối / Trả lời trong terminal</strong> và câu trả lời được trả về như <code>decision</code> của hook. Không có câu trả lời trong <code>DASHBOARD_PERMISSION_HOLD_MS</code> (60 giây) thì trả về <code>{}</code> và lời nhắc terminal bình thường xuất hiện; dashboard không chạy là lỗi kết nối mà Claude Code bỏ qua.",
+  "How long a Claude Code permission prompt routed through the Permission Relay waits for a dashboard Allow/Deny before falling through to the terminal prompt; the installed hook's own timeout is this + 15 s":
+    "Thời gian một lời nhắc cấp quyền của Claude Code đi qua Chuyển tiếp quyền chờ dashboard Cho phép/Từ chối trước khi rơi về lời nhắc terminal; timeout của hook đã cài là giá trị này + 15 giây",
+});
+
+Object.assign(window.__WIKI_CONTENT_I18N.plain.vi, {
+  "Permission Relay": "Chuyển tiếp quyền",
+});
+
+Object.assign(window.__WIKI_CONTENT_I18N.ko, {
+  "Answer Claude Code permission prompts from the dashboard — for any hook-monitored session, not only ones the dashboard spawned. The <code>PermissionRequest</code> hook is installed as an <code>http</code> hook that blocks on <code>POST /api/hooks/permission-request</code>; a floating card shows the tool and its full input with Allow, Allow always, Deny, or Answer in terminal, and the answer returns as the hook's decision. No answer within <code>DASHBOARD_PERMISSION_HOLD_MS</code> (60 s) or a dashboard that is down falls back to the normal terminal prompt; nothing is ever auto-allowed.":
+    "대시보드에서 Claude Code 권한 프롬프트에 답변 — 대시보드가 띄운 세션뿐 아니라 hook으로 모니터링되는 모든 세션에 적용됩니다. <code>PermissionRequest</code> hook을 <code>http</code> hook으로 설치해 <code>POST /api/hooks/permission-request</code>에서 차단하고, 떠 있는 카드가 도구와 전체 입력을 허용, 항상 허용, 거부, 터미널에서 답변과 함께 보여 주며, 답변은 hook의 decision으로 반환됩니다. <code>DASHBOARD_PERMISSION_HOLD_MS</code>(60초) 안에 답이 없거나 대시보드가 꺼져 있으면 일반 터미널 프롬프트로 돌아가며, 자동 허용은 절대 없습니다.",
+  "Claude is about to ask for tool permission": "Claude가 도구 권한을 요청하기 직전",
+  "The one hook that talks back. Installed as an <code>http</code> hook, so Claude Code blocks the prompt on <code>POST /api/hooks/permission-request</code>; the dashboard shows an <strong>Allow / Allow always / Deny / Answer in terminal</strong> card and its answer is returned as the hook's <code>decision</code>. No answer within <code>DASHBOARD_PERMISSION_HOLD_MS</code> (60 s) returns <code>{}</code> and the normal terminal prompt appears; a dashboard that is down is a connection failure Claude Code ignores.":
+    "유일하게 응답을 돌려주는 hook. <code>http</code> hook으로 설치되므로 Claude Code는 <code>POST /api/hooks/permission-request</code>에서 프롬프트를 차단합니다. 대시보드는 <strong>허용 / 항상 허용 / 거부 / 터미널에서 답변</strong> 카드를 표시하고 답변을 hook의 <code>decision</code>으로 반환합니다. <code>DASHBOARD_PERMISSION_HOLD_MS</code>(60초) 안에 답이 없으면 <code>{}</code>를 반환하고 일반 터미널 프롬프트가 나타나며, 대시보드가 꺼져 있으면 Claude Code가 무시하는 연결 실패입니다.",
+  "How long a Claude Code permission prompt routed through the Permission Relay waits for a dashboard Allow/Deny before falling through to the terminal prompt; the installed hook's own timeout is this + 15 s":
+    "권한 릴레이를 거치는 Claude Code 권한 프롬프트가 터미널 프롬프트로 넘어가기 전에 대시보드의 허용/거부를 기다리는 시간. 설치된 hook 자체의 timeout은 이 값 + 15초",
+});
+
+Object.assign(window.__WIKI_CONTENT_I18N.plain.ko, {
+  "Permission Relay": "권한 릴레이",
+});
+
+Object.assign(window.__WIKI_CONTENT_I18N.es, {
+  "Answer Claude Code permission prompts from the dashboard — for any hook-monitored session, not only ones the dashboard spawned. The <code>PermissionRequest</code> hook is installed as an <code>http</code> hook that blocks on <code>POST /api/hooks/permission-request</code>; a floating card shows the tool and its full input with Allow, Allow always, Deny, or Answer in terminal, and the answer returns as the hook's decision. No answer within <code>DASHBOARD_PERMISSION_HOLD_MS</code> (60 s) or a dashboard that is down falls back to the normal terminal prompt; nothing is ever auto-allowed.":
+    "Responde a los avisos de permiso de Claude Code desde el dashboard — para cualquier sesión monitorizada por hooks, no solo las que lanza el dashboard. El hook <code>PermissionRequest</code> se instala como hook <code>http</code> que bloquea en <code>POST /api/hooks/permission-request</code>; una tarjeta flotante muestra la herramienta y su entrada completa con Permitir, Permitir siempre, Denegar o Responder en la terminal, y la respuesta vuelve como la decision del hook. Sin respuesta en <code>DASHBOARD_PERMISSION_HOLD_MS</code> (60 s) o con el dashboard apagado se vuelve al aviso normal de la terminal; nunca se permite nada automáticamente.",
+  "Claude is about to ask for tool permission":
+    "Claude está a punto de pedir permiso para una herramienta",
+  "The one hook that talks back. Installed as an <code>http</code> hook, so Claude Code blocks the prompt on <code>POST /api/hooks/permission-request</code>; the dashboard shows an <strong>Allow / Allow always / Deny / Answer in terminal</strong> card and its answer is returned as the hook's <code>decision</code>. No answer within <code>DASHBOARD_PERMISSION_HOLD_MS</code> (60 s) returns <code>{}</code> and the normal terminal prompt appears; a dashboard that is down is a connection failure Claude Code ignores.":
+    "El único hook que responde de vuelta. Instalado como hook <code>http</code>, así que Claude Code bloquea el aviso en <code>POST /api/hooks/permission-request</code>; el dashboard muestra una tarjeta <strong>Permitir / Permitir siempre / Denegar / Responder en la terminal</strong> y su respuesta se devuelve como la <code>decision</code> del hook. Sin respuesta en <code>DASHBOARD_PERMISSION_HOLD_MS</code> (60 s) devuelve <code>{}</code> y aparece el aviso normal de la terminal; un dashboard apagado es un fallo de conexión que Claude Code ignora.",
+  "How long a Claude Code permission prompt routed through the Permission Relay waits for a dashboard Allow/Deny before falling through to the terminal prompt; the installed hook's own timeout is this + 15 s":
+    "Cuánto espera un aviso de permiso de Claude Code enrutado por el Relé de permisos a un Permitir/Denegar del dashboard antes de volver al aviso de la terminal; el timeout propio del hook instalado es este valor + 15 s",
+});
+
+Object.assign(window.__WIKI_CONTENT_I18N.plain.es, {
+  "Permission Relay": "Relé de permisos",
+});

@@ -22,6 +22,7 @@ const liveness = require("../lib/session-liveness");
 const { getRemotePushToken, extractHeaderOnlyToken, tokensMatch } = require("../lib/security");
 const { REMOTE_PROVIDERS, assertProvider } = require("../lib/remote-sync");
 const { normalizeSpeed, normalizeGeo, normalizeTier } = require("../lib/token-usage");
+const permissionRelay = require("../lib/permission-relay");
 
 const router = Router();
 
@@ -1385,6 +1386,20 @@ router.post("/codex", (req, res) => {
       // Hook ingestion is intentionally fail-safe: polling remains the fallback.
     }
   });
+});
+
+// Claude Code `PermissionRequest` http hook. Unlike every other hook here this
+// one is *synchronous* from Claude's side: it blocks the permission prompt
+// until we answer. The relay parks the response and the UI decides (see
+// server/lib/permission-relay.js and /api/permissions).
+router.post("/permission-request", (req, res) => {
+  const body = req.body || {};
+  if (body.hook_event_name !== "PermissionRequest" || !body.tool_name) {
+    return res.status(400).json({
+      error: { code: "INVALID_INPUT", message: "expected a PermissionRequest hook payload" },
+    });
+  }
+  permissionRelay.hold(body, res);
 });
 
 router.post("/event", (req, res) => {

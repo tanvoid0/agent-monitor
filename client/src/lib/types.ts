@@ -1765,9 +1765,13 @@ export interface WSMessage {
     | "alert_updated"
     | "workflow_upserted"
     | "remote_source.status"
-    | "remote_data.updated";
+    | "remote_data.updated"
+    | "permission_request"
+    | "permission_resolved";
   /** The message body, whose concrete shape is selected by `type` above. */
   data:
+    | PermissionRequest
+    | PermissionResolvedPayload
     | Session
     | Agent
     | DashboardEvent
@@ -1784,6 +1788,41 @@ export interface WSMessage {
   /** ISO timestamp the server broadcast this message (not necessarily the
    *  same instant the underlying event occurred). */
   timestamp: string;
+}
+
+// ───── Permission relay ─────
+
+/** One Claude Code permission update entry, as sent in a PermissionRequest
+ *  hook's `permission_suggestions` and echoed back via `updatedPermissions`
+ *  ("Allow always"). Opaque to the UI beyond `type`/`behavior`. */
+export interface PermissionUpdate {
+  type: string;
+  behavior?: "allow" | "deny" | "ask";
+  destination?: string;
+  rules?: Array<{ toolName: string; ruleContent?: string }>;
+  [key: string]: unknown;
+}
+
+/** A Claude Code permission prompt parked by the dashboard's PermissionRequest
+ *  http hook — pushed as `permission_request` and listed by GET /api/permissions.
+ *  Claude blocks until the user answers or `expires_at` passes (then the
+ *  terminal prompt shows as usual). */
+export interface PermissionRequest {
+  id: string;
+  session_id: string | null;
+  cwd: string | null;
+  tool_name: string;
+  tool_input: Record<string, unknown>;
+  permission_mode: string | null;
+  permission_suggestions: PermissionUpdate[];
+  received_at: string;
+  expires_at: string;
+}
+
+/** `permission_resolved` payload — the parked prompt is gone, however it ended. */
+export interface PermissionResolvedPayload {
+  id: string;
+  outcome: "allow" | "deny" | "deferred" | "timeout" | "cancelled";
 }
 
 // ───── Session stats ─────
