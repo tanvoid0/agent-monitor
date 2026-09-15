@@ -92,6 +92,7 @@
 - [Tabby](#tabby)
 - [声音提示](#声音提示)
 - [MCP 集成](#mcp-集成)
+- [计划层](#计划层)
 - [API 参考](#api-参考)
 - [Hook 事件](#hook-事件)
 - [浏览器通知](#浏览器通知)
@@ -1063,6 +1064,48 @@ flowchart TD
   - 工具输入 `confirmation_token: "CLEAR_ALL_DATA"`
 
 完整详情：[mcp/README.md](./mcp/README.md)
+
+---
+
+## 计划层
+
+计划层将项目的 `PROGRESS.md`（里程碑 → 步骤 → 通道 → 任务框）与该项目 `cwd` 下 CCAM 自身的会话、Agent 和事件关联起来，让看板上的每个任务框都能显示正在处理它的实时 Agent、它运行了什么、哪里失败了、花费了多少——这些都是按需从 CCAM 已经在采集的数据中计算得到的,无需再维护一个独立的跟踪器。发现是自动的：任何在最近 7 天内 CCAM 见过会话的 `cwd` 下若存在 `PROGRESS.md`，都会被自动纳入并持续监视其变化，无需注册步骤。
+
+<p align="center">
+  <img src="images/plan.png" alt="计划层 — 构建看板" width="100%">
+  <br>
+  <em>🗺️ <strong>计划</strong> — 左侧是故事栏（里程碑 → 步骤 → 通道），中间是待办 / 进行中 / 已上报 / 已完成看板，每个任务框带有 Agent、模型、上下文占比和成本徽章，右侧是实时 Agent 面板</em>
+</p>
+
+在仪表盘中打开 `/plan/:slug?`，或者不读文件、直接让主线程以纯文本方式驱动它——`/api/plans` 下的 `GET`/`POST` 接口，每个只读路由都同样支持 `?format=json`：
+
+```bash
+# 面板是否在运行？
+curl -s localhost:4820/api/plans   # 若未运行，在 fork 中执行 `npm start`（或打开桌面应用）
+
+# 会话开始
+curl -s localhost:4820/api/plans/<slug>/summary
+# 派发某条通道之前
+curl -s localhost:4820/api/plans/<slug>/next?n=3
+# Agent 运行期间
+curl -s localhost:4820/api/plans/<slug>/wip
+# 只看一件事
+curl -s localhost:4820/api/plans/<slug>/lane/X
+curl -s localhost:4820/api/plans/<slug>/task/KEY
+curl -s localhost:4820/api/plans/<slug>/agent/ID
+
+# 勾选一个任务框 —— 仅限主线程，在报告落地的那一轮执行
+curl -s -XPOST localhost:4820/api/plans/<slug>/tick \
+  -H 'content-type: application/json' \
+  -d '{"key":"R3","done":true}'
+
+# 某条通道的 Agent 上报一个已完成（或被阻塞）的任务框，而不是直接改 PROGRESS.md
+curl -s -XPOST localhost:4820/api/plans/<slug>/log \
+  -H 'content-type: application/json' \
+  -d '{"agent":"<agent>","key":"<KEY>","status":"done","note":"<what passed or what was measured>"}'
+```
+
+`POST /api/plans/<slug>/export` 会把快照（`index.html`、`model.json`、`events.jsonl`）写入你指定的目录，并返回用于发布它的确切 `Artifact(...)` 调用。完整的路由表、关联规则，以及项目 `CLAUDE.local.md` 所携带的技能文本，见 [docs/plan-layer.md](./docs/plan-layer.md) 和 [docs/plan-layer-skill.md](./docs/plan-layer-skill.md)。
 
 ---
 

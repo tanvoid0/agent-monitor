@@ -130,6 +130,15 @@ The public repository becomes installable as soon as these files are on the defa
 
 The stable `ccam mcp stdio` launcher resolves the MCP build from the linked CCAM checkout. This avoids plugin-cache-relative paths, which break after installation. Run `npm run setup` first. It now installs and builds MCP before linking `ccam`.
 
+## Plan Layer Skill
+
+The plan layer (`/plan`, `/api/plans` — see [docs/plan-layer.md](./plan-layer.md)) ships its skill text as a plain
+file, [`docs/plan-layer-skill.md`](./plan-layer-skill.md), rather than a marketplace plugin: it is fork-specific
+(the plan join is additive on top of upstream CCAM, not part of the upstream catalog this marketplace mirrors), and
+a project adopts it by pasting the block verbatim into its own `CLAUDE.local.md`. It is not installed through
+`claude plugin`, `codex plugin`, or `npx skills add` — see `docs/plan-layer.md` §4.7 and §10 for why, and for the
+plan to fold it into this marketplace as a `board` skill once a second project adopts it.
+
 ## Source layout
 
 ```text

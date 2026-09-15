@@ -89,6 +89,7 @@ Un panel profesional para rastrear y visualizar sus sesiones de agente Claude Co
 - [Mercado de complementos](#mercado-de-complementos)
 - [Extensión de agentes](#extensión-de-agentes)
 - [Integración MCP](#integración-mcp)
+- [Capa de planificación](#capa-de-planificación)
 - [Referencia de API](#referencia-de-api)
 - [Eventos de conexión](#eventos-de-enganchamiento)
 - [Notificaciones del navegador](#notificaciones-del-navegador)
@@ -983,6 +984,48 @@ flowchart TD
 - entrada de la herramienta `confirmation_token: "CLEAR_ALL_DATA"`
 
 Detalles completos: [mcp/README.md](./mcp/README.md)
+
+---
+
+## Capa de planificación
+
+La capa de planificación une el `PROGRESS.md` de un proyecto (hitos → pasos → carriles → casillas) con las propias sesiones, agentes y eventos de CCAM para el `cwd` de ese proyecto, de modo que cada casilla del tablero muestra el agente que la está trabajando en vivo, qué ejecutó, qué falló y cuánto costó — calculado bajo demanda a partir de datos que CCAM ya estaba recopilando, sin necesidad de mantener sincronizado un rastreador aparte. El descubrimiento es automático: cualquier proyecto con un `PROGRESS.md` bajo un `cwd` en el que CCAM haya visto una sesión en los últimos 7 días se detecta y se vigila en busca de cambios, sin ningún paso de registro.
+
+<p align="center">
+  <img src="images/plan.png" alt="Capa de planificación — tablero de construcción" width="100%">
+  <br>
+  <em>🗺️ <strong>Plan</strong> — el riel de historias (hitos → pasos → carriles) a la izquierda, un tablero Por hacer / En curso / Reportado / Hecho en el centro con distintivos de agente, modelo, % de contexto y coste por casilla, y un panel de agentes en vivo a la derecha</em>
+</p>
+
+Ábralo en `/plan/:slug?` dentro del panel, o gestiónelo como texto desde un hilo principal en lugar de leer archivos — `GET`/`POST` bajo `/api/plans`, y toda ruta de lectura también responde a `?format=json`:
+
+```bash
+# ¿el panel está activo?
+curl -s localhost:4820/api/plans   # si no, ejecute `npm start` en el fork (o abra la app de escritorio)
+
+# inicio de sesión
+curl -s localhost:4820/api/plans/<slug>/summary
+# antes de asignar un carril
+curl -s localhost:4820/api/plans/<slug>/next?n=3
+# mientras los agentes se ejecutan
+curl -s localhost:4820/api/plans/<slug>/wip
+# una sola cosa
+curl -s localhost:4820/api/plans/<slug>/lane/X
+curl -s localhost:4820/api/plans/<slug>/task/KEY
+curl -s localhost:4820/api/plans/<slug>/agent/ID
+
+# marcar una casilla — solo el hilo principal, en el mismo turno en que llega el reporte
+curl -s -XPOST localhost:4820/api/plans/<slug>/tick \
+  -H 'content-type: application/json' \
+  -d '{"key":"R3","done":true}'
+
+# un agente de carril reporta una casilla terminada (o bloqueada) en vez de tocar PROGRESS.md
+curl -s -XPOST localhost:4820/api/plans/<slug>/log \
+  -H 'content-type: application/json' \
+  -d '{"agent":"<agent>","key":"<KEY>","status":"done","note":"<what passed or what was measured>"}'
+```
+
+`POST /api/plans/<slug>/export` escribe una instantánea (`index.html`, `model.json`, `events.jsonl`) en el directorio que indique y responde con la llamada `Artifact(...)` exacta para publicarla. La tabla completa de rutas, las reglas de unión y el texto de la skill que lleva el `CLAUDE.local.md` de un proyecto: [docs/plan-layer.md](./docs/plan-layer.md) y [docs/plan-layer-skill.md](./docs/plan-layer-skill.md).
 
 ---
 

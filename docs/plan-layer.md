@@ -34,7 +34,7 @@ Why it is viable — checked in the source, not the README:
 And the gap that is not additive, found in `server/routes/hooks.js`:
 
 > "Subagent tool_use blocks never fire hooks on the parent session — this scan is the only path that attributes them
-> to the subagent's agent_id." (`hooks.js:1224`)
+> to the subagent's agent_id." (`hooks.js:1224` at v2.2.0; the §4.1 patch rewords that comment)
 
 That was true once; it is not now. `PreToolUse`/`PostToolUse` fire inside subagents and carry `agent_id` +
 `agent_type` (probed 2026-09-15, Claude Code 2.1.238 — ledgerflow ADR 0001). CCAM does not read `data.agent_id` on
@@ -75,20 +75,29 @@ Ledgerflow's own hooks keep running beside it until §8; both write, nothing col
 
 1. `scripts/install-hooks.js:87-94` — add `SubagentStart` to `HOOKS_WITHOUT_MATCHER`. It carries `agent_id`,
    `agent_type`, `session_id`, and the subagent transcript is on disk ~100 ms before it fires.
-2. `server/db.js` migration — `ALTER TABLE agents ADD COLUMN claude_agent_id TEXT` + index. Pattern at `db.js:557`.
+2. `server/db.js` migration — `ALTER TABLE agents ADD COLUMN claude_agent_id TEXT` + index. Pattern at `db.js:557`,
+   but placed **after** the legacy `agents_new` rebuild (`db.js:1113-1171`), which enumerates columns explicitly and
+   would drop a column added before it on a legacy-CHECK database.
 3. `server/routes/hooks.js`:
-   - `SubagentStart`: bind. Find the most recent `working` subagent in the session with `claude_agent_id IS NULL`
-     and matching `subagent_type` (else any unbound); set `claude_agent_id`; record the transcript path in
+   - `SubagentStart`: bind. Find the **oldest** `working` subagent in the session with `claude_agent_id IS NULL`,
+     same `subagent_type` first (else any unbound) — FIFO, because a batched dispatch fires its `Agent` hooks 1,2,3 and
+     its `SubagentStart`s 1,2,3, and most-recent would bind them reversed; set `claude_agent_id`; record the transcript path in
      `metadata.transcript_path` (from `agent_transcript_path`, or derived `<dir of transcript_path>/<session_id>/subagents/agent-<id>.jsonl`).
-     No unbound row (a dispatch the `Agent` hook missed) → insert one.
-   - `PreToolUse` / `PostToolUse` / `PostToolUseFailure` / `Notification` with `data.agent_id`: attribute to the row
-     with that `claude_agent_id`. Only when absent fall back to today's deepest-working heuristic.
+     No unbound row (a dispatch the `Agent` hook missed) → insert one. A resumed subagent fires `SubagentStart`
+     again (fixture: `a41bd1302af678ba7` at 13:35 and 13:37) and is already bound → reactivate the row.
+   - `PreToolUse` / `PostToolUse` / `Notification` with `data.agent_id`: attribute to the row with that
+     `claude_agent_id`. Only when absent fall back to today's deepest-working heuristic. (`PostToolUseFailure` is not
+     in `HOOKS_WITH_MATCHER` at `install-hooks.js:87`, so it never arrives; the attribution is generic and would cover
+     it if installed. `Notification` waiting stamps the asking subagent's row instead of main when `agent_id` names
+     one; the session flag still drives the badge.)
    - `SubagentStop` with `data.agent_id`: match by `claude_agent_id` first; the four heuristics stay as fallback.
    - The JSONL scan at stop stays — it back-fills anything the hooks missed and older sessions.
 4. Tests: `server/__tests__/hooks-agent-id.test.js` — three concurrent subagents of the same type, tool events
    interleaved, each lands on its own row; stop matches by id.
 
-~80 lines. This is the PR.
+~140 lines net, half of them comments. This is the PR. Named in its text but left alone (§6):
+`scripts/import-history.js:774 findLiveSubagentForJsonl` still matches a JSONL to a live row by type + start-time
+tolerance at the stop scan; a `WHERE claude_agent_id = ?` first try there would make it exact.
 
 ### 4.2 Data
 
@@ -230,7 +239,7 @@ at least every 5 s while any agent on the plan is working), `plan_log {slug, row
 
 ### 4.6 Page — `client/src/plan/`, route `/plan/:slug?`
 
-The v2 page in CCAM's components and Tailwind, one route, one nav item (`nav:plan`, icon `KanbanSquare`):
+The v2 page in CCAM's components and Tailwind, one route, one nav item (`nav:plan`, icon `SquareKanban` — lucide-react 0.474 dropped the `KanbanSquare` name):
 
 - **Project picker** (top bar): `GET /api/plans`, live/waiting badges, last-used remembered in `localStorage`.
 - **Stories rail** (left): milestones → steps → lanes, current step expanded, counts per lane, mode chip.
@@ -238,13 +247,17 @@ The v2 page in CCAM's components and Tailwind, one route, one nav item (`nav:pla
   nested subtask tree, amber border + `waiting · permission · Bash` chip, `say` line on the live card's agent.
   Checkbox on a card → `POST tick`.
 - **Agents** (right, collapsible): one row per agent on this plan — badge, ctx meter, $, lane, box, elapsed, last command,
-  swimlane timeline of tool ticks (d3 is already a dependency).
+  swimlane timeline of tool ticks (d3 is already a dependency) — deferred past 0.1.0: the model carries only
+  per-agent aggregates; the timeline needs a per-event slice the routes do not expose yet.
 - **Detail** (drawer): breadcrumb `Step 17 › Lane D › D1`, status, text, log lines, attributed tool events with
-  stdout/stderr tails (from `events.data`), link to the CCAM session and agent pages — the deep dive is already built.
+  stdout/stderr tails (from `events.data`), link to the CCAM session page (`/sessions/:id`; CCAM has no per-agent
+  route) — the deep dive is already built.
 - Strings in `client/src/i18n/locales/<xx>/plan.json` for **all five locales** — the repo's i18n-parity rule and
   `bash .claude/skills/i18n-parity/scripts/i18n-audit.sh` require every namespace file in every locale dir with the
-  same keys (an `en`-only file fails the audit). Registered at runtime from `client/src/plan/i18n.ts` via
-  `i18n.addResourceBundle(lng, "plan", …)` so `client/src/i18n/index.ts` is not touched.
+  same keys (an `en`-only file fails the audit), and Surface 4 of that audit greps `client/src/i18n/index.ts` for
+  every namespace — so `plan` is registered there like every other namespace (five imports, five `plan: plan_xx`
+  resource lines, one `ns` entry; additive). Runtime `addResourceBundle` registration was tried first and can never
+  pass the audit.
 - 400 px: rail and agents collapse into drawers; board scrolls.
 
 Dark/light follows CCAM's theme. No new theming.
@@ -290,7 +303,7 @@ _touches: `scripts/install-hooks.js`, `server/routes/hooks.js`, `server/db.js` (
 - [ ] S8 upstream PR text for S1 in `docs/upstream-pr-agent-id.md` — diff, the probe, the three-concurrent test
 
 ### Lane P — page · parallel · `crew:coder` on sonnet
-_touches: `client/src/plan/**`, `client/src/App.tsx` (one route), `client/src/components/Sidebar.tsx` (one item), `client/src/i18n/locales/*/plan.json` (five, new), `client/src/i18n/locales/*/nav.json` (`nav:plan`, five one-liners), `client/src/plan/__tests__/**`_
+_touches: `client/src/plan/**`, `client/src/App.tsx` (one route), `client/src/components/Sidebar.tsx` (one item), `client/src/i18n/locales/*/plan.json` (five, new), `client/src/i18n/locales/*/nav.json` (`nav:plan`, five one-liners), `client/src/i18n/index.ts` (namespace registration), `client/src/plan/__tests__/**`_
 
 - [ ] P1 `Plan.tsx` renders `expected/model.json` from a mock fetch: rail, board, agents, detail — screenshot beside the v2 page
 - [ ] P2 picker + route param + `localStorage`
@@ -326,11 +339,12 @@ including upstream's suite, and the PR for §4.1 is open upstream.
 | file | change | lines |
 |---|---|---|
 | `scripts/install-hooks.js:94` | `SubagentStart` in `HOOKS_WITHOUT_MATCHER` | 1 |
-| `server/db.js` ~`:557` | `claude_agent_id` migration; `require("./plan/schema").init(db)` | 3 |
+| `server/db.js` ~`:1171` | `claude_agent_id` migration (comment + try/catch + index); `require("./plan/schema").init(db)` | 13 + 1 |
 | `server/routes/hooks.js` | §4.1 bind + attribute + stop-by-id | ~70 |
 | `server/index.js:73,105` | `require("./routes/plans")`; `app.use("/api/plans", plansRouter)` | 2 |
 | `client/src/App.tsx:129` | `<Route path="plan/:slug?" element={<Plan />} />` | 2 |
-| `client/src/components/Sidebar.tsx:99` | `{ to: "/plan", icon: KanbanSquare, key: "nav:plan" }` | 1 |
+| `client/src/components/Sidebar.tsx:99` | `{ to: "/plan", icon: SquareKanban, key: "nav:plan" }` + import | 2 |
+| `client/src/i18n/index.ts` | `plan` namespace: five imports, five resource lines, one `ns` entry | 11 |
 | `client/src/i18n/locales/*/nav.json` | `nav:plan` (five locales, parity rule) | 5 × 1 |
 
 Everything else is a new file. After the upstream PR merges, the `hooks.js` line count goes to zero.

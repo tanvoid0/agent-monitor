@@ -92,6 +92,7 @@ Tài liệu đã bản địa hóa: [`README.md`](./README.md) · [`README-CN.md
 - [Tabby](#tabby)
 - [Tín hiệu âm thanh](#tín-hiệu-âm-thanh)
 - [Tích hợp MCP](#tích-hợp-mcp)
+- [Lớp kế hoạch](#lớp-kế-hoạch)
 - [Tham chiếu API](#tham-chiếu-api)
 - [Sự kiện móc nối](#sự-kiện-móc-nối)
 - [Thông báo trình duyệt](#thông-báo-trình-duyệt)
@@ -1043,6 +1044,48 @@ flowchart TD
   - đầu vào công cụ `confirmation_token: "CLEAR_ALL_DATA"`
 
 Chi tiết đầy đủ: [mcp/README.md](./mcp/README.md)
+
+---
+
+## Lớp kế hoạch
+
+Lớp kế hoạch (plan layer) khớp nối `PROGRESS.md` của một dự án (cột mốc → bước → làn → hộp việc) với chính các session, agent và event của CCAM cho `cwd` của dự án đó, để mỗi hộp việc trên bảng hiển thị agent đang thực hiện nó, nó đã chạy gì, thất bại ở đâu, và tốn bao nhiêu — tất cả được tính theo yêu cầu từ dữ liệu CCAM đã thu thập sẵn, không cần một bộ theo dõi riêng để giữ đồng bộ. Việc phát hiện là tự động: bất kỳ dự án nào có `PROGRESS.md` dưới một `cwd` mà CCAM đã thấy session trong 7 ngày gần nhất đều được tự động nhận diện và theo dõi thay đổi, không cần bước đăng ký.
+
+<p align="center">
+  <img src="images/plan.png" alt="Lớp kế hoạch — bảng xây dựng" width="100%">
+  <br>
+  <em>🗺️ <strong>Kế hoạch</strong> — thanh câu chuyện (cột mốc → bước → làn) bên trái, bảng Cần làm / Đang làm / Đã báo cáo / Hoàn thành ở giữa với huy hiệu agent, model, % ngữ cảnh và chi phí trên từng hộp việc, và bảng agent trực tiếp ở bên phải</em>
+</p>
+
+Mở tại `/plan/:slug?` trong dashboard, hoặc điều khiển nó bằng văn bản từ luồng chính thay vì đọc file — `GET`/`POST` dưới `/api/plans`, mọi route đọc đều trả lời thêm `?format=json`:
+
+```bash
+# bảng đã chạy chưa?
+curl -s localhost:4820/api/plans   # nếu chưa, chạy `npm start` trong fork (hoặc mở ứng dụng desktop)
+
+# bắt đầu phiên
+curl -s localhost:4820/api/plans/<slug>/summary
+# trước khi phân công một làn
+curl -s localhost:4820/api/plans/<slug>/next?n=3
+# trong khi agent đang chạy
+curl -s localhost:4820/api/plans/<slug>/wip
+# xem một mục cụ thể
+curl -s localhost:4820/api/plans/<slug>/lane/X
+curl -s localhost:4820/api/plans/<slug>/task/KEY
+curl -s localhost:4820/api/plans/<slug>/agent/ID
+
+# đánh dấu hoàn thành một hộp việc — chỉ luồng chính, ngay lượt báo cáo được ghi nhận
+curl -s -XPOST localhost:4820/api/plans/<slug>/tick \
+  -H 'content-type: application/json' \
+  -d '{"key":"R3","done":true}'
+
+# agent của một làn báo cáo một hộp việc đã xong (hoặc bị chặn) thay vì đụng vào PROGRESS.md
+curl -s -XPOST localhost:4820/api/plans/<slug>/log \
+  -H 'content-type: application/json' \
+  -d '{"agent":"<agent>","key":"<KEY>","status":"done","note":"<what passed or what was measured>"}'
+```
+
+`POST /api/plans/<slug>/export` ghi một bản chụp nhanh (`index.html`, `model.json`, `events.jsonl`) vào thư mục bạn chỉ định và trả về đúng lệnh gọi `Artifact(...)` để xuất bản nó. Bảng route đầy đủ, quy tắc khớp nối, và nội dung kỹ năng mà `CLAUDE.local.md` của một dự án mang theo: [docs/plan-layer.md](./docs/plan-layer.md) và [docs/plan-layer-skill.md](./docs/plan-layer-skill.md).
 
 ---
 

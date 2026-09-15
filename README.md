@@ -90,6 +90,7 @@ A professional dashboard to track and visualize your Claude Code and Codex agent
 - [Plugin Marketplace](#plugin-marketplace)
 - [Agent Extensions](#agent-extensions)
 - [MCP Integration](#mcp-integration)
+- [Plan Layer](#plan-layer)
 - [API Reference](#api-reference)
 - [Hook Events](#hook-events)
 - [Browser Notifications](#browser-notifications)
@@ -995,6 +996,56 @@ flowchart TD
   - tool input `confirmation_token: "CLEAR_ALL_DATA"`
 
 Full details: [mcp/README.md](./mcp/README.md)
+
+---
+
+## Plan Layer
+
+The plan layer joins a project's `PROGRESS.md` (milestones → steps → lanes → boxes) against CCAM's own sessions,
+agents, and events for that project's `cwd`, so every box on the board shows the live agent working it, what it ran,
+what failed, and what it cost — computed on request from data CCAM was already collecting, no separate tracker to
+keep in sync. Discovery is automatic: any project with a `PROGRESS.md` under a `cwd` CCAM has seen a session for in
+the last 7 days is picked up and watched for changes, no registration step.
+
+<p align="center">
+  <img src="images/plan.png" alt="Plan Layer — build board" width="100%">
+  <br>
+  <em>🗺️ <strong>Plan</strong> — stories rail (milestones → steps → lanes) on the left, a To do / Doing / Reported / Done board in the centre with per-box agent, model, context %, and cost badges, and a live agents panel on the right</em>
+</p>
+
+Open it at `/plan/:slug?` in the dashboard, or drive it as text from a main thread instead of reading files —
+`GET`/`POST` under `/api/plans`, every read route also answering `?format=json`:
+
+```bash
+# board up?
+curl -s localhost:4820/api/plans   # else `npm start` in the fork (or open the desktop app)
+
+# session start
+curl -s localhost:4820/api/plans/<slug>/summary
+# before dispatching a lane
+curl -s localhost:4820/api/plans/<slug>/next?n=3
+# while agents are running
+curl -s localhost:4820/api/plans/<slug>/wip
+# one thing
+curl -s localhost:4820/api/plans/<slug>/lane/X
+curl -s localhost:4820/api/plans/<slug>/task/KEY
+curl -s localhost:4820/api/plans/<slug>/agent/ID
+
+# tick a box — main thread only, the turn the report lands
+curl -s -XPOST localhost:4820/api/plans/<slug>/tick \
+  -H 'content-type: application/json' \
+  -d '{"key":"R3","done":true}'
+
+# a lane agent logs a finished (or blocked) box instead of touching PROGRESS.md
+curl -s -XPOST localhost:4820/api/plans/<slug>/log \
+  -H 'content-type: application/json' \
+  -d '{"agent":"<agent>","key":"<KEY>","status":"done","note":"<what passed or what was measured>"}'
+```
+
+`POST /api/plans/<slug>/export` writes a snapshot (`index.html`, `model.json`, `events.jsonl`) into a directory you
+name and answers with the exact `Artifact(...)` call to publish it. Full route table, the join rules, and the skill
+text a project's `CLAUDE.local.md` carries: [docs/plan-layer.md](./docs/plan-layer.md) and
+[docs/plan-layer-skill.md](./docs/plan-layer-skill.md).
 
 ---
 

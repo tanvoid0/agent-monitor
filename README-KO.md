@@ -89,6 +89,7 @@ Claude Code & Codex 에이전트 세션, 도구 사용, 서브에이전트 오�
 - [플러그인 마켓플레이스](#플러그인-마켓플레이스)
 - [에이전트 확장](#에이전트-확장)
 - [MCP 통합](#mcp-통합)
+- [플랜 레이어](#플랜-레이어)
 - [API 참조](#api-참조)
 - [Hook 이벤트](#hook-이벤트)
 - [브라우저 알림](#브라우저-알림)
@@ -990,6 +991,48 @@ flowchart TD
   - 도구 입력 `confirmation_token: "CLEAR_ALL_DATA"`
 
 전체 세부 사항: [mcp/README.md](./mcp/README.md)
+
+---
+
+## 플랜 레이어
+
+플랜 레이어는 프로젝트의 `PROGRESS.md`(마일스톤 → 단계 → 레인 → 박스)를 해당 프로젝트의 `cwd`에 대한 CCAM 자체 세션, 에이전트, 이벤트와 조인하여, 보드의 모든 박스가 이를 작업 중인 실시간 에이전트, 실행한 내용, 실패한 부분, 비용을 보여주도록 합니다 — 별도의 트래커를 동기화할 필요 없이 CCAM이 이미 수집 중인 데이터로부터 요청 시 계산됩니다. 검색은 자동입니다: 최근 7일 이내에 CCAM이 세션을 본 `cwd` 아래에 `PROGRESS.md`가 있는 프로젝트는 등록 절차 없이 자동으로 인식되어 변경 사항이 감시됩니다.
+
+<p align="center">
+  <img src="images/plan.png" alt="플랜 레이어 — 빌드 보드" width="100%">
+  <br>
+  <em>🗺️ <strong>플랜</strong> — 왼쪽에는 스토리 레일(마일스톤 → 단계 → 레인), 가운데에는 박스별 에이전트·모델·컨텍스트 %·비용 배지가 있는 할 일 / 진행 중 / 보고됨 / 완료 보드, 오른쪽에는 실시간 에이전트 패널</em>
+</p>
+
+대시보드의 `/plan/:slug?`에서 열거나, 파일을 읽는 대신 메인 스레드에서 텍스트로 다룰 수 있습니다 — `/api/plans` 아래의 `GET`/`POST`이며, 모든 읽기 라우트는 `?format=json`에도 응답합니다:
+
+```bash
+# 보드가 실행 중인가?
+curl -s localhost:4820/api/plans   # 아니라면 fork에서 `npm start`(또는 데스크톱 앱 실행)
+
+# 세션 시작
+curl -s localhost:4820/api/plans/<slug>/summary
+# 레인을 배정하기 전
+curl -s localhost:4820/api/plans/<slug>/next?n=3
+# 에이전트가 실행 중일 때
+curl -s localhost:4820/api/plans/<slug>/wip
+# 한 가지만 확인
+curl -s localhost:4820/api/plans/<slug>/lane/X
+curl -s localhost:4820/api/plans/<slug>/task/KEY
+curl -s localhost:4820/api/plans/<slug>/agent/ID
+
+# 박스에 체크 표시 — 메인 스레드만, 보고가 도착한 바로 그 턴에
+curl -s -XPOST localhost:4820/api/plans/<slug>/tick \
+  -H 'content-type: application/json' \
+  -d '{"key":"R3","done":true}'
+
+# 레인 에이전트가 PROGRESS.md를 직접 건드리는 대신 완료된(또는 막힌) 박스를 기록
+curl -s -XPOST localhost:4820/api/plans/<slug>/log \
+  -H 'content-type: application/json' \
+  -d '{"agent":"<agent>","key":"<KEY>","status":"done","note":"<what passed or what was measured>"}'
+```
+
+`POST /api/plans/<slug>/export`는 지정한 디렉터리에 스냅샷(`index.html`, `model.json`, `events.jsonl`)을 기록하고 이를 게시할 정확한 `Artifact(...)` 호출을 응답으로 돌려줍니다. 전체 라우트 표, 조인 규칙, 프로젝트의 `CLAUDE.local.md`가 담는 스킬 텍스트: [docs/plan-layer.md](./docs/plan-layer.md)와 [docs/plan-layer-skill.md](./docs/plan-layer-skill.md).
 
 ---
 
