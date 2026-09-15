@@ -1401,7 +1401,8 @@ Dashboard 处理以下 Claude Code Hook 类型：
 | `PreToolUse` | Agent 开始使用工具 | 清除等待标志,设置 Agent 为 `working`,设置 `current_tool`。如果工具是 `Agent`,创建子 Agent 记录 |
 | `PostToolUse` | 工具执行完成 | 清除等待标志(用于处理用户在工具运行期间批准权限提示的场景)。清除 `current_tool`。Agent 保持 `working` |
 | `Stop` | Claude 完成响应 | 非错误：主 Agent → `waiting` — Claude 完成本回合，主动权交给用户。`stop_reason=error`：将 Agent 和会话标记为 `error`。后台子 Agent 继续运行 |
-| `SubagentStop` | 后台 Agent 完成 | 通过描述、类型或任务匹配并完成子 Agent。故意不清除等待标志 — 子 Agent 完成不能说明用户是否已响应。**触发 fire-and-forget 的 JSONL 扫描**(`scanAndImportSubagents`),在子 Agent 自己的 `agent_id` 下为每个 tool 发出 `PreToolUse` + `PostToolUse` 事件,使 Timeline 显示子 Agent 运行的所有 tool,而不仅仅是 spawn 标记 |
+| `SubagentStart` | 子 Agent 开始运行 | 将 `Agent` 派发创建的子 Agent 行绑定到 Claude Code 的 `agent_id`(`claude_agent_id`)并记录其 transcript 路径,使子 Agent 内部后续的工具 Hook 即使在多个同类型子 Agent 并发运行时也能归属到正确的行。没有匹配派发的 start 会插入该行 |
+| `SubagentStop` | 后台 Agent 完成 | 通过 Claude Code 的 `agent_id`(在 `SubagentStart` 绑定)匹配子 Agent,否则通过描述、类型或任务匹配,并将其标记为完成。故意不清除等待标志 — 子 Agent 完成不能说明用户是否已响应。**触发 fire-and-forget 的 JSONL 扫描**(`scanAndImportSubagents`),在子 Agent 自己的 `agent_id` 下为每个 tool 发出 `PreToolUse` + `PostToolUse` 事件,使 Timeline 显示子 Agent 运行的所有 tool,而不仅仅是 spawn 标记 |
 | `Notification` | Agent 通知 | 记录事件。权限/输入提示消息将 Agent 设为 `waiting` 并盖上 `awaiting_input_since`（附带 `awaiting_reason=notification`，按模式匹配：`permission`、`waiting for input`、`needs your approval` 等）。压缩通知标记为 `Compaction` 事件。如果启用,触发浏览器通知 |
 | `SessionEnd` | Claude Code CLI 进程退出 | 清除等待标志。如果会话已处于 `error` 状态，则保留错误状态；否则将所有 Agent 和会话标记为 `completed` |
 | `Compaction` | JSONL 中检测到 `/compact` | 创建压缩子 Agent（类型 `compaction`）和 Compaction 事件。通过 Transcript JSONL 中的 `isCompactSummary` 条目检测。也可由周期性扫描器对活跃会话检测 |

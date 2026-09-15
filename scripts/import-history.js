@@ -767,11 +767,22 @@ function truncateForEvent(value) {
  * matches a JSONL transcript. Used to merge JSONL-extracted tool events into
  * the live subagent row instead of creating a duplicate row.
  *
+ * Exact match first: the JSONL filename is Claude Code's agent id, and a row
+ * bound by SubagentStart carries it in claude_agent_id — three same-type
+ * agents started in one second tie on the heuristic below, and without this
+ * agent-a2.jsonl lands on a1's row.
+ *
  * Match heuristic: same session, same agentType, started within START_TOLERANCE_MS
  * of the JSONL's first timestamp, not already a JSONL-keyed row.
  */
 const SUBAGENT_LIVE_MATCH_TOLERANCE_MS = 30_000;
 function findLiveSubagentForJsonl(dbModule, sessionId, subData) {
+  if (subData.agentId) {
+    const bound = dbModule.db
+      .prepare("SELECT id FROM agents WHERE session_id = ? AND claude_agent_id = ?")
+      .get(sessionId, subData.agentId);
+    if (bound) return bound;
+  }
   if (!subData.agentType || !subData.startedAt) return null;
   return dbModule.db
     .prepare(

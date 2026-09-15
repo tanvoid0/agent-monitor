@@ -414,6 +414,12 @@ function createOpenApiSpec() {
             name: { type: "string" },
             type: { type: "string", enum: ["main", "subagent"] },
             subagent_type: { type: "string", nullable: true },
+            claude_agent_id: {
+              type: "string",
+              nullable: true,
+              description:
+                "Claude Code's own id for this subagent, bound by the SubagentStart hook; null for main agents and rows from builds that do not stamp agent_id.",
+            },
             status: {
               type: "string",
               enum: ["working", "waiting", "completed", "error"],
@@ -983,7 +989,7 @@ function createOpenApiSpec() {
             hook_type: {
               type: "string",
               description:
-                "Hook type from Claude Code (common values: PreToolUse, PostToolUse, Stop, SubagentStop, Notification, SessionStart, SessionEnd)",
+                "Hook type from Claude Code (common values: PreToolUse, PostToolUse, Stop, SubagentStart, SubagentStop, Notification, SessionStart, SessionEnd, UserPromptSubmit)",
             },
             data: {
               type: "object",
@@ -992,6 +998,12 @@ function createOpenApiSpec() {
                 session_id: { type: "string" },
                 tool_name: { type: "string" },
                 transcript_path: { type: "string" },
+                agent_id: {
+                  type: "string",
+                  description:
+                    "Claude Code's own subagent id, present on SubagentStart/SubagentStop and on tool hooks fired inside a subagent. Binds the event to the agent row with that claude_agent_id.",
+                },
+                agent_type: { type: "string" },
               },
               additionalProperties: true,
             },

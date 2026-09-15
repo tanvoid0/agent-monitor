@@ -1002,7 +1002,7 @@ All hook traffic is sent to one endpoint:
 |--------|----------|-------|
 | `POST` | `/api/hooks/event` | Body includes `hook_type` and `data`; server routes behavior by hook type |
 
-Supported `hook_type` values include `PreToolUse`, `PostToolUse`, `Stop`, `SubagentStop`, `Notification`, `SessionStart`, and `SessionEnd`.
+Supported `hook_type` values include `PreToolUse`, `PostToolUse`, `Stop`, `SubagentStart`, `SubagentStop`, `Notification`, `SessionStart`, `SessionEnd`, and `UserPromptSubmit`. `SubagentStart` and the hooks fired inside a subagent carry `data.agent_id`, which binds the event to the agent row with that `claude_agent_id`.
 
 ### Hook Processing Logic
 
