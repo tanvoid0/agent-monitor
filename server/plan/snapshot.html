@@ -1,0 +1,705 @@
+<meta charset="utf-8">
+<title>LedgerFlow Build Board</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --ground: #F4F6F8; --surface: #FFFFFF; --ink: #1B2733; --muted: #66727F; --rule: #D9DEE4;
+    --done: #1F7A5C; --done-soft: #E3F1EB; --now: #B8720A; --now-soft: #F7EBD6; --stop: #9A3B3B; --stop-soft: #F5E3E3;
+    --wait: #3B6EA8; --wait-soft: #E2ECF7; --code-bg: #EAEEF2;
+    --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Consolas, "SF Mono", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0F1418; --surface: #161C22; --ink: #E1E7ED; --muted: #8B97A3; --rule: #273038;
+      --done: #4FB58A; --done-soft: #17302A; --now: #E0A343; --now-soft: #33291A; --stop: #D07070; --stop-soft: #331F1F;
+      --wait: #7FA8DC; --wait-soft: #1B2A3B; --code-bg: #1F272F;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0F1418; --surface: #161C22; --ink: #E1E7ED; --muted: #8B97A3; --rule: #273038;
+    --done: #4FB58A; --done-soft: #17302A; --now: #E0A343; --now-soft: #33291A; --stop: #D07070; --stop-soft: #331F1F;
+    --wait: #7FA8DC; --wait-soft: #1B2A3B; --code-bg: #1F272F;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font: 15px/1.5 var(--sans); padding-block: 0 48px; padding-inline: clamp(16px, 4vw, 40px); }
+  a { color: var(--done); }
+  code { font: 0.86em var(--mono); background: var(--code-bg); padding: 0.05em 0.35em; border-radius: 3px; overflow-wrap: anywhere; }
+  h1, h2, h3 { text-wrap: balance; margin: 0; }
+  .lbl, .eyebrow { font: 500 11px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  :focus-visible { outline: 2px solid var(--wait); outline-offset: 2px; }
+  button { font: inherit; }
+  p.empty, .empty { color: var(--muted); font-size: 13px; padding: 6px 2px; }
+
+  header { display: flex; flex-wrap: wrap; gap: 24px 40px; align-items: flex-end; padding-block: 28px 20px; border-bottom: 1px solid var(--rule); }
+  .name { flex: 1 1 260px; }
+  .eyebrow { margin-bottom: 8px; }
+  h1 { font: 600 26px/1.15 var(--sans); letter-spacing: -0.01em; }
+  #status { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+  #live { font: 500 11px/1 var(--mono); margin-left: 10px; }
+  #live::before { content: "●"; margin-right: 5px; }
+  #live.ok { color: var(--done); } #live.bad { color: var(--stop); } #live.snap { color: var(--muted); }
+  .meters { display: flex; gap: 28px; flex-wrap: wrap; }
+  .meter { min-width: 150px; }
+  .meter .num { font: 500 28px/1.1 var(--mono); font-variant-numeric: tabular-nums; margin: 6px 0 4px; }
+  .meter .num small { font-size: 14px; color: var(--muted); }
+  .meter .sub { font: 12px/1.4 var(--mono); color: var(--muted); }
+  .bar { height: 6px; background: var(--rule); border-radius: 3px; overflow: hidden; display: flex; margin: 4px 0; }
+  .bar i { display: block; height: 100%; width: 0; transition: width .4s ease; }
+  .bar i.done { background: var(--done); } .bar i.doing { background: var(--now); }
+  .bar i.reported { background: var(--wait); } .bar i.blocked { background: var(--stop); }
+
+  /* tags & badges — shared everywhere a lane, status or agent shows up */
+  .tag { font: 500 10px/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; padding: 4px 7px; border-radius: 3px; background: var(--code-bg); color: var(--muted); white-space: nowrap; }
+  .tag.serial { background: var(--stop-soft); color: var(--stop); }
+  .tag.parallel { background: var(--done-soft); color: var(--done); }
+  .tag.inline { background: var(--now-soft); color: var(--now); }
+  .agent { font: 500 11px/1 var(--mono); padding: 3px 6px; border-radius: 3px; color: #fff; background: var(--muted); white-space: nowrap; border: 0; cursor: pointer; }
+  .st { font: 500 10px/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; }
+  .st.start, .st.note { color: var(--now); } .st.done { color: var(--done); } .st.blocked { color: var(--stop); }
+  .key { font: 500 12px/1 var(--mono); padding: 3px 5px; border-radius: 3px; background: var(--code-bg); }
+  .model-badge { font: 500 10px/1 var(--mono); padding: 3px 6px; border: 1px solid var(--rule); border-radius: 3px; color: var(--muted); white-space: nowrap; }
+  .ctx-meter { display: inline-flex; align-items: center; gap: 5px; font: 400 11px/1 var(--mono); color: var(--muted); }
+  .ctx-meter .bar { width: 48px; height: 6px; margin: 0; }
+  .ctx-meter .bar i { background: var(--wait); }
+  .ctx-meter.now .bar i { background: var(--now); } .ctx-meter.stop .bar i { background: var(--stop); }
+  .session-tag { font: 500 10px/1 var(--mono); color: var(--muted); border: 1px dashed var(--rule); border-radius: 3px; padding: 3px 5px; }
+  .status-chip { font: 500 10px/1 var(--mono); text-transform: uppercase; letter-spacing: .05em; padding: 3px 7px; border-radius: 3px; }
+  .status-chip.todo { color: var(--muted); background: var(--code-bg); }
+  .status-chip.doing { color: var(--now); background: var(--now-soft); }
+  .status-chip.reported { color: var(--wait); background: var(--wait-soft); }
+  .status-chip.done { color: var(--done); background: var(--done-soft); }
+  .status-chip.blocked { color: var(--stop); background: var(--stop-soft); }
+  .tool-chip { font: 500 10px/1 var(--mono); padding: 3px 6px; border-radius: 3px; background: var(--code-bg); color: var(--muted); white-space: nowrap; }
+  .tool-chip.bash { color: var(--wait); } .tool-chip.edit { color: var(--now); } .tool-chip.read { color: var(--muted); } .tool-chip.err { color: var(--stop); }
+
+  /* layout: rail / main / sidebar */
+  .layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 0 24px; align-items: start; padding-top: 8px; }
+  .layout.sidebar-open { grid-template-columns: 260px minmax(0, 1fr) 400px; }
+  #rail, #main, #sidebar { min-width: 0; }
+  #rail h2 { padding: 22px 0 12px; border-bottom: 1px solid var(--rule); margin-bottom: 8px; }
+  #rail h3 { font: 600 13px/1.3 var(--sans); margin: 16px 0 4px; }
+  #rail ul { list-style: none; margin: 6px 0 0; padding: 0; }
+  #rail li { position: relative; padding: 3px 0 3px 24px; font-size: 13px; font-variant-numeric: tabular-nums; }
+  #rail li.current > label { color: var(--ink); font-weight: 600; }
+  #rail label { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  #rail input[type=checkbox] { position: absolute; left: 0; top: 7px; margin: 0; width: 14px; height: 14px; appearance: none; border: 1.5px solid var(--muted); border-radius: 3px; background: var(--surface); }
+  #rail input:checked { background: var(--done); border-color: var(--done); }
+  #rail input:checked::after { content: ""; position: absolute; left: 4px; top: 1px; width: 4px; height: 7px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  #rail .step-title { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; text-align: left; }
+  #rail .step-title:hover { text-decoration: underline; }
+  #rail .commit { font-size: 11px; }
+  .rail-lanes { margin: 6px 0 10px 24px; display: flex; flex-direction: column; gap: 4px; }
+  .rail-lane { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 5px 8px; font-size: 12px; cursor: pointer; text-align: left; width: 100%; }
+  .rail-lane.active { border-color: var(--wait); background: var(--wait-soft); }
+  .rail-lane .ltr { font: 600 13px/1 var(--mono); }
+  .rail-lane .mini-bar { width: 56px; }
+  .rail-lane .cnt { font: 500 11px/1 var(--mono); color: var(--muted); }
+
+  #sidebar { display: none; position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow-y: auto; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 16px; font-size: 13px; }
+  .layout.sidebar-open #sidebar { display: block; }
+  #sidebar-close { position: absolute; top: 10px; right: 10px; background: none; border: 0; color: var(--muted); font-size: 18px; line-height: 1; cursor: pointer; padding: 4px; }
+  #sidebar-backdrop { display: none; }
+  .crumbs { font: 12px/1.6 var(--mono); color: var(--muted); margin: 0 24px 10px 0; }
+  .crumbs .crumb { background: none; border: 0; color: var(--wait); cursor: pointer; font: inherit; padding: 0; }
+  .crumbs .sep { margin: 0 4px; }
+  .sd-head { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .sd-text { font-size: 14px; line-height: 1.5; margin-bottom: 10px; overflow-wrap: anywhere; }
+  .sd-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 6px 0; }
+  .sd-times { font: 12px var(--mono); color: var(--muted); margin: 6px 0; }
+  #sidebar h3 { font: 600 12px/1.3 var(--sans); margin: 16px 0 6px; padding-top: 10px; border-top: 1px solid var(--rule); }
+  .files li { font-size: 12px; margin: 3px 0; }
+
+  @media (max-width: 1100px) {
+    .layout, .layout.sidebar-open { grid-template-columns: 260px minmax(0, 1fr); }
+    #sidebar { position: fixed; top: 0; right: 0; bottom: 0; width: min(400px, 100vw - 32px); max-height: none; border-radius: 0; z-index: 20; }
+    .layout.sidebar-open #sidebar-backdrop { display: block; position: fixed; inset: 0; background: rgb(0 0 0 / .35); z-index: 19; }
+  }
+  @media (max-width: 760px) {
+    .layout, .layout.sidebar-open { grid-template-columns: minmax(0, 1fr); }
+    #rail { order: -1; }
+  }
+
+  /* brief (doneWhen + decisions), reused above the board */
+  .brief { margin: 8px 0 0; }
+  .brief .done-when { margin: 8px 0 0; padding: 12px 16px; border-left: 3px solid var(--now); background: var(--surface); max-width: 78ch; }
+  details.more { margin-top: 8px; max-width: 78ch; }
+  details.more summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+
+  /* tabs */
+  .tab-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--rule); flex: 1 1 auto; }
+  .tabs button { background: none; border: 0; border-bottom: 2px solid transparent; padding: 10px 14px; font: 500 12px/1 var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); cursor: pointer; }
+  .tabs button[aria-selected=true] { color: var(--ink); border-bottom-color: var(--wait); }
+  .lane-filter-chip { font: 500 11px/1 var(--mono); padding: 6px 9px; border-radius: 12px; background: var(--now-soft); color: var(--now); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .lane-filter-chip button { background: none; border: 0; color: inherit; cursor: pointer; font: 14px/1 inherit; }
+  .tabpanel { padding-top: 8px; }
+
+  /* board */
+  .board { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 8px; }
+  @media (max-width: 1100px) { .board { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 560px) { .board { grid-template-columns: minmax(0, 1fr); } }
+  .col > .lbl { display: flex; justify-content: space-between; padding: 8px 2px; border-bottom: 2px solid var(--rule); margin-bottom: 8px; }
+  .col.todo > .lbl { border-color: var(--rule); } .col.doing > .lbl { border-color: var(--now); }
+  .col.reported > .lbl { border-color: var(--wait); } .col.done > .lbl { border-color: var(--done); }
+  .card { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; margin-bottom: 8px; border-left-width: 3px; cursor: pointer; }
+  .card.doing { border-left-color: var(--now); } .card.reported { border-left-color: var(--wait); }
+  .card.done { border-left-color: var(--done); } .card.blocked { border-left-color: var(--stop); background: var(--stop-soft); }
+  .card.done .card-txt { color: var(--muted); }
+  .card-top { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; padding: 8px 10px 4px; }
+  .card-txt { padding: 0 10px; font-size: 13px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+  .card .sub { margin: 8px 10px 0; padding-top: 8px; border-top: 1px dashed var(--rule); }
+  .card .sub-hdr { font: 500 11px/1 var(--mono); color: var(--muted); margin-bottom: 4px; }
+  .card .sub .bar { margin-bottom: 6px; }
+  .card-ft { padding: 8px 10px 10px; font: 12px var(--mono); color: var(--muted); display: flex; gap: 6px; flex-wrap: wrap; }
+  .card-ft .err { color: var(--stop); }
+  .task-row { display: flex; align-items: baseline; gap: 6px; padding: 2px 0; font-size: 12px; }
+  .task-row .caret, .task-row .caret-sp { width: 14px; flex: none; background: none; border: 0; padding: 0; color: var(--muted); cursor: pointer; font: inherit; }
+  .task-row .glyph { width: 14px; flex: none; text-align: center; }
+  .task-row .txt { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .task-row.status-done .txt, .task-row.status-done .key { color: var(--muted); }
+  .task-row.status-blocked .glyph { color: var(--stop); }
+
+  /* agents tab */
+  .agents-list { display: grid; grid-template-columns: minmax(240px, 340px) minmax(0, 1fr); gap: 6px 16px; align-items: center; margin-top: 8px; }
+  .timeline-axis { position: relative; height: 16px; font: 400 10px/1 var(--mono); color: var(--muted); }
+  .timeline-axis span { position: absolute; transform: translateX(-50%); }
+  .agent-row { display: contents; }
+  .agent-left { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 12px; padding: 6px 0; border-top: 1px solid var(--rule); cursor: pointer; }
+  .agent-right { padding: 6px 0; border-top: 1px solid var(--rule); min-width: 0; }
+  .agent-right svg.timeline-bar { display: block; width: 100%; height: 20px; }
+  .agent-last { font: 12px var(--mono); color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
+  .agent-last .on-box { color: var(--now); }
+  .num { font: 500 12px/1 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+  .num.err { color: var(--stop); }
+  .tl-bar { fill: var(--wait); } .tl-bar.tl-live { fill: var(--now); animation: pulse 1.4s ease-in-out infinite; }
+
+  /* activity tab — reuses the v1 feed row shape */
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 12px; }
+  .chip { font: 500 11px/1 var(--mono); padding: 5px 8px; border-radius: 12px; border: 1px solid var(--rule); background: var(--surface); color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+  .chip.active { border-color: var(--wait); color: var(--wait); background: var(--wait-soft); }
+  .act-list { list-style: none; margin: 0; padding: 0; font-size: 13px; }
+  .act-row { display: grid; grid-template-columns: 64px 1fr; gap: 0 10px; padding: 6px 0; border-top: 1px solid var(--rule); }
+  .act-row:first-child { border-top: 0; }
+  .act-row.is-err { background: var(--stop-soft); }
+  .act-row time { font: 400 12px/1.6 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+  .act-row .who { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .act-row .msg { color: var(--ink); overflow-wrap: anywhere; font-family: var(--mono); font-size: 12.5px; margin-top: 2px; }
+  .act-row .ms { font: 400 11px var(--mono); color: var(--muted); }
+  .act-row .expand { background: none; border: 0; color: var(--muted); cursor: pointer; font: 11px var(--mono); padding: 0 2px; }
+  .act-body { margin: 6px 0 0; padding: 8px; background: var(--code-bg); border-radius: 4px; font: 12px/1.5 var(--mono); max-height: 240px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .more { display: block; margin: 12px auto 0; font: 500 12px var(--mono); padding: 6px 14px; border: 1px solid var(--rule); border-radius: 4px; background: var(--surface); color: var(--muted); cursor: pointer; }
+  @keyframes rowFade { from { background: var(--now-soft); } to { background: transparent; } }
+  .act-row.new { animation: rowFade 1.2s ease-out; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+  @media (prefers-reduced-motion: reduce) { .bar i, .tl-bar.tl-live, .act-row.new { animation: none; transition: none; } }
+</style>
+
+<header>
+  <div class="name">
+    <div class="eyebrow" id="eyebrow"></div>
+    <h1>LedgerFlow Build Board</h1>
+    <p id="status"><span id="status-text">Loading…</span><span id="live"></span></p>
+  </div>
+  <div class="meters">
+    <div class="meter" id="m-steps"><div class="lbl">Steps</div><div class="num">—</div><div class="bar"><i class="done"></i></div></div>
+    <div class="meter" id="m-current"><div class="lbl">Current step</div><div class="num">—</div><div class="bar"></div><div class="sub"></div></div>
+    <div class="meter" id="m-agents"><div class="lbl">Agents live</div><div class="num">—</div></div>
+    <div class="meter" id="m-tokens"><div class="lbl">Tokens out this step</div><div class="num">—</div><div class="sub"></div></div>
+  </div>
+</header>
+
+<div class="layout" id="layout">
+  <aside id="rail"><h2>Stories</h2><div id="rail-body"></div></aside>
+  <main id="main">
+    <div class="tab-bar">
+      <div class="tabs" role="tablist">
+        <button role="tab" data-tab="board" aria-selected="true" tabindex="0">Board</button>
+        <button role="tab" data-tab="agents" aria-selected="false" tabindex="-1">Agents</button>
+        <button role="tab" data-tab="activity" aria-selected="false" tabindex="-1">Activity</button>
+      </div>
+      <div id="lane-chip"></div>
+    </div>
+    <div class="tabpanel" id="tab-board" role="tabpanel"></div>
+    <div class="tabpanel" id="tab-agents" role="tabpanel" hidden></div>
+    <div class="tabpanel" id="tab-activity" role="tabpanel" hidden></div>
+  </main>
+  <div id="sidebar-backdrop"></div>
+  <aside id="sidebar"><button id="sidebar-close" aria-label="Close detail">×</button><div id="sidebar-body"></div></aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+<script>
+(function () {
+  // ---- pure helpers (extracted and asserted by a node scratch script — no DOM, no closure vars) ----
+  // --- pure helpers start ---
+  function shortModel(id) {
+    if (!id) return '';
+    if (!id.startsWith('claude-')) return id;
+    const parts = id.slice(7).split('-');
+    const name = parts[0];
+    if (!['opus', 'sonnet', 'haiku', 'fable'].includes(name)) return parts.join('-');
+    const ver = parts.slice(1).filter(p => !/^\d{6,}$/.test(p)); // drop date stamps like 20251001
+    return ver.length ? name + ' ' + ver.join('.') : name;
+  }
+  function fmtTokens(n) {
+    if (n == null) return '0';
+    if (n < 1000) return String(n);
+    const [div, suf] = n < 1e6 ? [1e3, 'k'] : [1e6, 'M'];
+    return (n / div).toFixed(1).replace(/\.0$/, '') + suf;
+  }
+  function fmtDur(ms) {
+    if (ms == null || ms < 0) return '';
+    const s = Math.round(ms / 1000);
+    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    if (h) return h + 'h ' + m + 'm';
+    if (m) return m + 'm ' + sec + 's';
+    return sec + 's';
+  }
+  function hash(s) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) % 360; return h; }
+  function statusGlyph(s) { return { todo: '☐', doing: '▶', reported: '◔', done: '✓', blocked: '✕' }[s] || '☐'; }
+  // --- pure helpers end ---
+
+  const LOCAL = location.protocol === 'http:';
+  marked.setOptions({ gfm: true, headerIds: false, mangle: false });
+  const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const mdInline = s => marked.parseInline(esc(s));
+  const hm = iso => { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); };
+  const hms = iso => { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }); };
+
+  let model = null;
+  const state = {
+    storyId: null, laneFilter: null, tab: 'board', collapsed: new Set(), sidebar: null,
+    activityFilter: null, activityShown: 400, expandedEvents: new Set(), events: [], connected: false, freshTs: null,
+  };
+
+  // ---- model lookups ----
+  function getStory(id) { return model && (model.stories || []).find(s => s.id === id); }
+  function currentStepId() { const s = (model.stories || []).find(x => x.kind === 'step'); return s ? s.id : ((model.stories || [])[0] || {}).id; }
+  function subtaskCounts(task) {
+    let total = 0, done = 0;
+    for (const c of task.children || []) { total++; if (c.status === 'done') done++; const r = subtaskCounts(c); total += r.total; done += r.done; }
+    return { total, done };
+  }
+  function findTaskPath(tasks, key, path) {
+    for (const t of tasks) {
+      const p = [...path, t];
+      if (t.key === key) return p;
+      if (t.children) { const r = findTaskPath(t.children, key, p); if (r) return r; }
+    }
+    return null;
+  }
+  function findTask(story, key) {
+    for (const lane of story.lanes) { const path = findTaskPath(lane.tasks, key, []); if (path) return { lane, path }; }
+    return null;
+  }
+
+  // ---- badges & small components (reused across rail, board, agents, activity, sidebar) ----
+  function agentBadge(a) {
+    if (!a) return '';
+    const bg = `hsl(${hash((a.type || '') + (a.id || ''))} 38% 42%)`;
+    return `<button class="agent" style="background:${bg}" title="${esc(a.id || '')} · ${esc(a.session || '')}" data-agent="${esc(a.id || '')}">${esc(a.type || 'agent')}</button>`;
+  }
+  function modelBadge(id) { return id ? `<span class="model-badge">${esc(shortModel(id))}</span>` : ''; }
+  function ctxMeter(pct) {
+    if (pct == null) return '';
+    const cls = pct > 90 ? 'stop' : pct > 70 ? 'now' : '';
+    return `<span class="ctx-meter ${cls}"><span class="bar"><i style="width:${Math.min(100, pct)}%"></i></span>${pct}%</span>`;
+  }
+  function sessionTag(session, totals) {
+    if (!session || !totals || !totals.sessions || totals.sessions.length <= 1) return '';
+    return `<span class="session-tag">${esc(session)}</span>`;
+  }
+  function statusChip(status) { return `<span class="status-chip ${esc(status)}">${esc(status)}</span>`; }
+  function modeTag(mode) { return mode ? `<span class="tag ${esc(mode)}">${esc(mode)}</span>` : ''; }
+  function toolChip(tool, err) {
+    const cls = err ? 'err' : tool === 'Bash' ? 'bash' : (tool === 'Edit' || tool === 'Write') ? 'edit' : (tool === 'Read' || tool === 'Grep' || tool === 'Glob') ? 'read' : '';
+    return `<span class="tool-chip ${cls}">${esc(tool || '')}</span>`;
+  }
+  function barSegs(total, counts) {
+    return ['done', 'reported', 'doing', 'blocked'].map(k => `<i class="${k}" style="width:${total ? 100 * (counts[k] || 0) / total : 0}%"></i>`).join('');
+  }
+
+  // ---- header ----
+  function currentMilestoneNum() {
+    const ms = model.milestones || [];
+    const idx = ms.findIndex(m => m.steps.some(s => s.current));
+    return idx >= 0 ? idx + 1 : ms.filter(m => m.done).length + 1;
+  }
+  function meter(id, done, total, parts) {
+    const el = document.getElementById(id);
+    el.querySelector('.num').innerHTML = `${done} <small>/ ${total}</small>`;
+    el.querySelector('.bar').innerHTML = barSegs(total, parts);
+  }
+  function renderHeader() {
+    document.getElementById('eyebrow').textContent = model ? `Step ${model.steps.current} of ${model.steps.total} · milestone ${currentMilestoneNum()} of ${(model.milestones || []).length}` : '';
+    document.getElementById('status-text').textContent = model ? `${model.status.text} — as of ${model.status.date}` : 'Loading…';
+    const live = document.getElementById('live');
+    live.textContent = !LOCAL ? 'snapshot' : state.connected ? 'live' : 'reconnecting…';
+    live.className = !LOCAL ? 'snap' : state.connected ? 'ok' : 'bad';
+    if (!model) return;
+    meter('m-steps', model.steps.done, model.steps.total, { done: model.steps.done });
+    const cc = (getStory(currentStepId()) || {}).counts || { done: 0, reported: 0, doing: 0, blocked: 0, total: 0 };
+    document.querySelector('#m-current .num').innerHTML = `${cc.done} <small>/ ${cc.total}</small>`;
+    document.querySelector('#m-current .bar').innerHTML = barSegs(cc.total, cc);
+    document.querySelector('#m-current .sub').textContent = `${cc.reported} reported · ${cc.doing} doing · ${cc.blocked} blocked`;
+    const liveAgents = Object.values(model.agents || {}).filter(a => a.live);
+    document.querySelector('#m-agents .num').innerHTML = `${liveAgents.length} <small>${[...new Set(liveAgents.map(a => a.type))].join(', ') || 'idle'}</small>`;
+    document.querySelector('#m-tokens .num').innerHTML = `${fmtTokens(model.totals.out)} <small>out</small>`;
+    document.querySelector('#m-tokens .sub').textContent = `${model.totals.tools} tool calls · ${model.totals.errors} errors`;
+  }
+
+  // ---- rail: stories ----
+  function railLaneHtml(l, story) {
+    const live = l.live && model.agents[l.live];
+    const active = state.laneFilter && state.laneFilter.letter === l.letter;
+    return `<button class="rail-lane ${active ? 'active' : ''}" data-lane="${esc(l.letter)}" data-lane-story="${esc(story.id)}">` +
+      `<span class="ltr">${esc(l.letter)}</span><span class="nm">${esc(l.name)}</span>${modeTag(l.mode)}` +
+      `<span class="mini-bar bar">${barSegs(l.counts.total, l.counts)}</span><span class="cnt">${l.counts.done}/${l.counts.total}</span>` +
+      (live ? agentBadge(live) : '') + `</button>`;
+  }
+  function renderRail() {
+    const el = document.getElementById('rail-body');
+    if (!model) { el.innerHTML = '<p class="empty">Loading…</p>'; return; }
+    let html = '';
+    for (const ms of model.milestones || []) {
+      html += `<h3>${esc(ms.id)} — ${esc(ms.title)}${ms.done ? ' ✓' : ''}</h3><ul>`;
+      for (const s of ms.steps) {
+        html += `<li class="${s.current ? 'current' : ''}"><label><input type="checkbox" disabled ${s.done ? 'checked' : ''}>` +
+          `<button class="step-title" data-story="step-${esc(String(parseInt(s.num, 10)))}">${esc(s.num)} ${esc(s.title)}</button>` +
+          (s.commit ? ` <code class="commit">${esc(s.commit)}</code>` : '') + `</label>` +
+          (s.current && getStory(currentStepId()) ? `<div class="rail-lanes">${getStory(currentStepId()).lanes.map(l => railLaneHtml(l, getStory(currentStepId()))).join('')}</div>` : '') +
+          `</li>`;
+      }
+      html += `</ul>`;
+    }
+    const sandboxes = (model.stories || []).filter(s => s.kind === 'sandbox');
+    if (sandboxes.length) html += `<h3>Sandbox</h3><ul>` + sandboxes.map(s => `<li><button class="step-title" data-story="${esc(s.id)}">${esc(s.title)}</button></li>`).join('') + `</ul>`;
+    el.innerHTML = html;
+  }
+
+  // ---- board tab ----
+  function taskRow(task, depth) {
+    const hasKids = task.children && task.children.length;
+    const collapsed = state.collapsed.has(task.key);
+    const caret = hasKids ? `<button class="caret" data-caret="${esc(task.key)}" aria-label="${collapsed ? 'Expand' : 'Collapse'} ${esc(task.key)}">${collapsed ? '▸' : '▾'}</button>` : '<span class="caret-sp"></span>';
+    const ag = task.agentId && model.agents[task.agentId];
+    let html = `<div class="task-row status-${esc(task.status)}" style="padding-left:${depth * 12}px" data-task="${esc(task.key)}" tabindex="0" role="button">` +
+      `${caret}<span class="glyph">${statusGlyph(task.status)}</span><span class="key">${esc(task.key)}</span><span class="txt">${mdInline(task.text)}</span>${ag ? agentBadge(ag) : ''}</div>`;
+    if (hasKids && !collapsed) html += task.children.map(c => taskRow(c, depth + 1)).join('');
+    return html;
+  }
+  function taskCard(task, story, lane) {
+    const ag = task.agentId && model.agents[task.agentId];
+    const sub = subtaskCounts(task);
+    const started = task.started ? hm(task.started) : '';
+    const durText = task.status === 'doing' && task.started ? `<span data-live-start="${esc(task.started)}">${fmtDur(Date.now() - new Date(task.started))}</span>` : task.ms != null ? fmtDur(task.ms) : '';
+    return `<div class="card ${esc(task.status)}" data-story="${esc(story.id)}" data-task="${esc(task.key)}" tabindex="0" role="button">` +
+      `<div class="card-top"><span class="key">${esc(task.key)}</span><span class="tag">${esc(lane.letter)}</span>${ag ? agentBadge(ag) : ''}${ag ? modelBadge(ag.model) : ''}</div>` +
+      `<div class="card-txt">${mdInline(task.text)}</div>` +
+      (sub.total ? `<div class="sub"><div class="sub-hdr">${sub.done} / ${sub.total} subtasks</div><div class="bar">${barSegs(sub.total, { done: sub.done })}</div>${task.children.map(c => taskRow(c, 0)).join('')}</div>` : '') +
+      `<div class="card-ft">${started ? `<span>${esc(started)}</span>` : ''}${durText ? `<span>· ${durText}</span>` : ''}${task.tools ? `<span>· ${task.tools} tools</span>` : ''}${task.errors ? `<span class="err">· ${task.errors} err</span>` : ''}${task.note ? `<span>· ${esc(task.note)}</span>` : ''}</div>` +
+      `</div>`;
+  }
+  function renderBoard() {
+    const el = document.getElementById('tab-board');
+    document.getElementById('lane-chip').innerHTML = state.laneFilter ? `<span class="lane-filter-chip">Lane ${esc(state.laneFilter.letter)} <button data-clear-lane aria-label="Clear lane filter">×</button></span>` : '';
+    if (!model) { el.innerHTML = '<p class="empty">Loading…</p>'; return; }
+    const story = getStory(state.storyId) || model.stories[0];
+    if (!story) { el.innerHTML = '<p class="empty">No story yet.</p>'; return; }
+    let html = `<div class="brief"><h2>${esc(story.title)}</h2>`;
+    if (story.doneWhen) html += `<p class="done-when">${esc(story.doneWhen)}</p>`;
+    if (story.decisions) html += `<details class="more"><summary>Decisions</summary><p>${mdInline(story.decisions)}</p></details>`;
+    html += `</div>`;
+    const lanes = story.lanes.filter(l => !state.laneFilter || state.laneFilter.letter === l.letter);
+    const cols = { todo: [], doing: [], reported: [], done: [] };
+    for (const lane of lanes) for (const t of lane.tasks) (cols[t.status === 'blocked' ? 'doing' : t.status] || cols.todo).push({ task: t, lane });
+    const names = [['todo', 'To do'], ['doing', 'Doing'], ['reported', 'Reported'], ['done', 'Done']];
+    html += `<div class="board">` + names.map(([k, label]) =>
+      `<div class="col ${k}"><div class="lbl"><span>${label}</span><span>${cols[k].length}</span></div>` +
+      (cols[k].map(({ task, lane }) => taskCard(task, story, lane)).join('') || '<div class="empty">—</div>') + `</div>`).join('') + `</div>`;
+    el.innerHTML = html;
+  }
+
+  // ---- agents tab ----
+  function timelineTicksFor(from, to) {
+    const spanMin = (to - from) / 60000;
+    const step = spanMin <= 20 ? 5 : spanMin <= 60 ? 15 : spanMin <= 180 ? 30 : 60;
+    const stepMs = step * 60000, ticks = [];
+    for (let t = Math.ceil(from / stepMs) * stepMs; t <= to; t += stepMs) ticks.push(t);
+    return ticks;
+  }
+  function renderTimelineAxis(from, to) {
+    const span = Math.max(1, to - from);
+    const ticks = timelineTicksFor(from, to).map(t => `<span style="left:${((t - from) / span * 100).toFixed(1)}%">${esc(new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }))}</span>`).join('');
+    return `<div class="timeline-axis" style="grid-column:2">${ticks}</div>`;
+  }
+  function toolKindColor(tool) {
+    return tool === 'Bash' ? 'var(--wait)' : (tool === 'Edit' || tool === 'Write') ? 'var(--now)' : (tool === 'Read' || tool === 'Grep' || tool === 'Glob') ? 'var(--muted)' : 'var(--muted)';
+  }
+  function timelineSvg(a, from, to, evs) {
+    const span = Math.max(1, to - from);
+    const x = t => Math.max(0, Math.min(1000, (t - from) / span * 1000));
+    const startX = x(new Date(a.start).getTime()), endX = x(a.stop ? new Date(a.stop).getTime() : to);
+    const norm = [], errs = [];
+    for (const e of evs) {
+      const tx = x(new Date(e.ts).getTime());
+      const title = esc(`${hms(e.ts)} ${e.text || ''}`.trim());
+      const rect = `<rect x="${tx - 2}" y="2" width="4" height="16" style="fill:${e.err ? 'var(--stop)' : toolKindColor(e.tool)}"><title>${title}</title></rect>`;
+      (e.err ? errs : norm).push(rect);
+    }
+    return `<svg class="timeline-bar" viewBox="0 0 1000 20" preserveAspectRatio="none" role="img" aria-label="timeline for ${esc(a.id)}">` +
+      `<rect x="${startX}" y="6" width="${Math.max(2, endX - startX)}" height="8" rx="2" class="tl-bar ${a.live ? 'tl-live' : ''}"></rect>` +
+      norm.join('') + errs.join('') + `</svg>`;
+  }
+  function agentRowHtml(a, from, to, evs) {
+    return `<div class="agent-row">` +
+      `<div class="agent-left" data-agent="${esc(a.id)}" tabindex="0" role="button">${agentBadge(a)}${a.lane ? `<span class="tag">${esc(a.lane)}</span>` : ''}${modelBadge(a.model)}${ctxMeter(a.ctxPct)}<span class="num">${fmtTokens(a.out)} out</span><span class="num">${a.tools || 0} tools</span>${a.errors ? `<span class="num err">${a.errors} err</span>` : ''}${sessionTag(a.session, model.totals)}</div>` +
+      `<div class="agent-right" data-agent="${esc(a.id)}" tabindex="0" role="button">${timelineSvg(a, from, to, evs)}<div class="agent-last">${esc(a.last || '')}${a.box ? ` <span class="on-box">on ${esc(a.box)}</span>` : ''}</div></div>` +
+      `</div>`;
+  }
+  function renderAgents() {
+    const el = document.getElementById('tab-agents');
+    if (!model) { el.innerHTML = '<p class="empty">Loading…</p>'; return; }
+    const curId = currentStepId();
+    const rows = Object.values(model.agents || {}).filter(a => a.type === 'main' || a.story === curId)
+      .sort((a, b) => (a.type === 'main' ? 0 : 1) - (b.type === 'main' ? 0 : 1) || new Date(a.start) - new Date(b.start));
+    if (!rows.length) { el.innerHTML = '<p class="empty">No agents seen this step yet.</p>'; return; }
+    const from = Math.min(...rows.map(a => new Date(a.start).getTime())), to = Date.now();
+    const toolByAgent = {};
+    for (const r of toolRows(state.events)) (toolByAgent[r.agentKey] = toolByAgent[r.agentKey] || []).push(r);
+    el.innerHTML = `<div class="agents-list"><div style="grid-column:1"></div>${renderTimelineAxis(from, to)}` +
+      rows.map(a => agentRowHtml(a, from, to, toolByAgent[a.id] || [])).join('') + `</div>`;
+  }
+
+  // ---- raw event tail: tool.pre/post pairs + task log lines, both used by Activity and by the sidebar's per-task correlation ----
+  function agentKeyFor(ev) { return ev.agent === 'main' ? 'main@' + ev.session : ev.agent; }
+  function toolRows(events) {
+    const posts = new Map(events.filter(e => e.ev === 'tool.post').map(e => [e.id, e]));
+    return events.filter(e => e.ev === 'tool.pre').map(pre => {
+      const akey = agentKeyFor(pre);
+      const agent = (model.agents || {})[akey];
+      const post = posts.get(pre.id);
+      return {
+        kind: 'tool', ts: pre.ts, id: pre.id, agentKey: akey, agent, lane: agent ? agent.lane : null,
+        tool: pre.tool, text: pre.cmd || pre.file || pre.pattern || pre.desc || '',
+        ms: post ? post.ms : null, err: !!(post && (post.err || post.interrupted)),
+        out: post ? post.out : '', errOut: post ? post.err : '',
+      };
+    });
+  }
+  function allLogNotes() {
+    const out = [];
+    for (const story of model.stories || []) for (const lane of story.lanes || []) {
+      const walk = t => { for (const l of t.log || []) out.push({ ts: l.ts, agent: { type: l.agent, id: l.agent }, key: t.key, status: l.status, text: l.note, lane: lane.letter }); for (const c of t.children || []) walk(c); };
+      for (const t of lane.tasks) walk(t);
+    }
+    return out.map(n => ({ kind: 'note', ...n }));
+  }
+  // tool attribution for one task: the window opened by its own "start" line in the lane's per-label
+  // timeline (built from every task's .log in the lane), closed by that label's next start/done/blocked line
+  function laneLogTimeline(lane, label) {
+    const all = [];
+    const walk = t => { for (const l of t.log || []) all.push({ ...l, key: t.key }); for (const c of t.children || []) walk(c); };
+    for (const t of lane.tasks) walk(t);
+    return all.filter(l => l.agent === label).sort((a, b) => new Date(a.ts) - new Date(b.ts));
+  }
+  function attributedToolEvents(task, lane) {
+    const label = task.agent;
+    if (!label) return [];
+    const timeline = laneLogTimeline(lane, label);
+    const idx = timeline.findIndex(l => l.key === task.key && l.status === 'start');
+    let winStart, winEnd;
+    if (idx >= 0) {
+      winStart = new Date(timeline[idx].ts).getTime();
+      const next = timeline.slice(idx + 1).find(l => l.status === 'start' || l.status === 'done' || l.status === 'blocked');
+      winEnd = next ? new Date(next.ts).getTime() : Date.now();
+    } else if (task.started) {
+      winStart = new Date(task.started).getTime();
+      winEnd = task.finished ? new Date(task.finished).getTime() : Date.now();
+    } else return [];
+    const agentIds = new Set(Object.values(model.agents || {}).filter(a => a.type === label && a.lane === lane.letter).map(a => a.id));
+    return toolRows(state.events).filter(r => agentIds.has(r.agentKey) && new Date(r.ts).getTime() >= winStart && new Date(r.ts).getTime() < winEnd);
+  }
+
+  function activityRow(r) {
+    const time = hms(r.ts);
+    if (r.kind === 'note') {
+      return `<div class="act-row"><time>${time}</time><div><div class="who">${agentBadge(r.agent)}${r.lane ? `<span class="tag">${esc(r.lane)}</span>` : ''}<span class="key">${esc(r.key)}</span><span class="st ${esc(r.status)}">${esc(r.status)}</span></div><div class="msg">${esc(r.text || '')}</div></div></div>`;
+    }
+    const expanded = state.expandedEvents.has(r.id);
+    const hasBody = r.out || r.errOut;
+    return `<div class="act-row ${r.err ? 'is-err' : ''} ${state.freshTs && state.freshTs.has(r.ts) ? 'new' : ''}"><time>${time}</time><div><div class="who">${r.agent ? agentBadge(r.agent) : ''}${r.lane ? `<span class="tag">${esc(r.lane)}</span>` : ''}${toolChip(r.tool, r.err)}${r.ms != null ? `<span class="ms">${r.ms}ms</span>` : ''}${r.err ? '<span class="st blocked">ERR</span>' : ''}${hasBody ? `<button class="expand" data-expand="${esc(r.id)}">${expanded ? '▾' : '▸'}</button>` : ''}</div><div class="msg">${esc(r.text)}</div>` +
+      (hasBody && expanded ? `<pre class="act-body">${esc((r.errOut ? 'stderr:\n' + r.errOut + '\n' : '') + (r.out ? 'stdout:\n' + r.out : ''))}</pre>` : '') + `</div></div>`;
+  }
+  function renderActivity() {
+    const el = document.getElementById('tab-activity');
+    if (!model) { el.innerHTML = '<p class="empty">Loading…</p>'; return; }
+    let rows = [...toolRows(state.events), ...allLogNotes()];
+    if (state.laneFilter) rows = rows.filter(r => r.lane === state.laneFilter.letter);
+    const f = state.activityFilter;
+    if (f && f.type === 'agent') rows = rows.filter(r => r.agent && (r.agentKey === f.value || r.agent.id === f.value));
+    else if (f && f.type === 'lane') rows = rows.filter(r => r.lane === f.value);
+    else if (f && f.type === 'tool') rows = rows.filter(r => f.value === 'Bash' ? r.tool === 'Bash' : f.value === 'Edits' ? (r.tool === 'Edit' || r.tool === 'Write') : f.value === 'Reads' ? (r.tool === 'Read' || r.tool === 'Grep' || r.tool === 'Glob') : true);
+    else if (f && f.type === 'errors') rows = rows.filter(r => r.err);
+    rows.sort((a, b) => new Date(b.ts) - new Date(a.ts));
+    const shown = rows.slice(0, state.activityShown);
+    const agentsSeen = [...new Map(rows.filter(r => r.agent && r.agentKey).map(r => [r.agentKey, r.agent])).entries()];
+    const lanesSeen = [...new Set(rows.map(r => r.lane).filter(Boolean))];
+    const chips = [`<button class="chip ${!f ? 'active' : ''}" data-filter-all>All</button>`]
+      .concat(agentsSeen.map(([k, a]) => `<button class="chip ${f && f.type === 'agent' && f.value === k ? 'active' : ''}" data-filter-agent="${esc(k)}">${agentBadge(a)}</button>`))
+      .concat(lanesSeen.map(l => `<button class="chip ${f && f.type === 'lane' && f.value === l ? 'active' : ''}" data-filter-lane="${esc(l)}">Lane ${esc(l)}</button>`))
+      .concat(['Bash', 'Edits', 'Reads'].map(t => `<button class="chip ${f && f.type === 'tool' && f.value === t ? 'active' : ''}" data-filter-tool="${esc(t)}">${esc(t)}</button>`))
+      .concat([`<button class="chip ${f && f.type === 'errors' ? 'active' : ''}" data-filter-errors>Errors only</button>`]);
+    el.innerHTML = `<div class="chips">${chips.join('')}</div>` +
+      (shown.length ? `<div class="act-list">${shown.map(activityRow).join('')}</div>` : '<p class="empty">No activity matches this filter.</p>') +
+      (rows.length > shown.length ? `<button class="more" id="act-more">show ${Math.min(400, rows.length - shown.length)} more</button>` : '');
+  }
+
+  // ---- sidebar ----
+  function activityRowsHtml(rows) { return `<div class="act-list">${rows.map(activityRow).join('')}</div>`; }
+  function taskDetail(storyId, key) {
+    const story = getStory(storyId); if (!story) return '<p class="empty">Story not found.</p>';
+    const found = findTask(story, key); if (!found) return '<p class="empty">Task not found.</p>';
+    const { lane, path } = found, task = path[path.length - 1];
+    const ag = task.agentId && model.agents[task.agentId];
+    const sub = subtaskCounts(task);
+    const crumbs = [`<button class="crumb" data-crumb-story="${esc(story.id)}">${esc(story.title)}</button>`,
+      `<button class="crumb" data-crumb-lane="${esc(lane.letter)}">Lane ${esc(lane.letter)}</button>`,
+      ...path.map(t => `<button class="crumb" data-crumb-task="${esc(t.key)}" data-crumb-story="${esc(story.id)}">${esc(t.key)}</button>`)];
+    let html = `<div class="crumbs">${crumbs.join('<span class="sep">›</span>')}</div>`;
+    html += `<div class="sd-head"><span class="key">${esc(task.key)}</span>${statusChip(task.status)}</div>`;
+    html += `<div class="sd-text">${mdInline(task.text)}</div>`;
+    html += `<div class="sd-meta">${ag ? agentBadge(ag) : ''}${ag ? modelBadge(ag.model) : ''}${ag ? ctxMeter(ag.ctxPct) : ''}</div>`;
+    html += `<div class="sd-times">${task.started ? `started ${esc(hm(task.started))}` : ''}${task.finished ? ` · finished ${esc(hm(task.finished))}` : ''}${task.ms != null ? ` · ${fmtDur(task.ms)}` : ''}</div>`;
+    if (task.children && task.children.length) html += `<h3>Subtasks — ${sub.done} / ${sub.total}</h3>` + task.children.map(c => taskRow(c, 0)).join('');
+    if (task.log && task.log.length) html += `<h3>Log</h3><ul class="files">${task.log.map(l => `<li><span class="ms">${esc(hm(l.ts))}</span> ${agentBadge({ type: l.agent, id: l.agent })} <span class="st ${esc(l.status)}">${esc(l.status)}</span> ${esc(l.note || '')}</li>`).join('')}</ul>`;
+    const toolEvs = attributedToolEvents(task, lane).sort((a, b) => new Date(b.ts) - new Date(a.ts)).slice(0, 30);
+    if (toolEvs.length) html += `<h3>Tool events</h3>${activityRowsHtml(toolEvs)}`;
+    const files = [...new Set(toolEvs.filter(e => e.tool === 'Edit' || e.tool === 'Write').map(e => e.text).filter(Boolean))];
+    if (files.length) html += `<h3>Files touched</h3><ul class="files">${files.map(f => `<li><code>${esc(f)}</code></li>`).join('')}</ul>`;
+    html += `<h3>Lane</h3><p>${esc(lane.name)}${lane.touches ? ' · ' + mdInline(lane.touches) : ''}</p>`;
+    return html;
+  }
+  function agentDetail(id) {
+    const a = (model.agents || {})[id];
+    if (!a) return '<p class="empty">Agent not found.</p>';
+    let html = `<div class="sd-head">${agentBadge(a)}${modelBadge(a.model)}</div>`;
+    html += `<div class="sd-meta"><code>${esc(a.id)}</code> · ${esc(a.type)} · session ${esc(a.session)}</div>`;
+    html += `<div class="sd-meta">${ctxMeter(a.ctxPct)}<span class="num">${a.calls || 0} calls</span><span class="num">${fmtTokens(a.out)} out</span></div>`;
+    if (a.lane) html += `<div class="sd-meta"><span class="tag">${esc(a.lane)}</span>${a.title ? ' ' + esc(a.title) : ''}</div>`;
+    const elapsed = a.live ? `<span data-live-start="${esc(a.start)}">${fmtDur(Date.now() - new Date(a.start))}</span>` : fmtDur(new Date(a.stop || a.lastTs) - new Date(a.start));
+    html += `<div class="sd-times">start ${esc(hm(a.start))}${a.stop ? ` · stop ${esc(hm(a.stop))}` : ''} · ${elapsed}</div>`;
+    if (a.box) html += `<div class="sd-meta">on <span class="key">${esc(a.box)}</span></div>`;
+    const evs = toolRows(state.events.filter(e => agentKeyFor(e) === id)).sort((x, y) => new Date(y.ts) - new Date(x.ts)).slice(0, 60);
+    html += `<h3>Events</h3>${evs.length ? activityRowsHtml(evs) : '<p class="empty">No events yet.</p>'}`;
+    return html;
+  }
+  function renderSidebar() {
+    const layout = document.getElementById('layout');
+    if (!state.sidebar || !model) { layout.classList.remove('sidebar-open'); document.getElementById('sidebar-body').innerHTML = ''; return; }
+    layout.classList.add('sidebar-open');
+    document.getElementById('sidebar-body').innerHTML = state.sidebar.type === 'task' ? taskDetail(state.sidebar.story, state.sidebar.key) : agentDetail(state.sidebar.id);
+  }
+
+  function renderAll() { renderHeader(); renderRail(); renderBoard(); renderAgents(); renderActivity(); renderSidebar(); }
+
+  // ---- tabs ----
+  function setTab(name) {
+    state.tab = name;
+    for (const btn of document.querySelectorAll('.tabs [role=tab]')) {
+      const on = btn.dataset.tab === name;
+      btn.setAttribute('aria-selected', on);
+      btn.tabIndex = on ? 0 : -1;
+    }
+    for (const panel of document.querySelectorAll('.tabpanel')) panel.hidden = panel.id !== 'tab-' + name;
+  }
+  document.querySelector('.tabs').addEventListener('keydown', e => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    const tabs = [...document.querySelectorAll('.tabs [role=tab]')];
+    const i = tabs.findIndex(b => b.getAttribute('aria-selected') === 'true');
+    const j = (i + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+    setTab(tabs[j].dataset.tab); tabs[j].focus();
+  });
+
+  // ---- click delegation (most specific / nested targets first) ----
+  document.addEventListener('click', e => {
+    const hit = sel => e.target.closest(sel);
+    let el;
+    if ((el = hit('[data-caret]'))) { const k = el.dataset.caret; state.collapsed.has(k) ? state.collapsed.delete(k) : state.collapsed.add(k); renderBoard(); if (state.sidebar) renderSidebar(); return; }
+    if ((el = hit('[data-expand]'))) { const id = el.dataset.expand; state.expandedEvents.has(id) ? state.expandedEvents.delete(id) : state.expandedEvents.add(id); renderActivity(); if (state.sidebar) renderSidebar(); return; }
+    if (hit('#act-more')) { state.activityShown += 400; renderActivity(); return; }
+    if (hit('[data-clear-lane]')) { state.laneFilter = null; renderRail(); renderBoard(); renderActivity(); return; }
+    if (hit('#sidebar-close') || hit('#sidebar-backdrop')) { state.sidebar = null; renderSidebar(); return; }
+    if ((el = hit('[data-filter-agent]'))) { state.activityFilter = { type: 'agent', value: el.dataset.filterAgent }; renderActivity(); return; }
+    if ((el = hit('[data-filter-lane]'))) { state.activityFilter = { type: 'lane', value: el.dataset.filterLane }; renderActivity(); return; }
+    if ((el = hit('[data-filter-tool]'))) { state.activityFilter = { type: 'tool', value: el.dataset.filterTool }; renderActivity(); return; }
+    if (hit('[data-filter-errors]')) { state.activityFilter = { type: 'errors' }; renderActivity(); return; }
+    if (hit('[data-filter-all]')) { state.activityFilter = null; renderActivity(); return; }
+    if ((el = hit('[data-crumb-task]'))) { state.sidebar = { type: 'task', story: el.dataset.crumbStory, key: el.dataset.crumbTask }; renderSidebar(); return; }
+    if ((el = hit('[data-crumb-lane]'))) { state.laneFilter = { letter: el.dataset.crumbLane }; setTab('board'); renderRail(); renderBoard(); renderActivity(); return; }
+    if ((el = hit('[data-crumb-story]'))) { state.storyId = el.dataset.crumbStory; setTab('board'); renderRail(); renderBoard(); return; }
+    if ((el = hit('[data-agent]'))) { state.sidebar = { type: 'agent', id: el.dataset.agent }; renderSidebar(); return; }
+    if ((el = hit('[data-task]'))) { const story = el.closest('[data-story]'); state.sidebar = { type: 'task', story: story ? story.dataset.story : state.storyId, key: el.dataset.task }; renderSidebar(); return; }
+    if ((el = hit('[data-lane]'))) { const letter = el.dataset.lane; state.laneFilter = (state.laneFilter && state.laneFilter.letter === letter) ? null : { letter, story: el.dataset.laneStory }; renderRail(); renderBoard(); renderActivity(); return; }
+    if ((el = hit('[data-story]'))) { state.storyId = el.dataset.story; renderRail(); renderBoard(); return; }
+    if ((el = hit('[role=tab]'))) { setTab(el.dataset.tab); return; }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && state.sidebar) { state.sidebar = null; renderSidebar(); return; }
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role=button]')) { e.preventDefault(); e.target.click(); }
+  });
+
+  // ---- 1s ticker: live durations everywhere, and the agents timeline's right edge ----
+  setInterval(() => {
+    document.querySelectorAll('[data-live-start]').forEach(el => { el.textContent = fmtDur(Date.now() - new Date(el.dataset.liveStart).getTime()); });
+    // ponytail: re-renders the whole Agents tab each tick rather than patching just the timeline's right
+    // edge — cheap at this agent count; split into an incremental redraw if the roster grows large.
+    if (state.tab === 'agents' && model) renderAgents();
+  }, 1000);
+
+  // ---- loading: live (http.server + SSE) or snapshot (published artifact) ----
+  async function loadLive() {
+    try {
+      const r = await fetch('/api/state', { cache: 'no-store' });
+      const data = await r.json();
+      model = data.model; state.events = data.events || [];
+      if (model) state.storyId = currentStepId();
+      state.connected = true;
+      renderAll();
+    } catch (e) {
+      document.getElementById('status-text').textContent = 'Could not load /api/state (' + e.message + ')';
+    }
+    const es = new EventSource('/api/stream');
+    es.addEventListener('model', e => {
+      model = JSON.parse(e.data);
+      if (!state.storyId) state.storyId = currentStepId();
+      state.connected = true;
+      renderHeader(); renderRail(); renderBoard(); renderAgents(); if (state.sidebar) renderSidebar();
+    });
+    es.addEventListener('events', e => {
+      const evs = JSON.parse(e.data);
+      state.freshTs = new Set(evs.map(x => x.ts));
+      state.events.push(...evs);
+      if (state.events.length > 5000) state.events.splice(0, state.events.length - 5000);
+      renderActivity(); renderAgents();
+      setTimeout(() => { state.freshTs = null; }, 50);
+    });
+    es.onerror = () => { state.connected = false; renderHeader(); };
+    es.onopen = () => { state.connected = true; renderHeader(); };
+  }
+  async function loadSnapshot() {
+    try {
+      const [mr, er] = await Promise.all([fetch('model.json', { cache: 'no-store' }), fetch('events.jsonl', { cache: 'no-store' })]);
+      model = await mr.json();
+      const text = er.ok ? await er.text() : '';
+      state.events = text.split('\n').filter(Boolean).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+      state.storyId = currentStepId();
+      renderAll();
+    } catch (e) {
+      document.getElementById('status-text').textContent = 'Could not load model.json / events.jsonl (' + e.message + ')';
+    }
+  }
+  LOCAL ? loadLive() : loadSnapshot();
+})();
+</script>

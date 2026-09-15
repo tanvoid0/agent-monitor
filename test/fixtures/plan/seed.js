@@ -14,7 +14,10 @@
  *   session (8-char prefix)    -> sessions.id (used verbatim); sessions.cwd
  *                                 = --cwd; sessions.status = 'completed'
  *                                 unless the session's last event is within
- *                                 30 min of `now`, else 'active'
+ *                                 30 min of `now`, else 'active';
+ *                                 sessions.transcript_path = the main's first
+ *                                 line carrying `transcript`, resolved
+ *                                 against fixtureDir
  *   agent === "main"           -> one agents row, id `main@<session>`,
  *                                 type='main', name='main'
  *   agent !== "main" (each     -> one agents row, id = the v2 agent id,
@@ -23,15 +26,15 @@
  *                                 subagent_type = v2 `type` off this
  *                                   agent's first line (any kind — covers
  *                                   agents whose only line is agent.stop),
- *                                 task = "Lane <lane> — <title>" when this
- *                                   agent's own (earliest) agent.start line
- *                                   carries `lane`/`title`, else the
- *                                   earliest still-unclaimed dispatching
- *                                   tool.pre (agent: "main", tool: "Agent")
- *                                   in the same session whose ts is <= this
- *                                   agent's first ts (title falls back to
- *                                   the dispatch's `desc` with the leading
- *                                   "Lane <X>" stripped), else null,
+ *                                 task = "Lane <lane> — <title>": at each
+ *                                   agent.start take the line's own
+ *                                   `lane`/`title`; while the agent has no
+ *                                   lane, claim the earliest unclaimed
+ *                                   dispatching tool.pre (agent: "main",
+ *                                   tool: "Agent", carrying `lane`) at or
+ *                                   before that start (v2's rule; titles only
+ *                                   from `title` fields, never `desc`);
+ *                                   stop-only rows never claim; else null,
  *                                 started_at = first agent.start ts, else
  *                                   this agent's first event ts,
  *                                 ended_at/status = last agent.stop ts /
@@ -89,15 +92,6 @@ function resolveTranscript(fixtureDir, rel) {
   return path.resolve(fixtureDir, rel).split(path.sep).join("/");
 }
 
-// A dispatching tool.pre's `desc` is usually "Lane <X>: <text>" or
-// "Lane <X> · <text>" — strip that prefix to get a bare title. Falls back to
-// the untouched desc when the prefix doesn't match (e.g. mangled encoding).
-function titleFromDesc(desc, lane) {
-  if (!desc) return null;
-  const re = new RegExp(`^Lane\\s+${lane}\\s*[:\\-\\u2014\\u00b7]*\\s*`, "i");
-  return desc.replace(re, "").trim() || desc;
-}
-
 function laneTask(lane, title) {
   if (!lane) return null;
   return title ? `Lane ${lane} — ${title}` : `Lane ${lane}`;
@@ -150,6 +144,7 @@ function seedFromFile(dbModule, eventsPath, { fixtureDir, cwd, now }) {
     "UPDATE sessions SET started_at = ?, ended_at = ? WHERE id = ?"
   );
   const setAgentTimes = db.prepare("UPDATE agents SET started_at = ?, ended_at = ? WHERE id = ?");
+  const setSessionTranscript = db.prepare("UPDATE sessions SET transcript_path = ? WHERE id = ?");
 
   const counts = { sessions: 0, agents: 0, events: 0 };
 
@@ -207,6 +202,15 @@ function seedFromFile(dbModule, eventsPath, { fixtureDir, cwd, now }) {
         );
         counts.sessions++;
       }
+      // Main transcripts feed the main agent's model/ctx/tokens (v2 registers
+      // them the same way); the join reads sessions.transcript_path.
+      const mainTranscript = sessionLines.find((l) => l.agent === "main" && l.transcript);
+      if (mainTranscript) {
+        setSessionTranscript.run(
+          resolveTranscript(fixtureDir, mainTranscript.transcript),
+          sessionId
+        );
+      }
 
       const mainId = `main@${sessionId}`;
       if (!stmts.getAgent.get(mainId)) {
@@ -240,12 +244,11 @@ function seedFromFile(dbModule, eventsPath, { fixtureDir, cwd, now }) {
 
       // Dispatching Agent tool.pre lines, for the lane-fallback match below.
       const dispatches = sessionLines
-        .filter((l) => l.agent === "main" && l.ev === "tool.pre" && l.tool === "Agent")
+        .filter((l) => l.agent === "main" && l.ev === "tool.pre" && l.tool === "Agent" && l.lane)
         .map((l) => ({
           ts: new Date(l.ts).getTime(),
           lane: l.lane,
           title: l.title,
-          desc: l.desc,
           claimed: false,
         }));
 
@@ -263,21 +266,22 @@ function seedFromFile(dbModule, eventsPath, { fixtureDir, cwd, now }) {
         const starts = evs.filter((l) => l.ev === "agent.start");
         const stops = evs.filter((l) => l.ev === "agent.stop");
 
-        const ownLaneLine = starts.find((l) => l.lane);
+        // v2 rule (board.py Board._build): at each agent.start, take the line's
+        // own lane/title; while the agent still has no lane, claim the earliest
+        // unclaimed dispatch at or before that start. Stop-only rows never claim.
         let lane = null;
         let title = null;
-        if (ownLaneLine) {
-          lane = ownLaneLine.lane;
-          title = ownLaneLine.title || null;
-        } else {
-          const firstTs = new Date(evs[0].ts).getTime();
-          const candidate = dispatches
-            .filter((d) => !d.claimed && d.ts <= firstTs)
-            .sort((a, b) => a.ts - b.ts)[0];
-          if (candidate) {
-            candidate.claimed = true;
-            lane = candidate.lane;
-            title = candidate.title || titleFromDesc(candidate.desc, candidate.lane);
+        for (const st of starts) {
+          lane = st.lane || lane;
+          title = st.title || title;
+          if (!lane) {
+            const stTs = new Date(st.ts).getTime();
+            const candidate = dispatches.find((d) => !d.claimed && d.ts <= stTs);
+            if (candidate) {
+              candidate.claimed = true;
+              lane = candidate.lane;
+              title = candidate.title || null;
+            }
           }
         }
 

@@ -111,6 +111,8 @@ CREATE TABLE IF NOT EXISTS plans (
   parsed     TEXT NOT NULL,              -- JSON: milestones, stories, lanes, tasks (structure + ticks only)
   step       INTEGER,                    -- ## Current step: N
   mtime      TEXT NOT NULL,
+  step_since TEXT,                      -- when this step number was first seen; the step's event window opens at
+                                        -- the earlier of this and the step's first plan_log line
   updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
 );
 CREATE TABLE IF NOT EXISTS plan_log (
@@ -183,13 +185,20 @@ mtime).
   `finished` = last `done`; `ms` accordingly.
 - **tool attribution**: the `start` for KEY by label L opens a window closing at L's next later line that is another
   key's `start` or this key's `done`/`blocked`; `events` rows with `event_type = 'PreToolUse'` by a matching agent on
-  that lane inside the window count (`tools`; `errors` = the paired post event with stderr, `failed`, or interrupted).
-- **live**: `agents.status = 'working'` (CCAM's own rule, now correct per agent after §4.1); `waiting` =
-  `agents.status = 'waiting'` with the `Notification` payload's kind and tool.
+  that lane inside the window count (`tools`; `errors` = the paired `PostToolUse` with `data.is_error`,
+  `tool_response.interrupted`, or a non-empty `tool_response.stderr` — CCAM has no `PostToolUseFailure` event type).
+  v2 compares its second-precision log timestamps against ms event timestamps as strings, so its per-task `tools`
+  miss the start second and include the end second; ours are numerically right (model-only; summary/wip unaffected).
+- **live**: v2's rule — `agents.status = 'working'` (or `'waiting'` with `awaiting_reason = 'notification'`) **and**
+  last activity within 30 min (subagents) / 10 min (main). Status alone is wrong: imported mains stay `working`
+  forever. Per-agent status is correct after §4.1. `waiting` = `agents.status = 'waiting'` with the `Notification`
+  payload's kind and tool.
 - **per-agent figures** (`server/plan/tail.js`, the v2 tailer): from `metadata.transcript_path` (subagents) or
   `sessions.transcript_path` (main) — `transcriptCache.extract()` for `tokensByModel`/`latestModel`; our own tail for
   `ctx` (latest message's input + cache_creation + cache_read), `window` (200k, or 1M once exceeded), `ctxPct`, and
-  `say` (last assistant text block, ≤ 300 chars). `cost` = `tokensByModel` × `model_pricing` — CCAM's table, CCAM's
+  `say` (last assistant text block, ≤ 300 chars). `out`/`calls` count the **first** record per `message.id` (v2's
+  rule; `tokens out: 477119` only reproduces that way — CCAM's cache keeps the last record, which gives 697k across
+  the fixture). `cost` = `tokensByModel` × `model_pricing` — CCAM's table, CCAM's
   rates, so the plan page and the Analytics page agree to the cent.
 
 Model (`GET /api/plans/:slug/model`, WS `plan_model`):
@@ -221,13 +230,13 @@ Model (`GET /api/plans/:slug/model`, WS `plan_model`):
 |---|---|
 | `GET /` | projects with a plan: slug, cwd, step, counts, live agents, last event age (JSON; `?format=text` one line each) |
 | `GET /:slug/model` | the model |
-| `GET /:slug/summary` | **text/plain** ≤ 25 lines: `project: ledgerflow` · status · per lane: `lane D Demo · serial · 0/6 · live crew:coder@54a7d (sonnet 5, ctx 52%, $1.87) on D1 · WAITING permission Bash · last: <cmd 80> (3s ago)` · `blocked:` · `reported (awaiting tick):` · `next:` |
+| `GET /:slug/summary` | **text/plain** ≤ 25 lines: `project: ledgerflow` · status · per lane: `lane D Demo · serial · 0/6 · live crew:coder@54a7d (sonnet 5, ctx 52%) on D1 · WAITING permission Bash · last: <cmd 80> (3s ago)` — v2-exact, no `$` (the `$` lives in `wip` and `agent`) · `blocked:` · `reported (awaiting tick):` · `next:` |
 | `GET /:slug/next[?n=3]` | text: Done-when, then the next `n` todo tasks per lane |
-| `GET /:slug/wip` | text: live agents — id suffix, type, model, ctx%, $, lane, box, elapsed, waiting, say, last 3 commands with ms and `ERR` |
+| `GET /:slug/wip` | text: live agents — id suffix, type, model, ctx%, $, lane, box, elapsed, waiting, `say:` line, last 3 commands with ms and `ERR`. v2 plus `$` in the tag and the `say:` line |
 | `GET /:slug/lane/:X` · `/:slug/task/:key` · `/:slug/agent/:id` | text, as v2 |
 | `POST /:slug/tick` `{"key","done"}` | flips the checkbox in `<cwd>/PROGRESS.md` (first match, any indent), rewrites `(N / M boxes)` in the Status line, re-parses, answers with the summary. 404 unknown key. The UI's checkbox calls the same route |
 | `POST /:slug/log` `{"agent","key","status","note"}` | inserts a `plan_log` row for the current step; `broadcast("plan_log", …)` |
-| `POST /:slug/export` `{"dir","prompts": true}` | writes `index.html` (the v2 snapshot page, kept at `server/plan/snapshot.html`), `model.json`, `events.jsonl` (last 5000 events of the project, v2 line shape) into `dir` and answers with the exact `Artifact(...)` call. The Artifact tool reads only cwd/scratchpad, hence a directory the caller names |
+| `POST /:slug/export` `{"dir","prompts": true}` | writes `index.html` (the v2 snapshot page, kept at `server/plan/snapshot.html`), `model.json`, `events.jsonl` (last 5000 events of the project, v2 line shape; `agent` carries the CCAM agent id — the page keys `model.agents` by it — `type: "main"` still marks mains) into `dir` and answers with the exact `Artifact(...)` call. The Artifact tool reads only cwd/scratchpad, hence a directory the caller names |
 | every text route | `?format=json` |
 
 Text rules: one fact per line, no tables, no headers, `hh:mm:ss` absolute, `12s ago`/`3m`/`1.2h` relative, ≤ 60 lines
@@ -294,10 +303,10 @@ transcripts were already gone from disk and are absent on both sides.
 _touches: `scripts/install-hooks.js`, `server/routes/hooks.js`, `server/db.js` (two lines), `server/index.js` (two lines), `server/plan/**`, `server/routes/plans.js`, `server/__tests__/plan-*.test.js`, `server/__tests__/hooks-agent-id.test.js`_
 
 - [ ] S1 §4.1 patch; `hooks-agent-id.test.js` green; existing `npm run test:server` still green
-- [ ] S2 `server/plan/schema.js` + the init call; `server/plan/parser.js` reproduces the fixture's structure (counts per lane, depth-3 task present)
+- [ ] S2 `server/plan/schema.js` + the init call; `server/plan/parser.js` reproduces the fixture's structure (counts per lane; the fixture has no nested task, so depth is covered by an inline sample in `plan-parser.test.js`)
 - [ ] S3 `server/plan/watcher.js` — discovery from `sessions.cwd`, upsert, re-parse on change, `plan_updated`
 - [ ] S4 `server/plan/join.js` + `tail.js` — `summary` for the seeded fixture equals `expected/summary.txt`
-- [ ] S5 `server/routes/plans.js` — every route in §4.5; `wip` equals `expected/wip.txt` with the `$` column re-recorded
+- [ ] S5 `server/routes/plans.js` — every route in §4.5; `wip` equals `expected/wip.txt` once the `$` and `say:` additions are stripped; the `$` is asserted present, not pinned (upstream bumps `model_pricing` regularly; it read `$2.77` at the snapshot)
 - [ ] S6 WS: `plan_model` debounce + 5 s tick while working; `plan_log`
 - [ ] S7 `export` writes the three files; `snapshot.html` (v2 page) renders them
 - [ ] S8 upstream PR text for S1 in `docs/upstream-pr-agent-id.md` — diff, the probe, the three-concurrent test
@@ -339,7 +348,8 @@ including upstream's suite, and the PR for §4.1 is open upstream.
 | file | change | lines |
 |---|---|---|
 | `scripts/install-hooks.js:94` | `SubagentStart` in `HOOKS_WITHOUT_MATCHER` | 1 |
-| `server/db.js` ~`:1171` | `claude_agent_id` migration (comment + try/catch + index); `require("./plan/schema").init(db)` | 13 + 1 |
+| `server/db.js` ~`:1171`, ~`:1401` | `claude_agent_id` migration (comment + try/catch + index); `require("./plan/schema").init(db)` | 13 + 3 |
+| `.prettierignore` | `server/plan/snapshot.html` (the v2 page, kept verbatim) | 1 |
 | `server/routes/hooks.js` | §4.1 bind + attribute + stop-by-id | ~70 |
 | `server/index.js:73,105` | `require("./routes/plans")`; `app.use("/api/plans", plansRouter)` | 2 |
 | `client/src/App.tsx:129` | `<Route path="plan/:slug?" element={<Plan />} />` | 2 |

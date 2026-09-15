@@ -11,6 +11,7 @@ client/package-lock.json
 *.md
 index.html
 wiki/index.html
+server/plan/snapshot.html
 *.yml
 *.yaml
 mcp/build/

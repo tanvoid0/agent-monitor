@@ -1398,6 +1398,9 @@ db.prepare(
 `
 ).run();
 
+// Plan layer tables (docs/plan-layer.md §4.2).
+require("./plan/schema").init(db);
+
 // `updated_at` includes local bookkeeping (such as title/card-context
 // backfills), so API card/list "last activity" must use the latest durable
 // event instead. Eventless historical rows fall back to their lifecycle time.
