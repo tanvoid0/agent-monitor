@@ -309,7 +309,7 @@ _touches: `scripts/install-hooks.js`, `server/routes/hooks.js`, `server/db.js` (
 - [ ] S5 `server/routes/plans.js` — every route in §4.5; `wip` equals `expected/wip.txt` once the `$` and `say:` additions are stripped; the `$` is asserted present, not pinned (upstream bumps `model_pricing` regularly; it read `$2.77` at the snapshot)
 - [ ] S6 WS: `plan_model` debounce + 5 s tick while working; `plan_log`
 - [ ] S7 `export` writes the three files; `snapshot.html` (v2 page) renders them
-- [ ] S8 upstream PR text for S1 in `docs/upstream-pr-agent-id.md` — diff, the probe, the three-concurrent test
+- [x] S8 upstream PR text for S1 in `docs/upstream-pr-agent-id.md` — diff, the probe, the three-concurrent test (`36d40e8` is part of the PR)
 
 ### Lane P — page · parallel · `crew:coder` on sonnet
 _touches: `client/src/plan/**`, `client/src/App.tsx` (one route), `client/src/components/Sidebar.tsx` (one item), `client/src/i18n/locales/*/plan.json` (five, new), `client/src/i18n/locales/*/nav.json` (`nav:plan`, five one-liners), `client/src/i18n/index.ts` (namespace registration), `client/src/plan/__tests__/**`_
