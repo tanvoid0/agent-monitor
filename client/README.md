@@ -224,6 +224,7 @@ client/
 │   │   ├── Plan.tsx (plan/)   # Plan layer board, ?task= deep link
 │   │   ├── Analytics.tsx
 │   │   ├── Workflows.tsx
+│   │   ├── Permissions.tsx     # /permissions — held prompts beside their session context
 │   │   ├── Settings.tsx
 │   │   └── NotFound.tsx
 │   │
@@ -468,7 +469,7 @@ Server broadcasts these event types over WebSocket:
 | `tool.executed` | Tool execution record | PostToolUse hook |
 | `notification.received` | Notification object | Notification hook |
 | `remote_source.status` | `{ id, status, error?, providers?, last_sync_at? }` (`status`: `idle`/`syncing`/`ok`/`error`/`deleted`; each provider can also be `unavailable`) | Remote Data Source sync poller + `/api/remote-sources` routes |
-| `permission_request` | `PermissionRequest` — `{ id, session_id, cwd, tool_name, tool_input, permission_mode, permission_suggestions, received_at, expires_at }` | A Claude Code permission prompt parked by the `PermissionRequest` http hook; rendered by `components/PermissionRelay.tsx` (mounted in `Layout`) with Allow / Allow always / Deny / Answer in terminal → `POST /api/permissions/:id/decision`. `tool_input` is shaped by `lib/permission-input.ts` (`summarisePermissionInput`) and drawn by `components/PermissionInputView.tsx` — code / path / url / text / diff / questions / json fields, labelled from `permissions.field.*`; unknown tools (including every `mcp__*`) fall through to a generic pass that still renders every key |
+| `permission_request` | `PermissionRequest` — `{ id, session_id, cwd, tool_name, tool_input, permission_mode, permission_suggestions, received_at, expires_at }` | A Claude Code permission prompt parked by the `PermissionRequest` http hook; rendered by `components/PermissionRelay.tsx` (mounted in `Layout`) with Allow / Allow always / Deny / Answer in terminal → `POST /api/permissions/:id/decision`. `tool_input` is shaped by `lib/permission-input.ts` (`summarisePermissionInput`) and drawn by `components/PermissionInputView.tsx` — code / path / url / text / diff / questions / json fields, labelled from `permissions.field.*`; unknown tools (including every `mcp__*`) fall through to a generic pass that still renders every key. The relay state hook is `hooks/usePermissionRelay.ts` and the card `components/PermissionCard.tsx`; `pages/SessionDetail.tsx` renders the session's own prompts inline (and, via `lib/pending-permission.ts`, a read-only reconstruction of a prompt the relay no longer holds), `pages/Permissions.tsx` lists them all with session context, and `components/Tabby/brain.ts` tracks the count |
 | `permission_resolved` | `{ id, outcome }` (`allow`/`deny`/`deferred`/`timeout`/`cancelled`) | Removes the card whatever ended the prompt |
 | `remote_data.updated` | `{ sourceId, source, label?, counters?, providers?, last_sync_at? }` | Emitted once per successful remote sync; provider-aware counters trigger stats/cost/session refetches. The server also broadcasts `session_created` / `session_updated` (and main-agent frames) for each mirrored session so Kanban/Sessions update immediately |
 
@@ -524,6 +525,7 @@ graph TB
     Feed["/activity"]
     Analytics["/analytics"]
     Workflows["/workflows"]
+    Permissions["/permissions"]
     CcConfig["/cc-config"]
     Run["/run"]
     Settings["/settings"]

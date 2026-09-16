@@ -242,7 +242,9 @@
     "unmute": "말풍선 켜기",
     "showLive": "실행 중인 세션 보기",
     "showWaiting": "내 응답을 기다리는 세션 보기",
-    "showErrored": "오류가 발생한 세션 보기"
+    "showErrored": "오류가 발생한 세션 보기",
+    "approvals": "승인 대기",
+    "showApprovals": "대기 중인 권한 프롬프트 검토"
   },
   "permissions": {
     "title": "권한 요청",
@@ -253,6 +255,7 @@
     "deny": "거부",
     "inTerminal": "터미널에서 답변",
     "alwaysRule": "항상 허용: {{rule}} → {{destination}}",
+    "terminalOnly": "대시보드가 더 이상 이 프롬프트를 보관하고 있지 않습니다 — 대기 시간이 지났거나, 프롬프트가 뜰 때 대시보드가 닫혀 있었거나, PermissionRequest hook이 설치되지 않았습니다 — 이 세션을 실행 중인 터미널에서 답변하세요.",
     "field": {
       "command": "명령",
       "description": "설명",
@@ -266,6 +269,20 @@
       "agent": "에이전트",
       "emptyBefore": "(없음)",
       "emptyAfter": "(삭제됨)"
+    },
+    "page": {
+      "subtitlePending_one": "{{count}}개의 프롬프트가 답변을 기다리는 중 — 결정할 때까지 해당 Claude Code 세션은 차단됩니다",
+      "subtitlePending_other": "{{count}}개의 프롬프트가 답변을 기다리는 중 — 결정할 때까지 해당 Claude Code 세션은 차단됩니다",
+      "subtitleIdle": "기다리는 항목 없음 — 모든 Claude Code 세션이 필요한 권한을 갖고 있습니다",
+      "emptyTitle": "대기 중인 권한 프롬프트 없음",
+      "emptyBody": "hook으로 모니터링되는 Claude Code 세션이 도구 실행을 요청하면 프롬프트가 여기에 보관되고(떠 있는 카드로도 표시) 허용, 거부 또는 터미널로 되돌릴 때까지 기다립니다. 아무도 답하지 않으면 평소처럼 터미널 프롬프트가 나타납니다.",
+      "holdWindow": "프롬프트는 터미널로 넘어가기 전까지 최대 {{seconds}}초 동안 여기서 기다립니다",
+      "noSession": "이 프롬프트에는 세션 ID가 없어 표시할 세션 컨텍스트가 없습니다.",
+      "loadingSession": "세션 불러오는 중…",
+      "unknownSession": "대시보드에 이 세션의 기록이 없습니다 — 다른 hook이 설치되지 않았을 수 있습니다.",
+      "lastPrompt": "마지막 프롬프트",
+      "recentTools": "최근 도구 호출",
+      "openSession": "세션 타임라인 열기"
     }
   }
 }

@@ -242,7 +242,9 @@
     "unmute": "Unmute bubbles",
     "showLive": "Show live sessions",
     "showWaiting": "Show sessions waiting on you",
-    "showErrored": "Show errored sessions"
+    "showErrored": "Show errored sessions",
+    "approvals": "approvals",
+    "showApprovals": "Review pending permission prompts"
   },
   "permissions": {
     "title": "Permission requests",
@@ -253,6 +255,7 @@
     "deny": "Deny",
     "inTerminal": "Answer in terminal",
     "alwaysRule": "Always: {{rule}} → {{destination}}",
+    "terminalOnly": "The dashboard is no longer holding this prompt — its hold window passed, the dashboard was closed when it fired, or the PermissionRequest hook is not installed — so answer it in the terminal running this session.",
     "field": {
       "command": "Command",
       "description": "Description",
@@ -266,6 +269,20 @@
       "agent": "Agent",
       "emptyBefore": "(nothing)",
       "emptyAfter": "(deleted)"
+    },
+    "page": {
+      "subtitlePending_one": "{{count}} prompt waiting for your answer — Claude Code is blocked until you decide",
+      "subtitlePending_other": "{{count}} prompts waiting for your answer — each Claude Code session is blocked until you decide",
+      "subtitleIdle": "Nothing waiting on you — every Claude Code session has the permissions it needs",
+      "emptyTitle": "No pending permission prompts",
+      "emptyBody": "When a hook-monitored Claude Code session asks to run a tool, the prompt is parked here (and shown as a floating card) until you Allow, Deny, or hand it back to the terminal. If nobody answers, the terminal prompt appears as usual.",
+      "holdWindow": "Prompts wait here for up to {{seconds}} s before falling back to the terminal",
+      "noSession": "This prompt did not carry a session id, so there is no session context to show.",
+      "loadingSession": "Loading session…",
+      "unknownSession": "The dashboard has no record of this session — its other hooks may not be installed.",
+      "lastPrompt": "Last prompt",
+      "recentTools": "Recent tool calls",
+      "openSession": "Open session timeline"
     }
   }
 }

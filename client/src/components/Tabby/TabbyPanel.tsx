@@ -1,7 +1,8 @@
 /**
  * @file TabbyPanel.tsx
  * @description Expanded Tabby panel: a live status strip (live / waiting /
- *   errored stat chips + connection state), quick navigation actions, and a
+ *   errored / approvals stat chips, each a link to the matching list, plus
+ *   connection state), quick navigation actions, and a
  *   local "Ask" box. Pure presentational - all data and the ask/navigation
  *   behavior are injected by the container.
  * @author Son Nguyen <hoangson091104@gmail.com>
@@ -69,6 +70,7 @@ import {
   AlertTriangle,
   Hourglass,
   Radio,
+  ShieldAlert,
   type LucideIcon,
 } from "lucide-react";
 import { routes } from "../../lib/routes";
@@ -143,7 +145,7 @@ export function TabbyPanel({
 
       <div className="p-3">
         {/* status stat chips */}
-        <div className="mb-3 grid grid-cols-3 gap-1.5">
+        <div className="mb-3 grid grid-cols-4 gap-1.5">
           <StatChip
             icon={Radio}
             label={t("common:tabby.live")}
@@ -167,6 +169,14 @@ export function TabbyPanel({
             tone={status.errorCount > 0 ? "red" : "muted"}
             title={t("common:tabby.showErrored")}
             onClick={() => onNavigate(routes.sessions({ status: "error" }))}
+          />
+          <StatChip
+            icon={ShieldAlert}
+            label={t("common:tabby.approvals")}
+            value={status.permissionCount}
+            tone={status.permissionCount > 0 ? "amber" : "muted"}
+            title={t("common:tabby.showApprovals")}
+            onClick={() => onNavigate(routes.permissions())}
           />
         </div>
 

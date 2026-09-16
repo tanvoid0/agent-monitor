@@ -1352,7 +1352,7 @@
                   <div class="feature-icon ic-amber">🛡️</div>
                   <h3 id="feat-permission-relay">Permission Relay</h3>
                   <p>
-                    Answer Claude Code permission prompts from the dashboard — for any hook-monitored session, not only ones the dashboard spawned. The <code>PermissionRequest</code> hook is installed as an <code>http</code> hook that blocks on <code>POST /api/hooks/permission-request</code>; a floating card shows the tool and its full input with Allow, Allow always, Deny, or Answer in terminal, and the answer returns as the hook's decision. No answer within <code>DASHBOARD_PERMISSION_HOLD_MS</code> (60 s) or a dashboard that is down falls back to the normal terminal prompt; nothing is ever auto-allowed.
+                    Answer Claude Code permission prompts from the dashboard — for any hook-monitored session, not only ones the dashboard spawned. The <code>PermissionRequest</code> hook is installed as an <code>http</code> hook that blocks on <code>POST /api/hooks/permission-request</code>; the prompt shows as a floating card, inline on the session page, and on the <code>/permissions</code> page beside the session's last prompt and recent tool calls, rendered per tool, with Allow, Allow always, Deny, or Answer in terminal. Tabby counts pending approvals. No answer within <code>DASHBOARD_PERMISSION_HOLD_MS</code> (60 s) or a dashboard that is down falls back to the terminal prompt — the session page then shows what was asked, read-only; nothing is ever auto-allowed.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -7147,7 +7147,7 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=98" defer></script>
+    <script src="i18n-content.js?v=99" defer></script>
     <script src="script.js?v=58" defer></script>
     <script>
       (function () {

@@ -242,7 +242,9 @@
     "unmute": "取消静音气泡",
     "showLive": "查看进行中的会话",
     "showWaiting": "查看等待你处理的会话",
-    "showErrored": "查看出错的会话"
+    "showErrored": "查看出错的会话",
+    "approvals": "待批准",
+    "showApprovals": "查看待处理的权限提示"
   },
   "permissions": {
     "title": "权限请求",
@@ -253,6 +255,7 @@
     "deny": "拒绝",
     "inTerminal": "在终端中回答",
     "alwaysRule": "始终允许：{{rule}} → {{destination}}",
+    "terminalOnly": "仪表盘已不再持有该提示——保持窗口已过、提示触发时仪表盘未打开，或尚未安装 PermissionRequest Hook——请在运行该会话的终端中回答。",
     "field": {
       "command": "命令",
       "description": "说明",
@@ -266,6 +269,20 @@
       "agent": "代理",
       "emptyBefore": "（无内容）",
       "emptyAfter": "（已删除）"
+    },
+    "page": {
+      "subtitlePending_one": "{{count}} 个提示等待你回答——在你决定之前，对应的 Claude Code 会话会一直阻塞",
+      "subtitlePending_other": "{{count}} 个提示等待你回答——在你决定之前，对应的 Claude Code 会话会一直阻塞",
+      "subtitleIdle": "没有等待你处理的内容——每个 Claude Code 会话都已获得所需权限",
+      "emptyTitle": "没有待处理的权限提示",
+      "emptyBody": "当受 Hook 监控的 Claude Code 会话请求运行某个工具时，该提示会暂存在这里（同时以浮动卡片显示），直到你允许、拒绝或交回终端处理。如果无人回答，终端提示会照常出现。",
+      "holdWindow": "提示最多在此等待 {{seconds}} 秒，之后回退到终端",
+      "noSession": "该提示未携带会话 ID，因此无法显示会话上下文。",
+      "loadingSession": "正在加载会话…",
+      "unknownSession": "仪表盘没有该会话的记录——它的其他 Hook 可能尚未安装。",
+      "lastPrompt": "最近的提示词",
+      "recentTools": "最近的工具调用",
+      "openSession": "打开会话时间线"
     }
   }
 }

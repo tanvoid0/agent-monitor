@@ -280,6 +280,11 @@ export function Tabby() {
             {brain.status.errorCount > 9 ? "9+" : brain.status.errorCount}
           </span>
         )}
+        {brain.status.permissionCount > 0 && (
+          <span className="tabby-permission-dot" aria-hidden>
+            {brain.status.permissionCount > 9 ? "9+" : brain.status.permissionCount}
+          </span>
+        )}
       </button>
     </>
   );

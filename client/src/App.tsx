@@ -81,6 +81,7 @@ import { SessionDetail } from "./pages/SessionDetail";
 import { ActivityFeed } from "./pages/ActivityFeed";
 import { Analytics } from "./pages/Analytics";
 import { Workflows } from "./pages/Workflows";
+import { Permissions } from "./pages/Permissions";
 import { Plan } from "./plan/Plan";
 import { Settings } from "./pages/Settings";
 import { CcConfig } from "./pages/CcConfig";
@@ -133,6 +134,7 @@ export default function App() {
           <Route path="activity" element={<ActivityFeed />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="workflows" element={<Workflows />} />
+          <Route path="permissions" element={<Permissions />} />
           <Route path="plan/:slug?" element={<Plan />} />
           <Route path="cc-config" element={<CcConfig />} />
           <Route path="run" element={<Run />} />

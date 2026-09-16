@@ -77,6 +77,7 @@ import {
   statusOf,
   clearErrors,
   seedSessions,
+  seedPermissions,
   type Mood,
   type TabbyState,
   type TabbyStatus,
@@ -142,6 +143,19 @@ export function useTabbyBrain(): TabbyBrain {
       .then((res) => {
         if (cancelled) return;
         setState((prev) => seedSessions(prev, res.sessions, Date.now()));
+      })
+      .catch(() => undefined);
+    // Same for prompts the permission relay is already holding.
+    api.permissions
+      .list()
+      .then((res) => {
+        if (cancelled) return;
+        setState((prev) =>
+          seedPermissions(
+            prev,
+            res.pending.map((p) => p.id)
+          )
+        );
       })
       .catch(() => undefined);
     return () => {

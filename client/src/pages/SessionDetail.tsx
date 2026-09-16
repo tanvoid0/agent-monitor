@@ -163,7 +163,10 @@ import type {
 } from "../lib/types";
 import { WorkflowRunsPanel } from "../components/workflows/WorkflowRunsPanel";
 import { PermissionCard } from "../components/PermissionCard";
+import { PermissionInputView } from "../components/PermissionInputView";
 import { usePermissionRelay } from "../hooks/usePermissionRelay";
+import { summarisePermissionInput } from "../lib/permission-input";
+import { inferPendingPermission } from "../lib/pending-permission";
 
 /** Tab keys in render order — also the order `1`…`3` and `[`/`]` address them. */
 const DETAIL_TABS = ["agents", "conversation", "timeline"] as const;
@@ -183,13 +186,27 @@ export function SessionDetail() {
   const { t: wfT } = useTranslation("workflows");
   const { t: commonT } = useTranslation("common");
   const [scope] = useDataScope();
+  const [session, setSession] = useState<Session | null>(null);
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [workflows, setWorkflows] = useState<WorkflowRun[]>([]);
+  // Unfiltered newest-first events from the session endpoint — the timeline's
+  // `events` below is the user-filtered, paginated view and cannot be used to
+  // reason about the session's latest state.
+  const [allEvents, setAllEvents] = useState<DashboardEvent[]>([]);
   // Permission prompts parked for *this* session. The global floating relay
   // skips them while this page is open so the prompt appears exactly once.
   const permissions = usePermissionRelay();
   const sessionPermissions = permissions.pending.filter((p) => p.session_id === id);
-  const [session, setSession] = useState<Session | null>(null);
-  const [agents, setAgents] = useState<Agent[]>([]);
-  const [workflows, setWorkflows] = useState<WorkflowRun[]>([]);
+  // What the session is blocked on when the relay is NOT holding it (hold
+  // window passed, dashboard was closed, hook not installed): reconstructed
+  // from the hook events. Read-only — the terminal owns that prompt now.
+  const inferredPermission = useMemo(
+    () =>
+      session && isSessionAwaitingInput(session) && sessionPermissions.length === 0
+        ? inferPendingPermission(allEvents)
+        : null,
+    [session, sessionPermissions.length, allEvents]
+  );
   const [events, setEvents] = useState<DashboardEvent[]>([]);
   const [eventsTotal, setEventsTotal] = useState(0);
   const [eventsLoaded, setEventsLoaded] = useState(false);
@@ -325,6 +342,7 @@ export function SessionDetail() {
       setSession(data.session);
       setAgents(data.agents);
       setWorkflows(data.workflows || []);
+      setAllEvents(data.events || []);
       setCost(costData);
       setError(null);
     } catch (err) {
@@ -856,6 +874,48 @@ export function SessionDetail() {
           ))}
         </div>
       )}
+
+      {/* The relay no longer holds this prompt (hold window passed, dashboard
+          was closed, or the hook is not installed), but the hook events still
+          say what Claude asked for. Show it read-only: only the terminal can
+          answer it now, and the user deserves to know what to type there. */}
+      {inferredPermission &&
+        (() => {
+          const summary = summarisePermissionInput(
+            inferredPermission.tool_name,
+            inferredPermission.tool_input
+          );
+          return (
+            <div
+              className="rounded-lg border border-amber-500/40 bg-amber-500/[0.06] p-4"
+              role="region"
+              aria-label={commonT("permissions.title")}
+            >
+              <div className="flex items-start gap-2">
+                <Hourglass className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-semibold text-gray-100">
+                    {commonT("permissions.wants", { tool: inferredPermission.tool_name })}
+                  </div>
+                  {inferredPermission.message && (
+                    <div className="truncate text-xs text-gray-500">
+                      {inferredPermission.message}
+                    </div>
+                  )}
+                </div>
+                <span className="text-xs tabular-nums text-gray-500">
+                  {timeAgo(inferredPermission.asked_at)}
+                </span>
+              </div>
+              <div className="mt-3 max-h-80 overflow-auto">
+                <PermissionInputView fields={summary.fields} />
+              </div>
+              <p className="mt-3 text-xs text-amber-300/80">
+                {commonT("permissions.terminalOnly")}
+              </p>
+            </div>
+          );
+        })()}
 
       {/* Waiting-for-input callout: WHY the session sits in the yellow Waiting
           state (awaiting_reason) and for how long. Reason-specific icon/label

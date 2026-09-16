@@ -130,16 +130,17 @@ describe("CommandPalette", () => {
   it("lists every page when the query is empty", () => {
     renderPalette();
     pressHotkey();
-    // With no query and nothing in the MRU list the palette shows the ten
+    // With no query and nothing in the MRU list the palette shows the eleven
     // sidebar routes: the rest of the catalog is one keystroke away, and dumping
     // ~150 rows into an empty launcher would bury them.
-    expect(screen.getAllByRole("option")).toHaveLength(10);
+    expect(screen.getAllByRole("option")).toHaveLength(11);
+    expect(screen.getByText("Permissions")).toBeInTheDocument();
     expect(screen.getByText("Analytics")).toBeInTheDocument();
   });
 
   it("offers the current page's own actions before anything is typed", () => {
     // Opening the launcher on a page should immediately surface what that page
-    // can do, not just the ten routes.
+    // can do, not just the eleven routes.
     render(
       <MemoryRouter initialEntries={["/"]}>
         <PaletteActionProvider>

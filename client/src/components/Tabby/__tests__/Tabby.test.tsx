@@ -145,6 +145,24 @@ describe("Tabby widget", () => {
     }
   });
 
+  it("shows an approvals badge and routes the chip to /permissions", () => {
+    renderTabby();
+    act(() => {
+      eventBus.publish({
+        type: "permission_request",
+        data: { id: "p1", session_id: "s", tool_name: "Bash" } as never,
+        timestamp: "t",
+      });
+    });
+    const btn = screen.getByRole("button", { name: /open tabby companion/i });
+    expect(within(btn).getByText("1")).toBeInTheDocument();
+
+    fireEvent.click(btn);
+    const panel = screen.getByRole("dialog", { name: /tabby companion/i });
+    fireEvent.click(statChip(panel, "approvals"));
+    expect(screen.getByTestId("location").textContent).toBe("/permissions");
+  });
+
   it("leaves a zero-count stat chip inert", () => {
     renderTabby();
     fireEvent.click(screen.getByRole("button", { name: /open tabby companion/i }));

@@ -12,6 +12,7 @@ const status = (over: Partial<TabbyStatus> = {}): TabbyStatus => ({
   liveCount: 0,
   waitingCount: 0,
   errorCount: 0,
+  permissionCount: 0,
   connected: true,
   ...over,
 });

@@ -4,9 +4,9 @@
  * `usePermissionRelay`; each card is a `PermissionCard`.
  *
  * Prompts belonging to the session whose detail page is currently open are
- * skipped here: that page renders the same card inline, in context, and two
- * copies of one prompt would only make the user wonder whether answering one
- * answers the other.
+ * skipped here, and nothing is shown on the dedicated /permissions page: both
+ * render the same card inline, in context, and two copies of one prompt would
+ * only make the user wonder whether answering one answers the other.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -25,6 +25,10 @@ export function PermissionRelay() {
   const { t } = useTranslation("common");
   const { pending, busy, errors, decide } = usePermissionRelay();
   const { pathname } = useLocation();
+
+  // The dedicated page lists every prompt; the floating stack would only
+  // duplicate it there.
+  if (pathname === "/permissions") return null;
 
   const onScreenElsewhere = openSessionId(pathname);
   const cards = pending.filter((req) => req.session_id !== onScreenElsewhere);

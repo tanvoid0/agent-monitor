@@ -70,14 +70,13 @@ function prompt(id: string, session_id: string, tool_name = "Bash"): PermissionR
 }
 
 let pending: PermissionRequest[] = [];
+let sessionEvents: DashboardEvent[] = [];
 const decide = vi.fn(() => Promise.resolve({ ok: true }));
 
 vi.mock("../../lib/api", () => ({
   api: {
     sessions: {
-      get: vi.fn(() =>
-        Promise.resolve({ session, agents: [agent], events: [] as DashboardEvent[] })
-      ),
+      get: vi.fn(() => Promise.resolve({ session, agents: [agent], events: sessionEvents })),
       transcripts: vi.fn(() => Promise.resolve({ transcripts: [] })),
       stats: vi.fn(() =>
         Promise.resolve({
@@ -149,6 +148,7 @@ describe("openSessionId", () => {
 describe("SessionDetail - pending permission prompt", () => {
   beforeEach(() => {
     decide.mockClear();
+    sessionEvents = [];
   });
 
   it("shows what the session is waiting on, inline and only once", async () => {
@@ -213,5 +213,42 @@ describe("SessionDetail - pending permission prompt", () => {
     expect(within(regions[0]!).queryByText(/wants to run/i)).toBeInTheDocument();
     // But the generic "why" callout still explains the wait.
     expect(screen.getByText(/waiting for your input/i)).toBeInTheDocument();
+  });
+
+  it("reconstructs a prompt the relay no longer holds, read-only", async () => {
+    pending = [];
+    const ev = (id: number, event_type: string, data: unknown, tool_name: string | null = null) =>
+      ({
+        id,
+        session_id: SESSION_ID,
+        agent_id: null,
+        event_type,
+        tool_name,
+        data: JSON.stringify(data),
+        created_at: "2026-09-16T10:00:0" + id + ".000Z",
+        status: null,
+      }) as unknown as DashboardEvent;
+    sessionEvents = [
+      ev(9, "Notification", {
+        notification_type: "permission_prompt",
+        message: "Claude needs your permission to use Bash",
+      }),
+      ev(
+        8,
+        "PreToolUse",
+        { tool_name: "Bash", tool_input: { command: "git push --force" } },
+        "Bash"
+      ),
+      ev(7, "PostToolUse", {}, "Read"),
+    ];
+    renderPage();
+
+    const region = await screen.findByRole("region", { name: /permission requests/i });
+    expect(within(region).getByText(/wants to run Bash/i)).toBeInTheDocument();
+    expect(within(region).getByText("git push --force")).toBeInTheDocument();
+    expect(within(region).getByText(/needs your permission to use Bash/i)).toBeInTheDocument();
+    expect(within(region).getByText(/answer it in the terminal/i)).toBeInTheDocument();
+    // Read-only: nothing here can answer a prompt the dashboard is not holding.
+    expect(within(region).queryByRole("button")).toBeNull();
   });
 });
