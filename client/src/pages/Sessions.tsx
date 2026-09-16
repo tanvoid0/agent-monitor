@@ -1,8 +1,11 @@
 /**
  * @file Sessions.tsx
  * @description Displays all recorded sessions with searchable multi-project,
- * status, text, and custom sort filters plus server-side pagination. Rows can
- * show an accessible task-progress donut beside status and the local transient
+ * status, text, and custom sort filters plus server-side pagination. Status
+ * and project filters live in the URL (`?status=`, repeated `?cwd=`; `?q=`
+ * seeds the search box). Rows are Clickable table rows with an EntityRef
+ * session name, project / model chips and a per-row entity menu; they can show
+ * an accessible task-progress donut beside status and the local transient
  * Codex startup row before its durable session id exists.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
@@ -62,19 +65,10 @@
  *
  * ----------------------------------------------------------------------------- */
 
-import { useEffect, useRef, useState, useCallback, useSyncExternalStore } from "react";
-import { Link, useNavigate } from "react-router";
+import { useEffect, useMemo, useRef, useState, useCallback, useSyncExternalStore } from "react";
+import { Link, useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
-import {
-  FolderOpen,
-  Search,
-  ChevronRight,
-  RefreshCw,
-  SortDesc,
-  SortAsc,
-  Play,
-  Server,
-} from "lucide-react";
+import { FolderOpen, Search, RefreshCw, SortDesc, SortAsc, Play, Server } from "lucide-react";
 import { api } from "../lib/api";
 import type { RemoteSource } from "../lib/api";
 import { eventBus } from "../lib/eventBus";
@@ -89,7 +83,25 @@ import { Select } from "../components/Select";
 import { useUrlTab } from "../hooks/usePageShortcuts";
 import { usePaletteAction } from "../components/PaletteActionProvider";
 import { PaletteHint } from "../components/PaletteHint";
-import { formatDateTime, formatDuration, truncate, fmtCost } from "../lib/format";
+import {
+  Badge,
+  Button,
+  Clickable,
+  IconButton,
+  MenuButton,
+  PageHeader,
+  SegmentedControl,
+} from "../components/ui";
+import { EntityRef, entityMenu } from "../components/entity";
+import { copyText } from "../lib/clipboard";
+import { routes } from "../lib/routes";
+import {
+  formatDateTime,
+  formatDuration,
+  formatModelName,
+  fmtCost,
+  isTransientProcess,
+} from "../lib/format";
 import {
   effectiveSessionStatus,
   isSessionAwaitingInput,
@@ -100,22 +112,15 @@ import type { Session, DashboardEvent } from "../lib/types";
 const PAGE_SIZE = 10;
 type SessionSort = "time" | "duration" | "price";
 
-function isTransientProcessSession(session: Session): boolean {
-  if (!session.metadata) return false;
-  try {
-    return JSON.parse(session.metadata)?.pre_identity_process === true;
-  } catch {
-    return false;
-  }
-}
+const isTransientProcessSession = (session: Session) => isTransientProcess(session.metadata);
 
 /** Status filters in render order — also the order `1`…`6` addresses them.
  *  `""` is the "all" pseudo-filter the server treats as no status constraint. */
 const SESSION_FILTERS = ["", "active", "waiting", "completed", "error", "abandoned"] as const;
 
 export function Sessions() {
-  const navigate = useNavigate();
   const { t } = useTranslation("sessions");
+  const [searchParams, setSearchParams] = useSearchParams();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [total, setTotal] = useState(0);
   // The status filter lives in the URL so the command palette (and any shared
@@ -125,20 +130,34 @@ export function Sessions() {
   // `searchInput` is what the user types; `search` is the debounced value
   // actually sent to the server. Without debouncing, every keystroke would
   // hit /api/sessions.
-  const [searchInput, setSearchInput] = useState("");
+  // `?q=` seeds the box so a shared link opens the list already searched.
+  const [searchInput, setSearchInput] = useState(() => searchParams.get("q") ?? "");
   const searchRef = useRef<HTMLInputElement>(null);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(() => (searchParams.get("q") ?? "").trim());
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
 
-  // Seeded from `?cwd=` so the palette's project jump lands on a filtered list.
-  // Only the initial value is read from the URL: the multi-select is the source
-  // of truth afterwards, and rewriting the query on every toggle would make Back
-  // walk through filter states instead of pages.
-  const [cwds, setCwds] = useState<string[]>(() => {
-    const initial = new URLSearchParams(window.location.search).get("cwd");
-    return initial ? [initial] : [];
-  });
+  // Project filter lives in the URL as repeated `?cwd=` params (paths may
+  // contain commas) so the palette's project jump and EntityRef(project) links
+  // land on a filtered list. Written back with `replace` so Back walks pages,
+  // not filter states. Memoised on the joined value: `getAll` returns a fresh
+  // array per render and `load` keys off it.
+  const cwdKey = searchParams.getAll("cwd").join("\0");
+  const cwds = useMemo(() => (cwdKey ? cwdKey.split("\0") : []), [cwdKey]);
+  const setCwds = useCallback(
+    (next: string[]) => {
+      setSearchParams(
+        (previous) => {
+          const params = new URLSearchParams(previous);
+          params.delete("cwd");
+          for (const cwd of next) params.append("cwd", cwd);
+          return params;
+        },
+        { replace: true }
+      );
+    },
+    [setSearchParams]
+  );
   const [sortBy, setSortBy] = useState<SessionSort>("time");
   const [sortDesc, setSortDesc] = useState(true);
   const [directories, setDirectories] = useState<string[]>([]);
@@ -162,7 +181,12 @@ export function Sessions() {
     error: t("filterError"),
     abandoned: t("filterAbandoned"),
   };
-  const FILTER_OPTIONS = SESSION_FILTERS.map((value) => ({ value, label: FILTER_LABELS[value] }));
+  // Radix ToggleGroup treats `""` as "nothing selected", so the "all" pseudo-
+  // filter travels as `"all"` inside the control and maps back at the edge.
+  const FILTER_OPTIONS = SESSION_FILTERS.map((value) => ({
+    value: value || "all",
+    label: FILTER_LABELS[value],
+  }));
 
   // Debounce the search input → 300 ms after the user stops typing, the
   // committed value flips and triggers a fresh fetch.
@@ -259,9 +283,19 @@ export function Sessions() {
   usePaletteAction("sessions.sortCost", () => setSortBy("price"));
   usePaletteAction("sessions.toggleSortDirection", () => setSortDesc((prev) => !prev));
   usePaletteAction("sessions.clearFilters", () => {
-    setFilter("");
     setSearchInput("");
-    setCwds([]);
+    // One URL write: two functional setSearchParams calls in the same tick
+    // both derive from the render-time params, so the second would restore
+    // the `status` the first removed.
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete("status");
+        next.delete("cwd");
+        return next;
+      },
+      { replace: true }
+    );
   });
 
   useEffect(() => {
@@ -366,35 +400,23 @@ export function Sessions() {
 
   return (
     <div className="animate-fade-in">
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-accent/15 flex items-center justify-center">
-            <FolderOpen className="w-4.5 h-4.5 text-accent" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-semibold text-gray-100">{t("title")}</h1>
-              {wsConnected ? (
-                <span className="flex items-center gap-1.5 text-[11px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse-dot" />
-                  {t("common:live")}
-                </span>
-              ) : (
-                <span className="flex items-center gap-1.5 text-[11px] text-gray-400 bg-gray-500/10 border border-gray-500/20 px-2 py-0.5 rounded-full">
-                  <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-                  {t("common:offline")}
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-gray-500" aria-live="polite" aria-atomic="true">
+      <div className="mb-8">
+        <PageHeader
+          icon={FolderOpen}
+          title={t("title")}
+          live={wsConnected}
+          subtitle={
+            <span aria-live="polite" aria-atomic="true">
               {t("sessionCount", { count: displayedTotal })}
               {filter ? ` ${filter}` : ""}
-            </p>
-          </div>
-        </div>
-        <button type="button" onClick={load} className="btn-ghost flex-shrink-0">
-          <RefreshCw className="w-4 h-4" /> {t("common:refresh")}
-        </button>
+            </span>
+          }
+          actions={
+            <Button variant="ghost" size="sm" icon={RefreshCw} onClick={() => void load()}>
+              {t("common:refresh")}
+            </Button>
+          }
+        />
       </div>
 
       {/* Filters */}
@@ -440,16 +462,13 @@ export function Sessions() {
             <Select<SessionSort> value={sortBy} onChange={setSortBy} options={SORT_OPTIONS} />
           </div>
           <div className="w-px h-4 bg-border mx-1" />
-          <button
-            type="button"
-            onClick={() => setSortDesc(!sortDesc)}
+          <IconButton
+            icon={sortDesc ? SortDesc : SortAsc}
+            label={sortDesc ? t("sortDescending") : t("sortAscending")}
             aria-pressed={sortDesc}
-            className="p-1.5 rounded hover:bg-surface-3 text-gray-400 hover:text-gray-200 transition-colors shrink-0"
-            title={sortDesc ? t("sortDescending") : t("sortAscending")}
-            aria-label={sortDesc ? t("sortDescending") : t("sortAscending")}
-          >
-            {sortDesc ? <SortDesc className="w-4 h-4" /> : <SortAsc className="w-4 h-4" />}
-          </button>
+            onClick={() => setSortDesc(!sortDesc)}
+            className="shrink-0"
+          />
         </div>
 
         {/* Status Filters — six pills that together outrun the toolbar on a
@@ -457,23 +476,16 @@ export function Sessions() {
             past the toolbar's rounded edge; it now caps at the space left over and
             scrolls inside itself, with the pills kept at full size so none of them
             compress into an unreadable sliver. */}
-        <div className="ml-auto flex min-w-0 max-w-full gap-1 overflow-x-auto no-scrollbar rounded-lg border border-border bg-surface-1 p-1">
-          {FILTER_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => setFilter(opt.value)}
-              aria-pressed={filter === opt.value}
-              className={`shrink-0 px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${
-                filter === opt.value
-                  ? "bg-surface-4 text-gray-200"
-                  : "text-gray-500 hover:text-gray-300"
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl
+          size="sm"
+          ariaLabel={t("statusFilterLabel")}
+          items={FILTER_OPTIONS}
+          value={filter || "all"}
+          onValueChange={(value) =>
+            setFilter(value === "all" ? "" : (value as (typeof SESSION_FILTERS)[number]))
+          }
+          className="ml-auto min-w-0 max-w-full overflow-x-auto no-scrollbar bg-surface-1 p-1"
+        />
       </div>
 
       {!loading && filtered.length === 0 ? (
@@ -511,7 +523,9 @@ export function Sessions() {
                   <th className="px-5 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
                     {t("tableDirectory")}
                   </th>
-                  <th className="w-10"></th>
+                  <th className="w-10">
+                    <span className="sr-only">{t("common:actions")}</span>
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -524,91 +538,152 @@ export function Sessions() {
                       />
                     ))
                   : null}
-                {paged.map((session) => (
-                  <tr
-                    key={session.id}
-                    onClick={
-                      isTransientProcessSession(session)
-                        ? undefined
-                        : () => navigate(`/sessions/${session.id}`)
-                    }
-                    className={`hover:bg-surface-4 transition-colors group ${
-                      isTransientProcessSession(session) ? "cursor-default" : "cursor-pointer"
-                    }`}
-                  >
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-2">
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium text-gray-200">
-                            {session.name || `${t("defaultName")}${session.id.slice(0, 8)}`}
-                          </p>
-                          <p className="text-[11px] text-gray-600 font-mono">
-                            {session.id.slice(0, 12)}
-                          </p>
-                        </div>
-                        <div className="flex shrink-0 items-center gap-2">
-                          {session.source && session.source !== "local" && (
-                            <span
-                              className="inline-flex items-center gap-1 text-[10px] font-semibold text-sky-300 bg-sky-500/10 border border-sky-500/25 px-1.5 py-0.5 rounded-full"
-                              title={t("remoteSourceBadgeTitle", "Collected from a remote machine")}
-                            >
-                              <Server className="w-2.5 h-2.5" />
-                              {sourceLabels.get(session.source) || session.source}
-                            </span>
-                          )}
-                          {dashboardRunIds.has(session.id) && (
-                            <Link
-                              to={`/run?session=${encodeURIComponent(session.id)}`}
-                              onClick={(e) => e.stopPropagation()}
-                              className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/25 hover:bg-emerald-500/20 hover:text-emerald-200 px-1.5 py-0.5 rounded-full transition-colors"
-                              title={t("dashboardRunBadge", "Driven by Run page · click to open")}
-                            >
-                              <Play className="w-2.5 h-2.5" />
-                              {t("common:dashboardRun", "Run")}
-                            </Link>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-2">
-                        <SessionStatusBadge
-                          status={effectiveSessionStatus(session)}
-                          reason={sessionAwaitingReason(session)}
-                          provider={session.provider}
-                        />
-                        {session.todo_summary && (
-                          <TodoProgressIndicator progress={session.todo_summary} />
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-5 py-4 text-sm text-gray-400">
-                      {formatDateTime(session.last_activity || session.started_at)}
-                    </td>
-                    <td className="px-5 py-4 text-sm text-gray-400 font-mono">
-                      {session.ended_at
-                        ? formatDuration(session.started_at, session.ended_at)
-                        : t("common:running")}
-                    </td>
-                    <td className="px-5 py-4 text-sm text-gray-400">
-                      {session.agent_count ?? "-"}
-                    </td>
-                    <td className="px-5 py-4 text-sm text-gray-400 font-mono">
-                      {session.cost != null && session.cost > 0 ? fmtCost(session.cost) : "-"}
-                    </td>
-                    <td
-                      className="px-5 py-4 text-[11px] text-gray-500 font-mono"
-                      title={session.cwd || undefined}
+                {paged.map((session) => {
+                  const transient = isTransientProcessSession(session);
+                  const menu = transient
+                    ? undefined
+                    : entityMenu(
+                        {
+                          kind: "session",
+                          id: session.id,
+                          name: session.name,
+                          cwd: session.cwd,
+                          source: session.source,
+                        },
+                        { t, copy: copyText }
+                      );
+                  return (
+                    <Clickable
+                      as="tr"
+                      key={session.id}
+                      to={transient ? undefined : routes.session(session.id)}
+                      menu={menu}
+                      kebab={false}
+                      className="hover:bg-surface-4 transition-colors group"
                     >
-                      {session.cwd ? truncate(session.cwd, 30) : "-"}
-                    </td>
-                    <td className="px-3 py-4">
-                      {!isTransientProcessSession(session) && (
-                        <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-gray-400 transition-colors" />
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-2">
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-gray-200 truncate">
+                              <EntityRef
+                                kind="session"
+                                id={session.id}
+                                name={session.name}
+                                cwd={session.cwd}
+                                source={session.source}
+                                transient={transient}
+                                mono={false}
+                                className="text-sm font-medium text-gray-200"
+                              />
+                            </p>
+                            <p className="text-[11px] text-gray-600 font-mono truncate">
+                              {session.id.slice(0, 12)}
+                              {session.model && !transient && (
+                                <>
+                                  {" · "}
+                                  <EntityRef
+                                    kind="model"
+                                    model={session.model}
+                                    className="text-gray-500"
+                                    tabbable={false}
+                                  >
+                                    {formatModelName(session.model)}
+                                  </EntityRef>
+                                </>
+                              )}
+                            </p>
+                          </div>
+                          <div className="flex shrink-0 items-center gap-2">
+                            {session.source && session.source !== "local" && (
+                              <Badge
+                                tone="info"
+                                size="xs"
+                                icon={Server}
+                                title={t(
+                                  "remoteSourceBadgeTitle",
+                                  "Collected from a remote machine"
+                                )}
+                              >
+                                {sourceLabels.get(session.source) || session.source}
+                              </Badge>
+                            )}
+                            {dashboardRunIds.has(session.id) && (
+                              <Link
+                                to={routes.run({ session: session.id })}
+                                className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/25 hover:bg-emerald-500/20 hover:text-emerald-200 px-1.5 py-0.5 rounded-full transition-colors"
+                                title={t("dashboardRunBadge", "Driven by Run page · click to open")}
+                              >
+                                <Play className="w-2.5 h-2.5" />
+                                {t("common:dashboardRun", "Run")}
+                              </Link>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-2">
+                          <SessionStatusBadge
+                            status={effectiveSessionStatus(session)}
+                            reason={sessionAwaitingReason(session)}
+                            provider={session.provider}
+                          />
+                          {session.todo_summary && (
+                            <TodoProgressIndicator progress={session.todo_summary} />
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-5 py-4 text-sm text-gray-400">
+                        {formatDateTime(session.last_activity || session.started_at)}
+                      </td>
+                      <td className="px-5 py-4 text-sm text-gray-400 font-mono">
+                        {session.ended_at
+                          ? formatDuration(session.started_at, session.ended_at)
+                          : t("common:running")}
+                      </td>
+                      <td className="px-5 py-4 text-sm text-gray-400">
+                        {session.agent_count != null && !transient ? (
+                          <Link
+                            to={routes.session(session.id, { tab: "agents" })}
+                            title={t("detail.agents")}
+                            className="hover:text-gray-200 hover:underline decoration-dotted underline-offset-2"
+                          >
+                            {session.agent_count}
+                          </Link>
+                        ) : (
+                          (session.agent_count ?? "-")
+                        )}
+                      </td>
+                      <td className="px-5 py-4 text-sm text-gray-400 font-mono">
+                        {session.cost != null && session.cost > 0 ? fmtCost(session.cost) : "-"}
+                      </td>
+                      <td className="px-5 py-4 text-[11px] text-gray-500 font-mono max-w-[16rem]">
+                        {session.cwd ? (
+                          <EntityRef
+                            kind="project"
+                            cwd={session.cwd}
+                            source={session.source}
+                            className="text-gray-500"
+                            tabbable={false}
+                          />
+                        ) : (
+                          "-"
+                        )}
+                      </td>
+                      <td className="px-3 py-4">
+                        {menu && (
+                          <MenuButton
+                            size="xs"
+                            items={menu}
+                            label={t("common:ui.openMenuFor", {
+                              name: session.name?.trim() || session.id.slice(0, 8),
+                            })}
+                            reveal
+                          />
+                        )}
+                      </td>
+                    </Clickable>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -622,25 +697,25 @@ export function Sessions() {
                 })}
               </span>
               <div className="flex items-center gap-1">
-                <button
-                  type="button"
+                <Button
+                  variant="secondary"
+                  size="xs"
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
                   disabled={page === 0}
-                  className="px-3 py-1.5 text-xs font-medium rounded-md bg-surface-2 text-gray-400 hover:text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {t("common:pagination.previous")}
-                </button>
+                </Button>
                 <span className="px-3 py-1.5 text-xs text-gray-500">
                   {page + 1} / {totalPages}
                 </span>
-                <button
-                  type="button"
+                <Button
+                  variant="secondary"
+                  size="xs"
                   onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                   disabled={page >= totalPages - 1}
-                  className="px-3 py-1.5 text-xs font-medium rounded-md bg-surface-2 text-gray-400 hover:text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {t("common:pagination.next")}
-                </button>
+                </Button>
               </div>
             </div>
           )}

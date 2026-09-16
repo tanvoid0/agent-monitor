@@ -1,6 +1,6 @@
 /**
  * @file Workflows.tsx
- * @description Displays comprehensive analytics on agent orchestration patterns, including DAGs of agent spawning, tool usage flows, collaboration networks, and session complexity metrics, with real-time updates and interactive filtering.
+ * @description Displays comprehensive analytics on agent orchestration patterns, including DAGs of agent spawning, tool usage flows, collaboration networks, and session complexity metrics, with real-time updates and interactive filtering. Deep links: `?session=<id>` opens (and scrolls to) the session drill-in, `?run=<id>` expands that Workflow-tool run; both are written back with replace semantics.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -71,12 +71,15 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import { useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { Workflow, RefreshCw, Download, AlertCircle, Info } from "lucide-react";
 import { api } from "../lib/api";
 import { usePaletteAction } from "../components/PaletteActionProvider";
+import { Button, IconButton, PageHeader, SegmentedControl } from "../components/ui";
 
 import { useDataScope } from "../lib/dataScope";
+import { getCurrentLocale } from "../lib/format";
 import { eventBus } from "../lib/eventBus";
 import type { WorkflowData, WSMessage } from "../lib/types";
 
@@ -96,6 +99,8 @@ import { WorkflowRunsPanel } from "../components/workflows/WorkflowRunsPanel";
 
 type StatusFilter = "all" | "active" | "completed";
 
+const DRILL_IN_ID = "workflows-drill-in";
+
 export function Workflows() {
   const { t } = useTranslation("workflows");
   const [dataScope] = useDataScope();
@@ -104,9 +109,30 @@ export function Workflows() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
-  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  // `?session=` (drill-in) and `?run=` (expanded Workflow-tool run) live in
+  // the URL so they can be deep-linked; in-page changes replace history.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedSessionId = searchParams.get("session");
+  const expandedRunId = searchParams.get("run");
+  const setParam = useCallback(
+    (key: "session" | "run", value: string | null) =>
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (value) next.set(key, value);
+          else next.delete(key);
+          return next;
+        },
+        { replace: true }
+      ),
+    [setSearchParams]
+  );
+  const setSelectedSessionId = useCallback(
+    (id: string | null) => setParam("session", id),
+    [setParam]
+  );
 
   const fetchData = useCallback(async () => {
     try {
@@ -128,6 +154,14 @@ export function Workflows() {
   usePaletteAction("page.refresh", () => {
     void fetchData();
   });
+
+  // Bring the drill-in into view when a session is (deep-)linked; the section
+  // only exists once the page data has loaded.
+  const hasData = data !== null;
+  useEffect(() => {
+    if (!selectedSessionId || !hasData) return;
+    document.getElementById(DRILL_IN_ID)?.scrollIntoView({ block: "start" });
+  }, [selectedSessionId, hasData]);
 
   // Auto-refresh on WebSocket events
   useEffect(() => {
@@ -162,7 +196,7 @@ export function Workflows() {
   if (loading && !data) {
     return (
       <div className="space-y-6">
-        <PageHeader
+        <Header
           statusFilter={statusFilter}
           onStatusFilterChange={setStatusFilter}
           onRefresh={handleRefresh}
@@ -184,7 +218,7 @@ export function Workflows() {
   if (error && !data) {
     return (
       <div className="space-y-6">
-        <PageHeader
+        <Header
           statusFilter={statusFilter}
           onStatusFilterChange={setStatusFilter}
           onRefresh={handleRefresh}
@@ -194,9 +228,9 @@ export function Workflows() {
         <div className="card flex flex-col items-center justify-center py-16 gap-4">
           <AlertCircle className="w-10 h-10 text-red-400" />
           <p className="text-red-400 text-sm">{error}</p>
-          <button onClick={handleRefresh} className="btn-primary text-sm">
+          <Button variant="primary" size="sm" onClick={handleRefresh}>
             {t("common:retry")}
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -207,7 +241,7 @@ export function Workflows() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <PageHeader
+      <Header
         statusFilter={statusFilter}
         onStatusFilterChange={setStatusFilter}
         onRefresh={handleRefresh}
@@ -229,7 +263,11 @@ export function Workflows() {
             </h2>
             <p className="text-xs text-gray-500 mt-0.5">{t("runs.subtitle")}</p>
           </div>
-          <WorkflowRunsPanel statusFilter={statusFilter} />
+          <WorkflowRunsPanel
+            statusFilter={statusFilter}
+            expandedRunId={expandedRunId}
+            onExpandedRunChange={(id) => setParam("run", id)}
+          />
         </div>
       )}
 
@@ -356,6 +394,7 @@ export function Workflows() {
 
       {/* Section 11: Session Drill-In */}
       <Section
+        id={DRILL_IN_ID}
         number={11}
         title={t("drillIn.title")}
         subtitle={t("drillIn.subtitle")}
@@ -373,12 +412,15 @@ export function Workflows() {
 
 // ── Section wrapper ──
 function Section({
+  id,
   number,
   title,
   subtitle,
   infoKey,
   children,
 }: {
+  /** DOM id, for scroll targets (`?session=` deep link). */
+  id?: string;
   number: number;
   title: string;
   subtitle: string;
@@ -391,7 +433,7 @@ function Section({
     // (lg:grid-cols-2), the grid's default row-stretch reaches the card itself —
     // otherwise a shorter chart (e.g. the Session Complexity Scatter) leaves its
     // card shorter than a taller companion (Compaction Impact) in the same row.
-    <div className="flex flex-col h-full">
+    <div id={id} className="flex flex-col h-full">
       <div className="flex items-center justify-between gap-4 mb-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <span className="w-5 h-5 rounded-md bg-accent/15 text-accent text-[11px] font-bold flex items-center justify-center flex-shrink-0">
@@ -526,7 +568,7 @@ function ChartInfoPopover({ infoKey, title }: { infoKey: string; title: string }
 }
 
 // ── Page Header ──
-function PageHeader({
+function Header({
   statusFilter,
   onStatusFilterChange,
   onRefresh,
@@ -548,71 +590,32 @@ function PageHeader({
   ];
 
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-      <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-accent/15 flex items-center justify-center">
-          <Workflow className="w-4.5 h-4.5 text-accent" />
-        </div>
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-lg font-semibold text-gray-100">{t("title")}</h1>
-            {wsConnected ? (
-              <span className="flex items-center gap-1.5 text-[11px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse-dot" />
-                {t("common:live")}
-              </span>
-            ) : (
-              <span className="flex items-center gap-1.5 text-[11px] text-gray-400 bg-gray-500/10 border border-gray-500/20 px-2 py-0.5 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-                {t("common:offline")}
-              </span>
-            )}
-          </div>
-          <p className="text-xs text-gray-500">{t("subtitle")}</p>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-2 flex-wrap">
-        {/* Status filter tabs */}
-        <div className="flex bg-surface-2 rounded-lg p-0.5 border border-border">
-          {filters.map((f) => (
-            <button
-              key={f.value}
-              onClick={() => onStatusFilterChange(f.value)}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                statusFilter === f.value
-                  ? "bg-accent/15 text-accent"
-                  : "text-gray-500 hover:text-gray-300"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Actions */}
-        <button
-          onClick={onRefresh}
-          className="p-2 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-surface-3 transition-colors"
-          title={t("refreshData")}
-        >
-          <RefreshCw className="w-4 h-4" />
-        </button>
-        <button
-          onClick={onExport}
-          className="p-2 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-surface-3 transition-colors"
-          title={t("exportJson")}
-        >
-          <Download className="w-4 h-4" />
-        </button>
-
-        {lastUpdated && (
-          <span className="text-[10px] text-gray-600 ml-1">
-            {t("common:updated")}
-            {lastUpdated.toLocaleTimeString()}
-          </span>
-        )}
-      </div>
-    </div>
+    <PageHeader
+      icon={Workflow}
+      title={t("title")}
+      subtitle={t("subtitle")}
+      live={wsConnected}
+      actions={
+        <>
+          <SegmentedControl
+            size="sm"
+            value={statusFilter}
+            onValueChange={onStatusFilterChange}
+            items={filters}
+            ariaLabel={t("statusFilter")}
+          />
+          <Button variant="ghost" size="sm" icon={RefreshCw} onClick={onRefresh}>
+            {t("common:refresh")}
+          </Button>
+          <IconButton icon={Download} label={t("exportJson")} size="md" onClick={onExport} />
+          {lastUpdated && (
+            <span className="text-[10px] text-gray-600 ml-1">
+              {t("common:updated")}
+              {lastUpdated.toLocaleTimeString(getCurrentLocale())}
+            </span>
+          )}
+        </>
+      }
+    />
   );
 }

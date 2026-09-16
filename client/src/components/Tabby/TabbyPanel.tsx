@@ -56,6 +56,7 @@
  * ----------------------------------------------------------------------------- */
 
 import { useState, type FormEvent, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Play,
   Activity,
@@ -70,6 +71,7 @@ import {
   Radio,
   type LucideIcon,
 } from "lucide-react";
+import { routes } from "../../lib/routes";
 import type { TabbyStatus } from "./brain";
 
 interface TabbyPanelProps {
@@ -92,6 +94,7 @@ export function TabbyPanel({
   onAsk,
   onClose,
 }: TabbyPanelProps) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [answer, setAnswer] = useState<string | null>(null);
 
@@ -106,7 +109,7 @@ export function TabbyPanel({
     <div
       className="w-72 overflow-hidden rounded-2xl border border-border-light bg-surface-2/95 shadow-2xl shadow-black/50 backdrop-blur-md animate-slide-up"
       role="dialog"
-      aria-label="Tabby companion"
+      aria-label={t("common:tabby.companion")}
     >
       {/* header */}
       <div className="flex items-center justify-between gap-2 border-b border-border/70 bg-gradient-to-r from-accent/10 to-transparent px-3.5 py-2.5">
@@ -126,13 +129,13 @@ export function TabbyPanel({
               }`}
               aria-hidden
             />
-            {status.connected ? "Live" : "Offline"}
+            {status.connected ? t("common:live") : t("common:offline")}
           </span>
         </div>
         <button
           className="rounded-md p-1 text-gray-500 transition-colors hover:bg-surface-4 hover:text-gray-200"
           onClick={onClose}
-          aria-label="Close Tabby"
+          aria-label={t("common:tabby.close")}
         >
           <X size={15} />
         </button>
@@ -143,19 +146,19 @@ export function TabbyPanel({
         <div className="mb-3 grid grid-cols-3 gap-1.5">
           <StatChip
             icon={Radio}
-            label="live"
+            label={t("common:tabby.live")}
             value={status.liveCount}
             tone={status.liveCount > 0 ? "accent" : "muted"}
           />
           <StatChip
             icon={Hourglass}
-            label="waiting"
+            label={t("common:tabby.waiting")}
             value={status.waitingCount}
             tone={status.waitingCount > 0 ? "amber" : "muted"}
           />
           <StatChip
             icon={AlertTriangle}
-            label="errored"
+            label={t("common:tabby.errored")}
             value={status.errorCount}
             tone={status.errorCount > 0 ? "red" : "muted"}
           />
@@ -163,27 +166,35 @@ export function TabbyPanel({
 
         {/* quick actions */}
         <div className="mb-3 grid grid-cols-2 gap-1.5">
-          <ActionButton icon={Play} label="Run Claude" onClick={() => onNavigate("/run")} />
-          <ActionButton icon={Activity} label="Activity" onClick={() => onNavigate("/activity")} />
+          <ActionButton
+            icon={Play}
+            label={t("common:tabby.runClaude")}
+            onClick={() => onNavigate("/run")}
+          />
+          <ActionButton
+            icon={Activity}
+            label={t("common:tabby.activity")}
+            onClick={() => onNavigate("/activity")}
+          />
           <ActionButton
             icon={LayoutList}
-            label="Sessions"
+            label={t("common:tabby.sessions")}
             onClick={() => onNavigate("/sessions")}
           />
           <ActionButton
             icon={AlertTriangle}
-            label="Errored"
+            label={t("common:tabby.erroredSessions")}
             disabled={status.errorCount === 0}
-            onClick={() => onNavigate("/sessions")}
+            onClick={() => onNavigate(routes.sessions({ status: "error" }))}
           />
           <ActionButton
             icon={muted ? BellOff : Bell}
-            label={muted ? "Unmute" : "Mute"}
+            label={muted ? t("common:tabby.unmute") : t("common:tabby.mute")}
             onClick={onToggleMute}
           />
           <ActionButton
             icon={Trash2}
-            label="Clear alerts"
+            label={t("common:tabby.clearAlerts")}
             disabled={status.errorCount === 0}
             onClick={onClearAlerts}
           />
@@ -196,12 +207,12 @@ export function TabbyPanel({
             placeholder="Ask Tabby… (e.g. any errors?)"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            aria-label="Ask Tabby"
+            aria-label={t("common:tabby.ask")}
           />
           <button
             type="submit"
             className="flex items-center justify-center rounded-lg bg-accent px-2.5 py-2 text-white transition-colors hover:bg-accent-hover"
-            aria-label="Send"
+            aria-label={t("common:tabby.send")}
           >
             <Send size={14} />
           </button>

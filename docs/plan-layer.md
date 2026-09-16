@@ -216,7 +216,7 @@ Model (`GET /api/plans/:slug/model`, WS `plan_model`):
                 "agent": "crew:coder", "agentId": "<id>", "started": "iso", "finished": null, "ms": 123456,
                 "tools": 14, "errors": 0, "note": "…", "log": [{"ts": "iso", "agent": "crew:coder", "status": "start", "note": "…"}],
                 "children": []}]}]}],
- "agents": {"<ccam id>": {"id": "…", "claudeId": "…", "type": "crew:coder", "session": "66f2a6f0", "lane": "D",
+ "agents": {"<ccam id>": {"id": "…", "claudeId": "…", "type": "crew:coder", "session": "66f2a6f0", "sessionId": "<full ccam session id>", "lane": "D",
    "story": "step-17", "title": "Demo", "start": "iso", "stop": null, "live": true,
    "waiting": {"kind": "permission", "tool": "Bash", "since": "iso"} | null, "say": "…" | null,
    "lastTs": "iso", "lastTool": "Bash", "last": "<cmd or file>", "tools": 33, "errors": 0, "box": "D1",

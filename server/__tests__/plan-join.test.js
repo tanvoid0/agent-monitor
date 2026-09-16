@@ -73,6 +73,9 @@ describe("plan join — ledgerflow fixture", () => {
     assert.equal(live.tools, 106);
     assert.equal(live.errors, 3);
     assert.equal(live.model, "claude-sonnet-5");
+    // `session` is the 8-char display prefix; `sessionId` carries the full id for links.
+    assert.equal(typeof live.sessionId, "string");
+    assert.equal(live.sessionId.slice(0, 8), live.session);
     assert.equal(live.ctxPct, 81);
     assert.equal(live.out, 3736);
     assert.ok(live.cost > 0, "cost from tokensByModel × model_pricing");

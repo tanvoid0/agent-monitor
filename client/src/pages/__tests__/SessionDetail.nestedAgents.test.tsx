@@ -1,6 +1,6 @@
 /**
  * @file SessionDetail.nestedAgents.test.tsx
- * @description Tests for SessionDetail page focusing on correct rendering of nested agent hierarchies, including edge cases like orphaned subagents and multiple main agents. Validates expand/collapse behavior and descendant counts in the UI.
+ * @description Tests for SessionDetail page focusing on correct rendering of nested agent hierarchies, including edge cases like orphaned subagents and multiple main agents. Validates expand/collapse behavior, descendant counts, and the `#agent-<id>` deep link that expands every ancestor of the targeted agent.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -106,9 +106,9 @@ vi.mock("../../lib/eventBus", () => ({
   },
 }));
 
-function renderPage() {
+function renderPage(url = "/sessions/sess-1") {
   return render(
-    <MemoryRouter initialEntries={["/sessions/sess-1"]}>
+    <MemoryRouter initialEntries={[url]}>
       <Routes>
         <Route path="/sessions/:id" element={<SessionDetail />} />
       </Routes>
@@ -298,6 +298,34 @@ describe("SessionDetail - Nested Agent Tree Rendering", () => {
     expect(await screen.findByText("Level-1")).toBeInTheDocument();
     // Level-2 is still nested under Level-1 which is collapsed
     expect(screen.getByText("1 subagent")).toBeInTheDocument();
+  });
+
+  it("expands every ancestor of the agent named in #agent-<id> and marks the wrapper", async () => {
+    // Everything is completed, so nothing auto-expands: only the deep link can
+    // reveal Level-2, and it must open Main and Level-1 on the way down.
+    mockAgents = [
+      makeAgent({ id: "main-1", name: "Main", type: "main", status: "completed" }),
+      makeAgent({
+        id: "l1",
+        name: "Level-1",
+        type: "subagent",
+        status: "completed",
+        parent_agent_id: "main-1",
+      }),
+      makeAgent({
+        id: "l2",
+        name: "Level-2",
+        type: "subagent",
+        status: "completed",
+        parent_agent_id: "l1",
+      }),
+    ];
+
+    renderPage("/sessions/sess-1?tab=agents#agent-l2");
+    const tree = await findTree();
+    await waitFor(() => expect(within(tree).getByText("Level-2")).toBeInTheDocument());
+    expect(within(tree).getByText("Level-1")).toBeInTheDocument();
+    expect(document.getElementById("agent-l2")).toContainElement(within(tree).getByText("Level-2"));
   });
 
   it("renders orphaned subagents in dedicated section", async () => {

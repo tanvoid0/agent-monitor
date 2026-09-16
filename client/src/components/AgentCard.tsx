@@ -2,9 +2,14 @@
  * @file AgentCard.tsx
  * @description Defines the AgentCard component that displays a summary of an
  * agent's name, status, task, current tool, timestamps, and native Codex
- * title plus a latest-two-human-turn context. Cards reuse session task-progress
- * donuts beside status when available. Durable cards navigate to session
- * details while the brief pre-identity Codex process card stays non-navigable.
+ * title plus a latest-two-human-turn context, with a colour-keyed project badge
+ * (open-in-file-manager for local sessions) under the header. Cards reuse
+ * session task-progress donuts beside status when available. Two densities:
+ * `variant="card"` (default, the full layout) and `variant="row"` (one line
+ * for the Dashboard tree and the Kanban rows density). Both are a `Clickable`
+ * surface with the agent context menu; the name, current tool, model and
+ * session id are `EntityRef` chips. Durable cards navigate to session details
+ * while the brief pre-identity Codex process card stays non-navigable.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -32,6 +37,7 @@
  *
  * ## Internal dependencies
  * - `./StatusBadge`
+ * - `./ui` / `./entity`
  * - `../lib/types`
  * - `../lib/format`
  *
@@ -60,12 +66,25 @@
 
 import { useTranslation } from "react-i18next";
 import { Bot, GitBranch, Clock, Wrench, Cpu, Coins } from "lucide-react";
-import { useNavigate } from "react-router";
 import { AgentStatusBadge } from "./StatusBadge";
 import { TodoProgressIndicator } from "./TodoProgressIndicator";
+import { ProjectBadge } from "./ProjectBadge";
+import { CompactRow } from "./CompactRow";
+import { Clickable, MenuButton } from "./ui";
+import { EntityRef, entityMenu } from "./entity";
+import { copyText } from "../lib/clipboard";
+import { routes } from "../lib/routes";
 import { effectiveAgentStatus, isAgentAwaitingInput, agentAwaitingReason } from "../lib/types";
 import type { Agent, Session } from "../lib/types";
-import { formatDuration, timeAgo, formatModelName, pathBasename, fmtCost } from "../lib/format";
+import {
+  formatDuration,
+  timeAgo,
+  formatModelName,
+  fmtCost,
+  promptPreviewLines,
+  isTransientProcess,
+  pathBasename,
+} from "../lib/format";
 
 /**
  * Display name for a main agent, swapping its auto-generated placeholder for the
@@ -82,56 +101,35 @@ function mainAgentDisplayName(agentName: string, realSessionName: string): strin
   return sep >= 0 ? `${agentName.slice(0, sep)} - ${realSessionName}` : agentName;
 }
 
-/** Keep a compact card's history legible: at most two distinct human turns,
- * one visual row each. This intentionally preserves a title-matching first
- * request when a terse follow-up depends on it for context. */
-function promptPreviewLines(value: string | null | undefined): string[] {
-  const seen = new Set<string>();
-  return String(value || "")
-    .split(/\n+/)
-    .map((line) => line.trim())
-    .filter((line) => {
-      const key = line.toLocaleLowerCase();
-      if (!line || seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    })
-    .slice(-2);
-}
-
 interface AgentCardProps {
   agent: Agent;
   /** Optional session data for richer main-agent rendering (model, cwd,
    *  cost). Subagent display ignores this. When omitted, the card falls
    *  back to the original minimal layout. */
   session?: Session;
+  /** Project group root (see `projectRoots`) so the badge colour matches the
+   *  board's tabs; defaults to the session's own cwd. */
+  projectRoot?: string;
   label?: string;
   onClick?: () => void;
+  /** `card` (default) is the full layout; `row` is a single line. */
+  variant?: "card" | "row";
 }
 
-function isTransientProcessCard(metadata: string | null | undefined): boolean {
-  if (!metadata) return false;
-  try {
-    return JSON.parse(metadata)?.pre_identity_process === true;
-  } catch {
-    return false;
-  }
-}
-
-export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
-  const navigate = useNavigate();
+export function AgentCard({
+  agent,
+  session,
+  projectRoot,
+  label,
+  onClick,
+  variant = "card",
+}: AgentCardProps) {
   const { t } = useTranslation("kanban");
   const isWaiting = agent.status === "waiting" || isAgentAwaitingInput(agent);
   const status = effectiveAgentStatus(agent);
   const isActive = agent.status === "working";
   const isMain = agent.type === "main";
 
-  // Session-level metadata applies to every card in the session - main and
-  // subagents alike. Subtitle differs by type: main uses model+cwd (its
-  // auto-generated name carries no info), subagents stick with their
-  // subagent_type label (more useful than repeating the session model).
-  const model = formatModelName(session?.model);
-  const cwdBase = pathBasename(session?.cwd);
   // Cost shown on the card is scoped to what the card represents: a main agent's
   // card stands in for the whole session, so it shows the session total; a
   // subagent's card shows that subagent's OWN cost (server-computed from its
@@ -166,7 +164,7 @@ export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
     ? session?.prompt_preview?.trim() || agent.task?.trim() || null
     : agent.task?.trim() || null;
   const taskPreviewLines = promptPreviewLines(taskPreview);
-  const isTransient = isTransientProcessCard(agent.metadata);
+  const isTransient = isTransientProcess(agent.metadata);
   // A subagent's own model lives in its metadata (resolved from its transcript,
   // not the parent session's — see issue #185). Use it everywhere this card
   // shows a model so a Haiku QA agent under an Opus orchestrator reads as
@@ -175,19 +173,20 @@ export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
   if (!isMain && agent.metadata) {
     try {
       const parsed = JSON.parse(agent.metadata) as { model?: string };
-      subagentModel = parsed?.model ? formatModelName(parsed.model) : null;
+      subagentModel = parsed?.model || null;
     } catch {
       subagentModel = null;
     }
   }
   // The model badge (footer) must reflect THIS card's agent: the session model
   // for main, the subagent's own model for subagents.
-  const displayModel = isMain ? model : subagentModel;
-  // Model now lives in the footer badge, so the subtitle carries project
-  // context instead: main shows cwd + how many agents the session spawned +
-  // how many turns it has run; subagents show their type + the project they ran
-  // in. (No model here — that would duplicate the footer badge, which is what
-  // main cards used to do.)
+  const modelId = (isMain ? session?.model : subagentModel) || null;
+  const displayModel = formatModelName(modelId);
+  // Model now lives in the footer badge and the project in its own badge row,
+  // so the subtitle carries what's left: for main, how many agents the session
+  // spawned + how many turns it has run; subagents show their type. (No model
+  // here — that would duplicate the footer badge, which is what main cards
+  // used to do.)
   const agentCount = typeof session?.agent_count === "number" ? session.agent_count : 0;
   // agent_count includes the main agent itself. Show how many SUBAGENTS the
   // session spawned instead, so this reconciles with the "Active Subagents"
@@ -206,34 +205,103 @@ export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
   }
   const subtitle = isMain
     ? [
-        cwdBase,
         subagentCount > 0 ? t("kanban:session.subagentSummary", { count: subagentCount }) : null,
         sessionTurns > 0 ? t("kanban:session.turnSummary", { count: sessionTurns }) : null,
       ]
         .filter(Boolean)
         .join(" · ") || null
-    : [label || agent.subagent_type, cwdBase].filter(Boolean).join(" · ") || null;
+    : label || agent.subagent_type || null;
 
-  function handleClick() {
-    if (onClick) {
-      onClick();
-    } else if (!isTransient) {
-      navigate(`/sessions/${agent.session_id}`);
-    }
+  const reason = agentAwaitingReason(agent);
+
+  // Surface click: `onClick` wins (SessionDetail opens the conversation);
+  // otherwise the session page. A transient process has no durable id yet.
+  const to = onClick || isTransient ? undefined : routes.session(agent.session_id);
+  const menu = isTransient
+    ? undefined
+    : entityMenu(
+        { kind: "agent", id: agent.id, sessionId: agent.session_id, type: agent.type },
+        { t, copy: copyText }
+      );
+  // With `onClick` given, Enter on the name must run it (SessionDetail opens
+  // the agent's conversation) rather than re-navigate to the agents tab via
+  // EntityRef's href — the kebab menu still carries the entity actions.
+  const nameRef = isTransient ? (
+    displayName
+  ) : onClick ? (
+    <button
+      type="button"
+      onClick={onClick}
+      className="text-left truncate hover:underline decoration-dotted"
+    >
+      {displayName}
+    </button>
+  ) : (
+    <EntityRef
+      kind="agent"
+      id={agent.id}
+      sessionId={agent.session_id}
+      type={agent.type}
+      mono={false}
+      className="text-gray-200"
+    >
+      {displayName}
+    </EntityRef>
+  );
+  const accent = isWaiting
+    ? "border-l-2 border-l-yellow-500/60"
+    : isActive
+      ? "border-l-2 border-l-emerald-500/50"
+      : "";
+
+  if (variant === "row") {
+    const ts = agent.ended_at || agent.last_activity || agent.updated_at || agent.started_at;
+    // Main-agent rows otherwise show only the model, unlike SessionCard's row
+    // (which always names the project) — prepend the project folder here too.
+    const projectPart = isMain ? pathBasename(session?.cwd) : null;
+    const rowSubtitle = [projectPart, isMain ? null : label || agent.subagent_type, displayModel]
+      .filter(Boolean)
+      .join(" · ");
+    return (
+      <CompactRow
+        to={to}
+        onActivate={onClick}
+        menu={menu}
+        menuLabel={t("common:ui.openMenuFor", { name: displayName })}
+        accent={accent}
+        badge={
+          <AgentStatusBadge status={status} reason={reason} provider={session?.provider} compact />
+        }
+        name={nameRef}
+        subtitle={rowSubtitle}
+        subtitleTitle={projectPart ? (session?.cwd ?? undefined) : undefined}
+        chip={
+          agent.current_tool && (
+            <EntityRef
+              kind="tool"
+              name={agent.current_tool}
+              sessionId={agent.session_id}
+              className="max-w-[8rem] min-w-0"
+            />
+          )
+        }
+        progress={
+          session?.todo_summary && <TodoProgressIndicator progress={session.todo_summary} />
+        }
+        ts={ts}
+      />
+    );
   }
 
+  // Card layout is block-level, so the kebab lives in the header cluster
+  // instead of Clickable's default last-child slot.
   return (
-    <div
-      onClick={handleClick}
-      className={`card-hover p-4 overflow-hidden ${
-        isTransient ? "cursor-default" : "cursor-pointer"
-      } ${
-        isWaiting
-          ? "border-l-2 border-l-yellow-500/60"
-          : isActive
-            ? "border-l-2 border-l-emerald-500/50"
-            : ""
-      }`}
+    <Clickable
+      to={to}
+      onActivate={onClick}
+      menu={menu}
+      kebab={false}
+      className={`group card-hover p-4 overflow-hidden ${isTransient ? "cursor-default" : ""} ${accent}`}
     >
       <div className="flex items-start justify-between gap-2 mb-3 min-w-0">
         <div className="flex items-center gap-2.5 min-w-0 overflow-hidden">
@@ -251,7 +319,7 @@ export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
                   placeholder for the real session name when one exists. Codex
                   main agents use their native renamed title (or short ID) so
                   a board never shows a bare, indistinguishable "Codex". */}
-              {displayName}
+              {nameRef}
             </p>
             {subtitle && <p className="text-[11px] text-gray-500 truncate">{subtitle}</p>}
           </div>
@@ -262,14 +330,23 @@ export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
           {session?.todo_summary && (
             <TodoProgressIndicator progress={session.todo_summary} stopClickPropagation />
           )}
-          <AgentStatusBadge
-            status={status}
-            reason={agentAwaitingReason(agent)}
-            provider={session?.provider}
-            compact
-          />
+          <AgentStatusBadge status={status} reason={reason} provider={session?.provider} compact />
+          {menu && (
+            <MenuButton
+              size="xs"
+              items={menu}
+              label={t("common:ui.openMenuFor", { name: displayName })}
+              reveal
+            />
+          )}
         </div>
       </div>
+
+      {session?.cwd && (
+        <div className="mb-3 flex min-w-0">
+          <ProjectBadge cwd={session.cwd} root={projectRoot} source={session.source} />
+        </div>
+      )}
 
       {taskPreviewLines.length > 0 && (
         <div className="mb-3 space-y-1 border-l-2 border-accent/25 pl-2.5">
@@ -289,17 +366,19 @@ export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
         {agent.current_tool && (
           <span className="flex items-center gap-1 flex-shrink-0">
             <Wrench className="w-3 h-3" />
-            {agent.current_tool}
+            <EntityRef kind="tool" name={agent.current_tool} sessionId={agent.session_id} />
           </span>
         )}
         {/* Model badge - shown on every card when no tool is currently
             running (avoids clutter on actively-running agents that already
             display the running tool name). Uses the agent's OWN model:
             session model for main, the subagent's resolved model otherwise. */}
-        {displayModel && !agent.current_tool && (
+        {modelId && displayModel && !agent.current_tool && (
           <span className="flex items-center gap-1 flex-shrink-0">
             <Cpu className="w-3 h-3" />
-            {displayModel}
+            <EntityRef kind="model" model={modelId}>
+              {displayModel}
+            </EntityRef>
           </span>
         )}
         {cost > 0 && (
@@ -327,9 +406,19 @@ export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
           {realSessionName && !isCodexMain && (
             <span className="truncate max-w-[10rem]">{realSessionName} ·</span>
           )}
-          <span className="font-mono flex-shrink-0">{agent.session_id.slice(0, 8)}</span>
+          <EntityRef
+            kind="session"
+            id={agent.session_id}
+            name={session?.name}
+            cwd={session?.cwd}
+            source={session?.source}
+            transient={isTransient}
+            className="flex-shrink-0"
+          >
+            {agent.session_id.slice(0, 8)}
+          </EntityRef>
         </span>
       </div>
-    </div>
+    </Clickable>
   );
 }

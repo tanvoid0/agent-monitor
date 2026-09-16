@@ -135,18 +135,15 @@ export function AgentStatusBadge({
   const shouldPulse = pulse ?? (status === "working" || status === "waiting");
   // Only decorate the Waiting overlay - a reason on any other status is stale.
   const shownReason = status === "waiting" && reason ? reason : null;
+  const reasonText = shownReason
+    ? t(AWAITING_REASON_CONFIG[shownReason].descKey, {
+        provider: provider === "codex" ? "Codex" : "Claude",
+      })
+    : undefined;
 
   return (
     // Tip renders children unwrapped when raw is undefined (non-waiting rows).
-    <Tip
-      raw={
-        shownReason
-          ? t(AWAITING_REASON_CONFIG[shownReason].descKey, {
-              provider: provider === "codex" ? "Codex" : "Claude",
-            })
-          : undefined
-      }
-    >
+    <Tip raw={reasonText}>
       <span className={`badge ${config.bg} ${config.color}`}>
         <span
           className={`w-1.5 h-1.5 rounded-full ${config.dot} ${
@@ -155,6 +152,7 @@ export function AgentStatusBadge({
         />
         {t(config.labelKey)}
         {shownReason && !compact && <ReasonChip reason={shownReason} />}
+        {compact && shownReason && <span className="sr-only">{reasonText}</span>}
       </span>
     </Tip>
   );
@@ -185,16 +183,13 @@ export function SessionStatusBadge({
   const config = SESSION_STATUS_CONFIG[status];
   const shouldPulse = pulse ?? status === "waiting";
   const shownReason = status === "waiting" && reason ? reason : null;
+  const reasonText = shownReason
+    ? t(AWAITING_REASON_CONFIG[shownReason].descKey, {
+        provider: provider === "codex" ? "Codex" : "Claude",
+      })
+    : undefined;
   return (
-    <Tip
-      raw={
-        shownReason
-          ? t(AWAITING_REASON_CONFIG[shownReason].descKey, {
-              provider: provider === "codex" ? "Codex" : "Claude",
-            })
-          : undefined
-      }
-    >
+    <Tip raw={reasonText}>
       <span className={`badge ${config.bg} ${config.color}`}>
         {shouldPulse && (
           <span
@@ -204,6 +199,7 @@ export function SessionStatusBadge({
         )}
         {t(config.labelKey)}
         {shownReason && !compact && <ReasonChip reason={shownReason} />}
+        {compact && shownReason && <span className="sr-only">{reasonText}</span>}
       </span>
     </Tip>
   );

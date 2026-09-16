@@ -3,8 +3,13 @@
  * @description Kanban-style board with two views: agents grouped by their
  * AgentStatus (working/waiting/completed/error) or sessions grouped
  * by their SessionStatus (active/completed/error/abandoned). The view toggle
- * is persisted in localStorage so the user's choice survives reloads. Each
- * column paginates client-side at COLUMN_PAGE_SIZE.
+ * (`?view=`) and card density (`?density=cards|rows`) are persisted in
+ * localStorage so the user's choice survives reloads. A strip of project tabs
+ * (`?project=<group root>` — a raw cwd folds onto its root, "All projects" by
+ * default) narrows either board to one project group, every card carries a
+ * colour-keyed project badge, and each column's count links to the sessions
+ * list pre-filtered by that status and project. Each column paginates
+ * client-side at COLUMN_PAGE_SIZE.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -64,7 +69,8 @@
 
 import { useEffect, useState, useCallback, useMemo, useRef, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
-import { RefreshCw, Columns3, ChevronDown, HelpCircle } from "lucide-react";
+import { Link, useSearchParams } from "react-router";
+import { RefreshCw, Columns3, ChevronDown, HelpCircle, Layers } from "lucide-react";
 import { api } from "../lib/api";
 import { useUrlTab } from "../hooks/usePageShortcuts";
 import { usePaletteAction } from "../components/PaletteActionProvider";
@@ -73,8 +79,11 @@ import { eventBus } from "../lib/eventBus";
 import { isRemoteDataRefreshMessage } from "../lib/remoteDataEvents";
 import { AgentCard } from "../components/AgentCard";
 import { SessionCard } from "../components/SessionCard";
+import { projectRoots, projectLabel, projectColor } from "../components/ProjectBadge";
 import { EmptyState } from "../components/EmptyState";
 import { CardSkeleton } from "../components/Skeleton";
+import { Badge, Button, PageHeader, SegmentedControl } from "../components/ui";
+import { routes } from "../lib/routes";
 import {
   STATUS_CONFIG,
   SESSION_STATUS_CONFIG,
@@ -93,6 +102,8 @@ import type {
 /** Board views in render order — also the order `1`/`2` and `[`/`]` address them. */
 const BOARD_VIEWS = ["agents", "sessions"] as const;
 type BoardView = (typeof BOARD_VIEWS)[number];
+/** Card densities: the full card or a one-line row. */
+const DENSITIES = ["cards", "rows"] as const;
 
 // Persisted statuses we fetch from the API.
 const AGENT_FETCH_STATUSES: AgentStatus[] = ["working", "waiting", "completed", "error"];
@@ -118,10 +129,35 @@ export function KanbanBoard() {
     param: "view",
     storageKey: VIEW_STORAGE_KEY,
   });
+  const [density, setDensity] = useUrlTab(DENSITIES, "cards", {
+    param: "density",
+    storageKey: "kanban-density",
+  });
+  const cardVariant = density === "rows" ? "row" : "card";
   const [agents, setAgents] = useState<Agent[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Record<string, number>>({});
+  // `?project=<group root>` narrows both boards to one project group; absent
+  // means every project in one place. URL-only (no localStorage) so a fresh
+  // visit always starts from the whole picture.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const project = searchParams.get("project") ?? "";
+  const setProject = useCallback(
+    (root: string) => {
+      setSearchParams(
+        (previous) => {
+          const next = new URLSearchParams(previous);
+          if (root) next.set("project", root);
+          else next.delete("project");
+          return next;
+        },
+        { replace: true }
+      );
+      setExpanded({});
+    },
+    [setSearchParams]
+  );
 
   const setView = useCallback(
     (next: BoardView) => {
@@ -223,6 +259,42 @@ export function KanbanBoard() {
     return map;
   }, [sessions]);
 
+  // cwd → project group root (nested cwds and worktrees fold onto the shortest
+  // known ancestor), shared by the tabs and every card's badge colour.
+  const rootByCwd = useMemo(() => projectRoots(sessions.map((s) => s.cwd)), [sessions]);
+  const rootOfSession = (s: Session | undefined) => (s?.cwd ? rootByCwd.get(s.cwd) : undefined);
+  const rootOfAgent = (a: Agent) => rootOfSession(sessionsById.get(a.session_id));
+
+  // One tab per group, counted in the active view and ordered by label so the
+  // strip stays put as counts move.
+  const projectCounts = new Map<string, number>();
+  for (const root of rootByCwd.values()) projectCounts.set(root, 0);
+  const bump = (root: string | undefined) => {
+    if (root) projectCounts.set(root, (projectCounts.get(root) ?? 0) + 1);
+  };
+  if (view === "agents") agents.forEach((a) => bump(rootOfAgent(a)));
+  else sessions.forEach((s) => bump(rootOfSession(s)));
+  const projectTabs = [...projectCounts]
+    .map(([root, count]) => ({ root, count, label: projectLabel(root) }))
+    .sort((a, b) => a.label.localeCompare(b.label) || a.root.localeCompare(b.root));
+
+  // `?project=` is a group root, but links from elsewhere may carry a raw cwd —
+  // fold it onto its root. A value nobody has any more (stale link, purged data)
+  // would leave an empty board with no tab selected — fall back to every
+  // project instead.
+  const activeProject = projectCounts.has(project) ? project : (rootByCwd.get(project) ?? "");
+  // /api/sessions matches `cwd IN (...)` on the stored string, so links must
+  // carry every raw cwd that folds onto the active root, not the root itself.
+  const activeProjectCwds = activeProject
+    ? [...new Set([...rootByCwd].filter(([, r]) => r === activeProject).map(([c]) => c))]
+    : undefined;
+  const visibleAgents = activeProject
+    ? agents.filter((a) => rootOfAgent(a) === activeProject)
+    : agents;
+  const visibleSessions = activeProject
+    ? sessions.filter((s) => rootOfSession(s) === activeProject)
+    : sessions;
+
   // Bucket by effective status: agents with status "waiting" OR those with
   // awaiting_input_since set go into the "waiting" column. Other columns
   // exclude agents that belong in "waiting".
@@ -232,8 +304,8 @@ export function KanbanBoard() {
     (acc, status) => {
       acc[status] =
         status === "waiting"
-          ? agents.filter(isEffectivelyWaiting)
-          : agents.filter((a) => a.status === status && !isEffectivelyWaiting(a));
+          ? visibleAgents.filter(isEffectivelyWaiting)
+          : visibleAgents.filter((a) => a.status === status && !isEffectivelyWaiting(a));
       return acc;
     },
     {} as Record<EffectiveAgentStatus, Agent[]>
@@ -243,14 +315,14 @@ export function KanbanBoard() {
     (acc, status) => {
       acc[status] =
         status === "waiting"
-          ? sessions.filter(isSessionAwaitingInput)
-          : sessions.filter((s) => s.status === status && !isSessionAwaitingInput(s));
+          ? visibleSessions.filter(isSessionAwaitingInput)
+          : visibleSessions.filter((s) => s.status === status && !isSessionAwaitingInput(s));
       return acc;
     },
     {} as Record<EffectiveSessionStatus, Session[]>
   );
 
-  const total = view === "agents" ? agents.length : sessions.length;
+  const total = view === "agents" ? visibleAgents.length : visibleSessions.length;
   const subtitle =
     view === "agents"
       ? t("agentCount", { count: agents.length })
@@ -259,35 +331,43 @@ export function KanbanBoard() {
   const wsConnected = useSyncExternalStore(eventBus.onConnection, () => eventBus.connected);
 
   const Header = (
-    <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
-      <div className="flex items-center gap-3 min-w-0">
-        <div className="w-9 h-9 rounded-xl bg-accent/15 flex items-center justify-center flex-shrink-0">
-          <Columns3 className="w-4.5 h-4.5 text-accent" />
-        </div>
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <h1 className="text-lg font-semibold text-gray-100 truncate">{t("title")}</h1>
-            {wsConnected ? (
-              <span className="flex items-center gap-1.5 text-[11px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse-dot" />
-                {t("common:live")}
-              </span>
-            ) : (
-              <span className="flex items-center gap-1.5 text-[11px] text-gray-400 bg-gray-500/10 border border-gray-500/20 px-2 py-0.5 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-                {t("common:offline")}
-              </span>
-            )}
-          </div>
-          <p className="text-xs text-gray-500 truncate">{subtitle}</p>
-        </div>
-      </div>
-      <div className="flex items-center gap-2 flex-shrink-0">
-        <ViewToggle view={view} onChange={setView} />
-        <button onClick={load} className="btn-ghost flex-shrink-0">
-          <RefreshCw className="w-4 h-4" /> {t("common:refresh")}
-        </button>
-      </div>
+    <div className="mb-8">
+      <PageHeader
+        icon={Columns3}
+        title={t("title")}
+        subtitle={subtitle}
+        live={wsConnected}
+        actions={
+          <>
+            <SegmentedControl
+              size="sm"
+              value={view}
+              onValueChange={setView}
+              ariaLabel={t("viewToggle.label")}
+              items={BOARD_VIEWS.map((v) => ({ value: v, label: t(`viewToggle.${v}`) }))}
+            />
+            <SegmentedControl
+              size="sm"
+              value={density}
+              onValueChange={setDensity}
+              ariaLabel={t("density.label")}
+              items={DENSITIES.map((d) => ({ value: d, label: t(`common:ui.density.${d}`) }))}
+            />
+            <Button variant="ghost" icon={RefreshCw} onClick={load} className="flex-shrink-0">
+              {t("common:refresh")}
+            </Button>
+          </>
+        }
+      >
+        {projectTabs.length > 0 && (
+          <ProjectTabs
+            tabs={projectTabs}
+            active={activeProject}
+            total={view === "agents" ? agents.length : sessions.length}
+            onChange={setProject}
+          />
+        )}
+      </PageHeader>
     </div>
   );
 
@@ -301,9 +381,9 @@ export function KanbanBoard() {
             title={view === "agents" ? t("noAgents") : t("noSessions")}
             description={view === "agents" ? t("noAgentsDesc") : t("noSessionsDesc")}
             action={
-              <button onClick={load} className="btn-primary">
-                <RefreshCw className="w-4 h-4" /> {t("common:refresh")}
-              </button>
+              <Button variant="primary" icon={RefreshCw} onClick={load}>
+                {t("common:refresh")}
+              </Button>
             }
           />
         </div>
@@ -329,6 +409,11 @@ export function KanbanBoard() {
                   dotClass={config.dot}
                   pulse={status === "working" || status === "waiting"}
                   count={items?.length ?? 0}
+                  countHref={routes.sessions({
+                    status: status === "working" ? "active" : status,
+                    cwd: activeProjectCwds,
+                  })}
+                  countKind="agent"
                   emptyLabel={t("noAgentsInColumn")}
                   tooltip={t(`tooltip.agent.${status}`)}
                   remaining={Math.max(0, (items?.length ?? 0) - limit)}
@@ -348,8 +433,10 @@ export function KanbanBoard() {
                         .map((agent) => (
                           <AgentCard
                             key={agent.id}
+                            variant={cardVariant}
                             agent={agent}
                             session={sessionsById.get(agent.session_id)}
+                            projectRoot={rootOfAgent(agent)}
                           />
                         ))}
                 </Column>
@@ -367,6 +454,8 @@ export function KanbanBoard() {
                   dotClass={config.dot}
                   pulse={status === "active" || status === "waiting"}
                   count={items?.length ?? 0}
+                  countHref={routes.sessions({ status, cwd: activeProjectCwds })}
+                  countKind="session"
                   emptyLabel={t("noSessionsInColumn")}
                   tooltip={t(`tooltip.session.${status}`)}
                   remaining={Math.max(0, (items?.length ?? 0) - limit)}
@@ -383,7 +472,14 @@ export function KanbanBoard() {
                       ))
                     : items
                         ?.slice(0, limit)
-                        .map((session) => <SessionCard key={session.id} session={session} />)}
+                        .map((session) => (
+                          <SessionCard
+                            key={session.id}
+                            variant={cardVariant}
+                            session={session}
+                            projectRoot={rootOfSession(session)}
+                          />
+                        ))}
                 </Column>
               );
             })}
@@ -392,44 +488,57 @@ export function KanbanBoard() {
   );
 }
 
-interface ViewToggleProps {
-  view: BoardView;
-  onChange: (next: BoardView) => void;
+interface ProjectTabsProps {
+  tabs: { root: string; label: string; count: number }[];
+  /** Active group root; `""` is the all-projects tab. */
+  active: string;
+  total: number;
+  onChange: (root: string) => void;
 }
 
-function ViewToggle({ view, onChange }: ViewToggleProps) {
+/** "All projects" plus one chip per project group, colour-dotted to match the
+ *  cards' badges. Scrolls horizontally rather than wrapping so the board keeps
+ *  its height when a machine has dozens of projects. */
+function ProjectTabs({ tabs, active, total, onChange }: ProjectTabsProps) {
   const { t } = useTranslation("kanban");
-  const baseClass =
-    "px-3 py-1.5 text-xs font-medium transition-colors first:rounded-l-lg last:rounded-r-lg";
-  const activeClass = "bg-accent/15 text-accent";
-  const inactiveClass = "text-gray-400 hover:text-gray-200 hover:bg-surface-3";
-
+  const chip = (selected: boolean) =>
+    `flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium border whitespace-nowrap transition-colors ${
+      selected
+        ? "bg-accent/15 text-accent border-accent/30"
+        : "border-border text-gray-400 hover:text-gray-200 hover:bg-surface-3"
+    }`;
   return (
     <div
       role="tablist"
-      aria-label={t("viewToggle.agents") + " / " + t("viewToggle.sessions")}
-      className="inline-flex border border-border rounded-lg overflow-hidden bg-surface-2"
+      aria-label={t("projects.all")}
+      className="basis-full flex gap-1.5 overflow-x-auto pb-1 -mb-1"
     >
       <button
         type="button"
         role="tab"
-        aria-selected={view === "agents"}
-        onClick={() => onChange("agents")}
-        className={`${baseClass} ${view === "agents" ? activeClass : inactiveClass}`}
+        aria-selected={active === ""}
+        onClick={() => onChange("")}
+        className={chip(active === "")}
       >
-        {t("viewToggle.agents")}
+        <Layers className="w-3 h-3" />
+        {t("projects.all")}
+        <Badge size="xs">{total}</Badge>
       </button>
-      <button
-        type="button"
-        role="tab"
-        aria-selected={view === "sessions"}
-        onClick={() => onChange("sessions")}
-        className={`${baseClass} border-l border-border ${
-          view === "sessions" ? activeClass : inactiveClass
-        }`}
-      >
-        {t("viewToggle.sessions")}
-      </button>
+      {tabs.map(({ root, label, count }) => (
+        <button
+          key={root}
+          type="button"
+          role="tab"
+          aria-selected={active === root}
+          onClick={() => onChange(root)}
+          title={root}
+          className={chip(active === root)}
+        >
+          <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${projectColor(root).dot}`} />
+          {label}
+          <Badge size="xs">{count}</Badge>
+        </button>
+      ))}
     </div>
   );
 }
@@ -440,6 +549,11 @@ interface ColumnProps {
   dotClass: string;
   pulse: boolean;
   count: number;
+  /** Sessions list pre-filtered to this column (status + active project). */
+  countHref: string;
+  /** Which count noun the "view all" link's `count` refers to, for its
+   *  accessible name (the link itself shows only the bare number). */
+  countKind: "agent" | "session";
   emptyLabel: string;
   /** Multi-line description rendered in a tooltip when the user hovers
    *  the column's help icon. Pass an empty string to suppress the icon. */
@@ -455,6 +569,8 @@ function Column({
   dotClass,
   pulse,
   count,
+  countHref,
+  countKind,
   emptyLabel,
   tooltip,
   remaining,
@@ -473,9 +589,16 @@ function Column({
           {t(labelKey)}
         </span>
         {tooltip && <ColumnHelp text={tooltip} />}
-        <span className="ml-auto text-[11px] text-gray-600 bg-surface-3 px-2 py-0.5 rounded-full">
+        <Link
+          to={countHref}
+          aria-label={t(countKind === "agent" ? "columnCountLinkAgents" : "columnCountLink", {
+            count,
+            status: t(labelKey),
+          })}
+          className="ml-auto text-[11px] text-gray-400 hover:text-gray-200 bg-surface-3 px-2 py-0.5 rounded-full transition-colors"
+        >
           {count}
-        </span>
+        </Link>
       </div>
 
       <div className="flex-1 space-y-2.5 overflow-y-auto">
@@ -483,13 +606,15 @@ function Column({
           <>
             {children}
             {remaining > 0 && (
-              <button
+              <Button
+                variant="ghost"
+                size="xs"
+                icon={ChevronDown}
                 onClick={onShowMore}
-                className="w-full py-2 text-[11px] text-gray-500 hover:text-gray-300 flex items-center justify-center gap-1 transition-colors"
+                className="w-full text-[11px] text-gray-500"
               >
-                <ChevronDown className="w-3 h-3" />
                 {t("common:showMore", { count: remaining })}
-              </button>
+              </Button>
             )}
           </>
         ) : (

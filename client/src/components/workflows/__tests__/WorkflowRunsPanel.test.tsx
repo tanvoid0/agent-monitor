@@ -136,7 +136,9 @@ describe("WorkflowRunsPanel", () => {
 
   it("marks a running workflow as running", () => {
     renderPanel([makeRun({ status: "running", name: "live-run" })]);
-    const header = screen.getByRole("button", { name: /live-run/ });
+    // The expander button is the chevron; the status badge sits beside it in
+    // the Clickable header row.
+    const header = screen.getByRole("button", { name: /live-run/ }).closest("div")!;
     expect(within(header).getByText("Running")).toBeInTheDocument();
   });
 });

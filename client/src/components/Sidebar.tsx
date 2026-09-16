@@ -89,6 +89,7 @@ import { api } from "../lib/api";
 import { eventBus } from "../lib/eventBus";
 import type { UpdateStatusPayload, WSMessage } from "../lib/types";
 import { Select } from "./Select";
+import { EntityRef } from "./entity";
 import { UPDATE_CHECK_EVENT } from "../lib/appEvents";
 
 function isUpdatePayload(x: unknown): x is UpdateStatusPayload {
@@ -570,7 +571,9 @@ export function Sidebar({ wsConnected, collapsed, onToggle }: SidebarProps) {
           </div>
           {!collapsed && (
             <div className="min-w-0">
-              <h1 className="text-sm font-semibold text-gray-100 truncate">{t("nav:brand")}</h1>
+              <span className="block text-sm font-semibold text-gray-100 truncate">
+                {t("nav:brand")}
+              </span>
               <p className="text-[11px] text-gray-500">{t("nav:brandSub")}</p>
             </div>
           )}
@@ -934,7 +937,8 @@ function ConnectionStatusModal({
       aria-modal="true"
       aria-labelledby="connection-status-title"
       onClick={(e) => {
-        if (e.target === e.currentTarget) close();
+        // Backdrop click, or following an event-type link (chip or its menu), closes the modal.
+        if (e.target === e.currentTarget || (e.target as Element).closest("a")) close();
       }}
     >
       <div className="w-full max-w-md card shadow-2xl animate-slide-up overflow-hidden flex flex-col max-h-[85vh]">
@@ -1058,7 +1062,12 @@ function ConnectionStatusModal({
                     key={`${evt.at}-${i}`}
                     className="flex items-center justify-between gap-3 text-[11px] font-mono px-2 py-1 rounded bg-surface-2/50"
                   >
-                    <span className="text-gray-200 truncate">{evt.type}</span>
+                    <EntityRef
+                      kind="eventType"
+                      type={evt.type}
+                      menu={false}
+                      className="text-gray-200"
+                    />
                     <span className="text-gray-500 flex-shrink-0">{formatRelative(evt.at, t)}</span>
                   </li>
                 ))}
@@ -1148,7 +1157,7 @@ function TypeBar({
   return (
     <div className="text-[11px]">
       <div className="flex items-center justify-between gap-2 mb-0.5">
-        <span className="font-mono text-gray-200 truncate">{type}</span>
+        <EntityRef kind="eventType" type={type} menu={false} className="text-gray-200" />
         <span className="text-gray-500 flex-shrink-0 font-mono">
           {count} · {sharePct}%
         </span>

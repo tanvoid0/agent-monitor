@@ -98,7 +98,10 @@ export interface PlanAgent {
   /** `claude_agent_id` from the §4.1 bind — v3 only. */
   claudeId?: string | null;
   type: string;
+  /** First 8 chars of the session id (display). */
   session: string;
+  /** Full session id, for links and `EntityRef`. */
+  sessionId: string;
   lane: string | null;
   story: string | null;
   title: string;

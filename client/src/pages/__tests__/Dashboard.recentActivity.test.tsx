@@ -5,12 +5,13 @@
  * PreToolUse, so every other event — and every Codex-native event type — got a
  * misleading yellow "Waiting" badge. Each row must now carry the badge the
  * shared mapping produces, matching what Activity Feed and Session Detail show
- * for the same event.
+ * for the same event. Also covers the row's deep link (session at event),
+ * its session/tool EntityRef chips and the event context menu.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { Dashboard } from "../Dashboard";
 import type { DashboardEvent } from "../../lib/types";
@@ -133,6 +134,39 @@ describe("Dashboard - Recent Activity status badges", () => {
     expect(await badgeFor("Bash finished")).toBe("Waiting");
     // Previously "Waiting" here but "Completed" on the Activity Feed.
     expect(await badgeFor("Subagent handed back")).toBe("Completed");
+  });
+
+  it("makes each row a deep link to the event with session and tool chips", async () => {
+    mockEvents = [
+      makeEvent({
+        id: 2,
+        event_type: "codex_tool_call",
+        summary: "Called exec",
+        tool_name: "Bash",
+      }),
+    ];
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>
+    );
+    const row = (await screen.findByText("Called exec")).closest("div.px-4") as HTMLElement;
+    // Right-click / kebab menu is the event menu; the chips link by reference.
+    expect(row).toHaveAttribute("data-menu", "");
+    expect(within(row).getByRole("link", { name: "sess-cod" })).toHaveAttribute(
+      "href",
+      "/sessions/sess-codex"
+    );
+    expect(within(row).getByRole("link", { name: "Bash" })).toHaveAttribute(
+      "href",
+      "/activity?session_id=sess-codex&tool_name=Bash"
+    );
+    fireEvent.contextMenu(screen.getByText("Called exec"));
+    expect(await screen.findByRole("menu")).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "Open timeline" })).toHaveAttribute(
+      "href",
+      "/sessions/sess-codex?tab=timeline&event=2"
+    );
   });
 
   it("surfaces failures, whether typed or only described in the summary", async () => {

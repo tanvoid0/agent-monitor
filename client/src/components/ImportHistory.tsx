@@ -90,6 +90,7 @@ import {
 import { api, type ImportResult, type ImportBackupResult, type RunProvider } from "../lib/api";
 import { eventBus } from "../lib/eventBus";
 import type { WSMessage, ImportProgressMessage } from "../lib/types";
+import { EntityRef } from "./entity";
 
 type Mode = "rescan" | "path" | "upload" | "backup";
 
@@ -727,7 +728,14 @@ export function ImportHistory() {
             {typeof result.files_scanned === "number" && (
               <p className="text-[11px] text-gray-500">
                 {t("import.result.filesScanned", { count: result.files_scanned })}
-                {result.path ? ` · ${result.path}` : ""}
+                {result.path ? (
+                  <>
+                    {" · "}
+                    <EntityRef kind="project" cwd={result.path} className="text-gray-500">
+                      {result.path}
+                    </EntityRef>
+                  </>
+                ) : null}
               </p>
             )}
           </div>

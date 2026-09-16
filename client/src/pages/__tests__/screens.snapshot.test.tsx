@@ -468,9 +468,21 @@ async function settle() {
   });
 }
 
+// Radix TabsContent suppresses its mount animation with an inline
+// `animation-duration: 0s` held in a ref that flips on the next animation
+// frame — so whether the attribute is still present depends on whether any
+// re-render landed after that frame, which varies with machine load. Drop it
+// so snapshots are timing-independent.
+function stripMountAnimationStyle(container: HTMLElement) {
+  for (const panel of container.querySelectorAll<HTMLElement>('[role="tabpanel"]')) {
+    if (panel.style.animationDuration === "0s") panel.style.removeProperty("animation-duration");
+  }
+}
+
 async function snapshot(ui: ReactNode, route = "/") {
   const { container } = render(<MemoryRouter initialEntries={[route]}>{ui}</MemoryRouter>);
   await settle();
+  stripMountAnimationStyle(container);
   expect(container).toMatchSnapshot();
 }
 

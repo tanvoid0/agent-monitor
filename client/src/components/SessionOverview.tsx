@@ -2,9 +2,10 @@
  * @file SessionOverview.tsx
  * @description Real-time stats panel rendered at the top of the Agents tab on the
  * Session detail page. Shows tile counters (events, tool calls, subagents, errors,
- * compactions, duration), top-tool usage bars, subagent-type breakdown, and a token
- * flow strip. Live-refreshes on `new_event` (debounced) so counters track the running
- * session without spamming the backend.
+ * compactions, duration), top-tool usage bars (each tool an EntityRef into the
+ * Activity feed), subagent-type breakdown, and a token flow strip. Live-refreshes on
+ * `new_event` (debounced) so counters track the running session without spamming the
+ * backend.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -61,6 +62,7 @@
  * ----------------------------------------------------------------------------- */
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Activity,
   Wrench,
@@ -76,6 +78,8 @@ import { eventBus } from "../lib/eventBus";
 import { isRemoteDataRefreshMessage } from "../lib/remoteDataEvents";
 import { fmt, formatDuration } from "../lib/format";
 import { styleForTool } from "./conversation/toolStyle";
+import { EntityRef } from "./entity";
+import { SectionHeader } from "./ui";
 import type { Agent, Session, SessionStats } from "../lib/types";
 
 interface SessionOverviewProps {
@@ -134,7 +138,17 @@ function StatTile({
   );
 }
 
-function ToolUsageRow({ toolName, count, max }: { toolName: string; count: number; max: number }) {
+function ToolUsageRow({
+  toolName,
+  sessionId,
+  count,
+  max,
+}: {
+  toolName: string;
+  sessionId: string;
+  count: number;
+  max: number;
+}) {
   const style = styleForTool(toolName);
   const Icon = style.Icon;
   const pct = max > 0 ? Math.max(2, Math.round((count / max) * 100)) : 0;
@@ -147,9 +161,12 @@ function ToolUsageRow({ toolName, count, max }: { toolName: string; count: numbe
         >
           <Icon className="w-3 h-3" />
         </span>
-        <span className="font-mono text-xs truncate" title={toolName}>
-          {toolName}
-        </span>
+        <EntityRef
+          kind="tool"
+          name={toolName}
+          sessionId={sessionId}
+          className={`text-xs ${style.text}`}
+        />
       </div>
       <div className="flex-1 h-1.5 rounded-full bg-surface-3/60 overflow-hidden">
         <div
@@ -165,6 +182,7 @@ function ToolUsageRow({ toolName, count, max }: { toolName: string; count: numbe
 }
 
 export function SessionOverview({ session, agents }: SessionOverviewProps) {
+  const { t } = useTranslation("sessions");
   const [stats, setStats] = useState<SessionStats | null>(null);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fetchingRef = useRef(false);
@@ -294,12 +312,17 @@ export function SessionOverview({ session, agents }: SessionOverviewProps) {
           </span>
           <Bot className="w-3.5 h-3.5 text-emerald-300 flex-shrink-0" />
           <span className="text-xs text-emerald-200 font-medium flex-shrink-0">
-            {activeAgent.name || "Agent"}
+            {activeAgent.name || t("detail.overview.agentFallback")}
           </span>
           {activeAgent.current_tool && (
             <span className="text-[11px] text-gray-400 font-mono inline-flex items-center gap-1">
-              <span className="text-gray-600">running</span>
-              <span className="text-emerald-300">{activeAgent.current_tool}</span>
+              <span className="text-gray-600">{t("common:running")}</span>
+              <EntityRef
+                kind="tool"
+                name={activeAgent.current_tool}
+                sessionId={session.id}
+                className="text-emerald-300"
+              />
             </span>
           )}
           {activeAgent.task && (
@@ -313,45 +336,55 @@ export function SessionOverview({ session, agents }: SessionOverviewProps) {
       {/* Stat tiles */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
         <StatTile
-          label="Events"
+          label={t("detail.overview.events")}
           value={stats.total_events.toLocaleString()}
           hint={
             eventRate !== null && eventRate > 0
-              ? `${eventRate < 1 ? eventRate.toFixed(2) : Math.round(eventRate)}/min`
+              ? t("detail.overview.perMinute", {
+                  rate: eventRate < 1 ? eventRate.toFixed(2) : Math.round(eventRate),
+                })
               : undefined
           }
           icon={<Activity className="w-3 h-3" />}
         />
         <StatTile
-          label="Tool calls"
+          label={t("detail.overview.toolCalls")}
           value={toolCallCount.toLocaleString()}
-          hint={stats.tools_used.length > 0 ? `${stats.tools_used.length} unique` : undefined}
+          hint={
+            stats.tools_used.length > 0
+              ? t("detail.overview.uniqueTools", { count: stats.tools_used.length })
+              : undefined
+          }
           icon={<Wrench className="w-3 h-3" />}
           tone="violet"
         />
         <StatTile
-          label="Subagents"
+          label={t("detail.overview.subagents")}
           value={stats.agents.subagent.toLocaleString()}
-          hint={stats.agents.main > 0 ? `+${stats.agents.main} main` : undefined}
+          hint={
+            stats.agents.main > 0
+              ? t("detail.overview.plusMain", { count: stats.agents.main })
+              : undefined
+          }
           icon={<GitBranch className="w-3 h-3" />}
           tone="cyan"
         />
         <StatTile
-          label="Compactions"
+          label={t("detail.overview.compactions")}
           value={stats.agents.compaction.toLocaleString()}
           icon={<Layers className="w-3 h-3" />}
           tone="blue"
         />
         <StatTile
-          label="Errors"
+          label={t("detail.overview.errors")}
           value={stats.error_count.toLocaleString()}
           icon={<AlertTriangle className="w-3 h-3" />}
           tone={stats.error_count > 0 ? "rose" : "default"}
         />
         <StatTile
-          label="Duration"
+          label={t("detail.overview.duration")}
           value={durationLabel}
-          hint={session.status === "active" ? "running" : "completed"}
+          hint={session.status === "active" ? t("common:running") : t("detail.overview.completed")}
           icon={<Clock className="w-3 h-3" />}
           tone={session.status === "active" ? "emerald" : "default"}
         />
@@ -361,24 +394,29 @@ export function SessionOverview({ session, agents }: SessionOverviewProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Tool usage */}
         <div className="lg:col-span-2 rounded-lg border border-surface-3 bg-surface-2/60 p-3.5">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider flex items-center gap-1.5">
-              <Wrench className="w-3.5 h-3.5 text-violet-400" />
-              Top tools
-            </h3>
-            <span className="text-[10px] text-gray-500 font-mono">
-              {stats.tools_used.length} total
-            </span>
+          <div className="mb-3">
+            <SectionHeader
+              icon={Wrench}
+              title={t("detail.overview.topTools")}
+              actions={
+                <span className="text-[10px] text-gray-500 font-mono">
+                  {t("detail.overview.toolsTotal", { count: stats.tools_used.length })}
+                </span>
+              }
+            />
           </div>
           {stats.tools_used.length === 0 ? (
-            <div className="text-center py-6 text-xs text-gray-500">No tool calls yet.</div>
+            <div className="text-center py-6 text-xs text-gray-500">
+              {t("detail.overview.noToolCalls")}
+            </div>
           ) : (
             <div className="space-y-1.5">
-              {stats.tools_used.slice(0, 8).map((t) => (
+              {stats.tools_used.slice(0, 8).map((tool) => (
                 <ToolUsageRow
-                  key={t.tool_name}
-                  toolName={t.tool_name}
-                  count={t.count}
+                  key={tool.tool_name}
+                  toolName={tool.tool_name}
+                  sessionId={session.id}
+                  count={tool.count}
                   max={maxToolCount}
                 />
               ))}
@@ -410,7 +448,7 @@ export function SessionOverview({ session, agents }: SessionOverviewProps) {
             if (stats.agents.compaction > 0) {
               rows.push({
                 key: "__compaction__",
-                label: "Context Compaction",
+                label: t("detail.overview.contextCompaction"),
                 count: stats.agents.compaction,
                 isCompaction: true,
               });
@@ -420,16 +458,20 @@ export function SessionOverview({ session, agents }: SessionOverviewProps) {
 
             return (
               <>
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider flex items-center gap-1.5">
-                    <GitBranch className="w-3.5 h-3.5 text-cyan-400" />
-                    Subagents
-                  </h3>
-                  <span className="text-[10px] text-gray-500 font-mono">{totalRuns} runs</span>
+                <div className="mb-3">
+                  <SectionHeader
+                    icon={GitBranch}
+                    title={t("detail.overview.subagents")}
+                    actions={
+                      <span className="text-[10px] text-gray-500 font-mono">
+                        {t("detail.overview.subagentRuns", { count: totalRuns })}
+                      </span>
+                    }
+                  />
                 </div>
                 {rows.length === 0 ? (
                   <div className="text-center py-6 text-xs text-gray-500">
-                    No subagents in this session.
+                    {t("detail.overview.noSubagents")}
                   </div>
                 ) : (
                   <div className="space-y-1.5">
@@ -469,12 +511,16 @@ export function SessionOverview({ session, agents }: SessionOverviewProps) {
       {/* Token flow strip */}
       {totalTokens > 0 && (
         <div className="rounded-lg border border-surface-3 bg-surface-2/60 p-3.5">
-          <div className="flex items-center justify-between mb-2.5">
-            <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider flex items-center gap-1.5">
-              <Coins className="w-3.5 h-3.5 text-amber-400" />
-              Token flow
-            </h3>
-            <span className="text-[10px] text-gray-500 font-mono">{fmt(totalTokens)} total</span>
+          <div className="mb-2.5">
+            <SectionHeader
+              icon={Coins}
+              title={t("detail.overview.tokenFlow")}
+              actions={
+                <span className="text-[10px] text-gray-500 font-mono">
+                  {t("detail.overview.tokensTotal", { total: fmt(totalTokens) })}
+                </span>
+              }
+            />
           </div>
           <TokenFlowBar tokens={tokens} total={totalTokens} />
         </div>
@@ -483,10 +529,9 @@ export function SessionOverview({ session, agents }: SessionOverviewProps) {
       {/* Event-type breakdown - secondary, only top 6 */}
       {stats.events_by_type.length > 0 && (
         <div className="rounded-lg border border-surface-3 bg-surface-2/60 p-3.5">
-          <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-            <Activity className="w-3.5 h-3.5 text-gray-400" />
-            Event mix
-          </h3>
+          <div className="mb-3">
+            <SectionHeader icon={Activity} title={t("detail.overview.eventMix")} />
+          </div>
           <div className="flex flex-wrap gap-1.5">
             {stats.events_by_type.slice(0, 12).map((e) => (
               <span
@@ -506,31 +551,32 @@ export function SessionOverview({ session, agents }: SessionOverviewProps) {
 }
 
 function TokenFlowBar({ tokens, total }: { tokens: SessionStats["tokens"]; total: number }) {
+  const { t } = useTranslation("common");
   const segments = [
     {
       key: "cache_read",
-      label: "Cache read",
+      label: t("token.cacheRead"),
       value: tokens.cache_read_tokens,
       cls: "bg-sky-500",
       text: "text-sky-300",
     },
     {
       key: "cache_write",
-      label: "Cache write",
+      label: t("token.cacheWrite"),
       value: tokens.cache_write_tokens,
       cls: "bg-violet-500",
       text: "text-violet-300",
     },
     {
       key: "input",
-      label: "Input",
+      label: t("token.input"),
       value: tokens.input_tokens,
       cls: "bg-emerald-500",
       text: "text-emerald-300",
     },
     {
       key: "output",
-      label: "Output",
+      label: t("token.output"),
       value: tokens.output_tokens,
       cls: "bg-orange-500",
       text: "text-orange-300",

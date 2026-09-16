@@ -105,6 +105,9 @@ import {
 } from "lucide-react";
 import { api } from "../lib/api";
 import { CodexConfigExplorer } from "../components/CodexConfigExplorer";
+import { Button, PageHeader } from "../components/ui";
+import { EntityRef } from "../components/entity";
+import { formatModelName, getCurrentLocale } from "../lib/format";
 import { useUrlTab } from "../hooks/usePageShortcuts";
 import { usePaletteAction } from "../components/PaletteActionProvider";
 import { PaletteHint } from "../components/PaletteHint";
@@ -640,69 +643,43 @@ function Header({
   wsConnected,
 }: HeaderProps) {
   const { t } = useTranslation("ccConfig");
-  const { t: tCommon } = useTranslation("common");
   const formatted = lastUpdated
-    ? lastUpdated.toLocaleTimeString(undefined, {
+    ? lastUpdated.toLocaleTimeString(getCurrentLocale(), {
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
       })
     : "-";
   return (
-    <header className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-      <div className="flex items-start gap-3 min-w-0 flex-1">
-        <div className="w-9 h-9 rounded-xl bg-accent/15 flex items-center justify-center flex-shrink-0">
-          <Boxes className="w-4.5 h-4.5 text-accent" />
-        </div>
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <h1 className="text-lg font-semibold text-gray-100">{t("title")}</h1>
-            {wsConnected ? (
-              <span className="flex items-center gap-1.5 text-[11px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse-dot" />
-                {tCommon("live")}
-              </span>
-            ) : (
-              <span className="flex items-center gap-1.5 text-[11px] text-gray-400 bg-gray-500/10 border border-gray-500/20 px-2 py-0.5 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-                {tCommon("offline")}
-              </span>
-            )}
+    <PageHeader
+      icon={Boxes}
+      title={t("title")}
+      live={wsConnected}
+      subtitle={t(`provider.${provider}.subtitle`)}
+      actions={
+        <div className="flex flex-col items-stretch lg:items-end gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 justify-end flex-wrap">
             <ProviderToggle value={provider} onChange={onProviderChange} />
+            {provider === "claude" && <ScopeToggle value={scope} onChange={onScopeChange} />}
+            {provider === "claude" && (
+              <Button size="xs" icon={History} onClick={onOpenBackups}>
+                {t("backups.openButton")}
+              </Button>
+            )}
+            {provider === "claude" && (
+              <Button size="xs" icon={RefreshCw} loading={loading} onClick={onRefresh}>
+                {loading ? t("refreshing") : t("refresh")}
+              </Button>
+            )}
           </div>
-          <p className="text-xs text-gray-500 max-w-2xl">{t(`provider.${provider}.subtitle`)}</p>
-        </div>
-      </div>
-      <div className="flex flex-col items-stretch lg:items-end gap-2 flex-shrink-0">
-        <div className="flex items-center gap-2 justify-end flex-wrap">
-          {provider === "claude" && <ScopeToggle value={scope} onChange={onScopeChange} />}
-          {provider === "claude" && (
-            <button
-              onClick={onOpenBackups}
-              className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-xs font-medium text-gray-200 hover:bg-surface-3 transition-colors"
-            >
-              <History className="w-3.5 h-3.5" />
-              {t("backups.openButton")}
-            </button>
-          )}
-          {provider === "claude" && (
-            <button
-              onClick={onRefresh}
-              disabled={loading}
-              className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-xs font-medium text-gray-200 hover:bg-surface-3 disabled:opacity-60 transition-colors"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-              {loading ? t("refreshing") : t("refresh")}
-            </button>
+          {provider === "claude" && lastUpdated && (
+            <span className="text-[11px] text-gray-500 self-end">
+              {t("lastUpdated", { time: formatted })}
+            </span>
           )}
         </div>
-        {provider === "claude" && lastUpdated && (
-          <span className="text-[11px] text-gray-500 self-end">
-            {t("lastUpdated", { time: formatted })}
-          </span>
-        )}
-      </div>
-    </header>
+      }
+    />
   );
 }
 
@@ -858,7 +835,7 @@ function Tabs({ current, onSelect, counts }: TabsProps) {
       {canScrollLeft && (
         <button
           onClick={() => scrollByButton(-1)}
-          aria-label="scroll tabs left"
+          aria-label={t("codex.scrollLeft")}
           className="absolute left-1 top-1/2 -translate-y-1/2 z-20 rounded-md w-7 h-7 flex items-center justify-center bg-surface-2 border border-border text-gray-300 hover:text-gray-100 hover:bg-surface-3"
         >
           <ChevronLeft className="w-4 h-4" />
@@ -909,7 +886,7 @@ function Tabs({ current, onSelect, counts }: TabsProps) {
       {canScrollRight && (
         <button
           onClick={() => scrollByButton(1)}
-          aria-label="scroll tabs right"
+          aria-label={t("codex.scrollRight")}
           className="absolute right-1 top-1/2 -translate-y-1/2 z-20 rounded-md w-7 h-7 flex items-center justify-center bg-surface-2 border border-border text-gray-300 hover:text-gray-100 hover:bg-surface-3"
         >
           <ChevronRight className="w-4 h-4" />
@@ -1471,9 +1448,13 @@ function MdItemCard({ item, onOpen, onEdit, onDelete, kind }: MdItemCardProps) {
             <span className="font-mono text-sm text-gray-100 truncate">{item.name}</span>
             <ScopeBadge scope={item.scope} />
             {item.frontmatter.model && (
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-accent/10 text-accent border border-accent/20">
-                {item.frontmatter.model}
-              </span>
+              <EntityRef
+                kind="model"
+                model={item.frontmatter.model}
+                className="text-[10px] px-1.5 py-0.5 rounded bg-accent/10 text-accent hover:text-accent border border-accent/20"
+              >
+                {formatModelName(item.frontmatter.model)}
+              </EntityRef>
             )}
           </div>
           {description && (
@@ -1881,7 +1862,12 @@ function HooksPanel({
                     <div key={event}>
                       <div className="text-[11px] font-semibold text-gray-300 mb-1.5 inline-flex items-center gap-2">
                         <Wrench className="w-3 h-3 text-gray-500" />
-                        {event}
+                        <EntityRef
+                          kind="eventType"
+                          type={event}
+                          mono={false}
+                          className="text-[11px] font-semibold text-gray-300"
+                        />
                         <span className="text-[10px] text-gray-600">({entries.length})</span>
                       </div>
                       <div className="space-y-1.5 pl-5">
@@ -3593,6 +3579,7 @@ function ConfirmDeleteModal({ state, onCancel, onConfirm }: ConfirmDeleteModalPr
 // ── Toast (5s auto-dismiss) ───────────────────────────────────────────
 
 function ToastNotice({ toast, onDismiss }: { toast: NonNullable<Toast>; onDismiss: () => void }) {
+  const { t } = useTranslation("ccConfig");
   const isErr = toast.kind === "error";
   return (
     <div className="fixed bottom-6 right-6 z-50 max-w-md">
@@ -3612,7 +3599,7 @@ function ToastNotice({ toast, onDismiss }: { toast: NonNullable<Toast>; onDismis
         <button
           onClick={onDismiss}
           className="text-current/70 hover:text-current p-0.5"
-          aria-label="dismiss"
+          aria-label={t("common.close")}
         >
           <X className="w-3 h-3" />
         </button>

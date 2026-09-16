@@ -158,8 +158,11 @@ describe("awaiting-reason suffix", () => {
     );
     expect(screen.getByText("Waiting")).toBeInTheDocument();
     expect(screen.queryByText("Needs input")).not.toBeInTheDocument();
+    // Compact mode keeps the reason for screen readers as sr-only text…
+    expect(container.querySelector(".sr-only")).toHaveTextContent(/Blocked on a permission prompt/);
     fireEvent.mouseEnter(container.firstElementChild!, { clientX: 10, clientY: 10 });
-    expect(screen.getByText(/Blocked on a permission prompt/)).toBeInTheDocument();
+    // …and the hover tooltip repeats it for sighted users.
+    expect(screen.getAllByText(/Blocked on a permission prompt/)).toHaveLength(2);
   });
 
   it("compact mode works on SessionStatusBadge too", () => {

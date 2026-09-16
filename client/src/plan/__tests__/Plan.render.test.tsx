@@ -3,8 +3,8 @@
  * @description P1/P2/P5 — renders the plan page against the exact
  * ledgerflow fixture model (`test/fixtures/plan/ledgerflow/expected/model.json`)
  * through a mocked `planApi`: rail, board, agents panel, and the task detail
- * drawer, plus the project picker's route-param default and the tick
- * checkbox's `$`/waiting/say rendering.
+ * drawer (click and `?task=` deep link), plus the project picker's
+ * route-param default and the tick checkbox's `$`/waiting/say rendering.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -116,6 +116,18 @@ describe("Plan page — ledgerflow fixture", () => {
     expect(screen.getByText(/Lane D/)).toBeInTheDocument();
     expect(screen.getAllByText(/start-services\.sh \+ stop-services\.sh/).length).toBeGreaterThan(
       0
+    );
+  });
+
+  it("?task=<key> deep-links straight into that task's drawer", async () => {
+    renderPlan("/plan/ledgerflow?task=D1");
+    await settle();
+
+    expect(screen.getByText(/Step 17/)).toBeInTheDocument();
+    expect(screen.getByText(/Lane D/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /open session/i })).toHaveAttribute(
+      "href",
+      "/sessions/1ee316a7-e0a8-4575-889e-42860c12df39"
     );
   });
 });

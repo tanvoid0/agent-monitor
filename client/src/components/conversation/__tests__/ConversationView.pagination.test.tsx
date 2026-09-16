@@ -1,6 +1,8 @@
 /**
- * @file Verifies ConversationView requests the preceding transcript page when
- * the scroll container reaches its top boundary.
+ * @file ConversationView.pagination.test.tsx
+ * @description Verifies ConversationView requests the preceding transcript page
+ * when the scroll container reaches its top boundary, and reports the selected
+ * transcript through `onTranscriptChange` without needing a router.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -95,5 +97,27 @@ describe("ConversationView history pagination", () => {
       limit: 50,
     });
     expect(screen.getByText("Older message")).toBeInTheDocument();
+  });
+
+  it("reports the selected transcript through onTranscriptChange", async () => {
+    mocks.transcript.mockResolvedValue(result([], 0, 0, false));
+    const onTranscriptChange = vi.fn();
+    const { rerender } = render(
+      <ConversationView
+        sessionId="s"
+        initialTranscriptId="agent-a"
+        onTranscriptChange={onTranscriptChange}
+      />
+    );
+    await waitFor(() => expect(onTranscriptChange).toHaveBeenLastCalledWith("agent-a"));
+
+    rerender(
+      <ConversationView
+        sessionId="s"
+        initialTranscriptId="agent-b"
+        onTranscriptChange={onTranscriptChange}
+      />
+    );
+    await waitFor(() => expect(onTranscriptChange).toHaveBeenLastCalledWith("agent-b"));
   });
 });

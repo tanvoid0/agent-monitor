@@ -241,6 +241,7 @@ function build(plan, now, sessions, transcriptCache) {
       claudeId: r.claude_agent_id || null,
       type: isMain ? "main" : r.subagent_type || "agent",
       session: r.session_id.slice(0, 8),
+      sessionId: r.session_id,
       lane: null,
       story: null,
       title: "",

@@ -82,9 +82,17 @@ const TRANSCRIPTS_REFRESH_MS = 15000;
 interface ConversationViewProps {
   sessionId: string;
   initialTranscriptId?: string | null;
+  /** Fires with the selected transcript id (null = main) whenever it changes —
+   *  from the dropdown or the `initialTranscriptId` sync — so the page can
+   *  persist it (e.g. in the URL). This component never touches the router. */
+  onTranscriptChange?: (transcriptId: string | null) => void;
 }
 
-export function ConversationView({ sessionId, initialTranscriptId }: ConversationViewProps) {
+export function ConversationView({
+  sessionId,
+  initialTranscriptId,
+  onTranscriptChange,
+}: ConversationViewProps) {
   const { t } = useTranslation("sessions");
   const [messages, setMessages] = useState<TranscriptMessage[]>([]);
   const [total, setTotal] = useState(0);
@@ -144,6 +152,14 @@ export function ConversationView({ sessionId, initialTranscriptId }: Conversatio
       setSelectedTranscript(initialTranscriptId);
     }
   }, [initialTranscriptId]);
+
+  // Report the selection outward (ref-held so a new callback identity does not
+  // re-fire it).
+  const onTranscriptChangeRef = useRef(onTranscriptChange);
+  onTranscriptChangeRef.current = onTranscriptChange;
+  useEffect(() => {
+    onTranscriptChangeRef.current?.(selectedTranscript);
+  }, [selectedTranscript]);
 
   // Initial load: fetch the latest N messages
   useEffect(() => {

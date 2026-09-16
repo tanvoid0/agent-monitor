@@ -110,6 +110,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Copy, Check } from "lucide-react";
+import { copyText } from "../../lib/clipboard";
 
 // ───────────────────────── Copy button ─────────────────────────
 
@@ -118,12 +119,9 @@ export function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
-    try {
-      await navigator.clipboard.writeText(text);
+    if (await copyText(text)) {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
-    } catch {
-      // Clipboard API can fail in insecure contexts - silently ignore.
     }
   }
 

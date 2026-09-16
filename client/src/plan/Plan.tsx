@@ -6,12 +6,14 @@
  * agents panel, and a task detail drawer. Reads `GET /api/plans` and
  * `GET /api/plans/:slug/model`, ticks boxes via `POST /api/plans/:slug/tick`
  * (optimistic, reverted on a 4xx), and stays live via the shared WebSocket
- * pipeline (`plan_updated`, `plan_model`, `plan_log`).
+ * pipeline (`plan_updated`, `plan_model`, `plan_log`). `?task=<key>` opens the
+ * task drawer (written back with replace semantics); agent rows, task-card
+ * agent badges and the project cwd are `EntityRef` chips.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
   SquareKanban,
@@ -36,6 +38,9 @@ import { EmptyState } from "../components/EmptyState";
 import { CardSkeleton } from "../components/Skeleton";
 import { Select } from "../components/Select";
 import { Checkbox } from "../components/Checkbox";
+import { Button, IconButton, PageHeader } from "../components/ui";
+import { EntityRef } from "../components/entity";
+import { routes } from "../lib/routes";
 import {
   formatDuration,
   timeAgo,
@@ -88,6 +93,24 @@ function resolveAgent(model: PlanModel, agentId: string | null): PlanAgent | und
   return agentId ? model.agents[agentId] : undefined;
 }
 
+/** Locate a task (with its story and lane) by key, at any nesting depth. */
+function findTask(
+  model: PlanModel,
+  key: string
+): { story: PlanStory; lane: PlanLane; task: PlanTask } | null {
+  for (const story of model.stories) {
+    for (const lane of story.lanes) {
+      const stack = [...lane.tasks];
+      while (stack.length > 0) {
+        const task = stack.pop()!;
+        if (task.key === key) return { story, lane, task };
+        stack.push(...task.children);
+      }
+    }
+  }
+  return null;
+}
+
 function currentStoryId(model: PlanModel): string | null {
   const current = model.stories.find((s) => s.kind === "step" && s.num === model.steps.current);
   return current?.id ?? model.stories[0]?.id ?? null;
@@ -104,11 +127,22 @@ export function Plan() {
   const [error, setError] = useState<string | null>(null);
   const [storyId, setStoryId] = useState<string | null>(null);
   const [laneFilter, setLaneFilter] = useState<string | null>(null);
-  const [selected, setSelected] = useState<{
-    story: PlanStory;
-    lane: PlanLane;
-    task: PlanTask;
-  } | null>(null);
+  // The open task drawer lives in `?task=<key>` (deep-linkable; replace).
+  const [searchParams, setSearchParams] = useSearchParams();
+  const taskKey = searchParams.get("task");
+  const setTaskKey = useCallback(
+    (key: string | null) =>
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (key) next.set("task", key);
+          else next.delete("task");
+          return next;
+        },
+        { replace: true }
+      ),
+    [setSearchParams]
+  );
   const [pendingTicks, setPendingTicks] = useState<Record<string, boolean>>({});
   const [tickError, setTickError] = useState<string | null>(null);
   const [railOpen, setRailOpen] = useState(false);
@@ -129,7 +163,7 @@ export function Plan() {
       return;
     }
     const fallback = readLastSlug() ?? plans[0]?.slug;
-    if (fallback) navigate(`/plan/${fallback}`, { replace: true });
+    if (fallback) navigate(routes.plan(fallback), { replace: true });
   }, [routeSlug, plans, navigate]);
 
   const loadModel = useCallback(async (slug: string) => {
@@ -150,7 +184,6 @@ export function Plan() {
     setModel(null);
     setStoryId(null);
     setLaneFilter(null);
-    setSelected(null);
     loadModel(routeSlug);
   }, [routeSlug, loadModel]);
 
@@ -206,76 +239,89 @@ export function Plan() {
     () => model?.stories.find((s) => s.id === storyId) ?? null,
     [model, storyId]
   );
+  const selected = useMemo(
+    () => (model && taskKey ? findTask(model, taskKey) : null),
+    [model, taskKey]
+  );
 
   const totalsCost = model?.totals.cost;
   const totalsWaiting = model?.totals.waiting;
 
   return (
     <div className="animate-fade-in">
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-xl bg-accent/15 flex items-center justify-center flex-shrink-0">
-            <SquareKanban className="w-4.5 h-4.5 text-accent" />
-          </div>
-          <div className="min-w-0">
-            <h1 className="text-lg font-semibold text-gray-100 truncate">{t("title")}</h1>
-            {model && (
-              <p className="text-xs text-gray-500 truncate">
+      <div className="mb-6">
+        <PageHeader
+          icon={SquareKanban}
+          title={t("title")}
+          subtitle={
+            model && (
+              <>
                 {model.status.text}
                 {typeof totalsCost === "number" && ` · ${fmtCost(totalsCost)}`}
                 {typeof totalsWaiting === "number" &&
                   totalsWaiting > 0 &&
                   ` · ${t("picker.waitingCount", { count: totalsWaiting })}`}
-              </p>
-            )}
-          </div>
-        </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {plans.length > 0 && (
-            <div className="w-56">
-              <Select
-                value={routeSlug ?? plans[0]!.slug}
-                onChange={(slug) => navigate(`/plan/${slug}`)}
-                options={plans.map((p) => ({
-                  value: p.slug,
-                  label: p.slug,
-                  hint: [
-                    p.cwd,
-                    typeof p.live === "number" && p.live > 0
-                      ? t("picker.liveCount", { count: p.live })
-                      : null,
-                    typeof p.waiting === "number" && p.waiting > 0
-                      ? t("picker.waitingCount", { count: p.waiting })
-                      : null,
-                  ]
-                    .filter(Boolean)
-                    .join(" · "),
-                }))}
+                {model.project?.cwd && (
+                  <>
+                    {" · "}
+                    <EntityRef kind="project" cwd={model.project.cwd} mono={false} />
+                  </>
+                )}
+              </>
+            )
+          }
+          actions={
+            <>
+              {plans.length > 0 && (
+                <div className="w-56">
+                  <Select
+                    value={routeSlug ?? plans[0]!.slug}
+                    onChange={(slug) => navigate(routes.plan(slug))}
+                    options={plans.map((p) => ({
+                      value: p.slug,
+                      label: p.slug,
+                      hint: [
+                        p.cwd,
+                        typeof p.live === "number" && p.live > 0
+                          ? t("picker.liveCount", { count: p.live })
+                          : null,
+                        typeof p.waiting === "number" && p.waiting > 0
+                          ? t("picker.waitingCount", { count: p.waiting })
+                          : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" · "),
+                    }))}
+                  />
+                </div>
+              )}
+              <IconButton
+                icon={Menu}
+                label={t("toggleRail")}
+                size="md"
+                className="lg:hidden"
+                onClick={() => setRailOpen(true)}
               />
-            </div>
-          )}
-          <button
-            className="btn-ghost lg:hidden"
-            onClick={() => setRailOpen(true)}
-            aria-label={t("toggleRail")}
-            title={t("toggleRail")}
-          >
-            <Menu className="w-4 h-4" />
-          </button>
-          <button
-            className="btn-ghost lg:hidden"
-            onClick={() => setAgentsOpen(true)}
-            aria-label={t("toggleAgents")}
-            title={t("toggleAgents")}
-          >
-            <PanelRight className="w-4 h-4" />
-          </button>
-          {routeSlug && (
-            <button className="btn-ghost" onClick={() => loadModel(routeSlug)}>
-              <RefreshCw className="w-4 h-4" /> {t("common:refresh")}
-            </button>
-          )}
-        </div>
+              <IconButton
+                icon={PanelRight}
+                label={t("toggleAgents")}
+                size="md"
+                className="lg:hidden"
+                onClick={() => setAgentsOpen(true)}
+              />
+              {routeSlug && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon={RefreshCw}
+                  onClick={() => loadModel(routeSlug)}
+                >
+                  {t("common:refresh")}
+                </Button>
+              )}
+            </>
+          }
+        />
       </div>
 
       {tickError && (
@@ -299,9 +345,9 @@ export function Plan() {
           description=""
           action={
             routeSlug && (
-              <button className="btn-primary" onClick={() => loadModel(routeSlug)}>
-                <RefreshCw className="w-4 h-4" /> {t("common:retry")}
-              </button>
+              <Button variant="primary" icon={RefreshCw} onClick={() => loadModel(routeSlug)}>
+                {t("common:retry")}
+              </Button>
             )
           }
         />
@@ -334,7 +380,7 @@ export function Plan() {
               laneFilter={laneFilter}
               pendingTicks={pendingTicks}
               onTick={handleTick}
-              onSelectTask={(lane, task) => setSelected({ story, lane, task })}
+              onSelectTask={(_lane, task) => setTaskKey(task.key)}
             />
           </div>
 
@@ -369,7 +415,7 @@ export function Plan() {
           lane={selected.lane}
           task={selected.task}
           agent={resolveAgent(model!, selected.task.agentId)}
-          onClose={() => setSelected(null)}
+          onClose={() => setTaskKey(null)}
           onTick={handleTick}
           pendingTicks={pendingTicks}
         />
@@ -691,36 +737,44 @@ function TaskCard({
   const isBlocked = task.status === "blocked";
 
   return (
-    <div
-      className={
-        depth === 0 ? "card-hover p-3 cursor-pointer" : "border-l border-border/60 pl-2 py-1"
-      }
-      onClick={depth === 0 ? onSelect : undefined}
-    >
+    <div className={depth === 0 ? "card-hover p-3" : "border-l border-border/60 pl-2 py-1"}>
       <div
         className={`flex items-start gap-2 ${isWaiting ? "border-l-2 border-l-amber-500/60 -ml-3 pl-2.5" : isBlocked ? "border-l-2 border-l-red-500/60 -ml-3 pl-2.5" : ""}`}
       >
         <span onClick={(e) => e.stopPropagation()}>
           <Checkbox checked={ticked} onChange={(v) => onTick(task.key, v)} className="mt-0.5" />
         </span>
-        <div className="min-w-0 flex-1" onClick={depth > 0 ? onSelect : undefined}>
-          <p
-            className={`text-xs leading-snug ${ticked ? "text-gray-500 line-through" : "text-gray-200"}`}
-          >
-            <span className="font-mono text-gray-500 mr-1">{task.key}</span>
-            {truncate(task.text, depth === 0 ? 140 : 90)}
-          </p>
+        <div className="min-w-0 flex-1">
+          <button type="button" onClick={onSelect} className="text-left w-full">
+            <p
+              className={`text-xs leading-snug ${ticked ? "text-gray-500 line-through" : "text-gray-200"}`}
+            >
+              <span className="font-mono text-gray-500 mr-1">{task.key}</span>
+              {truncate(task.text, depth === 0 ? 140 : 90)}
+            </p>
+          </button>
           {depth === 0 && (
             <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
               <span className="badge bg-surface-3 border-border text-gray-400 text-[9px] py-0.5 px-1.5">
                 {lane.letter}
               </span>
               {agent && (
-                <span className="badge bg-surface-3 border-border text-gray-400 text-[9px] py-0.5 px-1.5">
-                  {agent.type}
-                  {agent.model && ` · ${formatModelName(agent.model)}`}
-                  {agent.ctxPct > 0 && ` · ${agent.ctxPct}%`}
-                  {typeof agent.cost === "number" && agent.cost > 0 && ` · ${fmtCost(agent.cost)}`}
+                <span onClick={(e) => e.stopPropagation()}>
+                  <EntityRef
+                    kind="agent"
+                    id={agent.id}
+                    sessionId={agent.sessionId}
+                    type={agent.type}
+                    mono={false}
+                    className="badge bg-surface-3 border-border text-gray-400 text-[9px] py-0.5 px-1.5"
+                  >
+                    {agent.type}
+                    {agent.model && ` · ${formatModelName(agent.model)}`}
+                    {agent.ctxPct > 0 && ` · ${agent.ctxPct}%`}
+                    {typeof agent.cost === "number" &&
+                      agent.cost > 0 &&
+                      ` · ${fmtCost(agent.cost)}`}
+                  </EntityRef>
                 </span>
               )}
               {isBlocked && (
@@ -803,10 +857,17 @@ function AgentRow({ agent }: { agent: PlanAgent }) {
     >
       <div className="flex items-center gap-1.5">
         <Bot className="w-3 h-3 text-violet-400 flex-shrink-0" />
-        <span className="text-xs text-gray-200 truncate flex-1">
+        <EntityRef
+          kind="agent"
+          id={agent.id}
+          sessionId={agent.sessionId}
+          type={agent.type}
+          mono={false}
+          className="text-xs text-gray-200 flex-1"
+        >
           {agent.type}
           {agent.lane && ` · ${agent.lane}`}
-        </span>
+        </EntityRef>
         {agent.live && (
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse-dot" />
         )}
@@ -937,12 +998,12 @@ function DetailDrawer({
         {task.note && <p className="text-xs text-gray-400 mb-4">{task.note}</p>}
 
         {agent && (
-          <a
-            href={`/sessions/${agent.session}`}
+          <Link
+            to={routes.session(agent.sessionId)}
             className="inline-flex items-center gap-1.5 text-xs text-accent hover:underline mb-4"
           >
             <ExternalLink className="w-3 h-3" /> {t("detail.openSession")}
-          </a>
+          </Link>
         )}
 
         <div className="mb-4">

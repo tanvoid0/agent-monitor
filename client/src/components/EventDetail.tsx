@@ -5,6 +5,8 @@
  * from the hook payload as a single row. For `tool_input` and `tool_response`
  * on recognised tools, rows use tool-aware renderers (terminal blocks, diffs,
  * line-numbered code, match lists) instead of the generic JSON code view.
+ * Session, agent, working-directory, model and tool rows render as `EntityRef`
+ * chips (full raw value, right-click menu) so the panel links out by reference.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -64,11 +66,13 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { DashboardEvent } from "../lib/types";
+import { agentTypeOf } from "../lib/event-grouping";
 import type { AgentInfo } from "../lib/event-grouping";
 import { buildEventSummary } from "../lib/event-summary";
 import { formatModelName, formatDateTimeFull } from "../lib/format";
 import { CopyButton } from "./event-views/primitives";
 import { ToolInputView, ToolResponseView } from "./event-views/tool-views";
+import { EntityRef } from "./entity";
 
 type EventDetailProps = {
   event: DashboardEvent;
@@ -213,11 +217,7 @@ export function EventDetail({ event, agentInfoById, sessionNameById }: EventDeta
       // identifiers in the row labels.
       const i18nKey = PAYLOAD_LABEL_KEYS[k];
       const label = i18nKey ? t(i18nKey) : humanizeKey(k);
-      result.push({
-        key: k,
-        label,
-        value: k === "model" && typeof v === "string" ? (formatModelName(v) ?? v) : v,
-      });
+      result.push({ key: k, label, value: v });
     }
 
     // If JSON parse failed, show the raw data as a single row using the
@@ -257,7 +257,8 @@ export function EventDetail({ event, agentInfoById, sessionNameById }: EventDeta
             rowKey={row.key}
             label={row.label}
             value={row.value}
-            toolName={event.tool_name}
+            event={event}
+            agentInfoById={agentInfoById}
           />
         ))}
       </div>
@@ -317,19 +318,72 @@ function SummaryBlock({
 
 // ───────────────────────── Field row ─────────────────────────
 
+// Long raw values (paths, ids) wrap like the plain rows did instead of
+// inheriting the chip's single-line truncation.
+const WRAP = "whitespace-normal";
+
+/** Rows whose string value names a dashboard entity render as an `EntityRef`
+ *  chip (full raw value, right-click menu) instead of plain text. */
+function entityChip(
+  rowKey: string,
+  value: string,
+  event: DashboardEvent,
+  agentInfoById: Map<string, AgentInfo> | undefined
+) {
+  switch (rowKey) {
+    case "session_id":
+      return (
+        <EntityRef kind="session" id={value} className={WRAP}>
+          {value}
+        </EntityRef>
+      );
+    case "agent_id":
+      return (
+        <EntityRef
+          kind="agent"
+          id={value}
+          sessionId={event.session_id}
+          type={agentTypeOf(value, agentInfoById)}
+          className={WRAP}
+        >
+          {value}
+        </EntityRef>
+      );
+    case "cwd":
+      return (
+        <EntityRef kind="project" cwd={value} className={WRAP}>
+          {value}
+        </EntityRef>
+      );
+    case "model":
+      return (
+        <EntityRef kind="model" model={value}>
+          {formatModelName(value) ?? value}
+        </EntityRef>
+      );
+    case "tool_name":
+      return <EntityRef kind="tool" name={value} sessionId={event.session_id} />;
+    default:
+      return null;
+  }
+}
+
 function FieldRow({
   rowKey,
   label,
   value,
-  toolName,
+  event,
+  agentInfoById,
 }: {
   /** Raw payload key - used for tool-aware routing decisions so the renderer
    *  doesn't break when the user-visible label is translated. */
   rowKey: string;
   label: string;
   value: unknown;
-  toolName: string | null;
+  event: DashboardEvent;
+  agentInfoById?: Map<string, AgentInfo>;
 }) {
+  const toolName = event.tool_name;
   // Route tool_input / tool_response through tool-aware renderers when the
   // tool is known. Unknown tools (or unknown shape for known tools) fall back
   // to the generic CodeView below.
@@ -356,12 +410,13 @@ function FieldRow({
     }
   }
 
-  if (isInlineScalar(value)) {
+  const chip = typeof value === "string" ? entityChip(rowKey, value, event, agentInfoById) : null;
+  if (chip || isInlineScalar(value)) {
     return (
       <div className="grid grid-cols-[160px_1fr] gap-x-4 items-start text-[11px]">
         <div className="text-gray-500 font-mono pt-0.5">{label}</div>
         <div className="text-gray-300 font-mono break-all">
-          <ScalarValue value={value} />
+          {chip ?? <ScalarValue value={value} />}
         </div>
       </div>
     );

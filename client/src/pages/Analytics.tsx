@@ -1,6 +1,6 @@
 /**
  * @file Analytics.tsx
- * @description Provides a comprehensive analytics dashboard for monitoring Claude Code sessions, agents, token usage, and events in real-time. Features include an activity heatmap, token distribution charts, paginated chart legends, session outcome breakdowns, and more, all with interactive tooltips and live updates via WebSocket.
+ * @description Provides a comprehensive analytics dashboard for monitoring Claude Code sessions, agents, token usage, and events in real-time. Features include an activity heatmap, token distribution charts, paginated chart legends, session outcome breakdowns, and more, all with interactive tooltips and live updates via WebSocket. Uses the kit PageHeader and Radix Tabs (URL-backed `?tab=`); tool, event-type and model labels are `EntityRef` chips that link to the Activity feed / cost analytics and carry the entity context menu.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -75,12 +75,14 @@ import { api } from "../lib/api";
 import { eventBus } from "../lib/eventBus";
 import { isRemoteDataRefreshMessage } from "../lib/remoteDataEvents";
 import { useDataScope } from "../lib/dataScope";
-import { fmt, fmtCost, fmtCostFull, formatModelName } from "../lib/format";
+import { fmt, fmtCost, fmtCostFull, formatModelName, getCurrentLocale } from "../lib/format";
 import { Tip } from "../components/Tip";
 import { PaginatedLegend } from "../components/PaginatedLegend";
 import { Skeleton, StatValueSkeleton, TextSkeleton } from "../components/Skeleton";
 import { useUrlTab } from "../hooks/usePageShortcuts";
 import { usePaletteAction } from "../components/PaletteActionProvider";
+import { Button, PageHeader, Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui";
+import { EntityRef } from "../components/entity";
 import type { Analytics as AnalyticsData, CostResult } from "../lib/types";
 
 // ── Tooltip ───────────────────────────────────────────────────────────────────
@@ -432,7 +434,8 @@ function BarRow({
   color = "bg-accent",
   pct,
 }: {
-  label: string;
+  /** Plain text, or an `EntityRef` chip (which carries its own title). */
+  label: React.ReactNode;
   count: number;
   max: number;
   color?: string;
@@ -441,7 +444,10 @@ function BarRow({
   const width = pct !== undefined ? pct : max > 0 ? Math.round((count / max) * 100) : 0;
   return (
     <div className="flex items-center gap-3">
-      <span className="text-xs text-gray-400 w-28 truncate flex-shrink-0" title={label}>
+      <span
+        className="text-xs text-gray-400 w-28 truncate flex-shrink-0"
+        title={typeof label === "string" ? label : undefined}
+      >
         {label}
       </span>
       <div className="flex-1 bg-surface-3 rounded-full h-2">
@@ -918,48 +924,36 @@ export function Analytics() {
   return (
     <div className="animate-fade-in space-y-8">
       {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="flex items-center gap-3 mb-1">
-            <div className="w-9 h-9 rounded-xl bg-accent/15 flex items-center justify-center flex-shrink-0">
-              <BarChart3 className="w-4.5 h-4.5 text-accent" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-lg font-semibold text-gray-100">{t("title")}</h1>
-                {wsConnected ? (
-                  <span className="flex items-center gap-1.5 text-[11px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse-dot" />
-                    {t("common:live")}
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1.5 text-[11px] text-gray-400 bg-gray-500/10 border border-gray-500/20 px-2 py-0.5 rounded-full">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-                    {t("common:offline")}
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-gray-500 flex items-center gap-2">
-                {t("subtitle")}
-                <span className="inline-flex items-center gap-1.5 text-[11px] text-gray-500 bg-surface-2 border border-border px-2 py-0.5 rounded-md font-mono ml-2">
-                  <Clock className="w-3 h-3" />
-                  {lastUpdate.toLocaleTimeString()}
-                </span>
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <button onClick={load} className="btn-ghost" disabled={loading}>
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-            {t("common:refresh")}
-          </button>
-          <button onClick={handleExport} className="btn-ghost" disabled={!data}>
-            <Download className="w-4 h-4" />
-            {t("export")}
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        icon={BarChart3}
+        title={t("title")}
+        live={wsConnected}
+        subtitle={
+          <span className="flex items-center gap-2">
+            {t("subtitle")}
+            <span className="inline-flex items-center gap-1.5 text-[11px] text-gray-500 bg-surface-2 border border-border px-2 py-0.5 rounded-md font-mono ml-2">
+              <Clock className="w-3 h-3" />
+              {lastUpdate.toLocaleTimeString(getCurrentLocale())}
+            </span>
+          </span>
+        }
+        actions={
+          <>
+            <Button variant="ghost" size="sm" icon={RefreshCw} loading={loading} onClick={load}>
+              {t("common:refresh")}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={Download}
+              onClick={handleExport}
+              disabled={!data}
+            >
+              {t("export")}
+            </Button>
+          </>
+        }
+      />
 
       {/* Key stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -1060,24 +1054,19 @@ export function Analytics() {
           </div>
 
           {/* Tabs */}
-          <div>
-            <div className="flex gap-1 bg-surface-2 rounded-lg p-1 mb-6 w-fit">
+          <Tabs
+            value={activeTab}
+            onValueChange={(v) => setActiveTab(v as (typeof ANALYTICS_TABS)[number])}
+          >
+            <TabsList className="mb-6">
               {ANALYTICS_TABS.map((key) => (
-                <button
-                  key={key}
-                  onClick={() => setActiveTab(key)}
-                  className={`px-4 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                    activeTab === key
-                      ? "bg-surface-4 text-gray-200"
-                      : "text-gray-500 hover:text-gray-300"
-                  }`}
-                >
+                <TabsTrigger key={key} value={key} className="text-xs px-4">
                   {t(ANALYTICS_TAB_LABEL_KEYS[key])}
-                </button>
+                </TabsTrigger>
               ))}
-            </div>
+            </TabsList>
 
-            {activeTab === "tokens" && (
+            <TabsContent value="tokens">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Token bars */}
                 <div className="card p-5">
@@ -1195,9 +1184,9 @@ export function Analytics() {
                   )}
                 </div>
               </div>
-            )}
+            </TabsContent>
 
-            {activeTab === "cost" && (
+            <TabsContent value="cost">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Daily cost trends */}
                 <div className="card p-5">
@@ -1249,11 +1238,15 @@ export function Analytics() {
                         formatTotal={(cents) => fmtCost(cents / 100)}
                       />
                       <div className="mt-4 pt-4 border-t border-border space-y-2">
-                        {costBreakdown.map((b) => (
-                          <div key={b.model} className="flex justify-between text-xs">
-                            <span className="text-gray-400 font-mono truncate">
+                        {costBreakdown.map((b, i) => (
+                          <div key={`${b.model}-${i}`} className="flex justify-between text-xs">
+                            <EntityRef
+                              kind="model"
+                              model={b.model}
+                              className="text-xs text-gray-400"
+                            >
                               {formatModelName(b.model)}
-                            </span>
+                            </EntityRef>
                             <span className="text-emerald-400 font-mono font-medium ml-2">
                               <Tip raw={fmtCostFull(b.cost)}>{fmtCost(b.cost)}</Tip>
                             </span>
@@ -1303,9 +1296,9 @@ export function Analytics() {
                   )}
                 </div>
               </div>
-            )}
+            </TabsContent>
 
-            {activeTab === "workflow" && (
+            <TabsContent value="workflow">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Agent type distribution */}
                 <div className="card p-5">
@@ -1370,7 +1363,14 @@ export function Analytics() {
                       {(data?.event_types ?? []).map(({ event_type, count }) => (
                         <BarRow
                           key={event_type}
-                          label={event_type}
+                          label={
+                            <EntityRef
+                              kind="eventType"
+                              type={event_type}
+                              mono={false}
+                              className="text-xs text-gray-400"
+                            />
+                          }
                           count={count}
                           max={maxEventTypeCount}
                           color={EVENT_TYPE_COLORS[event_type] ?? "bg-gray-400"}
@@ -1380,9 +1380,9 @@ export function Analytics() {
                   )}
                 </div>
               </div>
-            )}
+            </TabsContent>
 
-            {activeTab === "productivity" && (
+            <TabsContent value="productivity">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Top tools */}
                 <div className="card p-5">
@@ -1394,7 +1394,14 @@ export function Analytics() {
                       {(data?.tool_usage ?? []).slice(0, 12).map(({ tool_name, count }) => (
                         <BarRow
                           key={tool_name}
-                          label={tool_name}
+                          label={
+                            <EntityRef
+                              kind="tool"
+                              name={tool_name}
+                              mono={false}
+                              className="text-xs text-gray-400"
+                            />
+                          }
                           count={count}
                           max={maxToolCount}
                           color="bg-yellow-400"
@@ -1483,8 +1490,8 @@ export function Analytics() {
                   )}
                 </div>
               </div>
-            )}
-          </div>
+            </TabsContent>
+          </Tabs>
         </>
       )}
     </div>

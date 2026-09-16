@@ -143,6 +143,9 @@ import type {
 } from "../lib/types";
 import { MarkdownContent } from "../components/conversation/MarkdownContent";
 import { Select } from "../components/Select";
+import { PageHeader } from "../components/ui";
+import { EntityRef } from "../components/entity";
+import { formatModelName } from "../lib/format";
 
 // ── Stream-json envelope shapes (the bits we render) ──────────────────
 
@@ -695,8 +698,11 @@ export function Run() {
   );
   const [sandbox, setSandbox] = useState<CodexSandbox>("workspace-write");
   const [effort, setEffort] = useState<EffortLevel>("");
-  const [cwd, setCwd] = useState("");
+  const [cwd, setCwd] = useState(() => searchParams.get("cwd") ?? "");
   const [resumeSession, setResumeSession] = useState<Session | null>(null);
+  // `?session=` for a non-live session: the provider effect below clears
+  // resumeSession, so the fetched session is parked here until it has run.
+  const pendingResumeRef = useRef<Session | null>(null);
   const [handle, setHandle] = useState<RunHandle | null>(null);
   const [envelopes, setEnvelopes] = useState<Envelope[]>([]);
   const displayEnvelopes = useTypewriterEnvelopes(envelopes);
@@ -791,7 +797,8 @@ export function Run() {
     setMode("conversation");
     setPermissionMode(provider === "codex" ? "on-request" : "acceptEdits");
     setSandbox("workspace-write");
-    setResumeSession(null);
+    setResumeSession(pendingResumeRef.current);
+    pendingResumeRef.current = null;
   }, [provider]);
 
   const refreshList = useCallback(() => {
@@ -1112,14 +1119,34 @@ export function Run() {
         );
         if (target) {
           void attachToRun(target.id);
-        } else {
+          return;
+        }
+        const notFound = () =>
           setError(
             t(
               "errors.sessionRunNotFound",
               "No active dashboard run is driving this session right now."
             )
           );
+        // Another run is on screen: the config card is hidden, so keep the
+        // error. Otherwise fall back to resume mode with the session preselected.
+        if (handle) {
+          notFound();
+          return;
         }
+        return api.sessions
+          .get(sid)
+          .then(({ session }) => {
+            const next = session.provider ?? "claude";
+            setMode("conversation");
+            if (next === provider) {
+              setResumeSession(session);
+            } else {
+              pendingResumeRef.current = session;
+              setProvider(next);
+            }
+          })
+          .catch(notFound);
       })
       .catch(() => undefined)
       .finally(() => {
@@ -1127,7 +1154,7 @@ export function Run() {
         next.delete("session");
         setSearchParams(next, { replace: true });
       });
-  }, [searchParams, setSearchParams, handle, attachToRun, t]);
+  }, [searchParams, setSearchParams, handle, attachToRun, provider, t]);
 
   // Prefill the prompt box from `?prompt=<text>` (e.g. Tabby's Ask handoff).
   // Apply once, then strip the param so a later refresh doesn't overwrite edits
@@ -2173,44 +2200,31 @@ function Header({
   onRefresh: () => void;
 }) {
   const { t } = useTranslation("run");
-  const { t: tCommon } = useTranslation("common");
   return (
-    <header className="flex items-start gap-3">
-      <div className="w-9 h-9 rounded-xl bg-accent/15 flex items-center justify-center flex-shrink-0">
-        <Play className="w-4.5 h-4.5 text-accent" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <h1 className="text-lg font-semibold text-gray-100">{t("title")}</h1>
-          {wsConnected ? (
-            <span className="flex items-center gap-1.5 text-[11px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse-dot" />
-              {tCommon("live")}
-            </span>
-          ) : (
-            <span className="flex items-center gap-1.5 text-[11px] text-gray-400 bg-gray-500/10 border border-gray-500/20 px-2 py-0.5 rounded-full">
-              <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-              {tCommon("offline")}
-            </span>
-          )}
+    <PageHeader
+      icon={Play}
+      title={t("title")}
+      live={wsConnected}
+      subtitle={t(`provider.${provider}.subtitle`)}
+      actions={
+        <>
           <RunProviderToggle
             value={provider}
             disabled={providerLocked}
             onChange={onProviderChange}
           />
-        </div>
-        <p className="text-xs text-gray-500 max-w-3xl">{t(`provider.${provider}.subtitle`)}</p>
-      </div>
-      <ActiveRunsSwitcher
-        activeRuns={activeRuns}
-        currentHandleId={currentHandleId}
-        onAttach={onAttach}
-        runHistory={runHistory}
-        onResumeFromHistory={onResumeFromHistory}
-        onViewFromHistory={onViewFromHistory}
-        onRefresh={onRefresh}
-      />
-    </header>
+          <ActiveRunsSwitcher
+            activeRuns={activeRuns}
+            currentHandleId={currentHandleId}
+            onAttach={onAttach}
+            runHistory={runHistory}
+            onResumeFromHistory={onResumeFromHistory}
+            onViewFromHistory={onViewFromHistory}
+            onRefresh={onRefresh}
+          />
+        </>
+      }
+    />
   );
 }
 
@@ -2607,7 +2621,7 @@ function RunsModal({
               <button
                 onClick={() => setSearch("")}
                 className="text-gray-500 hover:text-gray-200 text-[10px]"
-                aria-label="Clear"
+                aria-label={t("runs.clearSearch", "Clear search")}
               >
                 <X className="w-3 h-3" />
               </button>
@@ -2807,19 +2821,32 @@ function UnifiedRunRowView({
           {row.promptPreview}
         </div>
       )}
-      <div className="font-mono text-[10px] text-gray-500 truncate mt-1">{row.cwd}</div>
+      <div className="text-[10px] text-gray-500 truncate mt-1">
+        {row.cwd && (
+          <EntityRef kind="project" cwd={row.cwd} className="text-[10px] text-gray-500">
+            {row.cwd}
+          </EntityRef>
+        )}
+      </div>
       <div className="text-[10px] text-gray-600 mt-0.5 flex items-center gap-2 flex-wrap">
         <span>{startedLabel}</span>
-        {row.model && <span className="font-mono text-gray-500">· {row.model}</span>}
+        {row.model && (
+          <span className="font-mono text-gray-500">
+            ·{" "}
+            <EntityRef kind="model" model={row.model} className="text-[10px] text-gray-500">
+              {formatModelName(row.model)}
+            </EntityRef>
+          </span>
+        )}
         {row.sessionId && (
-          <Link
-            to={`/sessions/${encodeURIComponent(row.sessionId)}`}
-            className="inline-flex items-center gap-1 text-gray-500 hover:text-gray-300 transition-colors"
-            title={t("actions.viewSession")}
+          <EntityRef
+            kind="session"
+            id={row.sessionId}
+            className="inline-flex items-center gap-1 text-[10px] text-gray-500 hover:text-gray-300"
           >
             <ExternalLink className="w-2.5 h-2.5" />
-            <span className="font-mono">{row.sessionId.slice(0, 8)}</span>
-          </Link>
+            {row.sessionId.slice(0, 8)}
+          </EntityRef>
         )}
       </div>
     </div>
@@ -3650,14 +3677,22 @@ function RunSession(props: RunSessionProps) {
         <StatusPill status={props.handle.status} />
         <ModeBadge mode={props.mode} />
         {init?.model && (
-          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-3 text-gray-400 border border-border">
-            {init.model}
-          </span>
+          <EntityRef
+            kind="model"
+            model={init.model}
+            className="text-[10px] px-1.5 py-0.5 rounded bg-surface-3 text-gray-400 border border-border"
+          >
+            {formatModelName(init.model)}
+          </EntityRef>
         )}
         {props.handle.sessionId && (
-          <span className="text-[10px] font-mono text-gray-500 truncate max-w-xs">
+          <EntityRef
+            kind="session"
+            id={props.handle.sessionId}
+            className="text-[10px] text-gray-500 max-w-xs"
+          >
             {props.handle.sessionId.slice(0, 8)}…
-          </span>
+          </EntityRef>
         )}
         <div className="flex-1" />
         {props.isLive && (

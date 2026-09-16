@@ -1,7 +1,9 @@
 /**
  * @file AgentCard.test.tsx
  * @description Unit tests for the AgentCard component, including Codex-native
- * titles and transcript-derived prompt context alongside standard agent details.
+ * titles and transcript-derived prompt context alongside standard agent
+ * details, the EntityRef name link + agent context menu, and the one-line
+ * `row` variant.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -144,9 +146,10 @@ describe("AgentCard", () => {
         }
       />
     );
-    // Subtitle is the subagent type + project (cwd); the model badge shows the
-    // subagent's OWN model.
-    expect(screen.getByText("qa · x")).toBeInTheDocument();
+    // Subtitle is the subagent type beside the project badge (cwd basename);
+    // the model badge shows the subagent's OWN model.
+    expect(screen.getByText("qa")).toBeInTheDocument();
+    expect(screen.getByTitle("/x")).toHaveTextContent("x");
     expect(screen.getByText(formatModelName("claude-haiku-4-5-20251001")!)).toBeInTheDocument();
     // The Opus session model must NOT appear on a subagent card.
     expect(screen.queryByText(formatModelName("claude-opus-4-8")!)).not.toBeInTheDocument();
@@ -169,11 +172,13 @@ describe("AgentCard", () => {
         }
       />
     );
-    // Subtitle: project basename + SUBAGENT count + turn count (model excluded).
-    // agent_count includes the main agent itself, so 4 agents => 3 subagents.
-    // Showing subagents (not agents) reconciles the card with the "Active
-    // Subagents" dashboard stat, which excludes main agents.
-    expect(screen.getByText("proj · 3 subagents · 12 turns")).toBeInTheDocument();
+    // Subtitle: project badge (basename, full cwd as tooltip) + SUBAGENT count
+    // + turn count (model excluded). agent_count includes the main agent
+    // itself, so 4 agents => 3 subagents. Showing subagents (not agents)
+    // reconciles the card with the "Active Subagents" dashboard stat, which
+    // excludes main agents.
+    expect(screen.getByTitle("/Users/dev/proj")).toHaveTextContent("proj");
+    expect(screen.getByText("3 subagents · 12 turns")).toBeInTheDocument();
     // The model appears exactly once — in the footer badge, not duplicated in
     // the subtitle the way main cards used to.
     expect(screen.getAllByText(formatModelName("claude-opus-4-8")!)).toHaveLength(1);
@@ -395,11 +400,53 @@ describe("AgentCard", () => {
     expect(card?.className).not.toContain("border-l-2");
   });
 
-  it("should call onClick when clicked", () => {
+  it("should call onClick when the card surface is clicked", () => {
     const onClick = vi.fn();
     renderCard(<AgentCard agent={makeAgent()} onClick={onClick} />);
-    fireEvent.click(screen.getByText("Main Agent"));
+    // The name is now an EntityRef link (its own control); the surface click
+    // is any non-control area, e.g. the status badge.
+    fireEvent.click(screen.getByText("Working"));
     expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("runs onClick (not navigation) when Enter is pressed on the name", () => {
+    const onClick = vi.fn();
+    renderCard(<AgentCard agent={makeAgent({ name: "Explorer" })} onClick={onClick} />);
+    const name = screen.getByRole("button", { name: "Explorer" });
+    fireEvent.click(name);
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("links the name to the agent on the session page and opens the agent menu", async () => {
+    renderCard(<AgentCard agent={makeAgent({ name: "Explorer" })} />);
+    const name = screen.getByRole("link", { name: "Explorer" });
+    expect(name).toHaveAttribute("href", "/sessions/sess-1?tab=agents#agent-agent-1");
+    fireEvent.contextMenu(screen.getByText("Working"));
+    expect(await screen.findByRole("menu")).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "Copy agent ID" })).toBeInTheDocument();
+  });
+
+  it("row variant renders one line with the waiting reason readable without a mouse", () => {
+    const { container } = renderCard(
+      <AgentCard
+        variant="row"
+        agent={makeAgent({
+          status: "waiting",
+          current_tool: "Bash",
+          awaiting_input_since: "2026-03-05T10:01:00.000Z",
+          awaiting_reason: "notification",
+        })}
+      />
+    );
+    expect(container.querySelector(".card-hover")).toBeNull();
+    expect(screen.getByRole("link", { name: "Main Agent" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Bash" })).toHaveAttribute(
+      "href",
+      "/activity?session_id=sess-1&tool_name=Bash"
+    );
+    expect(container.querySelector("time")).toHaveAttribute("datetime", "2026-03-05T10:00:00.000Z");
+    // Reason is tooltip-only on the badge; a visually-hidden copy carries it.
+    expect(container.querySelector(".sr-only")).toHaveTextContent(/permission|input/i);
   });
 
   it("does not navigate before a transient Codex process has a durable session id", () => {

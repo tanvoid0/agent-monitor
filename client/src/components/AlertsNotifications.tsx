@@ -69,7 +69,6 @@
  * ----------------------------------------------------------------------------- */
 
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
   BellRing,
@@ -93,7 +92,11 @@ import { ConfirmModal } from "./ConfirmModal";
 import { Checkbox } from "./Checkbox";
 import { FieldHelp } from "./FieldHelp";
 import { timeAgo } from "../lib/format";
+import { copyText } from "../lib/clipboard";
+import { routes } from "../lib/routes";
 import type { AlertEvent, AlertRule, AlertRuleType, WSMessage } from "../lib/types";
+import { Clickable } from "./ui";
+import { EntityRef, entityMenu } from "./entity";
 
 const PAGE_SIZE = 25;
 
@@ -778,8 +781,23 @@ export function AlertsNotifications() {
             <>
               <ul className="space-y-2">
                 {alerts.map((alert) => (
-                  <li
+                  <Clickable
+                    as="li"
                     key={alert.id}
+                    to={alert.session_id ? routes.session(alert.session_id) : undefined}
+                    menu={
+                      alert.session_id
+                        ? entityMenu(
+                            { kind: "session", id: alert.session_id },
+                            { t, copy: copyText }
+                          )
+                        : undefined
+                    }
+                    menuLabel={
+                      alert.session_id
+                        ? t("common:ui.openMenuFor", { name: alert.message })
+                        : undefined
+                    }
                     className={`flex flex-wrap items-center justify-between gap-3 rounded-lg border px-3 py-2.5 ${
                       alert.acknowledged_at
                         ? "border-border bg-surface-2 opacity-70"
@@ -798,12 +816,22 @@ export function AlertsNotifications() {
                         {alert.session_id && (
                           <>
                             {" · "}
-                            <Link
-                              to={`/sessions/${encodeURIComponent(alert.session_id)}`}
-                              className="text-accent hover:underline"
-                            >
-                              {t("feed.viewSession")}
-                            </Link>
+                            <EntityRef
+                              kind="session"
+                              id={alert.session_id}
+                              className="text-accent"
+                            />
+                          </>
+                        )}
+                        {alert.session_id && alert.agent_id && (
+                          <>
+                            {" · "}
+                            <EntityRef
+                              kind="agent"
+                              id={alert.agent_id}
+                              sessionId={alert.session_id}
+                              type={null}
+                            />
                           </>
                         )}
                       </p>
@@ -817,7 +845,7 @@ export function AlertsNotifications() {
                         {t("feed.ack")}
                       </button>
                     )}
-                  </li>
+                  </Clickable>
                 ))}
               </ul>
 

@@ -1,7 +1,12 @@
 /**
  * @file SessionDetail.tsx
  * @description Displays session agents, owner-aware task progress, events, and
- * cost details with real-time updates and an expandable agent hierarchy.
+ * cost details with real-time updates and an expandable agent hierarchy. Tabs
+ * are URL-backed and the page honours deep links: `#agent-<id>` expands the
+ * agent's ancestors and scrolls to it, `?event=<id>` expands (loading one more
+ * batch if needed) and scrolls to a timeline row, `?transcript=` selects a
+ * conversation transcript (written back on change), and `?tool_name=` /
+ * `?agent_id=` seed the timeline filters once.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -31,11 +36,13 @@
  * - `../lib/api`
  * - `../lib/eventBus`
  * - `../components/AgentCard`
+ * - `../components/AgentTree`
  * - `../components/SessionOverview`
  * - `../components/conversation/ConversationView`
  * - `../components/StatusBadge`
  * - `../lib/types`
  * - `../components/EventDetail`
+ * - `../components/EventRow`
  * - `../components/EventFilters`
  * - `../components/EventFiltersInfo`
  * - `../components/Skeleton`
@@ -64,8 +71,8 @@
  *
  * ----------------------------------------------------------------------------- */
 
-import { useEffect, useState, useCallback, useMemo, useRef, type ReactNode } from "react";
-import { Link, useParams, useNavigate } from "react-router";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
+import { Link, useParams, useNavigate, useLocation, useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
@@ -75,9 +82,6 @@ import {
   Cpu,
   RefreshCw,
   DollarSign,
-  ChevronDown,
-  ChevronRight,
-  GitBranch,
   MessageSquare,
   List,
   AlertCircle,
@@ -86,8 +90,22 @@ import {
   ExternalLink,
   Workflow,
   Hourglass,
+  X,
 } from "lucide-react";
 import { api } from "../lib/api";
+import { copyText } from "../lib/clipboard";
+import { routes } from "../lib/routes";
+import {
+  Button,
+  IconButton,
+  PageHeader,
+  SectionHeader,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui";
+import { EntityRef, entityMenu } from "../components/entity";
 import { useUrlTab } from "../hooks/usePageShortcuts";
 import { usePaletteAction } from "../components/PaletteActionProvider";
 import { announceAction } from "../lib/appEvents";
@@ -95,10 +113,11 @@ import { eventBus } from "../lib/eventBus";
 import { isRemoteDataRefreshMessage } from "../lib/remoteDataEvents";
 import { useDataScope } from "../lib/dataScope";
 import { AgentCard } from "../components/AgentCard";
+import { AgentTree } from "../components/AgentTree";
 import { SessionOverview } from "../components/SessionOverview";
 import { TodoProgressPanel } from "../components/TodoProgressPanel";
 import { ConversationView } from "../components/conversation/ConversationView";
-import { SessionStatusBadge, AgentStatusBadge, REASON_ICONS } from "../components/StatusBadge";
+import { SessionStatusBadge, REASON_ICONS } from "../components/StatusBadge";
 import { CopyButton } from "../components/event-views/primitives";
 import {
   effectiveSessionStatus,
@@ -107,6 +126,7 @@ import {
   AWAITING_REASON_CONFIG,
 } from "../lib/types";
 import { EventDetail } from "../components/EventDetail";
+import { EventRow } from "../components/EventRow";
 import {
   EventFilters,
   EMPTY_FILTERS,
@@ -118,11 +138,9 @@ import { EventFiltersInfo } from "../components/EventFiltersInfo";
 import { Skeleton } from "../components/Skeleton";
 import {
   agentOriginLabel,
-  buildEventTitle,
   buildOriginLabel,
   projectFromCwd,
   projectFromEvent,
-  statusFromEventType,
 } from "../lib/event-grouping";
 import type { AgentInfo } from "../lib/event-grouping";
 import {
@@ -151,10 +169,42 @@ const EVENTS_MORE_BATCH = 500;
 // Live-refresh bounds - see ActivityFeed for rationale.
 const EVENTS_MAX_REFRESH = 500;
 const EVENTS_REFRESH_DEBOUNCE_MS = 500;
+const DEEP_LINK_RING_MS = 1500;
+
+/**
+ * Scroll a deep-link target into view, ring it briefly, and move focus onto
+ * it. Waits two frames: the caller's ancestor-expansion setState (expanding
+ * collapsed agent nodes) commits after the first frame, so the target may not
+ * exist in the DOM yet on frame one.
+ */
+function flashElement(elementId: string) {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      el.scrollIntoView({ block: "center" });
+      (el.querySelector<HTMLElement>("button,a") ?? el).focus({ preventScroll: true });
+      el.classList.add("ring-2", "ring-accent/60");
+      setTimeout(() => el.classList.remove("ring-2", "ring-accent/60"), DEEP_LINK_RING_MS);
+    });
+  });
+}
+
+/** `#agent-<id>` → `<id>`; empty for any other (or malformed) hash. */
+function agentIdFromHash(hash: string): string {
+  if (!hash.startsWith("#agent-")) return "";
+  try {
+    return decodeURIComponent(hash.slice("#agent-".length));
+  } catch {
+    return "";
+  }
+}
 
 export function SessionDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useTranslation("sessions");
   const { t: wfT } = useTranslation("workflows");
   const [scope] = useDataScope();
@@ -163,6 +213,7 @@ export function SessionDetail() {
   const [workflows, setWorkflows] = useState<WorkflowRun[]>([]);
   const [events, setEvents] = useState<DashboardEvent[]>([]);
   const [eventsTotal, setEventsTotal] = useState(0);
+  const [eventsLoaded, setEventsLoaded] = useState(false);
   const [eventsLoadingMore, setEventsLoadingMore] = useState(false);
   const [filters, setFilters] = useState<EventFiltersValue>(EMPTY_FILTERS);
   const [cost, setCost] = useState<CostResult | null>(null);
@@ -174,6 +225,14 @@ export function SessionDetail() {
   const [expandedAgents, setExpandedAgents] = useState<Set<string>>(() => {
     return new Set<string>();
   });
+  const toggleAgentExpanded = useCallback((id: string) => {
+    setExpandedAgents((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
   // URL-backed so a link can point at a session's conversation or timeline
   // directly, not just at the session.
   const [activeTab, setActiveTab] = useUrlTab(DETAIL_TABS, "agents");
@@ -184,7 +243,29 @@ export function SessionDetail() {
     setVisitedTabs((prev) => (prev.has(activeTab) ? prev : new Set(prev).add(activeTab)));
   }, [activeTab]);
   const [transcripts, setTranscripts] = useState<TranscriptInfo[]>([]);
-  const [pendingTranscriptId, setPendingTranscriptId] = useState<string | null>(null);
+  // `?transcript=` is the persisted selection; ConversationView reports every
+  // change back and the URL is rewritten in place (replace, never push).
+  const transcriptParam = searchParams.get("transcript");
+  const [pendingTranscriptId, setPendingTranscriptId] = useState<string | null>(transcriptParam);
+  useEffect(() => {
+    if (transcriptParam) setPendingTranscriptId(transcriptParam);
+  }, [transcriptParam]);
+  const handleTranscriptChange = useCallback(
+    (transcriptId: string | null) => {
+      setPendingTranscriptId(transcriptId);
+      if ((searchParams.get("transcript") ?? null) === transcriptId) return;
+      setSearchParams(
+        (previous) => {
+          const next = new URLSearchParams(previous);
+          if (transcriptId) next.set("transcript", transcriptId);
+          else next.delete("transcript");
+          return next;
+        },
+        { replace: true }
+      );
+    },
+    [searchParams, setSearchParams]
+  );
   const [transcriptNotFound, setTranscriptNotFound] = useState(false);
   const notFoundTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [expandedEvents, setExpandedEvents] = useState<Set<number>>(() => new Set());
@@ -381,6 +462,24 @@ export function SessionDetail() {
     [transcripts, id]
   );
 
+  // Entity menus deep-link with the DB agent id (`?transcript=<agents.id>`),
+  // but transcripts are keyed by Claude's file-level agent id. Resolve once the
+  // transcript list is known and rewrite the URL to the real transcript id.
+  const resolvedTranscriptRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!transcriptParam || transcriptParam === "main" || transcripts.length === 0) return;
+    if (transcripts.some((tr) => tr.id === transcriptParam)) return;
+    if (resolvedTranscriptRef.current === transcriptParam) return;
+    resolvedTranscriptRef.current = transcriptParam;
+    const byDbId = transcripts.find((tr) => tr.db_agent_id === transcriptParam);
+    if (byDbId) {
+      handleTranscriptChange(byDbId.id);
+      return;
+    }
+    const agent = agents.find((a) => a.id === transcriptParam);
+    if (agent) navigateToAgentConversation(agent);
+  }, [transcriptParam, transcripts, agents, handleTranscriptChange, navigateToAgentConversation]);
+
   // Compute compaction labels: "#1", "#2", etc. based on started_at order
   const compactionLabels = useMemo(() => {
     const map = new Map<string, string>();
@@ -455,11 +554,11 @@ export function SessionDetail() {
   const sessionNameById = useMemo(() => {
     const map = new Map<string, string>();
     if (session?.id) {
-      const label = session.name?.trim() || `Session ${session.id.slice(0, 8)}`;
+      const label = session.name?.trim() || `${t("defaultName")}${session.id.slice(0, 8)}`;
       map.set(session.id, label);
     }
     return map;
-  }, [session?.id, session?.name]);
+  }, [session?.id, session?.name, t]);
 
   // Precompute project per event so flat-row rendering doesn't re-parse JSON.
   const projectByEventId = useMemo(() => {
@@ -480,12 +579,39 @@ export function SessionDetail() {
       setEventsTotal(total);
     } catch (err) {
       console.error("Failed to load session events:", err);
+    } finally {
+      setEventsLoaded(true);
     }
   }, [eventApiParams]);
 
   useEffect(() => {
     loadEvents();
   }, [loadEvents]);
+
+  // `?tool_name=` / `?agent_id=` seed the timeline filters once per navigation,
+  // then leave the URL (replace) so a later tab switch cannot re-apply them.
+  const seededFiltersKeyRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (seededFiltersKeyRef.current === location.key) return;
+    seededFiltersKeyRef.current = location.key;
+    const toolName = searchParams.get("tool_name");
+    const agentId = searchParams.get("agent_id");
+    if (!toolName && !agentId) return;
+    setFilters((prev) => ({
+      ...prev,
+      tool_name: toolName ? [toolName] : prev.tool_name,
+      agent_id: agentId ? [agentId] : prev.agent_id,
+    }));
+    setSearchParams(
+      (previous) => {
+        const next = new URLSearchParams(previous);
+        next.delete("tool_name");
+        next.delete("agent_id");
+        return next;
+      },
+      { replace: true }
+    );
+  }, [location.key, searchParams, setSearchParams]);
 
   const loadMoreEvents = useCallback(async () => {
     if (!eventApiParams) return;
@@ -504,6 +630,74 @@ export function SessionDetail() {
       setEventsLoadingMore(false);
     }
   }, [eventApiParams, events.length]);
+
+  // `?event=<id>`: once the first batch is in, expand + scroll to the row. If
+  // it is not loaded yet, pull one more batch and retry; otherwise say so.
+  // Runs once per `event` value and never touches the filters.
+  const eventParam = searchParams.get("event");
+  const handledEventRef = useRef<string | null>(null);
+  const eventRetriedRef = useRef<string | null>(null);
+  // The component is not remounted between /sessions/A and /sessions/B (only
+  // `id` changes), so without this the previous session's events, offset, and
+  // deep-link bookkeeping would leak into the newly loaded session.
+  useEffect(() => {
+    setEvents([]);
+    setEventsTotal(0);
+    setEventsLoaded(false);
+    handledEventRef.current = null;
+    eventRetriedRef.current = null;
+  }, [id]);
+  useEffect(() => {
+    if (!eventParam || !eventsLoaded || eventsLoadingMore) return;
+    if (handledEventRef.current === eventParam) return;
+    const eventId = Number(eventParam);
+    if (events.some((e) => e.id === eventId)) {
+      handledEventRef.current = eventParam;
+      setExpandedEvents((prev) => new Set(prev).add(eventId));
+      flashElement(`event-${eventId}`);
+      return;
+    }
+    if (eventRetriedRef.current !== eventParam && events.length < eventsTotal) {
+      eventRetriedRef.current = eventParam;
+      void loadMoreEvents();
+      return;
+    }
+    handledEventRef.current = eventParam;
+    announceAction(t("detail.eventNotLoaded", { id: eventParam }));
+  }, [eventParam, events, eventsTotal, eventsLoaded, eventsLoadingMore, loadMoreEvents, t]);
+
+  // `#agent-<id>`: expand the target and every ancestor, then scroll to and
+  // ring the card. Runs once per navigation (location.key) per hash value.
+  // Split in two: the card nested under a collapsed ancestor does not exist
+  // in the DOM yet when `setExpandedAgents` and `flashElement` run in the same
+  // pass, so the rAF inside `flashElement` can fire before the expansion has
+  // committed and rendered the target. Effect 1 marks the hash handled and
+  // queues the flash; effect 2 fires it once the target element exists.
+  const agentHash = agentIdFromHash(location.hash);
+  const handledAgentHashRef = useRef<string | null>(null);
+  const pendingFlashRef = useRef<string | null>(null);
+  useEffect(() => {
+    const token = `${location.key}:${agentHash}`;
+    if (!agentHash || agents.length === 0 || handledAgentHashRef.current === token) return;
+    const agentMap = new Map(agents.map((a) => [a.id, a]));
+    if (!agentMap.has(agentHash)) return;
+    handledAgentHashRef.current = token;
+    const toExpand = new Set<string>();
+    let cur: string | null | undefined = agentHash;
+    while (cur && !toExpand.has(cur)) {
+      toExpand.add(cur);
+      cur = agentMap.get(cur)?.parent_agent_id;
+    }
+    setExpandedAgents((prev) => new Set([...prev, ...toExpand]));
+    pendingFlashRef.current = agentHash;
+  }, [agents, agentHash, location.key]);
+  useEffect(() => {
+    const pending = pendingFlashRef.current;
+    if (!pending || pending !== agentHash) return;
+    if (!document.getElementById(`agent-${pending}`)) return;
+    pendingFlashRef.current = null;
+    flashElement(`agent-${pending}`);
+  }, [expandedAgents, agentHash]);
   // Auto-expand agents that have working subagents (at any depth)
   useEffect(() => {
     const parentsWithActiveChildren = new Set<string>();
@@ -643,72 +837,87 @@ export function SessionDetail() {
     return (
       <div className="text-center py-20">
         <p className="text-red-400 mb-2">{error || t("detail.notFound")}</p>
-        <button onClick={goBack} className="btn-ghost mt-4">
-          <ArrowLeft className="w-4 h-4" /> {t("detail.backToSessions")}
-        </button>
+        <Button variant="ghost" size="sm" icon={ArrowLeft} onClick={goBack} className="mt-4">
+          {t("detail.backToSessions")}
+        </Button>
       </div>
     );
   }
 
   return (
     <div className="animate-fade-in space-y-8">
-      {/* Header */}
-      <div className="flex items-start gap-4">
-        <button onClick={goBack} className="btn-ghost mt-1">
-          <ArrowLeft className="w-4 h-4" />
-        </button>
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <h2 className="text-xl font-semibold text-gray-100">
-              {session.name || `${t("defaultName")}${session.id.slice(0, 8)}`}
-            </h2>
-            <SessionStatusBadge
-              status={effectiveSessionStatus(session)}
-              reason={sessionAwaitingReason(session)}
-              provider={session.provider}
-            />
-          </div>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
-            <span className="inline-flex items-center gap-1 text-xs text-gray-500 font-mono bg-surface-2 px-2 py-1 rounded">
-              <span title={session.id}>{session.id.slice(0, 16)}</span>
-              <CopyButton text={session.id} />
-            </span>
-            {session.model && (
-              <span className="inline-flex items-center gap-1.5 text-xs text-gray-400 bg-surface-2 px-2 py-1 rounded">
-                <Cpu className="w-3 h-3 text-gray-500" />
-                {formatModelName(session.model)}
+      {/* Header. The subtitle renders inside a <p>, so every chip is inline. */}
+      <PageHeader
+        icon={FolderOpen}
+        back={goBack}
+        title={session.name || `${t("defaultName")}${session.id.slice(0, 8)}`}
+        subtitle={
+          <span className="flex flex-col gap-1.5 mt-1">
+            <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <SessionStatusBadge
+                status={effectiveSessionStatus(session)}
+                reason={sessionAwaitingReason(session)}
+                provider={session.provider}
+              />
+              <span className="inline-flex items-center gap-1 text-xs text-gray-500 font-mono bg-surface-2 px-2 py-1 rounded">
+                <EntityRef
+                  kind="session"
+                  id={session.id}
+                  cwd={session.cwd}
+                  source={session.source}
+                  link={false}
+                  className="text-xs text-gray-500"
+                >
+                  {session.id.slice(0, 16)}
+                </EntityRef>
+                <CopyButton text={session.id} />
               </span>
-            )}
-            <span className="inline-flex items-center gap-1.5 text-xs text-gray-400 bg-surface-2 px-2 py-1 rounded">
-              <Clock className="w-3 h-3 text-gray-500" />
-              {formatDateTime(session.started_at)}
-              {session.ended_at && (
-                <span className="text-gray-500 ml-1">
-                  ({formatDuration(session.started_at, session.ended_at)})
+              {session.model && (
+                <span className="inline-flex items-center gap-1.5 text-xs text-gray-400 bg-surface-2 px-2 py-1 rounded">
+                  <Cpu className="w-3 h-3 text-gray-500" />
+                  <EntityRef kind="model" model={session.model} mono={false} className="text-xs">
+                    {formatModelName(session.model)}
+                  </EntityRef>
+                </span>
+              )}
+              <span className="inline-flex items-center gap-1.5 text-xs text-gray-400 bg-surface-2 px-2 py-1 rounded">
+                <Clock className="w-3 h-3 text-gray-500" />
+                {formatDateTime(session.started_at)}
+                {session.ended_at && (
+                  <span className="text-gray-500 ml-1">
+                    ({formatDuration(session.started_at, session.ended_at)})
+                  </span>
+                )}
+              </span>
+              {cost && cost.total_cost > 0 && (
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded">
+                  <DollarSign className="w-3 h-3" />
+                  {fmtCostFull(cost.total_cost).slice(1)}
                 </span>
               )}
             </span>
-            {cost && cost.total_cost > 0 && (
-              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded">
-                <DollarSign className="w-3 h-3" />
-                {fmtCostFull(cost.total_cost).slice(1)}
+            {session.cwd && (
+              <span className="inline-flex items-center gap-1.5 text-xs text-gray-500 min-w-0">
+                <FolderOpen className="w-3 h-3 flex-shrink-0" />
+                <EntityRef
+                  kind="project"
+                  cwd={session.cwd}
+                  source={session.source}
+                  className="text-xs text-gray-500"
+                >
+                  {session.cwd}
+                </EntityRef>
+                <CopyButton text={session.cwd} />
               </span>
             )}
-          </div>
-          {session.cwd && (
-            <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-2 min-w-0">
-              <FolderOpen className="w-3 h-3 flex-shrink-0" />
-              <span className="font-mono truncate" title={session.cwd}>
-                {session.cwd}
-              </span>
-              <CopyButton text={session.cwd} />
-            </div>
-          )}
-        </div>
-        <button onClick={load} className="btn-ghost">
-          <RefreshCw className="w-4 h-4" />
-        </button>
-      </div>
+          </span>
+        }
+        actions={
+          <Button variant="ghost" size="sm" icon={RefreshCw} onClick={() => void load()}>
+            {t("common:refresh")}
+          </Button>
+        }
+      />
 
       {/* Waiting-for-input callout: WHY the session sits in the yellow Waiting
           state (awaiting_reason) and for how long. Reason-specific icon/label
@@ -784,7 +993,7 @@ export function SessionDetail() {
 
       {isDashboardRun && (
         <Link
-          to={`/run?session=${encodeURIComponent(id || "")}`}
+          to={routes.run({ session: id || "" })}
           className="flex items-center gap-3 rounded-lg border border-emerald-500/30 bg-emerald-500/[0.06] hover:bg-emerald-500/[0.12] hover:border-emerald-500/50 px-4 py-2.5 transition-colors group"
         >
           <span className="w-7 h-7 rounded-md bg-emerald-500/15 border border-emerald-500/30 inline-flex items-center justify-center flex-shrink-0">
@@ -805,444 +1014,385 @@ export function SessionDetail() {
         </Link>
       )}
 
-      {/* Tab Navigation */}
-      <div className="flex items-center gap-1 border-b border-border">
-        <button
-          onClick={() => {
-            setActiveTab("agents");
-            setTranscriptNotFound(false);
-          }}
-          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === "agents"
-              ? "border-violet-500 text-violet-400"
-              : "border-transparent text-gray-500 hover:text-gray-300"
-          }`}
-        >
-          <Bot className="w-4 h-4" />
-          {t("detail.agents")} ({agents.length})
-        </button>
-        <button
-          onClick={() => {
-            setActiveTab("conversation");
-            setTranscriptNotFound(false);
-          }}
-          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === "conversation"
-              ? "border-violet-500 text-violet-400"
-              : "border-transparent text-gray-500 hover:text-gray-300"
-          }`}
-        >
-          <MessageSquare className="w-4 h-4" />
-          {t("detail.conversation")}
-        </button>
-        <button
-          onClick={() => {
-            setActiveTab("timeline");
-            setTranscriptNotFound(false);
-          }}
-          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === "timeline"
-              ? "border-violet-500 text-violet-400"
-              : "border-transparent text-gray-500 hover:text-gray-300"
-          }`}
-        >
-          <List className="w-4 h-4" />
-          {t("detail.timeline", { shown: events.length, total: eventsTotal })}
-        </button>
-      </div>
+      {/* Tab Navigation. Panels stay mounted once visited (no remount flash),
+          so each TabsContent is force-mounted and hidden by hand. */}
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => {
+          setActiveTab(value as DetailTab);
+          setTranscriptNotFound(false);
+        }}
+        className="space-y-8"
+      >
+        <TabsList variant="underline">
+          <TabsTrigger value="agents" icon={Bot} count={agents.length}>
+            {t("detail.agents")}
+          </TabsTrigger>
+          <TabsTrigger value="conversation" icon={MessageSquare}>
+            {t("detail.conversation")}
+          </TabsTrigger>
+          <TabsTrigger value="timeline" icon={List}>
+            {t("detail.timeline", { shown: events.length, total: eventsTotal })}
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Tab Content */}
-      {hookOnly && (
-        <div className="flex items-start gap-2 px-4 py-2.5 mb-3 text-sm text-sky-300 bg-sky-500/10 border border-sky-500/20 rounded-lg">
-          <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
-          <span>{t("detail.hookOnlySession")}</span>
-        </div>
-      )}
-      {transcriptNotFound && !hookOnly && (
-        <div className="flex items-center gap-2 px-4 py-2.5 mb-3 text-sm text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <span>{t("detail.transcriptNotFound")}</span>
-          <button
-            onClick={() => setTranscriptNotFound(false)}
-            className="ml-auto text-amber-400/60 hover:text-amber-400 transition-colors"
-          >
-            <List className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      )}
-
-      {visitedTabs.has("agents") && (
-        <div hidden={activeTab !== "agents"}>
-          <SessionOverview session={session} agents={agents} />
-          {session.todo_snapshot && <TodoProgressPanel snapshot={session.todo_snapshot} />}
-
-          {workflows.length > 0 && (
-            <div className="mb-4">
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <Workflow className="w-3.5 h-3.5 text-violet-400" />
-                {wfT("runs.sessionTitle")}
-                <span className="text-gray-600 font-mono">· {workflows.length}</span>
-              </h3>
-              <WorkflowRunsPanel runs={workflows} hideSessionLink />
-            </div>
-          )}
-
-          {agents.length === 0 ? (
-            <p className="text-sm text-gray-500">{t("detail.noAgents")}</p>
-          ) : (
-            <>
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                <Bot className="w-3.5 h-3.5 text-violet-400" />
-                {t("detail.agents")}
-                <span className="text-gray-600 font-mono">· {agents.length}</span>
-              </h3>
-              <div className="space-y-2" data-testid="agent-tree">
-                {(() => {
-                  // Build parent→children map for the full tree (works at any depth)
-                  const agentMap = new Map(agents.map((a) => [a.id, a]));
-                  const childrenByParent = new Map<string, Agent[]>();
-                  const rootAgents: Agent[] = [];
-                  for (const a of agents) {
-                    if (a.parent_agent_id && agentMap.has(a.parent_agent_id)) {
-                      const list = childrenByParent.get(a.parent_agent_id) || [];
-                      list.push(a);
-                      childrenByParent.set(a.parent_agent_id, list);
-                    } else if (!a.parent_agent_id || !agentMap.has(a.parent_agent_id)) {
-                      rootAgents.push(a);
-                    }
-                  }
-                  // Sort roots and children by started_at ascending (chronological order)
-                  rootAgents.sort((a, b) => (a.started_at || "").localeCompare(b.started_at || ""));
-                  for (const key of childrenByParent.keys()) {
-                    childrenByParent
-                      .get(key)!
-                      .sort((a, b) => (a.started_at || "").localeCompare(b.started_at || ""));
-                  }
-
-                  // Count all descendants (recursive) for collapsed badge.
-                  // `seen` guards against a cyclic parent_agent_id (corrupt data)
-                  // that would otherwise recurse forever and crash the page.
-                  function countDescendants(id: string, seen = new Set<string>()): number {
-                    if (seen.has(id)) return 0;
-                    seen.add(id);
-                    const kids = childrenByParent.get(id) || [];
-                    return kids.reduce((sum, k) => sum + 1 + countDescendants(k.id, seen), 0);
-                  }
-
-                  // Recursive agent node renderer. `ancestors` guards against a
-                  // cyclic parent_agent_id so a bad link can't stack-overflow.
-                  function renderAgentNode(
-                    agent: Agent,
-                    depth: number,
-                    ancestors: Set<string> = new Set()
-                  ): ReactNode {
-                    if (ancestors.has(agent.id)) return null;
-                    const childAncestors = new Set(ancestors).add(agent.id);
-                    const children = childrenByParent.get(agent.id) || [];
-                    const isExpanded = expandedAgents.has(agent.id);
-                    const hasChildren = children.length > 0;
-                    const isSubagent = depth > 0;
-                    const totalDesc = hasChildren ? countDescendants(agent.id) : 0;
-                    const toggleExpanded = () =>
-                      setExpandedAgents((prev) => {
-                        const next = new Set(prev);
-                        if (next.has(agent.id)) next.delete(agent.id);
-                        else next.add(agent.id);
-                        return next;
-                      });
-
-                    return (
-                      <div key={agent.id}>
-                        <div className="flex items-center gap-1 min-w-0">
-                          {hasChildren && (
-                            <button
-                              onClick={toggleExpanded}
-                              className="p-1 text-gray-500 hover:text-gray-300 transition-colors flex-shrink-0"
-                              aria-label={isExpanded ? "Collapse subagents" : "Expand subagents"}
-                              aria-expanded={isExpanded}
-                            >
-                              {isExpanded ? (
-                                <ChevronDown className="w-4 h-4" />
-                              ) : (
-                                <ChevronRight className="w-4 h-4" />
-                              )}
-                            </button>
-                          )}
-                          {isSubagent && !hasChildren && <span className="w-6 flex-shrink-0" />}
-                          {isSubagent && (
-                            <GitBranch className="w-3 h-3 text-violet-400 flex-shrink-0" />
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <AgentCard
-                              agent={agent}
-                              // The /api/sessions/:id session row has no `cost`
-                              // column (cost is loaded separately into `cost`
-                              // state), so inject the computed session total here
-                              // — otherwise the MAIN agent card, which shows
-                              // session.cost, renders no cost on this page.
-                              // Subagent cards ignore session.cost (they use
-                              // agent.cost), so this only affects the main card.
-                              session={
-                                session
-                                  ? { ...session, cost: cost?.total_cost ?? session.cost }
-                                  : undefined
-                              }
-                              label={compactionLabels.get(agent.id)}
-                              // Card click always opens the agent conversation —
-                              // same behavior whether or not it has children.
-                              // Expand/collapse of the subagent list is handled
-                              // solely by the chevron button, so clicking a
-                              // parent (incl. the main agent) no longer toggles.
-                              onClick={() => navigateToAgentConversation(agent)}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Recursive children (collapsible) */}
-                        {hasChildren && isExpanded && (
-                          <div className="ml-6 mt-1 space-y-1 border-l-2 border-violet-500/20 pl-3">
-                            {children.map((child) =>
-                              renderAgentNode(child, depth + 1, childAncestors)
-                            )}
-                          </div>
-                        )}
-
-                        {/* Descendant count badge when collapsed */}
-                        {hasChildren && !isExpanded && (
-                          <button
-                            onClick={() =>
-                              setExpandedAgents((prev) => new Set([...prev, agent.id]))
-                            }
-                            className="ml-7 mt-1 text-[11px] text-violet-400 hover:text-violet-300 transition-colors"
-                          >
-                            {t("common:subagent_label", { count: totalDesc })}
-                          </button>
-                        )}
-                      </div>
-                    );
-                  }
-
-                  // Separate true orphans (subagent whose parent_agent_id references a missing agent)
-                  const orphans = rootAgents.filter(
-                    (a) =>
-                      a.type === "subagent" && a.parent_agent_id && !agentMap.has(a.parent_agent_id)
-                  );
-                  const roots = rootAgents.filter(
-                    (a) =>
-                      !(
-                        a.type === "subagent" &&
-                        a.parent_agent_id &&
-                        !agentMap.has(a.parent_agent_id)
-                      )
-                  );
-
-                  return (
-                    <>
-                      {roots.map((agent) => renderAgentNode(agent, 0))}
-
-                      {/* Orphaned subagents */}
-                      {orphans.length > 0 && (
-                        <div className="mt-4">
-                          <p className="text-[11px] text-gray-500 mb-2 uppercase tracking-wider">
-                            {t("detail.unparented")}
-                          </p>
-                          <div className="space-y-1">
-                            {orphans.map((agent) => renderAgentNode(agent, 1))}
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  );
-                })()}
-              </div>
-            </>
-          )}
-
-          {/* Cost Breakdown - shown under Agents tab */}
-          {cost && cost.breakdown.length > 0 && cost.total_cost > 0 && (
-            <div className="mt-8">
-              <h3 className="text-sm font-medium text-gray-300 mb-4 flex items-center gap-2">
-                <DollarSign className="w-4 h-4" />
-                {t("detail.costBreakdown")}
-              </h3>
-              <div className="card overflow-x-auto">
-                <table className="w-full min-w-[600px]">
-                  <thead>
-                    <tr className="border-b border-border text-left">
-                      <th className="px-5 py-2.5 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
-                        {t("common:cost.model")}
-                      </th>
-                      <th className="px-5 py-2.5 text-[11px] font-semibold text-gray-500 uppercase tracking-wider text-right">
-                        {t("common:token.input")}
-                      </th>
-                      <th className="px-5 py-2.5 text-[11px] font-semibold text-gray-500 uppercase tracking-wider text-right">
-                        {t("common:token.output")}
-                      </th>
-                      <th className="px-5 py-2.5 text-[11px] font-semibold text-gray-500 uppercase tracking-wider text-right">
-                        {t("common:token.cacheRead")}
-                      </th>
-                      <th className="px-5 py-2.5 text-[11px] font-semibold text-gray-500 uppercase tracking-wider text-right">
-                        {t("common:token.cacheWrite")}
-                      </th>
-                      <th className="px-5 py-2.5 text-[11px] font-semibold text-gray-500 uppercase tracking-wider text-right">
-                        {t("common:cost.cost")}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {cost.breakdown.map((row) => (
-                      <tr key={row.model} className="hover:bg-surface-4 transition-colors">
-                        <td className="px-5 py-2.5 text-sm font-mono text-gray-300">
-                          {formatModelName(row.model)}
-                        </td>
-                        <td className="px-5 py-2.5 text-sm text-gray-400 text-right font-mono">
-                          {row.input_tokens.toLocaleString()}
-                        </td>
-                        <td className="px-5 py-2.5 text-sm text-gray-400 text-right font-mono">
-                          {row.output_tokens.toLocaleString()}
-                        </td>
-                        <td className="px-5 py-2.5 text-sm text-gray-400 text-right font-mono">
-                          {row.cache_read_tokens.toLocaleString()}
-                        </td>
-                        <td className="px-5 py-2.5 text-sm text-gray-400 text-right font-mono">
-                          {row.cache_write_tokens.toLocaleString()}
-                        </td>
-                        <td className="px-5 py-2.5 text-sm text-emerald-400 text-right font-mono font-medium">
-                          {fmtCostFull(row.cost, 4)}
-                        </td>
-                      </tr>
-                    ))}
-                    <tr className="bg-surface-2">
-                      <td className="px-5 py-2.5 text-sm font-medium text-gray-200" colSpan={5}>
-                        {t("common:total")}
-                      </td>
-                      <td className="px-5 py-2.5 text-sm text-emerald-400 text-right font-mono font-semibold">
-                        {fmtCostFull(cost.total_cost, 4)}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {visitedTabs.has("conversation") && (
-        <div hidden={activeTab !== "conversation"}>
-          <ConversationView sessionId={session.id} initialTranscriptId={pendingTranscriptId} />
-        </div>
-      )}
-
-      {visitedTabs.has("timeline") && (
-        <div hidden={activeTab !== "timeline"}>
-          <div className="mb-3">
-            <EventFiltersInfo />
+        {/* Tab Content */}
+        {hookOnly && (
+          <div className="flex items-start gap-2 px-4 py-2.5 mb-3 text-sm text-sky-300 bg-sky-500/10 border border-sky-500/20 rounded-lg">
+            <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <span>{t("detail.hookOnlySession")}</span>
           </div>
-          <div className="mb-3">
-            <EventFilters
-              value={filters}
-              onChange={setFilters}
-              hideSessionFilter
-              agentOptions={agents.map((a) => ({ id: a.id, label: a.name || a.id }))}
+        )}
+        {transcriptNotFound && !hookOnly && (
+          <div className="flex items-center gap-2 px-4 py-2.5 mb-3 text-sm text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span>{t("detail.transcriptNotFound")}</span>
+            <IconButton
+              icon={X}
+              size="xs"
+              label={t("common:close")}
+              onClick={() => setTranscriptNotFound(false)}
+              className="ml-auto text-amber-400/60 hover:text-amber-400"
             />
           </div>
-          {events.length === 0 ? (
-            <p className="text-sm text-gray-500">
-              {isEmptyFilters(filters) ? t("detail.noEvents") : t("common:eventFilters.noResults")}
-            </p>
-          ) : (
-            <div className="card overflow-hidden">
-              <div className="divide-y divide-border max-h-[600px] overflow-y-auto overflow-x-auto">
-                {events.map((event, i) => {
-                  const key = event.id ?? i;
-                  const isOpen = event.id != null && expandedEvents.has(event.id);
-                  return (
-                    <div key={key}>
-                      <button
-                        type="button"
-                        onClick={() => event.id != null && toggleEvent(event.id)}
-                        aria-expanded={isOpen}
-                        aria-label={
-                          isOpen ? t("common:eventDetail.collapse") : t("common:eventDetail.expand")
+        )}
+
+        <TabsContent value="agents" forceMount hidden={activeTab !== "agents"}>
+          {visitedTabs.has("agents") && (
+            <div>
+              <SessionOverview session={session} agents={agents} />
+              {session.todo_snapshot && <TodoProgressPanel snapshot={session.todo_snapshot} />}
+
+              {workflows.length > 0 && (
+                <div className="mb-4">
+                  <div className="mb-2">
+                    <SectionHeader
+                      icon={Workflow}
+                      title={wfT("runs.sessionTitle")}
+                      count={workflows.length}
+                    />
+                  </div>
+                  <WorkflowRunsPanel runs={workflows} hideSessionLink />
+                </div>
+              )}
+
+              {agents.length === 0 ? (
+                <p className="text-sm text-gray-500">{t("detail.noAgents")}</p>
+              ) : (
+                <>
+                  <div className="mb-3">
+                    <SectionHeader icon={Bot} title={t("detail.agents")} count={agents.length} />
+                  </div>
+                  <div className="space-y-2" data-testid="agent-tree">
+                    {(() => {
+                      // Build parent→children map for the full tree (works at any depth)
+                      const agentMap = new Map(agents.map((a) => [a.id, a]));
+                      const childrenByParent = new Map<string, Agent[]>();
+                      const rootAgents: Agent[] = [];
+                      for (const a of agents) {
+                        if (a.parent_agent_id && agentMap.has(a.parent_agent_id)) {
+                          const list = childrenByParent.get(a.parent_agent_id) || [];
+                          list.push(a);
+                          childrenByParent.set(a.parent_agent_id, list);
+                        } else if (!a.parent_agent_id || !agentMap.has(a.parent_agent_id)) {
+                          rootAgents.push(a);
                         }
-                        className="w-full text-left px-5 py-3 flex items-center gap-4 hover:bg-surface-4 transition-colors min-w-0 cursor-pointer"
-                      >
-                        <span
-                          className={`text-gray-500 text-[10px] w-3 flex-shrink-0 transition-transform ${isOpen ? "rotate-90" : ""}`}
-                          aria-hidden="true"
-                        >
-                          ▶
-                        </span>
-                        <div className="w-16 text-[11px] text-gray-600 font-mono flex-shrink-0">
-                          {timeAgo(event.created_at)}
-                        </div>
-                        <AgentStatusBadge status={statusFromEventType(event.event_type)} />
-                        {(() => {
-                          // Session is implicit on this page - project is
-                          // still shown so the row identifies the working
-                          // directory when you share / search. Events without
-                          // their own cwd (e.g. TurnDuration) fall back to the
-                          // session's cwd so every row carries the dir prefix.
-                          const project =
-                            projectByEventId.get(event.id) ?? projectFromCwd(session?.cwd) ?? null;
-                          const origin = buildOriginLabel(
-                            project,
-                            null,
-                            agentOriginLabel(event.agent_id, agentInfoById)
-                          );
-                          return (
-                            <span className="text-sm text-gray-300 flex-1 truncate">
-                              {origin && (
-                                <span
-                                  className="text-gray-500 mr-1"
-                                  title={event.agent_id ?? undefined}
-                                >
-                                  {origin} ·
-                                </span>
-                              )}
-                              {buildEventTitle(event)}
-                            </span>
-                          );
-                        })()}
-                        {event.tool_name && (
-                          <span className="text-[11px] px-2 py-0.5 bg-surface-2 rounded text-gray-500 font-mono">
-                            {event.tool_name}
-                          </span>
-                        )}
-                      </button>
-                      {isOpen && (
-                        <EventDetail
-                          event={event}
-                          agentInfoById={agentInfoById}
-                          sessionNameById={sessionNameById}
+                      }
+                      // Sort roots and children by started_at ascending (chronological order)
+                      rootAgents.sort((a, b) =>
+                        (a.started_at || "").localeCompare(b.started_at || "")
+                      );
+                      for (const key of childrenByParent.keys()) {
+                        childrenByParent
+                          .get(key)!
+                          .sort((a, b) => (a.started_at || "").localeCompare(b.started_at || ""));
+                      }
+
+                      const renderCard = (agent: Agent) => (
+                        <AgentCard
+                          agent={agent}
+                          // The /api/sessions/:id session row has no `cost`
+                          // column (cost is loaded separately into `cost`
+                          // state), so inject the computed session total here
+                          // — otherwise the MAIN agent card, which shows
+                          // session.cost, renders no cost on this page.
+                          // Subagent cards ignore session.cost (they use
+                          // agent.cost), so this only affects the main card.
+                          session={
+                            session
+                              ? { ...session, cost: cost?.total_cost ?? session.cost }
+                              : undefined
+                          }
+                          label={compactionLabels.get(agent.id)}
+                          // Card click always opens the agent conversation —
+                          // same behavior whether or not it has children.
+                          // Expand/collapse of the subagent list is handled
+                          // solely by the chevron button, so clicking a
+                          // parent (incl. the main agent) no longer toggles.
+                          onClick={() => navigateToAgentConversation(agent)}
                         />
-                      )}
-                    </div>
-                  );
-                })}
+                      );
+                      const treeProps = {
+                        childrenByParent,
+                        expanded: expandedAgents,
+                        onToggle: toggleAgentExpanded,
+                        renderCard,
+                        collapsedLabel: (_agent: Agent, descendants: Agent[]) =>
+                          t("common:subagent_label", { count: descendants.length }),
+                        // Keep nested leaves aligned with their chevron-bearing siblings.
+                        leafSlot: (_agent: Agent, depth: number) =>
+                          depth > 0 ? <span className="w-6 flex-shrink-0" /> : null,
+                      };
+
+                      // Separate true orphans (subagent whose parent_agent_id references a missing agent)
+                      const orphans = rootAgents.filter(
+                        (a) =>
+                          a.type === "subagent" &&
+                          a.parent_agent_id &&
+                          !agentMap.has(a.parent_agent_id)
+                      );
+                      const roots = rootAgents.filter(
+                        (a) =>
+                          !(
+                            a.type === "subagent" &&
+                            a.parent_agent_id &&
+                            !agentMap.has(a.parent_agent_id)
+                          )
+                      );
+
+                      return (
+                        <>
+                          <AgentTree roots={roots} {...treeProps} />
+
+                          {/* Orphaned subagents */}
+                          {orphans.length > 0 && (
+                            <div className="mt-4">
+                              <p className="text-[11px] text-gray-500 mb-2 uppercase tracking-wider">
+                                {t("detail.unparented")}
+                              </p>
+                              <div className="space-y-1">
+                                <AgentTree roots={orphans} depth={1} {...treeProps} />
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+                </>
+              )}
+
+              {/* Cost Breakdown - shown under Agents tab */}
+              {cost && cost.breakdown.length > 0 && cost.total_cost > 0 && (
+                <div className="mt-8">
+                  <div className="mb-4">
+                    <SectionHeader icon={DollarSign} title={t("detail.costBreakdown")} size="sm" />
+                  </div>
+                  <div className="card overflow-x-auto">
+                    <table className="w-full min-w-[600px]">
+                      <thead>
+                        <tr className="border-b border-border text-left">
+                          <th className="px-5 py-2.5 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
+                            {t("common:cost.model")}
+                          </th>
+                          <th className="px-5 py-2.5 text-[11px] font-semibold text-gray-500 uppercase tracking-wider text-right">
+                            {t("common:token.input")}
+                          </th>
+                          <th className="px-5 py-2.5 text-[11px] font-semibold text-gray-500 uppercase tracking-wider text-right">
+                            {t("common:token.output")}
+                          </th>
+                          <th className="px-5 py-2.5 text-[11px] font-semibold text-gray-500 uppercase tracking-wider text-right">
+                            {t("common:token.cacheRead")}
+                          </th>
+                          <th className="px-5 py-2.5 text-[11px] font-semibold text-gray-500 uppercase tracking-wider text-right">
+                            {t("common:token.cacheWrite")}
+                          </th>
+                          <th className="px-5 py-2.5 text-[11px] font-semibold text-gray-500 uppercase tracking-wider text-right">
+                            {t("common:cost.cost")}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border">
+                        {cost.breakdown.map((row, i) => (
+                          <tr
+                            key={`${row.model}-${i}`}
+                            className="hover:bg-surface-4 transition-colors"
+                          >
+                            <td className="px-5 py-2.5 text-sm font-mono text-gray-300">
+                              <EntityRef kind="model" model={row.model} className="text-sm">
+                                {formatModelName(row.model)}
+                              </EntityRef>
+                            </td>
+                            <td className="px-5 py-2.5 text-sm text-gray-400 text-right font-mono">
+                              {row.input_tokens.toLocaleString()}
+                            </td>
+                            <td className="px-5 py-2.5 text-sm text-gray-400 text-right font-mono">
+                              {row.output_tokens.toLocaleString()}
+                            </td>
+                            <td className="px-5 py-2.5 text-sm text-gray-400 text-right font-mono">
+                              {row.cache_read_tokens.toLocaleString()}
+                            </td>
+                            <td className="px-5 py-2.5 text-sm text-gray-400 text-right font-mono">
+                              {row.cache_write_tokens.toLocaleString()}
+                            </td>
+                            <td className="px-5 py-2.5 text-sm text-emerald-400 text-right font-mono font-medium">
+                              {fmtCostFull(row.cost, 4)}
+                            </td>
+                          </tr>
+                        ))}
+                        <tr className="bg-surface-2">
+                          <td className="px-5 py-2.5 text-sm font-medium text-gray-200" colSpan={5}>
+                            {t("common:total")}
+                          </td>
+                          <td className="px-5 py-2.5 text-sm text-emerald-400 text-right font-mono font-semibold">
+                            {fmtCostFull(cost.total_cost, 4)}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="conversation" forceMount hidden={activeTab !== "conversation"}>
+          {visitedTabs.has("conversation") && (
+            <ConversationView
+              sessionId={session.id}
+              initialTranscriptId={pendingTranscriptId}
+              onTranscriptChange={handleTranscriptChange}
+            />
+          )}
+        </TabsContent>
+
+        <TabsContent value="timeline" forceMount hidden={activeTab !== "timeline"}>
+          {visitedTabs.has("timeline") && (
+            <div>
+              <div className="mb-3">
+                <EventFiltersInfo />
               </div>
+              <div className="mb-3">
+                <EventFilters
+                  value={filters}
+                  onChange={setFilters}
+                  hideSessionFilter
+                  agentOptions={agents.map((a) => ({ id: a.id, label: a.name || a.id }))}
+                />
+              </div>
+              {events.length === 0 ? (
+                <p className="text-sm text-gray-500">
+                  {isEmptyFilters(filters)
+                    ? t("detail.noEvents")
+                    : t("common:eventFilters.noResults")}
+                </p>
+              ) : (
+                <div className="card overflow-hidden">
+                  <div className="divide-y divide-border max-h-[600px] overflow-y-auto overflow-x-auto">
+                    {events.map((event, i) => {
+                      const key = event.id ?? i;
+                      const isOpen = event.id != null && expandedEvents.has(event.id);
+                      const toggle = () => event.id != null && toggleEvent(event.id);
+                      const menu =
+                        event.id != null
+                          ? entityMenu(
+                              {
+                                kind: "event",
+                                id: event.id,
+                                sessionId: session.id,
+                                toolName: event.tool_name,
+                                agentId: event.agent_id,
+                              },
+                              { t, copy: copyText }
+                            )
+                          : undefined;
+                      // Session is implicit on this page - project is still shown
+                      // so the row identifies the working directory when you share
+                      // / search. Events without their own cwd (e.g. TurnDuration)
+                      // fall back to the session's cwd so every row carries the
+                      // dir prefix.
+                      const project =
+                        projectByEventId.get(event.id) ?? projectFromCwd(session?.cwd) ?? null;
+                      const origin = buildOriginLabel(
+                        project,
+                        null,
+                        agentOriginLabel(event.agent_id, agentInfoById)
+                      );
+                      const originAgent = event.agent_id ? agentInfoById.get(event.agent_id) : null;
+                      return (
+                        <div key={key}>
+                          <EventRow
+                            event={event}
+                            sessionId={session.id}
+                            id={event.id != null ? `event-${event.id}` : undefined}
+                            tabIndex={-1}
+                            isOpen={isOpen}
+                            onToggle={toggle}
+                            menu={menu}
+                            className="flex items-center gap-4 px-5 py-3 pr-3 hover:bg-surface-4 transition-colors min-w-0"
+                            time={
+                              <span className="w-16 text-[11px] text-gray-600 font-mono flex-shrink-0">
+                                {timeAgo(event.created_at)}
+                              </span>
+                            }
+                            origin={
+                              origin && (
+                                <span className="text-gray-500 mr-1">
+                                  {event.agent_id ? (
+                                    <EntityRef
+                                      kind="agent"
+                                      id={event.agent_id}
+                                      sessionId={session.id}
+                                      type={originAgent?.type}
+                                      name={originAgent?.name}
+                                      mono={false}
+                                      className="text-gray-500"
+                                    >
+                                      {origin}
+                                    </EntityRef>
+                                  ) : (
+                                    origin
+                                  )}{" "}
+                                  ·
+                                </span>
+                              )
+                            }
+                          />
+                          {isOpen && (
+                            <EventDetail
+                              event={event}
+                              agentInfoById={agentInfoById}
+                              sessionNameById={sessionNameById}
+                            />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+              {events.length < eventsTotal && (
+                <div className="flex items-center justify-between mt-3 px-1">
+                  <span className="text-xs text-gray-500">
+                    {t("common:eventFilters.showing", { shown: events.length, total: eventsTotal })}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={loadMoreEvents}
+                    disabled={eventsLoadingMore}
+                    className="px-3 py-1.5 text-xs font-medium rounded-md bg-accent/15 text-accent hover:bg-accent/25 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    {eventsLoadingMore
+                      ? t("common:eventFilters.loading")
+                      : t("common:eventFilters.loadMore")}
+                  </button>
+                </div>
+              )}
             </div>
           )}
-          {events.length < eventsTotal && (
-            <div className="flex items-center justify-between mt-3 px-1">
-              <span className="text-xs text-gray-500">
-                {t("common:eventFilters.showing", { shown: events.length, total: eventsTotal })}
-              </span>
-              <button
-                type="button"
-                onClick={loadMoreEvents}
-                disabled={eventsLoadingMore}
-                className="px-3 py-1.5 text-xs font-medium rounded-md bg-accent/15 text-accent hover:bg-accent/25 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-              >
-                {eventsLoadingMore
-                  ? t("common:eventFilters.loading")
-                  : t("common:eventFilters.loadMore")}
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

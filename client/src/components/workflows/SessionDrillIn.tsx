@@ -1,6 +1,6 @@
 /**
  * @file SessionDrillIn.tsx
- * @description Defines the SessionDrillIn component, which provides a detailed view of a specific session in the agent dashboard application. It allows users to drill into the agent tree, tool timeline, and event sequence for a selected session. The component manages its own state for loading, error handling, and active tab selection, and it fetches the necessary data from the backend API when a session is selected. It also includes a session selector for searching and selecting different sessions to view.
+ * @description Defines the SessionDrillIn component, which provides a detailed view of a specific session in the agent dashboard application. It allows users to drill into the agent tree, tool timeline, and event sequence for a selected session. The component manages its own state for loading, error handling, and active tab selection (Radix Tabs), and it fetches the necessary data from the backend API when a session is selected. It also includes a session selector for searching and selecting different sessions to view. The session header, agent-tree rows and tool pills are `EntityRef` chips linking to the session, agent and Activity feed.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -65,6 +65,8 @@ import { X, GitFork, Wrench, List, Search, ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { api } from "../../lib/api";
 import { formatDateTime, formatMs, formatModelName } from "../../lib/format";
+import { IconButton, Tabs, TabsContent, TabsList, TabsTrigger } from "../ui";
+import { EntityRef } from "../entity";
 import type {
   SessionDrillIn as SessionDrillInData,
   DashboardEvent,
@@ -107,49 +109,21 @@ function safeTimestamp(raw: string): string {
 
 // ── Tab bar ───────────────────────────────────────────────────────────────────
 
-interface TabBarProps {
-  active: Tab;
-  onChange: (t: Tab) => void;
-}
-
-function TabBar({ active, onChange }: TabBarProps) {
+function TabBar() {
   const { t } = useTranslation("workflows");
   const tabs = [
-    {
-      id: "tree" as Tab,
-      label: t("drillIn.tabs.agentTree"),
-      icon: <GitFork className="w-3.5 h-3.5" />,
-    },
-    {
-      id: "timeline" as Tab,
-      label: t("drillIn.tabs.toolTimeline"),
-      icon: <Wrench className="w-3.5 h-3.5" />,
-    },
-    {
-      id: "events" as Tab,
-      label: t("drillIn.tabs.eventSequence"),
-      icon: <List className="w-3.5 h-3.5" />,
-    },
+    { id: "tree" as Tab, label: t("drillIn.tabs.agentTree"), icon: GitFork },
+    { id: "timeline" as Tab, label: t("drillIn.tabs.toolTimeline"), icon: Wrench },
+    { id: "events" as Tab, label: t("drillIn.tabs.eventSequence"), icon: List },
   ];
   return (
-    <div className="flex gap-1 p-1 bg-surface-3 rounded-lg">
+    <TabsList className="bg-surface-3">
       {tabs.map((tab) => (
-        <button
-          key={tab.id}
-          type="button"
-          onClick={() => onChange(tab.id)}
-          className={[
-            "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors duration-150",
-            active === tab.id
-              ? "bg-surface-5 text-gray-100 shadow-sm"
-              : "text-gray-500 hover:text-gray-300",
-          ].join(" ")}
-        >
-          {tab.icon}
+        <TabsTrigger key={tab.id} value={tab.id} icon={tab.icon} className="text-xs">
           {tab.label}
-        </button>
+        </TabsTrigger>
       ))}
-    </div>
+    </TabsList>
   );
 }
 
@@ -158,9 +132,10 @@ function TabBar({ active, onChange }: TabBarProps) {
 interface TreeNodeProps {
   node: AgentNode;
   depth: number;
+  sessionId: string;
 }
 
-function TreeNode({ node, depth }: TreeNodeProps) {
+function TreeNode({ node, depth, sessionId }: TreeNodeProps) {
   const { t } = useTranslation(["workflows", "common"]);
   const indentPx = depth * 20;
   const isMain = node.type === "main";
@@ -192,11 +167,15 @@ function TreeNode({ node, depth }: TreeNodeProps) {
         </span>
 
         {/* Name */}
-        <span
-          className={`text-sm font-medium truncate ${isMain ? "text-indigo-300" : "text-gray-200"}`}
-        >
-          {node.name}
-        </span>
+        <EntityRef
+          kind="agent"
+          id={node.id}
+          sessionId={sessionId}
+          type={node.type}
+          name={node.name}
+          mono={false}
+          className={`text-sm font-medium ${isMain ? "text-indigo-300" : "text-gray-200"}`}
+        />
 
         {/* Subagent type */}
         {node.subagent_type && (
@@ -212,7 +191,7 @@ function TreeNode({ node, depth }: TreeNodeProps) {
       {node.children.length > 0 && (
         <div>
           {node.children.map((child) => (
-            <TreeNode key={child.id} node={child} depth={depth + 1} />
+            <TreeNode key={child.id} node={child} depth={depth + 1} sessionId={sessionId} />
           ))}
         </div>
       )}
@@ -222,9 +201,10 @@ function TreeNode({ node, depth }: TreeNodeProps) {
 
 interface AgentTreeProps {
   tree: SessionDrillInData["tree"];
+  sessionId: string;
 }
 
-function AgentTree({ tree }: AgentTreeProps) {
+function AgentTree({ tree, sessionId }: AgentTreeProps) {
   const { t } = useTranslation("workflows");
   if (tree.length === 0) {
     return <p className="text-sm text-gray-500 text-center py-8">{t("drillIn.noAgentTree")}</p>;
@@ -233,7 +213,7 @@ function AgentTree({ tree }: AgentTreeProps) {
   return (
     <div className="overflow-auto max-h-[420px] pr-1">
       {tree.map((node) => (
-        <TreeNode key={node.id} node={node} depth={0} />
+        <TreeNode key={node.id} node={node} depth={0} sessionId={sessionId} />
       ))}
     </div>
   );
@@ -245,9 +225,13 @@ type ToolEvent = SessionDrillInData["toolTimeline"][number];
 
 interface ToolTimelineProps {
   events: ToolEvent[];
+  sessionId: string;
 }
 
-function ToolTimeline({ events }: ToolTimelineProps) {
+const TOOL_PILL =
+  "flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-indigo-500/15 text-indigo-300 border border-indigo-500/20 whitespace-nowrap";
+
+function ToolTimeline({ events, sessionId }: ToolTimelineProps) {
   const { t } = useTranslation("workflows");
   if (events.length === 0) {
     return <p className="text-sm text-gray-500 text-center py-8">{t("drillIn.noToolEvents")}</p>;
@@ -262,9 +246,17 @@ function ToolTimeline({ events }: ToolTimelineProps) {
             className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-white/5 transition-colors"
           >
             {/* Tool pill */}
-            <span className="flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-indigo-500/15 text-indigo-300 border border-indigo-500/20 whitespace-nowrap">
-              {ev.tool_name ?? ev.event_type}
-            </span>
+            {ev.tool_name ? (
+              <EntityRef
+                kind="tool"
+                name={ev.tool_name}
+                sessionId={sessionId}
+                mono={false}
+                className={`${TOOL_PILL} hover:text-indigo-200`}
+              />
+            ) : (
+              <span className={TOOL_PILL}>{ev.event_type}</span>
+            )}
 
             {/* Summary */}
             {ev.summary && (
@@ -433,11 +425,9 @@ function NoSessionState({ onSelectSession }: NoSessionStateProps) {
 interface SessionHeaderProps {
   drillIn: SessionDrillInData;
   onClose: () => void;
-  activeTab: Tab;
-  onTabChange: (t: Tab) => void;
 }
 
-function SessionHeader({ drillIn, onClose, activeTab, onTabChange }: SessionHeaderProps) {
+function SessionHeader({ drillIn, onClose }: SessionHeaderProps) {
   const { t } = useTranslation("workflows");
   const { session } = drillIn;
 
@@ -446,24 +436,33 @@ function SessionHeader({ drillIn, onClose, activeTab, onTabChange }: SessionHead
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-sm font-semibold text-gray-100 truncate">
-            {session.name ?? session.id}
+            <EntityRef
+              kind="session"
+              id={session.id}
+              name={session.name}
+              cwd={session.cwd}
+              source={session.source}
+              mono={false}
+              className="text-sm font-semibold text-gray-100"
+            >
+              {session.name ?? session.id}
+            </EntityRef>
           </p>
           <p className="text-xs text-gray-500 mt-0.5 truncate">
-            {formatModelName(session.model) ?? t("drillIn.unknownModel")} &middot;{" "}
-            {t(`common:status.${session.status}`, { defaultValue: session.status })}
+            {session.model ? (
+              <EntityRef kind="model" model={session.model} mono={false} className="text-gray-500">
+                {formatModelName(session.model) ?? session.model}
+              </EntityRef>
+            ) : (
+              t("drillIn.unknownModel")
+            )}{" "}
+            &middot; {t(`common:status.${session.status}`, { defaultValue: session.status })}
             {session.started_at && ` \u00b7 ${safeTimestamp(session.started_at)}`}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="flex-shrink-0 w-7 h-7 rounded-md flex items-center justify-center text-gray-500 hover:text-gray-200 hover:bg-white/10 transition-colors"
-          aria-label={t("drillIn.closePanel")}
-        >
-          <X className="w-4 h-4" />
-        </button>
+        <IconButton icon={X} label={t("drillIn.closePanel")} onClick={onClose} />
       </div>
-      <TabBar active={activeTab} onChange={onTabChange} />
+      <TabBar />
     </div>
   );
 }
@@ -739,14 +738,7 @@ export function SessionDrillIn({ sessionId, onClose, onSelectSession }: SessionD
         <SessionSelector onSelectSession={onSelectSession} />
         <div className="flex items-center justify-between mb-2">
           <p className="text-xs text-gray-600 font-mono truncate">{sessionId}</p>
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-6 h-6 flex items-center justify-center rounded text-gray-600 hover:text-gray-300 hover:bg-white/10 transition-colors"
-            aria-label={t("drillIn.close")}
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
+          <IconButton icon={X} label={t("drillIn.close")} size="xs" onClick={onClose} />
         </div>
         <ErrorState message={error} />
       </div>
@@ -758,17 +750,20 @@ export function SessionDrillIn({ sessionId, onClose, onSelectSession }: SessionD
   return (
     <div className="bg-surface-2 border border-border rounded-xl p-4 animate-fade-in">
       <SessionSelector onSelectSession={onSelectSession} />
-      <SessionHeader
-        drillIn={drillIn}
-        onClose={onClose}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-      />
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as Tab)}>
+        <SessionHeader drillIn={drillIn} onClose={onClose} />
 
-      {/* Tab content */}
-      {activeTab === "tree" && <AgentTree tree={drillIn.tree} />}
-      {activeTab === "timeline" && <ToolTimeline events={drillIn.toolTimeline} />}
-      {activeTab === "events" && <EventSequence events={drillIn.events} />}
+        {/* Tab content */}
+        <TabsContent value="tree">
+          <AgentTree tree={drillIn.tree} sessionId={sessionId} />
+        </TabsContent>
+        <TabsContent value="timeline">
+          <ToolTimeline events={drillIn.toolTimeline} sessionId={sessionId} />
+        </TabsContent>
+        <TabsContent value="events">
+          <EventSequence events={drillIn.events} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

@@ -133,6 +133,8 @@ import { ImportHistory } from "../components/ImportHistory";
 import { RemoteSources } from "../components/RemoteSources";
 import { Skeleton } from "../components/Skeleton";
 import { AlertsNotifications } from "../components/AlertsNotifications";
+import { Button, PageHeader } from "../components/ui";
+import { EntityRef } from "../components/entity";
 import type { GptModelPricing, ModelPricing, WSMessage } from "../lib/types";
 import { useDataScope, type ProviderScope } from "../lib/dataScope";
 
@@ -503,6 +505,15 @@ const GPT_RATE_FIELDS = [
 type GptRateField = (typeof GPT_RATE_FIELDS)[number];
 type GptDraft = Record<"model_pattern" | "display_name" | GptRateField, string>;
 
+/** A pricing pattern with no wildcard (`%` server-side, `*` by habit) names one model. */
+function ModelPatternCell({ pattern }: { pattern: string }) {
+  return /[%*]/.test(pattern) ? (
+    <>{pattern}</>
+  ) : (
+    <EntityRef kind="model" model={pattern} mono={false} />
+  );
+}
+
 function emptyGptDraft(): GptDraft {
   return Object.fromEntries([
     ["model_pattern", ""],
@@ -733,7 +744,9 @@ function GptPricingTable({
                 </tr>
               ) : (
                 <tr key={rule.model_pattern} className="text-gray-400 hover:bg-surface-2/60">
-                  <td className="px-3 py-2 font-mono text-gray-300">{rule.model_pattern}</td>
+                  <td className="px-3 py-2 font-mono text-gray-300">
+                    <ModelPatternCell pattern={rule.model_pattern} />
+                  </td>
                   <td className="px-3 py-2 text-gray-200">{rule.display_name}</td>
                   {GPT_RATE_FIELDS.map((field) => (
                     <td
@@ -1587,43 +1600,24 @@ export function Settings() {
   return (
     <div className="animate-fade-in space-y-8">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-accent/15 flex items-center justify-center">
-            <SettingsIcon className="w-4.5 h-4.5 text-accent" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-semibold text-gray-100">{t("title")}</h1>
-              {wsConnected ? (
-                <span className="flex items-center gap-1.5 text-[11px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse-dot" />
-                  {t("common:live")}
-                </span>
-              ) : (
-                <span className="flex items-center gap-1.5 text-[11px] text-gray-400 bg-gray-500/10 border border-gray-500/20 px-2 py-0.5 rounded-full">
-                  <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-                  {t("common:offline")}
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-gray-500">{t("subtitle")}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <a
-            href={api.settings.exportData()}
-            download
-            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md border border-border text-gray-400 hover:text-gray-200 hover:border-gray-500 transition-colors"
-          >
-            <FileDown className="w-3.5 h-3.5" />
-            {t("exportData")}
-          </a>
-          <button onClick={load} className="btn-ghost">
-            <RefreshCw className="w-4 h-4" /> {t("common:refresh")}
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        icon={SettingsIcon}
+        title={t("title")}
+        live={wsConnected}
+        subtitle={t("subtitle")}
+        actions={
+          <>
+            <Button asChild variant="ghost" size="sm" icon={FileDown}>
+              <a href={api.settings.exportData()} download>
+                {t("exportData")}
+              </a>
+            </Button>
+            <Button variant="ghost" size="sm" icon={RefreshCw} onClick={load}>
+              {t("common:refresh")}
+            </Button>
+          </>
+        }
+      />
 
       {/* In-page section navigation - Settings is dense, so this TOC jumps to
           and scroll-spies each section. */}
@@ -1635,7 +1629,7 @@ export function Settings() {
           <button
             type="button"
             onClick={() => scrollTocBy(-180)}
-            aria-label="Scroll left"
+            aria-label={t("scrollTocLeft")}
             className="flex-shrink-0 flex items-center justify-center w-6 h-7 rounded-md border border-border text-gray-400 hover:text-gray-200 hover:bg-surface-3 transition-colors"
           >
             <ChevronLeft className="w-3.5 h-3.5" />
@@ -1670,7 +1664,7 @@ export function Settings() {
           <button
             type="button"
             onClick={() => scrollTocBy(180)}
-            aria-label="Scroll right"
+            aria-label={t("scrollTocRight")}
             className="flex-shrink-0 flex items-center justify-center w-6 h-7 rounded-md border border-border text-gray-400 hover:text-gray-200 hover:bg-surface-3 transition-colors"
           >
             <ChevronRight className="w-3.5 h-3.5" />
@@ -1862,7 +1856,7 @@ export function Settings() {
                     className="hover:bg-surface-4 transition-colors group"
                   >
                     <td className="px-4 py-3 text-sm font-mono text-gray-300">
-                      {rule.model_pattern}
+                      <ModelPatternCell pattern={rule.model_pattern} />
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-300">
                       {rule.display_name}

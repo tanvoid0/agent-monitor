@@ -78,6 +78,8 @@ describe("palette catalog coverage", () => {
   it("offers every route the app registers", () => {
     // `<Route path="x" …>` plus the index route, normalized to a leading slash.
     const routed = captures(appSource, /<Route\s+path="([^"*]+)"/g)
+      // `plan/:slug?` is one page with an optional segment, not a detail route.
+      .map((path) => path.replace(/\/:[^/]+\?$/, ""))
       .filter((path) => !path.includes(":"))
       .map((path) => `/${path}`);
     const covered = PAGE_COMMANDS.map((page) => page.to);

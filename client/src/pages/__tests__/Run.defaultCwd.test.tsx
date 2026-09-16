@@ -4,7 +4,9 @@
  * HOME directory (a neutral spawn location) rather than the dashboard's own
  * cwd, which would make ad-hoc runs inherit this repo's project context
  * (.claude/agents, skills, rules, CLAUDE.md, .mcp.json) — issue #202. Falls
- * back to the dashboard cwd only when no home suggestion is available.
+ * back to the dashboard cwd only when no home suggestion is available. A
+ * `?cwd=` deep link wins over every suggestion, and a `?session=` that no
+ * live run is driving lands in resume mode instead of erroring.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -55,6 +57,12 @@ vi.mock("../../lib/api", async (importOriginal) => {
       sessions: {
         list: r({ sessions: [], total: 0, limit: 50, offset: 0 }),
         transcript: r({ messages: [] }),
+        get: r({
+          session: { id: "sess-past-1", cwd: "/Users/tester/projects/other", status: "completed" },
+          agents: [],
+          events: [],
+          workflows: [],
+        }),
       },
     },
   };
@@ -95,9 +103,9 @@ async function settle() {
   });
 }
 
-async function renderRun() {
+async function renderRun(entry = "/run") {
   const utils = render(
-    <MemoryRouter initialEntries={["/run"]}>
+    <MemoryRouter initialEntries={[entry]}>
       <Run />
     </MemoryRouter>
   );
@@ -142,5 +150,25 @@ describe("Run page — default working directory (issue #202)", () => {
     cwdItems = [];
     await renderRun();
     expect(cwdInput().value).toBe("");
+  });
+
+  it("falls back to resume mode for a ?session= that no live run is driving", async () => {
+    cwdItems = [HOME];
+    render(
+      <MemoryRouter initialEntries={["/run?session=sess-past-1"]}>
+        <Run />
+      </MemoryRouter>
+    );
+    await settle();
+    // The session's provider replaces the chooser and the picker shows it selected.
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(screen.getByText(i18n.t("run:resume.selectedBadge"))).toBeInTheDocument();
+    expect(screen.getByText("sess-past-1")).toBeInTheDocument();
+  });
+
+  it("seeds cwd from ?cwd= ahead of every suggestion", async () => {
+    cwdItems = [DASHBOARD, HOME, RECENT];
+    await renderRun(`/run?cwd=${encodeURIComponent(RECENT.path)}`);
+    expect(cwdInput().value).toBe(RECENT.path);
   });
 });

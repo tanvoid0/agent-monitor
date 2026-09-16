@@ -4,14 +4,20 @@
  * label/value row rendering: event-level fields appear first, payload keys
  * follow, scalars render inline, objects/arrays/multiline strings render in a
  * terminal-styled code view, and JSON parse failures fall back to showing the
- * raw data as a single row.
+ * raw data as a single row. Renders inside a MemoryRouter because the
+ * session/agent/cwd/model/tool rows are EntityRef links.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render as rtlRender, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router";
 import { EventDetail } from "../EventDetail";
 import type { DashboardEvent } from "../../lib/types";
+import type { ReactElement } from "react";
+
+// EntityRef rows render react-router links, so every render needs a Router.
+const render = (ui: ReactElement) => rtlRender(<MemoryRouter>{ui}</MemoryRouter>);
 
 const baseEvent: DashboardEvent = {
   id: 42,

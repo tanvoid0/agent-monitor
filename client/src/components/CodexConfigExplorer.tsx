@@ -37,6 +37,7 @@ import {
   X,
 } from "lucide-react";
 import { api } from "../lib/api";
+import { copyText } from "../lib/clipboard";
 import type { CodexConfigEditableFile, CodexConfigFile, CodexConfigOverview } from "../lib/api";
 import { eventBus } from "../lib/eventBus";
 
@@ -1307,34 +1308,6 @@ function ProfileLaunchCommand({ name, t }: { name: string; t: TFunction }) {
       </button>
     </div>
   );
-}
-
-/** Copy from secure contexts with the native Clipboard API, while keeping the
- * dashboard's local HTTP and remote-browser sessions usable through a safe,
- * short-lived textarea fallback. */
-async function copyText(value: string): Promise<boolean> {
-  try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(value);
-      return true;
-    }
-  } catch {
-    // Some embedded or non-secure browser contexts reject Clipboard API access.
-  }
-
-  const textarea = document.createElement("textarea");
-  textarea.value = value;
-  textarea.setAttribute("readonly", "");
-  textarea.style.cssText = "position:fixed;opacity:0;pointer-events:none";
-  try {
-    document.body.appendChild(textarea);
-    textarea.select();
-    return document.execCommand("copy");
-  } catch {
-    return false;
-  } finally {
-    textarea.remove();
-  }
 }
 
 function CreateProfileModal({

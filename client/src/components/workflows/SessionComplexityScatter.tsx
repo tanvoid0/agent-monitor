@@ -1,6 +1,6 @@
 /**
  * @file SessionComplexityScatter.tsx
- * @description A React component that renders a scatter plot visualization of session complexity using D3.js. Each session is represented as a bubble, where the x-axis represents the session duration, the y-axis represents the number of agents involved, and the size of the bubble corresponds to the total tokens used. The color of each bubble indicates the session status (e.g., completed, active, error, abandoned). The component also includes tooltips for detailed information on hover and a legend for status colors. It is designed to be responsive and provides an empty state when no data is available.
+ * @description A React component that renders a scatter plot visualization of session complexity using D3.js. Each session is represented as a bubble, where the x-axis represents the session duration, the y-axis represents the number of agents involved, and the size of the bubble corresponds to the total tokens used. The color of each bubble indicates the session status (e.g., completed, active, error, abandoned). The component also includes tooltips for detailed information on hover and a legend for status colors. It is designed to be responsive and provides an empty state when no data is available. Right-clicking (or long-pressing) a bubble opens the session's entity context menu (open, show in Activity, copy id/link).
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -64,6 +64,9 @@ import { useTranslation } from "react-i18next";
 import * as d3 from "d3";
 import type { SessionComplexityItem } from "../../lib/types";
 import { formatModelName } from "../../lib/format";
+import { copyText } from "../../lib/clipboard";
+import { ContextMenuFor } from "../ui";
+import { entityMenu } from "../entity";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -220,6 +223,10 @@ export function SessionComplexityScatter({ data, onSessionClick }: SessionComple
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+  // Last hovered bubble: the context-menu target. Kept after mouseleave so the
+  // menu's items survive the pointer moving onto the menu itself; the menu
+  // only opens while a bubble is hovered (`disabled={!tooltip}`).
+  const [menuTarget, setMenuTarget] = useState<SessionComplexityItem | null>(null);
   const [width, setWidth] = useState(600);
 
   // Track container width for responsiveness
@@ -363,6 +370,7 @@ export function SessionComplexityScatter({ data, onSessionClick }: SessionComple
           .attr("fill-opacity", 1)
           .attr("stroke-width", 2.5);
         setTooltip({ x: event.clientX, y: event.clientY, item: d });
+        setMenuTarget(d);
       })
       .on("mousemove", (event: MouseEvent) => {
         setTooltip((prev) => (prev ? { ...prev, x: event.clientX, y: event.clientY } : null));
@@ -381,20 +389,32 @@ export function SessionComplexityScatter({ data, onSessionClick }: SessionComple
   if (data.length === 0) return <EmptyState />;
 
   return (
-    <div
-      ref={containerRef}
-      className="w-full h-full flex flex-col justify-center"
-      onMouseLeave={handleMouseLeave}
+    <ContextMenuFor
+      disabled={!tooltip}
+      items={
+        menuTarget
+          ? entityMenu(
+              { kind: "session", id: menuTarget.id, name: menuTarget.name },
+              { t, copy: copyText }
+            )
+          : []
+      }
     >
-      <svg
-        ref={svgRef}
-        width={width}
-        height={height}
-        aria-label={t("complexity.ariaLabel")}
-        role="img"
-      />
-      <Legend />
-      {tooltip && <Tooltip state={tooltip} />}
-    </div>
+      <div
+        ref={containerRef}
+        className="w-full h-full flex flex-col justify-center"
+        onMouseLeave={handleMouseLeave}
+      >
+        <svg
+          ref={svgRef}
+          width={width}
+          height={height}
+          aria-label={t("complexity.ariaLabel")}
+          role="img"
+        />
+        <Legend />
+        {tooltip && <Tooltip state={tooltip} />}
+      </div>
+    </ContextMenuFor>
   );
 }

@@ -10,6 +10,10 @@
  * journal; expanding an agent lazily fetches its full transcript (the journal
  * only carries server-truncated previews) and renders the complete prompt and
  * result, falling back to the teaser when the transcript is pruned/unavailable.
+ * Run headers are `Clickable` rows (the chevron is the expander button);
+ * session, inner-agent and model labels are `EntityRef` chips. Optional
+ * `expandedRunId` / `onExpandedRunChange` let a page mirror the open run in
+ * its URL (`?run=`).
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -83,10 +87,11 @@
  * ----------------------------------------------------------------------------- */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
-import { Workflow, ChevronRight, ChevronDown, Layers, ExternalLink, Loader2 } from "lucide-react";
+import { Workflow, ChevronRight, ChevronDown, Layers, Loader2 } from "lucide-react";
 import { api } from "../../lib/api";
+import { Clickable } from "../ui";
+import { EntityRef } from "../entity";
 import { eventBus } from "../../lib/eventBus";
 import type {
   WorkflowRun,
@@ -107,6 +112,10 @@ interface Props {
   sessionId?: string;
   /** Hide the parent-session link (e.g. when already on that session). */
   hideSessionLink?: boolean;
+  /** Run to keep expanded (e.g. from `?run=`); unknown ids are ignored. */
+  expandedRunId?: string | null;
+  /** Called with the run just opened, or null when the mirrored run closes. */
+  onExpandedRunChange?: (id: string | null) => void;
 }
 
 const STATUS_STYLES: Record<string, string> = {
@@ -232,6 +241,8 @@ export function WorkflowRunsPanel({
   statusFilter,
   sessionId,
   hideSessionLink,
+  expandedRunId,
+  onExpandedRunChange,
 }: Props) {
   const { t } = useTranslation("workflows");
   const controlled = controlledRuns != null;
@@ -308,13 +319,23 @@ export function WorkflowRunsPanel({
 
   const runs = controlled ? controlledRuns : fetchedRuns;
 
-  const toggle = (runId: string) =>
+  // Deep link: open the mirrored run once it is in the list.
+  useEffect(() => {
+    if (!expandedRunId || !runs.some((r) => r.run_id === expandedRunId)) return;
+    setExpanded((prev) => (prev.has(expandedRunId) ? prev : new Set(prev).add(expandedRunId)));
+  }, [expandedRunId, runs]);
+
+  const toggle = (runId: string) => {
+    const opening = !expanded.has(runId);
     setExpanded((prev) => {
       const next = new Set(prev);
       if (next.has(runId)) next.delete(runId);
       else next.add(runId);
       return next;
     });
+    if (opening) onExpandedRunChange?.(runId);
+    else if (expandedRunId === runId) onExpandedRunChange?.(null);
+  };
   const setPhase = (runId: string, phase: string) =>
     setPhaseFilter((prev) => ({ ...prev, [runId]: prev[runId] === phase ? null : phase }));
   const toggleResult = (key: string) =>
@@ -359,21 +380,28 @@ export function WorkflowRunsPanel({
             key={run.run_id}
             className="rounded-lg border border-gray-800 bg-card/40 overflow-hidden"
           >
-            <button
-              onClick={() => toggle(run.run_id)}
-              className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-gray-800/30 transition-colors"
-              aria-expanded={isOpen}
+            <Clickable
+              onActivate={() => toggle(run.run_id)}
+              className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-800/30 transition-colors"
             >
-              {isOpen ? (
-                <ChevronDown className="w-4 h-4 text-gray-500 flex-shrink-0" />
-              ) : (
-                <ChevronRight className="w-4 h-4 text-gray-500 flex-shrink-0" />
-              )}
-              {running ? (
-                <Loader2 className="w-4 h-4 text-amber-400 flex-shrink-0 animate-spin" />
-              ) : (
-                <Workflow className="w-4 h-4 text-violet-400 flex-shrink-0" />
-              )}
+              <button
+                type="button"
+                onClick={() => toggle(run.run_id)}
+                aria-expanded={isOpen}
+                aria-label={run.name || run.run_id}
+                className="flex items-center gap-3 flex-shrink-0 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+              >
+                {isOpen ? (
+                  <ChevronDown className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                ) : (
+                  <ChevronRight className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                )}
+                {running ? (
+                  <Loader2 className="w-4 h-4 text-amber-400 flex-shrink-0 animate-spin" />
+                ) : (
+                  <Workflow className="w-4 h-4 text-violet-400 flex-shrink-0" />
+                )}
+              </button>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-sm font-medium text-gray-200 truncate">
@@ -383,7 +411,11 @@ export function WorkflowRunsPanel({
                     {t(`runs.status.${run.status}`, run.status)}
                   </span>
                   {run.default_model && (
-                    <span className="text-[10px] font-mono text-gray-500">{run.default_model}</span>
+                    <EntityRef
+                      kind="model"
+                      model={run.default_model}
+                      className="text-[10px] text-gray-500"
+                    />
                   )}
                 </div>
                 <div className="flex items-center gap-3 mt-0.5 text-[11px] text-gray-500 flex-wrap">
@@ -397,16 +429,13 @@ export function WorkflowRunsPanel({
                 </div>
               </div>
               {!hideSessionLink && (
-                <Link
-                  to={`/sessions/${encodeURIComponent(run.session_id)}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="text-gray-500 hover:text-violet-400 transition-colors flex-shrink-0"
-                  title={t("runs.openSession")}
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </Link>
+                <EntityRef
+                  kind="session"
+                  id={run.session_id}
+                  className="text-gray-500 hover:text-violet-400 flex-shrink-0"
+                />
               )}
-            </button>
+            </Clickable>
 
             {isOpen && (
               <div className="px-3 pb-3 pt-3 border-t border-gray-800/60 space-y-3">
@@ -467,7 +496,21 @@ export function WorkflowRunsPanel({
                         {shown.map((a: WorkflowProgressEntry, i) => (
                           <tr key={a.agentId || i} className="border-b border-gray-800/40">
                             <td className="py-1 pr-3 text-gray-300">
-                              {a.label || a.agentType || a.agentId}
+                              {a.agentId ? (
+                                <EntityRef
+                                  kind="agent"
+                                  // Inner agents are imported as `${session}-jsonl-${agentId}`.
+                                  id={`${run.session_id}-jsonl-${a.agentId}`}
+                                  sessionId={run.session_id}
+                                  type="subagent"
+                                  mono={false}
+                                  className="text-gray-300"
+                                >
+                                  {a.label || a.agentType || a.agentId}
+                                </EntityRef>
+                              ) : (
+                                a.label || a.agentType
+                              )}
                               {a.lastToolName && (
                                 <span className="text-gray-600 font-mono ml-1">
                                   · {a.lastToolName}
@@ -560,7 +603,13 @@ export function WorkflowRunsPanel({
                           {open && (
                             <div className="px-2.5 pb-2.5 pt-0.5 space-y-2">
                               <div className="flex flex-wrap items-center gap-2 text-[10px] text-gray-500">
-                                {a.model && <span className="font-mono">{a.model}</span>}
+                                {a.model && (
+                                  <EntityRef
+                                    kind="model"
+                                    model={a.model}
+                                    className="text-[10px] text-gray-500"
+                                  />
+                                )}
                                 <span
                                   className={`badge border ${statusClass(String(a.state || ""))}`}
                                 >
