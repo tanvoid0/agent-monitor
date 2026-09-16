@@ -133,7 +133,8 @@
     "viewActive_other": "{{count}} lượt chạy dashboard",
     "scopeNote": "Chỉ hiển thị các run bạn khởi chạy từ dashboard này.",
     "allSessionsLink": "Xem tất cả phiên Claude Code →",
-    "viewLabel": "Xem"
+    "viewLabel": "Xem",
+    "clearSearch": "Xóa tìm kiếm"
   },
   "resume": {
     "label": "Phiên nguồn",

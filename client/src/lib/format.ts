@@ -66,6 +66,9 @@
  * - `shortModel` — exported API; see TSDoc on the symbol for behavior.
  * - `formatModelName` — exported API; see TSDoc on the symbol for behavior.
  * - `pathBasename` — exported API; see TSDoc on the symbol for behavior.
+ * - `promptPreviewLines` — exported API; see TSDoc on the symbol for behavior.
+ * - `isTransientProcess` — exported API; see TSDoc on the symbol for behavior.
+ * - `formatCostShort` — exported API; see TSDoc on the symbol for behavior.
  *
  * ## Testing pointers
  * - Prefer colocated `__tests__` with Vitest + Testing Library for UI.
@@ -561,18 +564,73 @@ export function formatModelName(model: string | null | undefined): string | null
 }
 
 /**
- * Last segment of a filesystem path. POSIX-only - fine for cwd display.
- * "/Users/dav/code/my-project" → "my-project".
- * @param p An absolute or relative POSIX path, or null/undefined.
+ * Last segment of a filesystem path, POSIX or Windows - fine for cwd display.
+ * "/Users/dav/code/my-project" → "my-project"; "D:\code\my-project" → "my-project".
+ * @param p An absolute or relative path, or null/undefined.
  * @returns The final path segment, or `null` for falsy input.
- * @remarks Trailing slashes are stripped first (`/a/b/` -> `b`). A path with no `/`
- *   returns unchanged. The `|| trimmed` fallback guards the degenerate case where the
- *   input is just slashes (e.g. `"/"`), returning the trimmed value rather than `""`.
- *   Backslash-separated (Windows) paths are not handled.
+ * @remarks Trailing separators are stripped first (`/a/b/` -> `b`). A path with no
+ *   separator returns unchanged. The `|| trimmed` fallback guards the degenerate case
+ *   where the input is just separators (e.g. `"/"`), returning the trimmed value
+ *   rather than `""`.
  */
 export function pathBasename(p: string | null | undefined): string | null {
   if (!p) return null;
-  const trimmed = p.replace(/\/+$/, ""); // drop trailing slash(es)
-  const idx = trimmed.lastIndexOf("/");
+  const trimmed = p.replace(/[\\/]+$/, ""); // drop trailing separator(s)
+  const idx = Math.max(trimmed.lastIndexOf("/"), trimmed.lastIndexOf("\\"));
   return idx === -1 ? trimmed : trimmed.slice(idx + 1) || trimmed;
+}
+
+// ===========================================================================
+// Card / row helpers shared by AgentCard, SessionCard and the Sessions table
+// ===========================================================================
+
+/**
+ * Keep a compact card's prompt history legible: at most two distinct human turns,
+ * one visual row each. Blank lines and case-insensitive duplicates are dropped and
+ * the LAST two survivors win, so a terse follow-up keeps the request it depends on.
+ * @param value Newline-separated prompt preview text, or null/undefined.
+ * @returns Up to two trimmed, distinct lines in original order (`[]` for empty input).
+ * @example promptPreviewLines("fix bug\n\nFix Bug\nadd tests") // ["fix bug", "add tests"]
+ */
+export function promptPreviewLines(value: string | null | undefined): string[] {
+  const seen = new Set<string>();
+  return String(value || "")
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter((line) => {
+      const key = line.toLocaleLowerCase();
+      if (!line || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(-2);
+}
+
+/**
+ * Whether a session/agent `metadata` JSON blob marks a pre-identity Codex process —
+ * a rollout that exists but has no id-bearing prompt yet, so it must not link anywhere.
+ * @param metadata Raw JSON string from the `metadata` column, or null/undefined.
+ * @returns `true` only when the JSON parses and `pre_identity_process === true`.
+ */
+export function isTransientProcess(metadata: string | null | undefined): boolean {
+  if (!metadata) return false;
+  try {
+    return JSON.parse(metadata)?.pre_identity_process === true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Compact cost for card footers: precision grows as the amount shrinks so tiny
+ * subagent spends stay distinguishable without padding dollar amounts to four places.
+ * @param cost A dollar amount.
+ * @returns `"$0"` for zero/negative/non-finite; 2 decimals at ≥ $1; 3 at ≥ $0.01; else 4.
+ * @example formatCostShort(1.5) // "$1.50"   formatCostShort(0.05) // "$0.050"   formatCostShort(0.0012) // "$0.0012"
+ */
+export function formatCostShort(cost: number): string {
+  if (!Number.isFinite(cost) || cost <= 0) return "$0";
+  if (cost >= 1) return `$${cost.toFixed(2)}`;
+  if (cost >= 0.01) return `$${cost.toFixed(3)}`;
+  return `$${cost.toFixed(4)}`;
 }

@@ -394,6 +394,8 @@
     "rulesEmptyHint": "Thêm quy tắc để bắt đầu cảnh báo về lỗi, không hoạt động, agent bị treo hoặc ngưỡng token."
   },
   "jumpTo": "Chuyển tới",
+  "scrollTocLeft": "Cuộn các mục sang trái",
+  "scrollTocRight": "Cuộn các mục sang phải",
   "webhookGuides": {
     "slack": {
       "steps": [

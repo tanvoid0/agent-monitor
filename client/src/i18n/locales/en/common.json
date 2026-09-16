@@ -9,7 +9,10 @@
   "active": "active",
   "total_lower": "total",
   "subagent": "subagent",
-  "subagents": "subagents",
+  "subagents": {
+    "expand": "Expand subagents",
+    "collapse": "Collapse subagents"
+  },
   "subagent_label_one": "{{count}} subagent",
   "subagent_label_other": "{{count}} subagents",
   "events": "events",
@@ -187,5 +190,55 @@
     }
   },
   "examples": "Examples",
-  "help": "Help"
+  "help": "Help",
+  "ui": {
+    "back": "Back",
+    "openMenu": "More actions",
+    "copyFailed": "Copy failed",
+    "density": {
+      "cards": "Cards",
+      "rows": "Rows"
+    },
+    "menu": {
+      "open": "Open",
+      "openConversation": "Open conversation",
+      "openTimeline": "Open timeline",
+      "openSession": "Open session",
+      "openAgent": "Open agent",
+      "openEvents": "Open events",
+      "showInActivity": "Show in Activity",
+      "sessionsInProject": "Sessions in this project",
+      "showOnBoard": "Show on Board",
+      "resumeInRun": "Resume in Run",
+      "filterByTool": "Filter by this tool",
+      "costAnalytics": "Cost analytics",
+      "pricingRules": "Pricing rules",
+      "copySessionId": "Copy session ID",
+      "copyAgentId": "Copy agent ID",
+      "copyEventId": "Copy event ID",
+      "copyModelId": "Copy model ID",
+      "copyToolName": "Copy tool name",
+      "copyEventType": "Copy event type",
+      "copyPath": "Copy path",
+      "copyLink": "Copy link",
+      "revealFolder": "Reveal folder"
+    },
+    "openMenuFor": "More actions for {{name}}"
+  },
+  "tabby": {
+    "companion": "Tabby companion",
+    "close": "Close Tabby",
+    "live": "live",
+    "waiting": "waiting",
+    "errored": "errored",
+    "runClaude": "Run Claude",
+    "activity": "Activity",
+    "sessions": "Sessions",
+    "erroredSessions": "Errored",
+    "clearAlerts": "Clear alerts",
+    "ask": "Ask Tabby",
+    "send": "Send",
+    "mute": "Mute bubbles",
+    "unmute": "Unmute bubbles"
+  }
 }

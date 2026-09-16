@@ -133,7 +133,8 @@
     "viewActive_other": "{{count}} dashboard runs",
     "scopeNote": "Only shows runs you started from this dashboard.",
     "allSessionsLink": "See all Claude Code sessions →",
-    "viewLabel": "View"
+    "viewLabel": "View",
+    "clearSearch": "Clear search"
   },
   "resume": {
     "label": "Source session",

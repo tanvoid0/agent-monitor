@@ -1,10 +1,18 @@
 {
   "title": "칸반 보드",
+  "columnCountLink_one": "{{status}}의 세션 {{count}}개",
+  "columnCountLink_other": "{{status}}의 세션 {{count}}개",
+  "columnCountLinkAgents_one": "{{status}}의 Agent {{count}}개",
+  "columnCountLinkAgents_other": "{{status}}의 Agent {{count}}개",
   "subtitle": "상태별로 정리한 모든 Agent의 칸반 보기",
   "subtitleSessions": "상태별로 정리한 모든 세션의 칸반 보기",
   "viewToggle": {
     "agents": "Agent",
-    "sessions": "세션"
+    "sessions": "세션",
+    "label": "보드 보기"
+  },
+  "density": {
+    "label": "카드 밀도"
   },
   "noAgents": "아직 추적된 Agent가 없습니다",
   "noAgentsDesc": "hooks가 설치된 모니터링 Agent 세션을 시작하면 여기에 Agent가 표시됩니다.",
@@ -26,6 +34,14 @@
     "subagentSummary_other": "Subagent {{count}}개",
     "turnSummary_one": "턴 {{count}}회",
     "turnSummary_other": "턴 {{count}}회"
+  },
+  "projects": {
+    "all": "모든 프로젝트"
+  },
+  "project": {
+    "open": "파일 관리자에서 폴더 열기",
+    "opened": "파일 관리자에서 {{name}}을(를) 열었습니다",
+    "openFailed": "폴더를 열 수 없습니다: {{message}}"
   },
   "tooltip": {
     "agent": {

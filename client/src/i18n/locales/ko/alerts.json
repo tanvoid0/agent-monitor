@@ -71,7 +71,6 @@
     "unackedCount": "확인 안 됨 {{count}}건",
     "unackedOnly": "확인 안 된 것만",
     "ack": "확인",
-    "viewSession": "세션 보기",
     "loadMore": "더 보기 ({{total}}개 중 {{shown}}개)",
     "emptyTitle": "알림 없음",
     "emptyDescription": "규칙에 의해 발생한 알림이 여기에 실시간으로 표시됩니다.",

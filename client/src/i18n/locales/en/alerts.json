@@ -71,7 +71,6 @@
     "unackedCount": "{{count}} unacknowledged",
     "unackedOnly": "Unacknowledged only",
     "ack": "Acknowledge",
-    "viewSession": "View session",
     "loadMore": "Load more ({{shown}} of {{total}})",
     "emptyTitle": "No alerts",
     "emptyDescription": "Alerts fired by your rules will appear here in real time.",

@@ -21,6 +21,7 @@
   "filterCompleted": "Completed",
   "filterError": "Error",
   "filterAbandoned": "Abandoned",
+  "statusFilterLabel": "Status filter",
   "sessionCount": "{{count}} session recorded",
   "sessionCount_plural": "{{count}} sessions recorded",
   "noSessions": "No sessions found",
@@ -76,12 +77,35 @@
     "costBreakdown": "Cost Breakdown",
     "eventTimeline": "Event Timeline",
     "noEvents": "No events recorded.",
+    "eventNotLoaded": "Event #{{id}} is not in the loaded timeline.",
     "conversation": "Conversation",
     "timeline": "Timeline ({{shown}}/{{total}})",
     "transcriptNotFound": "Conversation transcript not found for this agent. The transcript file may be missing or not yet linked.",
     "hookOnlySession": "This Codex session ran without writing a rollout to disk (as with `codex exec --ephemeral`), so its history was reconstructed from lifecycle hooks. Prompts, tool calls, and replies are captured, but there is no full transcript to open.",
     "transcript": {
       "loadOlder": "↑ Load older messages"
+    },
+    "overview": {
+      "agentFallback": "Agent",
+      "events": "Events",
+      "perMinute": "{{rate}}/min",
+      "toolCalls": "Tool calls",
+      "uniqueTools": "{{count}} unique",
+      "subagents": "Subagents",
+      "plusMain": "+{{count}} main",
+      "compactions": "Compactions",
+      "errors": "Errors",
+      "duration": "Duration",
+      "completed": "completed",
+      "topTools": "Top tools",
+      "toolsTotal": "{{count}} total",
+      "noToolCalls": "No tool calls yet.",
+      "subagentRuns": "{{count}} runs",
+      "contextCompaction": "Context Compaction",
+      "noSubagents": "No subagents in this session.",
+      "tokenFlow": "Token flow",
+      "tokensTotal": "{{total}} total",
+      "eventMix": "Event mix"
     }
   },
   "remoteSourceBadgeTitle": "Collected from a remote machine"

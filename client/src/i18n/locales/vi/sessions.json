@@ -21,6 +21,7 @@
   "filterCompleted": "Hoàn tất",
   "filterError": "Lỗi",
   "filterAbandoned": "Bị bỏ dở",
+  "statusFilterLabel": "Bộ lọc trạng thái",
   "sessionCount": "Đã ghi nhận {{count}} phiên",
   "sessionCount_plural": "Đã ghi nhận {{count}} phiên",
   "noSessions": "Không tìm thấy phiên",
@@ -77,12 +78,35 @@
     "costBreakdown": "Phân rã chi phí",
     "eventTimeline": "Dòng thời gian sự kiện",
     "noEvents": "Chưa có sự kiện được ghi nhận.",
+    "eventNotLoaded": "Sự kiện #{{id}} không có trong dòng thời gian đã tải.",
     "conversation": "Hội thoại",
     "timeline": "Dòng thời gian ({{shown}}/{{total}})",
     "transcriptNotFound": "Không tìm thấy bản ghi hội thoại cho agent này. Tệp transcript có thể bị thiếu hoặc chưa được liên kết.",
     "hookOnlySession": "Phiên Codex này chạy mà không ghi rollout xuống đĩa (như với `codex exec --ephemeral`), nên lịch sử được tái dựng từ các hook vòng đời. Prompt, lệnh gọi công cụ và phản hồi đều được ghi lại, nhưng không có transcript đầy đủ để mở.",
     "transcript": {
       "loadOlder": "↑ Tải các tin nhắn cũ hơn"
+    },
+    "overview": {
+      "agentFallback": "Agent",
+      "events": "Sự kiện",
+      "perMinute": "{{rate}}/phút",
+      "toolCalls": "Lượt gọi công cụ",
+      "uniqueTools": "{{count}} loại",
+      "subagents": "Subagent",
+      "plusMain": "+{{count}} chính",
+      "compactions": "Nén",
+      "errors": "Lỗi",
+      "duration": "Thời lượng",
+      "completed": "đã hoàn thành",
+      "topTools": "Công cụ hàng đầu",
+      "toolsTotal": "{{count}} tổng",
+      "noToolCalls": "Chưa có lượt gọi công cụ.",
+      "subagentRuns": "{{count}} lượt chạy",
+      "contextCompaction": "Nén ngữ cảnh",
+      "noSubagents": "Không có subagent trong phiên này.",
+      "tokenFlow": "Luồng token",
+      "tokensTotal": "{{total}} tổng",
+      "eventMix": "Phân bố sự kiện"
     }
   }
 }

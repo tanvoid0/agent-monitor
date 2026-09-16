@@ -9,7 +9,10 @@
   "active": "活跃",
   "total_lower": "总计",
   "subagent": "Subagent",
-  "subagents": "Subagent",
+  "subagents": {
+    "expand": "展开子代理",
+    "collapse": "收起子代理"
+  },
   "subagent_label_one": "{{count}} 个Subagent",
   "subagent_label_other": "{{count}} 个Subagent",
   "events": "事件",
@@ -187,5 +190,55 @@
     }
   },
   "examples": "示例",
-  "help": "帮助"
+  "help": "帮助",
+  "ui": {
+    "back": "返回",
+    "openMenu": "更多操作",
+    "copyFailed": "复制失败",
+    "density": {
+      "cards": "卡片",
+      "rows": "行"
+    },
+    "menu": {
+      "open": "打开",
+      "openConversation": "打开对话",
+      "openTimeline": "打开时间线",
+      "openSession": "打开会话",
+      "openAgent": "打开 Agent",
+      "openEvents": "打开事件",
+      "showInActivity": "在活动流中查看",
+      "sessionsInProject": "此项目中的会话",
+      "showOnBoard": "在看板中查看",
+      "resumeInRun": "在「运行 Agent」中恢复",
+      "filterByTool": "按此工具筛选",
+      "costAnalytics": "费用分析",
+      "pricingRules": "定价规则",
+      "copySessionId": "复制会话 ID",
+      "copyAgentId": "复制 Agent ID",
+      "copyEventId": "复制事件 ID",
+      "copyModelId": "复制模型 ID",
+      "copyToolName": "复制工具名称",
+      "copyEventType": "复制事件类型",
+      "copyPath": "复制路径",
+      "copyLink": "复制链接",
+      "revealFolder": "打开所在文件夹"
+    },
+    "openMenuFor": "{{name}} 的更多操作"
+  },
+  "tabby": {
+    "companion": "Tabby 助手",
+    "close": "关闭 Tabby",
+    "live": "在线",
+    "waiting": "等待中",
+    "errored": "出错",
+    "runClaude": "运行 Claude",
+    "activity": "活动",
+    "sessions": "会话",
+    "erroredSessions": "出错",
+    "clearAlerts": "清除提醒",
+    "ask": "询问 Tabby",
+    "send": "发送",
+    "mute": "静音气泡",
+    "unmute": "取消静音气泡"
+  }
 }

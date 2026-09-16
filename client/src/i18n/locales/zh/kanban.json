@@ -1,10 +1,18 @@
 {
   "title": "Kanban 看板",
+  "columnCountLink_one": "{{status}}中有 {{count}} 个会话",
+  "columnCountLink_other": "{{status}}中有 {{count}} 个会话",
+  "columnCountLinkAgents_one": "{{status}}中有 {{count}} 个 Agent",
+  "columnCountLinkAgents_other": "{{status}}中有 {{count}} 个 Agent",
   "subtitle": "按状态排列的 Agent 看板视图",
   "subtitleSessions": "按状态排列的会话看板视图",
   "viewToggle": {
     "agents": "Agent",
-    "sessions": "会话"
+    "sessions": "会话",
+    "label": "看板视图"
+  },
+  "density": {
+    "label": "卡片密度"
   },
   "noAgents": "暂无追踪的 Agent",
   "noAgentsDesc": "启动已安装 hooks 的受监控 Agent 会话即可在此查看 Agent。",
@@ -26,6 +34,14 @@
     "subagentSummary_other": "{{count}} 个子 Agent",
     "turnSummary_one": "{{count}} 轮",
     "turnSummary_other": "{{count}} 轮"
+  },
+  "projects": {
+    "all": "全部项目"
+  },
+  "project": {
+    "open": "在文件管理器中打开文件夹",
+    "opened": "已在文件管理器中打开 {{name}}",
+    "openFailed": "无法打开文件夹：{{message}}"
   },
   "tooltip": {
     "agent": {

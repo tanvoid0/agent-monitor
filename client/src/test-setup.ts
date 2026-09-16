@@ -3,7 +3,9 @@
  * @description Vitest global setup for the React client test suite. Pulls in
  * jest-dom matchers, initializes the real i18n bundle (same as production),
  * forces English before each test, installs deterministic local/session storage
- * shims for Node runtimes without browser storage, and runs Testing Library
+ * shims for Node runtimes without browser storage, polyfills the jsdom gaps
+ * Radix primitives need (ResizeObserver, pointer capture, scrollIntoView,
+ * matchMedia, DOMRect.fromRect), and runs Testing Library
  * cleanup after every test to prevent DOM leakage between cases.
  *
  * Imported from `vitest.config.ts` via `setupFiles`.
@@ -55,6 +57,37 @@ if (!globalThis.sessionStorage) {
     configurable: true,
     value: memoryStorage(),
   });
+}
+
+// jsdom lacks the layout/pointer APIs Radix primitives touch on mount and
+// during pointer interactions. All shims are guarded so a future jsdom that
+// ships them wins.
+if (!globalThis.ResizeObserver) {
+  globalThis.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+}
+if (!Element.prototype.hasPointerCapture) Element.prototype.hasPointerCapture = () => false;
+if (!Element.prototype.setPointerCapture) Element.prototype.setPointerCapture = () => {};
+if (!Element.prototype.releasePointerCapture) Element.prototype.releasePointerCapture = () => {};
+if (!Element.prototype.scrollIntoView) Element.prototype.scrollIntoView = () => {};
+if (!window.matchMedia) {
+  window.matchMedia = (query: string) =>
+    ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addEventListener() {},
+      removeEventListener() {},
+      addListener() {},
+      removeListener() {},
+      dispatchEvent: () => false,
+    }) as MediaQueryList;
+}
+if (typeof DOMRect !== "undefined" && !DOMRect.fromRect) {
+  DOMRect.fromRect = (r?: DOMRectInit) => new DOMRect(r?.x, r?.y, r?.width, r?.height);
 }
 
 /** Pin locale to English — LanguageDetector may otherwise pick up zh/vi from the host OS. */

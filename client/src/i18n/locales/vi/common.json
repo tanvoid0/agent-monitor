@@ -9,7 +9,10 @@
   "active": "đang hoạt động",
   "total_lower": "tổng",
   "subagent": "Subagent",
-  "subagents": "Subagent",
+  "subagents": {
+    "expand": "Mở rộng subagent",
+    "collapse": "Thu gọn subagent"
+  },
   "subagent_label_one": "{{count}} Subagent",
   "subagent_label_other": "{{count}} Subagent",
   "events": "sự kiện",
@@ -187,5 +190,55 @@
     }
   },
   "examples": "Ví dụ",
-  "help": "Trợ giúp"
+  "help": "Trợ giúp",
+  "ui": {
+    "back": "Quay lại",
+    "openMenu": "Thao tác khác",
+    "copyFailed": "Sao chép thất bại",
+    "density": {
+      "cards": "Thẻ",
+      "rows": "Hàng"
+    },
+    "menu": {
+      "open": "Mở",
+      "openConversation": "Mở hội thoại",
+      "openTimeline": "Mở dòng thời gian",
+      "openSession": "Mở phiên",
+      "openAgent": "Mở Agent",
+      "openEvents": "Mở sự kiện",
+      "showInActivity": "Xem trong Luồng hoạt động",
+      "sessionsInProject": "Các phiên trong dự án này",
+      "showOnBoard": "Xem trên Bảng Kanban",
+      "resumeInRun": "Tiếp tục trong Chạy Agent",
+      "filterByTool": "Lọc theo công cụ này",
+      "costAnalytics": "Phân tích chi phí",
+      "pricingRules": "Quy tắc định giá",
+      "copySessionId": "Sao chép ID phiên",
+      "copyAgentId": "Sao chép ID Agent",
+      "copyEventId": "Sao chép ID sự kiện",
+      "copyModelId": "Sao chép ID mô hình",
+      "copyToolName": "Sao chép tên công cụ",
+      "copyEventType": "Sao chép loại sự kiện",
+      "copyPath": "Sao chép đường dẫn",
+      "copyLink": "Sao chép liên kết",
+      "revealFolder": "Mở thư mục chứa"
+    },
+    "openMenuFor": "Thao tác khác cho {{name}}"
+  },
+  "tabby": {
+    "companion": "Trợ lý Tabby",
+    "close": "Đóng Tabby",
+    "live": "trực tiếp",
+    "waiting": "đang chờ",
+    "errored": "lỗi",
+    "runClaude": "Chạy Claude",
+    "activity": "Hoạt động",
+    "sessions": "Phiên",
+    "erroredSessions": "Lỗi",
+    "clearAlerts": "Xóa cảnh báo",
+    "ask": "Hỏi Tabby",
+    "send": "Gửi",
+    "mute": "Tắt bong bóng",
+    "unmute": "Bật bong bóng"
+  }
 }

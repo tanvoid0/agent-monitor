@@ -9,7 +9,10 @@
   "active": "activo",
   "total_lower": "total",
   "subagent": "subagente",
-  "subagents": "subagentes",
+  "subagents": {
+    "expand": "Expandir subagentes",
+    "collapse": "Contraer subagentes"
+  },
   "subagent_label_one": "{{count}} subagente",
   "subagent_label_other": "{{count}} subagentes",
   "events": "eventos",
@@ -187,5 +190,55 @@
     }
   },
   "examples": "Ejemplos",
-  "help": "Ayuda"
+  "help": "Ayuda",
+  "ui": {
+    "back": "Volver",
+    "openMenu": "Más acciones",
+    "copyFailed": "No se pudo copiar",
+    "density": {
+      "cards": "Tarjetas",
+      "rows": "Filas"
+    },
+    "menu": {
+      "open": "Abrir",
+      "openConversation": "Abrir conversación",
+      "openTimeline": "Abrir línea de tiempo",
+      "openSession": "Abrir sesión",
+      "openAgent": "Abrir agente",
+      "openEvents": "Abrir eventos",
+      "showInActivity": "Ver en Actividad",
+      "sessionsInProject": "Sesiones de este proyecto",
+      "showOnBoard": "Ver en el Tablero",
+      "resumeInRun": "Reanudar en Ejecutar agente",
+      "filterByTool": "Filtrar por esta herramienta",
+      "costAnalytics": "Analíticas de costo",
+      "pricingRules": "Reglas de precios",
+      "copySessionId": "Copiar ID de sesión",
+      "copyAgentId": "Copiar ID del agente",
+      "copyEventId": "Copiar ID del evento",
+      "copyModelId": "Copiar ID del modelo",
+      "copyToolName": "Copiar nombre de la herramienta",
+      "copyEventType": "Copiar tipo de evento",
+      "copyPath": "Copiar ruta",
+      "copyLink": "Copiar enlace",
+      "revealFolder": "Mostrar carpeta"
+    },
+    "openMenuFor": "Más acciones para {{name}}"
+  },
+  "tabby": {
+    "companion": "Compañero Tabby",
+    "close": "Cerrar Tabby",
+    "live": "en vivo",
+    "waiting": "en espera",
+    "errored": "con error",
+    "runClaude": "Ejecutar Claude",
+    "activity": "Actividad",
+    "sessions": "Sesiones",
+    "erroredSessions": "Con error",
+    "clearAlerts": "Borrar alertas",
+    "ask": "Preguntar a Tabby",
+    "send": "Enviar",
+    "mute": "Silenciar burbujas",
+    "unmute": "Activar burbujas"
+  }
 }

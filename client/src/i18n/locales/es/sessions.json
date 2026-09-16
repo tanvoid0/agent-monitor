@@ -21,6 +21,7 @@
   "filterCompleted": "Completadas",
   "filterError": "Error",
   "filterAbandoned": "Abandonadas",
+  "statusFilterLabel": "Filtro de estado",
   "sessionCount": "{{count}} sesión registrada",
   "sessionCount_plural": "{{count}} sesiones registradas",
   "noSessions": "No se encontraron sesiones",
@@ -76,12 +77,35 @@
     "costBreakdown": "Desglose de Costos",
     "eventTimeline": "Línea de Tiempo de Eventos",
     "noEvents": "No se registraron eventos.",
+    "eventNotLoaded": "El evento #{{id}} no está en la línea de tiempo cargada.",
     "conversation": "Conversación",
     "timeline": "Línea de tiempo ({{shown}}/{{total}})",
     "transcriptNotFound": "No se encontró la transcripción de la conversación para este agente. El archivo de transcripción puede estar ausente o aún no vinculado.",
     "hookOnlySession": "Esta sesión de Codex se ejecutó sin escribir un rollout en disco (como con `codex exec --ephemeral`), por lo que su historial se reconstruyó a partir de los hooks del ciclo de vida. Se capturan los prompts, las llamadas a herramientas y las respuestas, pero no hay una transcripción completa que abrir.",
     "transcript": {
       "loadOlder": "↑ Cargar mensajes anteriores"
+    },
+    "overview": {
+      "agentFallback": "Agente",
+      "events": "Eventos",
+      "perMinute": "{{rate}}/min",
+      "toolCalls": "Llamadas a herramientas",
+      "uniqueTools": "{{count}} únicas",
+      "subagents": "Subagentes",
+      "plusMain": "+{{count}} principal",
+      "compactions": "Compactaciones",
+      "errors": "Errores",
+      "duration": "Duración",
+      "completed": "completada",
+      "topTools": "Herramientas principales",
+      "toolsTotal": "{{count}} en total",
+      "noToolCalls": "Aún no hay llamadas a herramientas.",
+      "subagentRuns": "{{count}} ejecuciones",
+      "contextCompaction": "Compactación de contexto",
+      "noSubagents": "No hay subagentes en esta sesión.",
+      "tokenFlow": "Flujo de tokens",
+      "tokensTotal": "{{total}} en total",
+      "eventMix": "Mezcla de eventos"
     }
   },
   "remoteSourceBadgeTitle": "Recopilado desde una máquina remota"

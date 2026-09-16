@@ -133,7 +133,8 @@
     "viewActive_other": "{{count}} 个仪表盘运行",
     "scopeNote": "仅显示通过此仪表盘启动的运行。",
     "allSessionsLink": "查看所有 Claude Code 会话 →",
-    "viewLabel": "查看"
+    "viewLabel": "查看",
+    "clearSearch": "清除搜索"
   },
   "resume": {
     "label": "源会话",

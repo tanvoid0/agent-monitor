@@ -831,6 +831,20 @@ export function agentOriginLabel(
   return segments.join(" › ");
 }
 
+/** Resolves an agent's `"main" | "subagent"` type for EntityRef chips: the
+ *  known {@link AgentInfo} type when available, else inferred from the id's
+ *  `-main` suffix convention.
+ * @param agentId The event/agent's id; may be null/undefined-shaped by callers
+ *   that pass `event.agent_id ?? ""`.
+ * @param map Optional `agentId → AgentInfo` lookup populated from `/api/agents`.
+ * @returns `"main"` or `"subagent"` — never null, so it's safe to pass
+ *   straight to `EntityRef`'s `type` prop.
+ */
+export function agentTypeOf(agentId: string, map?: Map<string, AgentInfo>): "main" | "subagent" {
+  const info = map?.get(agentId);
+  return info?.type ?? (agentId.endsWith("-main") ? "main" : "subagent");
+}
+
 // ════════════════════════════════════════════════════════════════════════════
 // Origin prefix and project derivation
 // ════════════════════════════════════════════════════════════════════════════

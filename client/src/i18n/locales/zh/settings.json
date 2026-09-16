@@ -394,6 +394,8 @@
     "rulesEmptyHint": "添加规则，开始对错误、闲置、卡住的代理或令牌阈值进行告警。"
   },
   "jumpTo": "跳转到",
+  "scrollTocLeft": "向左滚动分区",
+  "scrollTocRight": "向右滚动分区",
   "webhookGuides": {
     "slack": {
       "steps": [

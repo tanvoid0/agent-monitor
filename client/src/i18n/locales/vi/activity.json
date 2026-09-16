@@ -6,5 +6,7 @@
   "pause": "Tạm dừng",
   "noActivity": "Chưa có hoạt động",
   "noActivityDesc": "Sự kiện sẽ được phát trực tiếp tại đây khi các phiên Agent hoạt động.",
-  "viewSession": "Phiên"
+  "viewSession": "Phiên",
+  "firstPage": "Trang đầu",
+  "lastPage": "Trang cuối"
 }

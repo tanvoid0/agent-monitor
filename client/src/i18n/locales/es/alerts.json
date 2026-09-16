@@ -71,7 +71,6 @@
     "unackedCount": "{{count}} sin reconocer",
     "unackedOnly": "Solo sin reconocer",
     "ack": "Reconocer",
-    "viewSession": "Ver sesión",
     "loadMore": "Cargar más ({{shown}} de {{total}})",
     "emptyTitle": "Sin alertas",
     "emptyDescription": "Las alertas disparadas por tus reglas aparecerán aquí en tiempo real.",

@@ -71,7 +71,6 @@
     "unackedCount": "{{count}} 条未确认",
     "unackedOnly": "仅显示未确认",
     "ack": "确认",
-    "viewSession": "查看会话",
     "loadMore": "加载更多（{{shown}} / {{total}}）",
     "emptyTitle": "暂无警报",
     "emptyDescription": "规则触发的警报会实时显示在这里。",

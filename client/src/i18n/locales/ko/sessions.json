@@ -21,6 +21,7 @@
   "filterCompleted": "완료됨",
   "filterError": "오류",
   "filterAbandoned": "중단됨",
+  "statusFilterLabel": "상태 필터",
   "sessionCount": "{{count}}개 세션 기록됨",
   "sessionCount_plural": "{{count}}개 세션 기록됨",
   "noSessions": "세션을 찾을 수 없습니다",
@@ -77,12 +78,35 @@
     "costBreakdown": "비용 내역",
     "eventTimeline": "이벤트 타임라인",
     "noEvents": "기록된 이벤트가 없습니다.",
+    "eventNotLoaded": "이벤트 #{{id}}이(가) 불러온 타임라인에 없습니다.",
     "conversation": "대화",
     "timeline": "타임라인 ({{shown}}/{{total}})",
     "transcriptNotFound": "이 Agent의 대화 기록을 찾을 수 없습니다. Transcript 파일이 없거나 아직 연결되지 않았을 수 있습니다.",
     "hookOnlySession": "이 Codex 세션은 rollout을 디스크에 기록하지 않고 실행되어(예: `codex exec --ephemeral`) 생명주기 hook에서 기록을 재구성했습니다. 프롬프트, 도구 호출, 응답은 저장되었지만 열어 볼 전체 transcript는 없습니다.",
     "transcript": {
       "loadOlder": "↑ 이전 메시지 불러오기"
+    },
+    "overview": {
+      "agentFallback": "에이전트",
+      "events": "이벤트",
+      "perMinute": "{{rate}}/분",
+      "toolCalls": "도구 호출",
+      "uniqueTools": "{{count}}종",
+      "subagents": "Subagent",
+      "plusMain": "+{{count}} 메인",
+      "compactions": "압축",
+      "errors": "오류",
+      "duration": "소요 시간",
+      "completed": "완료됨",
+      "topTools": "주요 도구",
+      "toolsTotal": "총 {{count}}개",
+      "noToolCalls": "아직 도구 호출이 없습니다.",
+      "subagentRuns": "{{count}}회 실행",
+      "contextCompaction": "컨텍스트 압축",
+      "noSubagents": "이 세션에는 subagent가 없습니다.",
+      "tokenFlow": "토큰 흐름",
+      "tokensTotal": "총 {{total}}",
+      "eventMix": "이벤트 구성"
     }
   }
 }

@@ -133,7 +133,8 @@
     "viewActive_other": "대시보드 실행 {{count}}개",
     "scopeNote": "이 대시보드에서 시작한 실행만 표시됩니다.",
     "allSessionsLink": "모든 Claude Code 세션 보기 →",
-    "viewLabel": "보기"
+    "viewLabel": "보기",
+    "clearSearch": "검색 지우기"
   },
   "resume": {
     "label": "원본 세션",

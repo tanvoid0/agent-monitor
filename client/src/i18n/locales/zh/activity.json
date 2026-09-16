@@ -6,5 +6,7 @@
   "pause": "暂停",
   "noActivity": "暂无活动",
   "noActivityDesc": "Agent 会话工作时，事件会实时显示在这里。",
-  "viewSession": "会话"
+  "viewSession": "会话",
+  "firstPage": "第一页",
+  "lastPage": "最后一页"
 }

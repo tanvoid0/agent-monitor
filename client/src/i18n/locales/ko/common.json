@@ -11,7 +11,10 @@
   "subagent": "Subagent",
   "subagent_label_one": "Subagent {{count}}개",
   "subagent_label_other": "Subagent {{count}}개",
-  "subagents": "Subagent",
+  "subagents": {
+    "expand": "Subagent 펼치기",
+    "collapse": "Subagent 접기"
+  },
   "events": "이벤트",
   "event": "이벤트",
   "sessions": "세션",
@@ -187,5 +190,55 @@
     }
   },
   "examples": "예시",
-  "help": "도움말"
+  "help": "도움말",
+  "ui": {
+    "back": "뒤로",
+    "openMenu": "추가 작업",
+    "copyFailed": "복사 실패",
+    "density": {
+      "cards": "카드",
+      "rows": "행"
+    },
+    "menu": {
+      "open": "열기",
+      "openConversation": "대화 열기",
+      "openTimeline": "타임라인 열기",
+      "openSession": "세션 열기",
+      "openAgent": "Agent 열기",
+      "openEvents": "이벤트 열기",
+      "showInActivity": "활동 피드에서 보기",
+      "sessionsInProject": "이 프로젝트의 세션",
+      "showOnBoard": "칸반 보드에서 보기",
+      "resumeInRun": "Agent 실행에서 재개",
+      "filterByTool": "이 도구로 필터링",
+      "costAnalytics": "비용 분석",
+      "pricingRules": "가격 규칙",
+      "copySessionId": "세션 ID 복사",
+      "copyAgentId": "Agent ID 복사",
+      "copyEventId": "이벤트 ID 복사",
+      "copyModelId": "모델 ID 복사",
+      "copyToolName": "도구 이름 복사",
+      "copyEventType": "이벤트 유형 복사",
+      "copyPath": "경로 복사",
+      "copyLink": "링크 복사",
+      "revealFolder": "폴더 열기"
+    },
+    "openMenuFor": "{{name}} 추가 작업"
+  },
+  "tabby": {
+    "companion": "Tabby 도우미",
+    "close": "Tabby 닫기",
+    "live": "실시간",
+    "waiting": "대기 중",
+    "errored": "오류",
+    "runClaude": "Claude 실행",
+    "activity": "활동",
+    "sessions": "세션",
+    "erroredSessions": "오류",
+    "clearAlerts": "알림 지우기",
+    "ask": "Tabby에게 질문",
+    "send": "보내기",
+    "mute": "말풍선 끄기",
+    "unmute": "말풍선 켜기"
+  }
 }

@@ -394,6 +394,8 @@
     "rulesEmptyHint": "Add a rule to start alerting on errors, inactivity, stuck agents, or token thresholds."
   },
   "jumpTo": "Jump to",
+  "scrollTocLeft": "Scroll sections left",
+  "scrollTocRight": "Scroll sections right",
   "webhookGuides": {
     "slack": {
       "steps": [

@@ -9,6 +9,7 @@
   "allSessions": "Todas las Sesiones",
   "activeOnly": "Solo Activas",
   "completed": "Completadas",
+  "statusFilter": "Filtro de estado de sesión",
   "runs": {
     "title": "Flujos Dinámicos",
     "subtitle": "Flotas iniciadas por la herramienta Workflow, reconstruidas a partir de los diarios de ejecución en disco",
@@ -16,7 +17,6 @@
     "loading": "Cargando flujos dinámicos…",
     "empty": "Sin flujos dinámicos aún. Las ejecuciones de la herramienta Workflow aparecen aquí una vez que se escribe su diario (al completarse).",
     "noAgents": "No se registraron agentes internos para esta ejecución.",
-    "openSession": "Abrir sesión padre",
     "filterPhase": "Filtrar por fase",
     "clearFilter": "Limpiar",
     "resultsLabel": "Resultados",

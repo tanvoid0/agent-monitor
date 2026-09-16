@@ -133,7 +133,8 @@
     "viewActive_other": "{{count}} ejecuciones del panel",
     "scopeNote": "Solo muestra ejecuciones que iniciaste desde este panel.",
     "allSessionsLink": "Ver todas las sesiones de Claude Code →",
-    "viewLabel": "Ver"
+    "viewLabel": "Ver",
+    "clearSearch": "Borrar búsqueda"
   },
   "resume": {
     "label": "Sesión de origen",

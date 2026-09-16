@@ -1,10 +1,18 @@
 {
   "title": "Tablero Kanban",
+  "columnCountLink_one": "{{count}} sesión en {{status}}",
+  "columnCountLink_other": "{{count}} sesiones en {{status}}",
+  "columnCountLinkAgents_one": "{{count}} agente en {{status}}",
+  "columnCountLinkAgents_other": "{{count}} agentes en {{status}}",
   "subtitle": "Vista Kanban de todos los agentes por estado",
   "subtitleSessions": "Vista Kanban de todas las sesiones por estado",
   "viewToggle": {
     "agents": "Agentes",
-    "sessions": "Sesiones"
+    "sessions": "Sesiones",
+    "label": "Vista del tablero"
+  },
+  "density": {
+    "label": "Densidad de tarjetas"
   },
   "noAgents": "Sin agentes rastreados aún",
   "noAgentsDesc": "Inicia una sesión de agente supervisada con los hooks instalados para ver los agentes aquí.",
@@ -26,6 +34,14 @@
     "subagentSummary_other": "{{count}} subagentes",
     "turnSummary_one": "{{count}} turno",
     "turnSummary_other": "{{count}} turnos"
+  },
+  "projects": {
+    "all": "Todos los proyectos"
+  },
+  "project": {
+    "open": "Abrir carpeta en el explorador de archivos",
+    "opened": "Se abrió {{name}} en el explorador de archivos",
+    "openFailed": "No se pudo abrir la carpeta: {{message}}"
   },
   "tooltip": {
     "agent": {

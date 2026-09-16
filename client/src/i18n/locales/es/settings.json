@@ -394,6 +394,8 @@
     "rulesEmptyHint": "Añade una regla para comenzar a alertar sobre errores, inactividad, agentes bloqueados o umbrales de tokens."
   },
   "jumpTo": "Ir a",
+  "scrollTocLeft": "Desplazar secciones a la izquierda",
+  "scrollTocRight": "Desplazar secciones a la derecha",
   "webhookGuides": {
     "slack": {
       "steps": [

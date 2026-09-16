@@ -9,6 +9,7 @@
   "allSessions": "All Sessions",
   "activeOnly": "Active Only",
   "completed": "Completed",
+  "statusFilter": "Session status filter",
   "runs": {
     "title": "Dynamic Workflows",
     "subtitle": "Fleets spawned by the Workflow tool, reconstructed from on-disk run journals",
@@ -16,7 +17,6 @@
     "loading": "Loading dynamic workflows…",
     "empty": "No dynamic workflows yet. Runs from the Workflow tool appear here once their journal is written (at completion).",
     "noAgents": "No inner agents recorded for this run.",
-    "openSession": "Open parent session",
     "filterPhase": "Filter by phase",
     "clearFilter": "Clear",
     "resultsLabel": "Results",

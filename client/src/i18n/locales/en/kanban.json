@@ -1,10 +1,18 @@
 {
   "title": "Kanban Board",
+  "columnCountLink_one": "{{count}} session in {{status}}",
+  "columnCountLink_other": "{{count}} sessions in {{status}}",
+  "columnCountLinkAgents_one": "{{count}} agent in {{status}}",
+  "columnCountLinkAgents_other": "{{count}} agents in {{status}}",
   "subtitle": "Kanban view of all agents by status",
   "subtitleSessions": "Kanban view of all sessions by status",
   "viewToggle": {
     "agents": "Agents",
-    "sessions": "Sessions"
+    "sessions": "Sessions",
+    "label": "Board view"
+  },
+  "density": {
+    "label": "Card density"
   },
   "noAgents": "No agents tracked yet",
   "noAgentsDesc": "Start a monitored agent session with hooks installed to see agents appear here.",
@@ -26,6 +34,14 @@
     "subagentSummary_other": "{{count}} subagents",
     "turnSummary_one": "{{count}} turn",
     "turnSummary_other": "{{count}} turns"
+  },
+  "projects": {
+    "all": "All projects"
+  },
+  "project": {
+    "open": "Open folder in file manager",
+    "opened": "Opened {{name}} in your file manager",
+    "openFailed": "Couldn't open folder: {{message}}"
   },
   "tooltip": {
     "agent": {

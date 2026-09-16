@@ -394,6 +394,8 @@
     "rulesEmptyHint": "규칙을 추가해 오류, 비활성, 정체된 Agent, 토큰 임계값에 대한 알림을 시작하세요."
   },
   "jumpTo": "바로 가기",
+  "scrollTocLeft": "섹션을 왼쪽으로 스크롤",
+  "scrollTocRight": "섹션을 오른쪽으로 스크롤",
   "webhookGuides": {
     "slack": {
       "steps": [

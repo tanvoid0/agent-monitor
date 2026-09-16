@@ -71,7 +71,6 @@
     "unackedCount": "{{count}} chưa xác nhận",
     "unackedOnly": "Chỉ chưa xác nhận",
     "ack": "Xác nhận",
-    "viewSession": "Xem phiên",
     "loadMore": "Tải thêm ({{shown}} / {{total}})",
     "emptyTitle": "Không có cảnh báo",
     "emptyDescription": "Cảnh báo do các quy tắc của bạn kích hoạt sẽ hiển thị tại đây theo thời gian thực.",

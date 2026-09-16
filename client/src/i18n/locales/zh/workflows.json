@@ -9,6 +9,7 @@
   "allSessions": "所有会话",
   "activeOnly": "仅活跃",
   "completed": "已完成",
+  "statusFilter": "会话状态筛选",
   "runs": {
     "title": "动态工作流",
     "subtitle": "由 Workflow 工具派生的 Agent 群组，依据磁盘上的运行日志重建",
@@ -16,7 +17,6 @@
     "loading": "正在加载动态工作流…",
     "empty": "暂无动态工作流。Workflow 工具的运行会在其日志写入后（即完成时）显示在此处。",
     "noAgents": "本次运行未记录内部 Agent。",
-    "openSession": "打开所属会话",
     "filterPhase": "按阶段筛选",
     "clearFilter": "清除",
     "resultsLabel": "结果",

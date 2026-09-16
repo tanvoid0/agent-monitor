@@ -17,6 +17,9 @@ import {
   formatTime,
   getCurrentLocale,
   formatModelName,
+  promptPreviewLines,
+  isTransientProcess,
+  formatCostShort,
 } from "../format";
 
 describe("formatMs", () => {
@@ -259,5 +262,54 @@ describe("formatModelName", () => {
   it("title-cases unknown models", () => {
     expect(formatModelName("o1-mini")).toBe("O1 Mini");
     expect(formatModelName("o1-preview")).toBe("O1 Preview");
+  });
+});
+
+describe("promptPreviewLines", () => {
+  it("returns [] for empty input", () => {
+    expect(promptPreviewLines(null)).toEqual([]);
+    expect(promptPreviewLines(undefined)).toEqual([]);
+    expect(promptPreviewLines("  \n \n")).toEqual([]);
+  });
+
+  it("trims, drops blank and case-insensitive duplicate lines, keeps the last two", () => {
+    expect(promptPreviewLines("  fix bug  \n\nFix Bug\nadd tests\nship it")).toEqual([
+      "add tests",
+      "ship it",
+    ]);
+    expect(promptPreviewLines("only one")).toEqual(["only one"]);
+  });
+});
+
+describe("isTransientProcess", () => {
+  it("is true only for pre_identity_process === true", () => {
+    expect(isTransientProcess('{"pre_identity_process":true}')).toBe(true);
+    expect(isTransientProcess('{"pre_identity_process":"true"}')).toBe(false);
+    expect(isTransientProcess('{"pre_identity_process":false}')).toBe(false);
+    expect(isTransientProcess("{}")).toBe(false);
+  });
+
+  it("is false for empty or malformed metadata", () => {
+    expect(isTransientProcess(null)).toBe(false);
+    expect(isTransientProcess(undefined)).toBe(false);
+    expect(isTransientProcess("")).toBe(false);
+    expect(isTransientProcess("{not json")).toBe(false);
+  });
+});
+
+describe("formatCostShort", () => {
+  it("returns $0 for zero, negative and non-finite", () => {
+    expect(formatCostShort(0)).toBe("$0");
+    expect(formatCostShort(-3)).toBe("$0");
+    expect(formatCostShort(NaN)).toBe("$0");
+    expect(formatCostShort(Infinity)).toBe("$0");
+  });
+
+  it("scales precision with magnitude", () => {
+    expect(formatCostShort(12.345)).toBe("$12.35");
+    expect(formatCostShort(1)).toBe("$1.00");
+    expect(formatCostShort(0.5)).toBe("$0.500");
+    expect(formatCostShort(0.01)).toBe("$0.010");
+    expect(formatCostShort(0.0012)).toBe("$0.0012");
   });
 });

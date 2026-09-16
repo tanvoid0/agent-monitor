@@ -21,6 +21,7 @@
   "filterCompleted": "已完成",
   "filterError": "错误",
   "filterAbandoned": "已废弃",
+  "statusFilterLabel": "状态筛选",
   "sessionCount": "已记录 {{count}} 个会话",
   "sessionCount_plural": "已记录 {{count}} 个会话",
   "noSessions": "未找到会话",
@@ -77,12 +78,35 @@
     "costBreakdown": "费用明细",
     "eventTimeline": "事件时间线",
     "noEvents": "暂无事件记录。",
+    "eventNotLoaded": "事件 #{{id}} 不在已加载的时间线中。",
     "conversation": "对话",
     "timeline": "时间线 ({{shown}}/{{total}})",
     "transcriptNotFound": "未找到此 Agent 的对话记录。Transcript 文件可能缺失或尚未关联。",
     "hookOnlySession": "此 Codex 会话运行时未将 rollout 写入磁盘（例如 `codex exec --ephemeral`），因此其历史记录由生命周期 hook 重建。提示词、工具调用和回复均已捕获，但没有完整的 transcript 可供打开。",
     "transcript": {
       "loadOlder": "↑ 加载更早的消息"
+    },
+    "overview": {
+      "agentFallback": "代理",
+      "events": "事件",
+      "perMinute": "{{rate}}/分钟",
+      "toolCalls": "工具调用",
+      "uniqueTools": "{{count}} 种",
+      "subagents": "子代理",
+      "plusMain": "+{{count}} 主代理",
+      "compactions": "压缩",
+      "errors": "错误",
+      "duration": "时长",
+      "completed": "已完成",
+      "topTools": "常用工具",
+      "toolsTotal": "共 {{count}} 个",
+      "noToolCalls": "尚无工具调用。",
+      "subagentRuns": "{{count}} 次运行",
+      "contextCompaction": "上下文压缩",
+      "noSubagents": "此会话中没有子代理。",
+      "tokenFlow": "Token 流量",
+      "tokensTotal": "共 {{total}}",
+      "eventMix": "事件构成"
     }
   }
 }

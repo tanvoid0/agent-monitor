@@ -9,6 +9,7 @@
   "allSessions": "모든 세션",
   "activeOnly": "활성만",
   "completed": "완료됨",
+  "statusFilter": "세션 상태 필터",
   "runs": {
     "title": "동적 워크플로",
     "subtitle": "Workflow 도구가 생성한 fleet - 디스크에 기록된 실행 저널로부터 재구성됨",
@@ -16,7 +17,6 @@
     "loading": "동적 워크플로를 불러오는 중…",
     "empty": "아직 동적 워크플로가 없습니다. Workflow 도구의 실행은 저널이 기록되는 시점(완료 시)에 여기에 표시됩니다.",
     "noAgents": "이 실행에 대해 기록된 내부 Agent가 없습니다.",
-    "openSession": "상위 세션 열기",
     "filterPhase": "단계별 필터",
     "clearFilter": "지우기",
     "resultsLabel": "결과",

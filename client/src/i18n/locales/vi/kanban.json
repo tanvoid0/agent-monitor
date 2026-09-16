@@ -1,10 +1,18 @@
 {
   "title": "Bảng Kanban",
+  "columnCountLink_one": "{{count}} phiên trong {{status}}",
+  "columnCountLink_other": "{{count}} phiên trong {{status}}",
+  "columnCountLinkAgents_one": "{{count}} Agent trong {{status}}",
+  "columnCountLinkAgents_other": "{{count}} Agent trong {{status}}",
   "subtitle": "Góc nhìn kanban của mọi Agent theo trạng thái",
   "subtitleSessions": "Góc nhìn kanban của mọi phiên theo trạng thái",
   "viewToggle": {
     "agents": "Agent",
-    "sessions": "Phiên"
+    "sessions": "Phiên",
+    "label": "Chế độ xem bảng"
+  },
+  "density": {
+    "label": "Mật độ thẻ"
   },
   "noAgents": "Chưa có Agent được theo dõi",
   "noAgentsDesc": "Bắt đầu một phiên Agent được theo dõi với hooks đã cài để thấy Agent xuất hiện tại đây.",
@@ -26,6 +34,14 @@
     "subagentSummary_other": "{{count}} Agent con",
     "turnSummary_one": "{{count}} lượt",
     "turnSummary_other": "{{count}} lượt"
+  },
+  "projects": {
+    "all": "Tất cả dự án"
+  },
+  "project": {
+    "open": "Mở thư mục trong trình quản lý tệp",
+    "opened": "Đã mở {{name}} trong trình quản lý tệp",
+    "openFailed": "Không thể mở thư mục: {{message}}"
   },
   "tooltip": {
     "agent": {
