@@ -35,9 +35,6 @@
     "turnSummary_one": "{{count}} turno",
     "turnSummary_other": "{{count}} turnos"
   },
-  "projects": {
-    "all": "Todos los proyectos"
-  },
   "project": {
     "open": "Abrir carpeta en el explorador de archivos",
     "opened": "Se abrió {{name}} en el explorador de archivos",

@@ -35,9 +35,6 @@
     "turnSummary_one": "{{count}} 轮",
     "turnSummary_other": "{{count}} 轮"
   },
-  "projects": {
-    "all": "全部项目"
-  },
   "project": {
     "open": "在文件管理器中打开文件夹",
     "opened": "已在文件管理器中打开 {{name}}",

@@ -4,12 +4,13 @@
  * AgentStatus (working/waiting/completed/error) or sessions grouped
  * by their SessionStatus (active/completed/error/abandoned). The view toggle
  * (`?view=`) and card density (`?density=cards|rows`) are persisted in
- * localStorage so the user's choice survives reloads. A strip of project tabs
- * (`?project=<group root>` — a raw cwd folds onto its root, "All projects" by
- * default) narrows either board to one project group, every card carries a
- * colour-keyed project badge, and each column's count links to the sessions
- * list pre-filtered by that status and project. Each column paginates
- * client-side at COLUMN_PAGE_SIZE.
+ * localStorage so the user's choice survives reloads. A collapsible project
+ * side panel (`?project=<root>[,<root>]` — a raw cwd folds onto its root, all
+ * projects by default) narrows either board to any set of project groups with
+ * search, sort and live per-project counts; every card carries a colour-keyed
+ * project badge, and each column's count links to the sessions list
+ * pre-filtered by that status and the selected projects. Each column
+ * paginates client-side at COLUMN_PAGE_SIZE.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -70,7 +71,7 @@
 import { useEffect, useState, useCallback, useMemo, useRef, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router";
-import { RefreshCw, Columns3, ChevronDown, HelpCircle, Layers } from "lucide-react";
+import { RefreshCw, Columns3, ChevronDown, HelpCircle } from "lucide-react";
 import { api } from "../lib/api";
 import { useUrlTab } from "../hooks/usePageShortcuts";
 import { usePaletteAction } from "../components/PaletteActionProvider";
@@ -80,9 +81,15 @@ import { isRemoteDataRefreshMessage } from "../lib/remoteDataEvents";
 import { AgentCard } from "../components/AgentCard";
 import { SessionCard } from "../components/SessionCard";
 import { projectRoots, projectLabel, projectColor } from "../components/ProjectBadge";
+import {
+  ProjectPanel,
+  buildProjectRows,
+  parseProjectParam,
+  useSeenProjects,
+} from "../components/kanban/ProjectPanel";
 import { EmptyState } from "../components/EmptyState";
 import { CardSkeleton } from "../components/Skeleton";
-import { Badge, Button, PageHeader, SegmentedControl } from "../components/ui";
+import { Button, PageHeader, SegmentedControl } from "../components/ui";
 import { routes } from "../lib/routes";
 import {
   STATUS_CONFIG,
@@ -138,25 +145,27 @@ export function KanbanBoard() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Record<string, number>>({});
-  // `?project=<group root>` narrows both boards to one project group; absent
-  // means every project in one place. URL-only (no localStorage) so a fresh
-  // visit always starts from the whole picture.
+  // `?project=<root>[,<root>]` narrows both boards to a set of project groups;
+  // absent means every project in one place. URL-only (no localStorage) so a
+  // fresh visit always starts from the whole picture.
   const [searchParams, setSearchParams] = useSearchParams();
-  const project = searchParams.get("project") ?? "";
-  const setProject = useCallback(
-    (root: string) => {
+  const projectParam = searchParams.get("project");
+  const [seenAt, markSeen] = useSeenProjects();
+  const setProjects = useCallback(
+    (roots: string[]) => {
       setSearchParams(
         (previous) => {
           const next = new URLSearchParams(previous);
-          if (root) next.set("project", root);
+          if (roots.length) next.set("project", roots.join(","));
           else next.delete("project");
           return next;
         },
         { replace: true }
       );
+      markSeen(roots);
       setExpanded({});
     },
-    [setSearchParams]
+    [setSearchParams, markSeen]
   );
 
   const setView = useCallback(
@@ -265,8 +274,7 @@ export function KanbanBoard() {
   const rootOfSession = (s: Session | undefined) => (s?.cwd ? rootByCwd.get(s.cwd) : undefined);
   const rootOfAgent = (a: Agent) => rootOfSession(sessionsById.get(a.session_id));
 
-  // One tab per group, counted in the active view and ordered by label so the
-  // strip stays put as counts move.
+  // Per-group count in the active view, feeding the panel rows.
   const projectCounts = new Map<string, number>();
   for (const root of rootByCwd.values()) projectCounts.set(root, 0);
   const bump = (root: string | undefined) => {
@@ -274,25 +282,48 @@ export function KanbanBoard() {
   };
   if (view === "agents") agents.forEach((a) => bump(rootOfAgent(a)));
   else sessions.forEach((s) => bump(rootOfSession(s)));
-  const projectTabs = [...projectCounts]
-    .map(([root, count]) => ({ root, count, label: projectLabel(root) }))
-    .sort((a, b) => a.label.localeCompare(b.label) || a.root.localeCompare(b.root));
+  const projectRows = buildProjectRows({
+    sessions,
+    rootByCwd,
+    labelOf: projectLabel,
+    dotOf: (root) => projectColor(root).dot,
+    seenAt,
+    countOf: (root) => projectCounts.get(root) ?? 0,
+  });
 
-  // `?project=` is a group root, but links from elsewhere may carry a raw cwd —
-  // fold it onto its root. A value nobody has any more (stale link, purged data)
-  // would leave an empty board with no tab selected — fall back to every
-  // project instead.
-  const activeProject = projectCounts.has(project) ? project : (rootByCwd.get(project) ?? "");
+  // `?project=` carries group roots, but links from elsewhere may carry a raw
+  // cwd — fold each onto its root. A value nobody has any more (stale link,
+  // purged data) is dropped rather than leaving an empty board. A single value
+  // that is itself a known path wins over comma-splitting, so a cwd with a
+  // comma in it (rare, but legal) still resolves.
+  const resolveProject = (value: string) =>
+    projectCounts.has(value) ? value : rootByCwd.get(value);
+  const projectRaw = projectParam ?? "";
+  const wholeProject = projectRaw ? resolveProject(projectRaw) : undefined;
+  const activeProjects = [
+    ...new Set(
+      (wholeProject ? [wholeProject] : parseProjectParam(projectRaw).map(resolveProject)).filter(
+        (r): r is string => Boolean(r)
+      )
+    ),
+  ];
+  const activeSet = new Set(activeProjects);
   // /api/sessions matches `cwd IN (...)` on the stored string, so links must
-  // carry every raw cwd that folds onto the active root, not the root itself.
-  const activeProjectCwds = activeProject
-    ? [...new Set([...rootByCwd].filter(([, r]) => r === activeProject).map(([c]) => c))]
+  // carry every raw cwd that folds onto a selected root, not the roots.
+  const activeProjectCwds = activeProjects.length
+    ? [...new Set([...rootByCwd].filter(([, r]) => activeSet.has(r)).map(([c]) => c))]
     : undefined;
-  const visibleAgents = activeProject
-    ? agents.filter((a) => rootOfAgent(a) === activeProject)
+  const visibleAgents = activeProjects.length
+    ? agents.filter((a) => {
+        const root = rootOfAgent(a);
+        return root !== undefined && activeSet.has(root);
+      })
     : agents;
-  const visibleSessions = activeProject
-    ? sessions.filter((s) => rootOfSession(s) === activeProject)
+  const visibleSessions = activeProjects.length
+    ? sessions.filter((s) => {
+        const root = rootOfSession(s);
+        return root !== undefined && activeSet.has(root);
+      })
     : sessions;
 
   // Bucket by effective status: agents with status "waiting" OR those with
@@ -358,34 +389,39 @@ export function KanbanBoard() {
             </Button>
           </>
         }
-      >
-        {projectTabs.length > 0 && (
-          <ProjectTabs
-            tabs={projectTabs}
-            active={activeProject}
-            total={view === "agents" ? agents.length : sessions.length}
-            onChange={setProject}
-          />
-        )}
-      </PageHeader>
+      />
     </div>
+  );
+
+  // The panel sits beside the board and also beside the empty state, so a
+  // selection that matches nothing can still be changed.
+  const panel = projectRows.length > 0 && (
+    <ProjectPanel
+      rows={projectRows}
+      selected={activeProjects}
+      onChange={setProjects}
+      total={view === "agents" ? agents.length : sessions.length}
+    />
   );
 
   if (!loading && total === 0) {
     return (
       <div className="animate-fade-in flex flex-col min-h-[60vh]">
         {Header}
-        <div className="flex-1 flex items-center justify-center">
-          <EmptyState
-            icon={Columns3}
-            title={view === "agents" ? t("noAgents") : t("noSessions")}
-            description={view === "agents" ? t("noAgentsDesc") : t("noSessionsDesc")}
-            action={
-              <Button variant="primary" icon={RefreshCw} onClick={load}>
-                {t("common:refresh")}
-              </Button>
-            }
-          />
+        <div className="flex flex-1 items-start gap-4">
+          {panel}
+          <div className="flex flex-1 items-center justify-center self-stretch">
+            <EmptyState
+              icon={Columns3}
+              title={view === "agents" ? t("noAgents") : t("noSessions")}
+              description={view === "agents" ? t("noAgentsDesc") : t("noSessionsDesc")}
+              action={
+                <Button variant="primary" icon={RefreshCw} onClick={load}>
+                  {t("common:refresh")}
+                </Button>
+              }
+            />
+          </div>
         </div>
       </div>
     );
@@ -395,150 +431,98 @@ export function KanbanBoard() {
     <div className="animate-fade-in">
       {Header}
 
-      <div className="flex gap-4 min-h-[600px] overflow-x-auto pb-4 -mx-8 px-8">
-        {view === "agents"
-          ? AGENT_COLUMNS.map((status) => {
-              const config = STATUS_CONFIG[status];
-              const items = groupedAgents[status];
-              const limit = expanded[status] || COLUMN_PAGE_SIZE;
-              return (
-                <Column
-                  key={status}
-                  labelKey={config.labelKey}
-                  color={config.color}
-                  dotClass={config.dot}
-                  pulse={status === "working" || status === "waiting"}
-                  count={items?.length ?? 0}
-                  countHref={routes.sessions({
-                    status: status === "working" ? "active" : status,
-                    cwd: activeProjectCwds,
-                  })}
-                  countKind="agent"
-                  emptyLabel={t("noAgentsInColumn")}
-                  tooltip={t(`tooltip.agent.${status}`)}
-                  remaining={Math.max(0, (items?.length ?? 0) - limit)}
-                  onShowMore={() =>
-                    setExpanded((prev) => ({
-                      ...prev,
-                      [status]: limit + COLUMN_PAGE_SIZE,
-                    }))
-                  }
-                >
-                  {loading && (items?.length ?? 0) === 0
-                    ? Array.from({ length: 3 }).map((_, i) => (
-                        <CardSkeleton key={`sk-${status}-${i}`} />
-                      ))
-                    : items
-                        ?.slice(0, limit)
-                        .map((agent) => (
-                          <AgentCard
-                            key={agent.id}
-                            variant={cardVariant}
-                            agent={agent}
-                            session={sessionsById.get(agent.session_id)}
-                            projectRoot={rootOfAgent(agent)}
-                          />
-                        ))}
-                </Column>
-              );
-            })
-          : SESSION_COLUMNS.map((status) => {
-              const config = SESSION_STATUS_CONFIG[status];
-              const items = groupedSessions[status];
-              const limit = expanded[status] || COLUMN_PAGE_SIZE;
-              return (
-                <Column
-                  key={status}
-                  labelKey={config.labelKey}
-                  color={config.color}
-                  dotClass={config.dot}
-                  pulse={status === "active" || status === "waiting"}
-                  count={items?.length ?? 0}
-                  countHref={routes.sessions({ status, cwd: activeProjectCwds })}
-                  countKind="session"
-                  emptyLabel={t("noSessionsInColumn")}
-                  tooltip={t(`tooltip.session.${status}`)}
-                  remaining={Math.max(0, (items?.length ?? 0) - limit)}
-                  onShowMore={() =>
-                    setExpanded((prev) => ({
-                      ...prev,
-                      [status]: limit + COLUMN_PAGE_SIZE,
-                    }))
-                  }
-                >
-                  {loading && (items?.length ?? 0) === 0
-                    ? Array.from({ length: 3 }).map((_, i) => (
-                        <CardSkeleton key={`sk-${status}-${i}`} />
-                      ))
-                    : items
-                        ?.slice(0, limit)
-                        .map((session) => (
-                          <SessionCard
-                            key={session.id}
-                            variant={cardVariant}
-                            session={session}
-                            projectRoot={rootOfSession(session)}
-                          />
-                        ))}
-                </Column>
-              );
-            })}
+      <div className="flex items-start gap-4 -mx-8 px-8">
+        {panel}
+        <div className="flex flex-1 gap-4 min-h-[600px] overflow-x-auto pb-4">
+          {view === "agents"
+            ? AGENT_COLUMNS.map((status) => {
+                const config = STATUS_CONFIG[status];
+                const items = groupedAgents[status];
+                const limit = expanded[status] || COLUMN_PAGE_SIZE;
+                return (
+                  <Column
+                    key={status}
+                    labelKey={config.labelKey}
+                    color={config.color}
+                    dotClass={config.dot}
+                    pulse={status === "working" || status === "waiting"}
+                    count={items?.length ?? 0}
+                    countHref={routes.sessions({
+                      status: status === "working" ? "active" : status,
+                      cwd: activeProjectCwds,
+                    })}
+                    countKind="agent"
+                    emptyLabel={t("noAgentsInColumn")}
+                    tooltip={t(`tooltip.agent.${status}`)}
+                    remaining={Math.max(0, (items?.length ?? 0) - limit)}
+                    onShowMore={() =>
+                      setExpanded((prev) => ({
+                        ...prev,
+                        [status]: limit + COLUMN_PAGE_SIZE,
+                      }))
+                    }
+                  >
+                    {loading && (items?.length ?? 0) === 0
+                      ? Array.from({ length: 3 }).map((_, i) => (
+                          <CardSkeleton key={`sk-${status}-${i}`} />
+                        ))
+                      : items
+                          ?.slice(0, limit)
+                          .map((agent) => (
+                            <AgentCard
+                              key={agent.id}
+                              variant={cardVariant}
+                              agent={agent}
+                              session={sessionsById.get(agent.session_id)}
+                              projectRoot={rootOfAgent(agent)}
+                            />
+                          ))}
+                  </Column>
+                );
+              })
+            : SESSION_COLUMNS.map((status) => {
+                const config = SESSION_STATUS_CONFIG[status];
+                const items = groupedSessions[status];
+                const limit = expanded[status] || COLUMN_PAGE_SIZE;
+                return (
+                  <Column
+                    key={status}
+                    labelKey={config.labelKey}
+                    color={config.color}
+                    dotClass={config.dot}
+                    pulse={status === "active" || status === "waiting"}
+                    count={items?.length ?? 0}
+                    countHref={routes.sessions({ status, cwd: activeProjectCwds })}
+                    countKind="session"
+                    emptyLabel={t("noSessionsInColumn")}
+                    tooltip={t(`tooltip.session.${status}`)}
+                    remaining={Math.max(0, (items?.length ?? 0) - limit)}
+                    onShowMore={() =>
+                      setExpanded((prev) => ({
+                        ...prev,
+                        [status]: limit + COLUMN_PAGE_SIZE,
+                      }))
+                    }
+                  >
+                    {loading && (items?.length ?? 0) === 0
+                      ? Array.from({ length: 3 }).map((_, i) => (
+                          <CardSkeleton key={`sk-${status}-${i}`} />
+                        ))
+                      : items
+                          ?.slice(0, limit)
+                          .map((session) => (
+                            <SessionCard
+                              key={session.id}
+                              variant={cardVariant}
+                              session={session}
+                              projectRoot={rootOfSession(session)}
+                            />
+                          ))}
+                  </Column>
+                );
+              })}
+        </div>
       </div>
-    </div>
-  );
-}
-
-interface ProjectTabsProps {
-  tabs: { root: string; label: string; count: number }[];
-  /** Active group root; `""` is the all-projects tab. */
-  active: string;
-  total: number;
-  onChange: (root: string) => void;
-}
-
-/** "All projects" plus one chip per project group, colour-dotted to match the
- *  cards' badges. Scrolls horizontally rather than wrapping so the board keeps
- *  its height when a machine has dozens of projects. */
-function ProjectTabs({ tabs, active, total, onChange }: ProjectTabsProps) {
-  const { t } = useTranslation("kanban");
-  const chip = (selected: boolean) =>
-    `flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium border whitespace-nowrap transition-colors ${
-      selected
-        ? "bg-accent/15 text-accent border-accent/30"
-        : "border-border text-gray-400 hover:text-gray-200 hover:bg-surface-3"
-    }`;
-  return (
-    <div
-      role="tablist"
-      aria-label={t("projects.all")}
-      className="basis-full flex gap-1.5 overflow-x-auto pb-1 -mb-1"
-    >
-      <button
-        type="button"
-        role="tab"
-        aria-selected={active === ""}
-        onClick={() => onChange("")}
-        className={chip(active === "")}
-      >
-        <Layers className="w-3 h-3" />
-        {t("projects.all")}
-        <Badge size="xs">{total}</Badge>
-      </button>
-      {tabs.map(({ root, label, count }) => (
-        <button
-          key={root}
-          type="button"
-          role="tab"
-          aria-selected={active === root}
-          onClick={() => onChange(root)}
-          title={root}
-          className={chip(active === root)}
-        >
-          <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${projectColor(root).dot}`} />
-          {label}
-          <Badge size="xs">{count}</Badge>
-        </button>
-      ))}
     </div>
   );
 }

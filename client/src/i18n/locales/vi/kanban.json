@@ -35,9 +35,6 @@
     "turnSummary_one": "{{count}} lượt",
     "turnSummary_other": "{{count}} lượt"
   },
-  "projects": {
-    "all": "Tất cả dự án"
-  },
   "project": {
     "open": "Mở thư mục trong trình quản lý tệp",
     "opened": "Đã mở {{name}} trong trình quản lý tệp",

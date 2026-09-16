@@ -744,7 +744,7 @@ For the palette to reach "every page and every view", the views had to become ad
 | Route | Parameter |
 | --- | --- |
 | `/` | `?tab=monitor\|health` |
-| `/kanban` | `?view=agents\|sessions`, `?project=<group root or raw cwd>`, `?density=cards\|rows` |
+| `/kanban` | `?view=agents\|sessions`, `?project=<group root or raw cwd>[,<…>]` (multi-select project panel), `?density=cards\|rows` |
 | `/analytics` | `?tab=cost\|tokens\|productivity\|workflow` |
 | `/activity` | `?session_id=`, `?agent_id=`, `?tool_name=`, `?event_type=`, `?status=` (comma lists), `?q=`, `?from=`, `?to=` |
 | `/workflows` | `?session=<id>` (drill-in), `?run=<id>` (expanded Workflow-tool run) |

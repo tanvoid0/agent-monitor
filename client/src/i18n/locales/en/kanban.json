@@ -35,9 +35,6 @@
     "turnSummary_one": "{{count}} turn",
     "turnSummary_other": "{{count}} turns"
   },
-  "projects": {
-    "all": "All projects"
-  },
   "project": {
     "open": "Open folder in file manager",
     "opened": "Opened {{name}} in your file manager",

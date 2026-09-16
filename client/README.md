@@ -190,6 +190,7 @@ client/
 │   │   │                   #   SegmentedControl, Menu/ContextMenu/DropdownMenu (MenuButton kebab), Clickable, PageHeader, SectionHeader
 │   │   ├── entity/         # EntityRef link-by-reference chip (session/agent/project/tool/eventType/model/event) + entityMenu item lists
 │   │   ├── dashboard/      # SystemHealthTab + its HealthPanel / KeyValueRow / MiniStat / RatioBar atoms
+│   │   ├── kanban/         # ProjectPanel — collapsible multi-select project filter (search, sort, live badges) + pure row helpers
 │   │   ├── AgentCard.tsx     # variant="card" | "row" (row → CompactRow)
 │   │   ├── SessionCard.tsx   # variant="card" | "row" (row → CompactRow)
 │   │   ├── CompactRow.tsx    # One-line row shared by AgentCard and SessionCard
@@ -811,7 +812,7 @@ interface AgentCardProps {
 
 The project chip both cards render under their header: a colour dot keyed to the project group, the group's folder name, the sub-path when the session ran below the group root (`repo · apps/web`), the full `cwd` as tooltip, and — for `source = 'local'` sessions only — a folder button that calls `POST /api/sessions/open-cwd` and confirms through `ActionToast`. The click is stopped before it reaches the card, so it never navigates.
 
-The same file exports the pure helpers the Kanban board's project tabs use, so tabs and badges agree on colours: `normalizeCwd` (one separator style, so Windows and POSIX cwds compare), `projectRoots(cwds)` (each known cwd → the shortest known ancestor cwd; `<repo>/.claude/worktrees/<x>` and `<repo>/.worktrees/<x>` fold onto `<repo>` even when no session ran there), `projectLabel(root)`, and `projectColor(root)` (a stable pick from a ten-colour palette). The board passes `?project=<group root>` through the URL — "All projects" is the absence of the parameter — and renders one tab per group with the count in the active view.
+The same file exports the pure helpers the Kanban board's project panel uses, so panel rows and badges agree on colours: `normalizeCwd` (one separator style, so Windows and POSIX cwds compare), `projectRoots(cwds)` (each known cwd → the shortest known ancestor cwd; `<repo>/.claude/worktrees/<x>` and `<repo>/.worktrees/<x>` fold onto `<repo>` even when no session ran there), `projectLabel(root)`, and `projectColor(root)` (a stable pick from a ten-colour palette). The board passes `?project=<root>[,<root>]` through the URL — "All projects" is the absence of the parameter — and `components/kanban/ProjectPanel.tsx` renders one row per group (search, name / recent / count sort, active · waiting · unseen-completed badges, collapsed state + sort in `localStorage`, "seen" stamps per root) from `buildProjectRows` over the sessions the page already holds.
 
 #### StatusBadge
 
