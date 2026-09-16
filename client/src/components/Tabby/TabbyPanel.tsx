@@ -149,18 +149,24 @@ export function TabbyPanel({
             label={t("common:tabby.live")}
             value={status.liveCount}
             tone={status.liveCount > 0 ? "accent" : "muted"}
+            title={t("common:tabby.showLive")}
+            onClick={() => onNavigate(routes.sessions({ status: "active" }))}
           />
           <StatChip
             icon={Hourglass}
             label={t("common:tabby.waiting")}
             value={status.waitingCount}
             tone={status.waitingCount > 0 ? "amber" : "muted"}
+            title={t("common:tabby.showWaiting")}
+            onClick={() => onNavigate(routes.sessions({ status: "waiting" }))}
           />
           <StatChip
             icon={AlertTriangle}
             label={t("common:tabby.errored")}
             value={status.errorCount}
             tone={status.errorCount > 0 ? "red" : "muted"}
+            title={t("common:tabby.showErrored")}
+            onClick={() => onNavigate(routes.sessions({ status: "error" }))}
           />
         </div>
 
@@ -250,26 +256,50 @@ const TONES: Record<string, Tone> = {
   muted: TONE_MUTED,
 };
 
+/**
+ * A count chip. With `onClick` it becomes a button that jumps to the matching
+ * Sessions filter; a zero count stays inert (nothing to show there) rather than
+ * navigating to an empty list.
+ */
 function StatChip({
   icon: Icon,
   label,
   value,
   tone,
+  onClick,
+  title,
 }: {
   icon: LucideIcon;
   label: string;
   value: number;
   tone: string;
+  onClick?: () => void;
+  title?: string;
 }): ReactNode {
   const t = TONES[tone] ?? TONE_MUTED;
-  return (
-    <div className={`flex flex-col items-center gap-0.5 rounded-xl border py-1.5 ${t.wrap}`}>
+  const body = (
+    <>
       <Icon size={13} className={t.icon} aria-hidden />
       <span className={`text-base font-semibold leading-none tabular-nums ${t.value}`}>
         {value}
       </span>
       <span className="text-[9px] uppercase tracking-wider text-gray-500">{label}</span>
-    </div>
+    </>
+  );
+  const base = `flex flex-col items-center gap-0.5 rounded-xl border py-1.5 ${t.wrap}`;
+
+  if (!onClick || value === 0) {
+    return <div className={base}>{body}</div>;
+  }
+  return (
+    <button
+      type="button"
+      className={`${base} transition-colors hover:border-accent/50 hover:bg-surface-4 focus:outline-none focus:ring-1 focus:ring-accent/40`}
+      onClick={onClick}
+      title={title}
+    >
+      {body}
+    </button>
   );
 }
 

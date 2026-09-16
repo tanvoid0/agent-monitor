@@ -239,7 +239,10 @@
     "ask": "Ask Tabby",
     "send": "Send",
     "mute": "Mute bubbles",
-    "unmute": "Unmute bubbles"
+    "unmute": "Unmute bubbles",
+    "showLive": "Show live sessions",
+    "showWaiting": "Show sessions waiting on you",
+    "showErrored": "Show errored sessions"
   },
   "permissions": {
     "title": "Permission requests",

@@ -239,7 +239,10 @@
     "ask": "Preguntar a Tabby",
     "send": "Enviar",
     "mute": "Silenciar burbujas",
-    "unmute": "Activar burbujas"
+    "unmute": "Activar burbujas",
+    "showLive": "Ver sesiones activas",
+    "showWaiting": "Ver sesiones que te esperan",
+    "showErrored": "Ver sesiones con error"
   },
   "permissions": {
     "title": "Solicitudes de permiso",

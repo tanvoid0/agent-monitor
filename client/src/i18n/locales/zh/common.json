@@ -239,7 +239,10 @@
     "ask": "询问 Tabby",
     "send": "发送",
     "mute": "静音气泡",
-    "unmute": "取消静音气泡"
+    "unmute": "取消静音气泡",
+    "showLive": "查看进行中的会话",
+    "showWaiting": "查看等待你处理的会话",
+    "showErrored": "查看出错的会话"
   },
   "permissions": {
     "title": "权限请求",

@@ -239,7 +239,10 @@
     "ask": "Tabby에게 질문",
     "send": "보내기",
     "mute": "말풍선 끄기",
-    "unmute": "말풍선 켜기"
+    "unmute": "말풍선 켜기",
+    "showLive": "실행 중인 세션 보기",
+    "showWaiting": "내 응답을 기다리는 세션 보기",
+    "showErrored": "오류가 발생한 세션 보기"
   },
   "permissions": {
     "title": "권한 요청",

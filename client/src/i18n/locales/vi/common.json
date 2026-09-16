@@ -239,7 +239,10 @@
     "ask": "Hỏi Tabby",
     "send": "Gửi",
     "mute": "Tắt bong bóng",
-    "unmute": "Bật bong bóng"
+    "unmute": "Bật bong bóng",
+    "showLive": "Xem các phiên đang chạy",
+    "showWaiting": "Xem các phiên đang chờ bạn",
+    "showErrored": "Xem các phiên bị lỗi"
   },
   "permissions": {
     "title": "Yêu cầu quyền",
