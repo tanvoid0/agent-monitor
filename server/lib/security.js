@@ -14,6 +14,9 @@
  *   4. An OPTIONAL bearer token (DASHBOARD_TOKEN) gating /api/* and the
  *      WebSocket — for operators who deliberately bind to a LAN. Off by default
  *      so the zero-config loopback experience is unchanged.
+ *   5. A same-origin / loopback-Origin guard for routes that spawn a local
+ *      process (Run Agent, open-in-file-manager) so a cross-origin page can't
+ *      drive them by CSRF.
  *
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
@@ -96,6 +99,43 @@ function corsOptions() {
     },
     credentials: false,
   };
+}
+
+const ALLOWED_ORIGIN_HOSTS = new Set(["localhost", "127.0.0.1", "::1", "0.0.0.0"]);
+
+/**
+ * Express middleware for routes that spawn a local process (Run Agent,
+ * open-in-file-manager). Browser requests carry Origin; if it's not loopback,
+ * reject — a malicious webpage must not drive these by CSRF. Server/CLI
+ * requests (curl) typically don't carry Origin and pass. Referer is checked as
+ * a fallback for older browsers / fetch with credentials disabled — the same
+ * loopback-host rule applies.
+ */
+function sameOriginGuard(req, res, next) {
+  const checkHost = (raw) => {
+    try {
+      const u = new URL(raw);
+      return ALLOWED_ORIGIN_HOSTS.has(u.hostname);
+    } catch {
+      return false;
+    }
+  };
+  const origin = req.headers.origin;
+  if (origin) {
+    if (!checkHost(origin)) {
+      return res.status(403).json({
+        error: { code: "EBADORIGIN", message: "cross-origin requests are not allowed" },
+      });
+    }
+    return next();
+  }
+  const referer = req.headers.referer;
+  if (referer && !checkHost(referer)) {
+    return res.status(403).json({
+      error: { code: "EBADORIGIN", message: "cross-origin requests are not allowed" },
+    });
+  }
+  return next();
 }
 
 function readSecret(envName, fileEnvName) {
@@ -239,6 +279,7 @@ module.exports = {
   isHostAllowed,
   hostGuard,
   corsOptions,
+  sameOriginGuard,
   getDashboardToken,
   getHookToken,
   getRemotePushToken,

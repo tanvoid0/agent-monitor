@@ -26,44 +26,11 @@ const claudeRuns = require("../lib/run-spawner");
 const codexRuns = require("../lib/codex-run-spawner");
 const { startCodexAppServer } = require("../lib/codex-app-server");
 
+const { sameOriginGuard } = require("../lib/security");
+
 const router = Router();
 
-const ALLOWED_ORIGIN_HOSTS = new Set(["localhost", "127.0.0.1", "::1", "0.0.0.0"]);
-
-/**
- * Loopback-Origin guard. Browser requests carry Origin; if it's not localhost,
- * we reject. Server/CLI requests (curl) typically don't carry Origin and pass.
- *
- * Referer is checked as a fallback for older browsers / fetch with credentials
- * disabled — the same loopback-host rule applies.
- */
-function sameOriginGuard(req, res, next) {
-  const checkHost = (raw) => {
-    try {
-      const u = new URL(raw);
-      return ALLOWED_ORIGIN_HOSTS.has(u.hostname);
-    } catch {
-      return false;
-    }
-  };
-  const origin = req.headers.origin;
-  if (origin) {
-    if (!checkHost(origin)) {
-      return res.status(403).json({
-        error: { code: "EBADORIGIN", message: "cross-origin requests are not allowed" },
-      });
-    }
-    return next();
-  }
-  const referer = req.headers.referer;
-  if (referer && !checkHost(referer)) {
-    return res.status(403).json({
-      error: { code: "EBADORIGIN", message: "cross-origin requests are not allowed" },
-    });
-  }
-  return next();
-}
-
+// Loopback-Origin guard shared with every route that spawns a local process.
 router.use(sameOriginGuard);
 
 function isExistingDir(p) {

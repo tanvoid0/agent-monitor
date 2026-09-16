@@ -462,6 +462,7 @@ The OpenAPI spec is generated from `server/openapi.js` (`createOpenApiSpec()`), 
 | `PATCH` | `/api/sessions/:id` | Update session                                   |
 | `GET`   | `/api/sessions/:id/transcripts` | List the session's transcript files (main + sub-agents) |
 | `GET`   | `/api/sessions/:id/transcript`  | Cursor-paginated message stream for one transcript |
+| `POST`  | `/api/sessions/open-cwd` | Reveal a known local session's `cwd` in the OS file manager (loopback-Origin guarded; `404` unless a `source = 'local'` session recorded it and it still exists) |
 | `GET`   | `/api/agents`       | List agents (`status`, `session_id`, `include_transient`, pagination)|
 | `GET`   | `/api/agents/:id`   | Agent detail                                     |
 | `POST`  | `/api/agents`       | Create agent (idempotent by `id`)               |
@@ -1648,6 +1649,10 @@ The hardening helpers all live in [`server/lib/security.js`](lib/security.js):
 - **`tokenGuard`** is a no-op unless `DASHBOARD_TOKEN` is set; when it is, every
   `/api/*` request (and the WebSocket) must present the token via
   `Authorization: Bearer <token>`, an `x-dashboard-token` header, or `?token=`.
+- **`sameOriginGuard`** refuses browser requests whose `Origin` (or `Referer`)
+  is not loopback on the routes that spawn a local process — `/api/run` and
+  `POST /api/sessions/open-cwd` — so a cross-origin page cannot drive them by
+  CSRF. No-Origin clients such as `curl` pass.
 
 Set **`DASHBOARD_HOST`** (e.g. `0.0.0.0`) to widen the bind beyond loopback —
 this logs a startup warning and you should set **`DASHBOARD_TOKEN`** for auth

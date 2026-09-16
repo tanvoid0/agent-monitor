@@ -608,6 +608,17 @@ export const api = {
       );
     },
     /**
+     * POST /api/sessions/open-cwd - reveal a project directory in the OS file
+     * manager. The server only accepts a cwd it already knows from a local
+     * session (and that still exists), so this is a convenience for the
+     * machine running the dashboard, not a general path opener.
+     */
+    openCwd: (cwd: string) =>
+      request<{ ok: boolean; cwd: string }>("/sessions/open-cwd", {
+        method: "POST",
+        body: JSON.stringify({ cwd }),
+      }),
+    /**
      * GET /api/sessions - paginated, filterable, sortable session list.
      *
      * Every parameter is optional and only serialized into the query string

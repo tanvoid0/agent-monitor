@@ -1718,6 +1718,73 @@ function createOpenApiSpec() {
           },
         },
       },
+      "/api/sessions/open-cwd": {
+        post: {
+          tags: ["Sessions"],
+          summary: "Reveal a session's project directory in the OS file manager",
+          description:
+            "Opens `cwd` in the file manager of the machine running the dashboard (`explorer.exe` / `open` / `xdg-open`). Backs the folder button on the Kanban board's project badges. Deliberately narrow: `cwd` must be absolute, must be the `cwd` of at least one local session (`sessions.source = 'local'`), and must still exist as a directory — otherwise 404, so the route cannot probe arbitrary paths. The loopback same-origin guard applies (403 EBADORIGIN for cross-origin browser requests).",
+          operationId: "openSessionCwd",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["cwd"],
+                  properties: {
+                    cwd: {
+                      type: "string",
+                      description: "Absolute project directory recorded on a local session.",
+                      example: "/Users/dev/code/my-project",
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            200: {
+              description: "File manager launched",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      ok: { type: "boolean", example: true },
+                      cwd: { type: "string", example: "/Users/dev/code/my-project" },
+                    },
+                  },
+                },
+              },
+            },
+            400: {
+              description: "`cwd` missing or not absolute",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/ErrorResponse" },
+                },
+              },
+            },
+            403: {
+              description: "Cross-origin browser request (EBADORIGIN)",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/ErrorResponse" },
+                },
+              },
+            },
+            404: {
+              description: "No local session has this `cwd`, or it is no longer a directory",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/ErrorResponse" },
+                },
+              },
+            },
+          },
+        },
+      },
       "/api/sessions/{id}": {
         get: {
           tags: ["Sessions"],

@@ -486,6 +486,39 @@ curl http://localhost:4820/api/sessions/sess_abc123/agents
 
 > **Note on `status` vs Waiting** — agents are persisted with one of `idle | connected | working | completed | error`. The yellow **Waiting** badge surfaced in the dashboard is a UI overlay derived from `awaiting_input_since` being non-null on a non-terminal agent (typically `idle` after a `Stop`, or `connected` right after `SessionStart`). Filter `?status=idle` on `/api/agents` and inspect `awaiting_input_since` to enumerate currently-waiting main agents.
 
+#### Open Session Directory
+
+```http
+POST /api/sessions/open-cwd
+```
+
+Reveals a project directory in the OS file manager on the machine running the dashboard
+(`explorer.exe` on Windows, `open` on macOS, `xdg-open` elsewhere). Backs the folder button on
+the Kanban board's project badges. Deliberately narrow: the `cwd` must be absolute, must be the
+`cwd` of at least one **local** session (`sessions.source = 'local'`), and must still exist as a
+directory — anything else is `404`, so the route cannot be used to probe arbitrary paths. Like
+`/api/run`, it is guarded by the loopback-Origin check: browser requests from a non-localhost
+origin get `403 EBADORIGIN`.
+
+**Request Body:**
+
+```json
+{ "cwd": "/Users/dev/code/my-project" }
+```
+
+**Response:**
+
+```json
+{ "ok": true, "cwd": "/Users/dev/code/my-project" }
+```
+
+| Status | Meaning |
+|--------|---------|
+| `400` | `cwd` missing or not absolute |
+| `403` | Cross-origin browser request |
+| `404` | No local session has this `cwd`, or it is no longer a directory |
+| `500` | The file-manager process could not be spawned |
+
 ---
 
 ### Agents

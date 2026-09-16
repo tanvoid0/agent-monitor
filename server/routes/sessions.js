@@ -2,18 +2,21 @@
  * @file Express router for session endpoints, allowing creation, retrieval, and
  * updating of sessions with pagination plus status, search, and multi-directory
  * filtering. It computes costs, derives optional owner-aware task progress,
- * adds card-ready prompt context, safely exposes transcript images, and
- * broadcasts live changes.
+ * adds card-ready prompt context, safely exposes transcript images, reveals a
+ * known local project directory in the OS file manager, and broadcasts live
+ * changes.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
 const { Router } = require("express");
+const { spawn } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 const readline = require("readline");
 const { stmts, db } = require("../db");
 const { broadcast } = require("../websocket");
 const { calculateProviderCost, attachAgentCosts } = require("./pricing");
+const { sameOriginGuard } = require("../lib/security");
 const { parseSources, sourceColumnClause } = require("../lib/source-filter");
 const { parseProviders, providerColumnClause } = require("../lib/provider-filter");
 const { getCodexProcessSessions } = require("../lib/codex-process-overlay");
@@ -453,6 +456,60 @@ router.get("/facets", (req, res) => {
   const sources = stmts.distinctSessionSources.all().map((r) => r.source);
   const providers = stmts.distinctSessionProviders.all().map((r) => r.provider);
   res.json({ cwds: rows.map((r) => r.cwd), sources, providers });
+});
+
+// Reveal a project directory in the OS file manager. Only a cwd the dashboard
+// already knows from a *local* session is accepted (no probing arbitrary paths),
+// and it must still exist as a directory. Loopback-Origin guarded like /api/run:
+// this spawns a process, so a cross-origin page must not be able to drive it.
+// The opener is swappable so tests never pop a real window. Resolves once the
+// process actually started — a missing binary (no xdg-open on a headless box)
+// surfaces asynchronously as 'error', which must become a 500, not a crash.
+let openDirectory = (dir) =>
+  new Promise((resolve, reject) => {
+    const [cmd, args] =
+      process.platform === "win32"
+        ? ["explorer.exe", [dir]]
+        : process.platform === "darwin"
+          ? ["open", [dir]]
+          : ["xdg-open", [dir]];
+    const child = spawn(cmd, args, { detached: true, stdio: "ignore" });
+    child.once("error", reject);
+    child.once("spawn", () => {
+      child.unref();
+      resolve();
+    });
+  });
+
+router.post("/open-cwd", sameOriginGuard, async (req, res) => {
+  const cwd = typeof req.body?.cwd === "string" ? req.body.cwd.trim() : "";
+  if (!cwd || !path.isAbsolute(cwd)) {
+    return res
+      .status(400)
+      .json({ error: { code: "BAD_REQUEST", message: "cwd must be an absolute path" } });
+  }
+  const known = db
+    .prepare("SELECT 1 FROM sessions WHERE cwd = ? AND source = 'local' LIMIT 1")
+    .get(cwd);
+  let isDir = false;
+  try {
+    isDir = fs.statSync(cwd).isDirectory();
+  } catch {
+    isDir = false;
+  }
+  if (!known || !isDir) {
+    return res
+      .status(404)
+      .json({ error: { code: "NOT_FOUND", message: "Directory not found for any local session" } });
+  }
+  try {
+    await openDirectory(cwd);
+  } catch (err) {
+    return res.status(500).json({
+      error: { code: "OPEN_FAILED", message: err?.message || "failed to open directory" },
+    });
+  }
+  res.json({ ok: true, cwd });
 });
 
 router.get("/:id", (req, res) => {
@@ -1590,6 +1647,10 @@ function truncateObj(obj, maxLen) {
 }
 
 module.exports = router;
+/** Test seam: replace the file-manager opener so tests never spawn a window. */
+module.exports.__setOpenDirectory = (fn) => {
+  openDirectory = fn;
+};
 // Exported for unit tests — sender attribution is correctness-critical.
 module.exports.classifyTranscriptSender = classifyTranscriptSender;
 module.exports.readCodexTranscript = readCodexTranscript;
