@@ -3,10 +3,10 @@
  * @description Displays all recorded sessions with searchable multi-project,
  * status, text, and custom sort filters plus server-side pagination. Status
  * and project filters live in the URL (`?status=`, repeated `?cwd=`; `?q=`
- * seeds the search box). Rows are Clickable table rows with an EntityRef
- * session name, project / model chips and a per-row entity menu; they can show
- * an accessible task-progress donut beside status and the local transient
- * Codex startup row before its durable session id exists.
+ * seeds the search box) behind `useSessionsUrlFilters`, the page's single URL
+ * writer. Each row is a `SessionRow` (Clickable `<tr>`, EntityRef name, chips,
+ * entity menu); the page owns fetching, sorting, pagination and the palette
+ * actions.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -36,7 +36,8 @@
  * - `../lib/api`
  * - `../lib/eventBus`
  * - `../lib/dataScope`
- * - `../components/StatusBadge`
+ * - `../hooks/useSessionsUrlFilters`
+ * - `../components/SessionRow`
  * - `../components/EmptyState`
  * - `../components/Skeleton`
  * - `../lib/format`
@@ -65,48 +66,26 @@
  *
  * ----------------------------------------------------------------------------- */
 
-import { useEffect, useMemo, useRef, useState, useCallback, useSyncExternalStore } from "react";
-import { Link, useSearchParams } from "react-router";
+import { useEffect, useRef, useState, useCallback, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
-import { FolderOpen, Search, RefreshCw, SortDesc, SortAsc, Play, Server } from "lucide-react";
+import { FolderOpen, Search, RefreshCw, SortDesc, SortAsc } from "lucide-react";
 import { api } from "../lib/api";
 import type { RemoteSource } from "../lib/api";
 import { eventBus } from "../lib/eventBus";
 import { isRemoteDataRefreshMessage } from "../lib/remoteDataEvents";
 import { useDataScope } from "../lib/dataScope";
-import { SessionStatusBadge } from "../components/StatusBadge";
-import { TodoProgressIndicator } from "../components/TodoProgressIndicator";
 import { EmptyState } from "../components/EmptyState";
 import { TableRowSkeleton } from "../components/Skeleton";
 import { MultiSelect } from "../components/MultiSelect";
 import { Select } from "../components/Select";
-import { useUrlTab } from "../hooks/usePageShortcuts";
+import { SessionRow, SESSION_ROW_COLUMNS } from "../components/SessionRow";
+import { SESSION_FILTERS, useSessionsUrlFilters } from "../hooks/useSessionsUrlFilters";
+import type { SessionFilter } from "../hooks/useSessionsUrlFilters";
 import { usePaletteAction } from "../components/PaletteActionProvider";
 import { PaletteHint } from "../components/PaletteHint";
-import {
-  Badge,
-  Button,
-  Clickable,
-  IconButton,
-  MenuButton,
-  PageHeader,
-  SegmentedControl,
-} from "../components/ui";
-import { EntityRef, entityMenu } from "../components/entity";
-import { copyText } from "../lib/clipboard";
-import { routes } from "../lib/routes";
-import {
-  formatDateTime,
-  formatDuration,
-  formatModelName,
-  fmtCost,
-  isTransientProcess,
-} from "../lib/format";
-import {
-  effectiveSessionStatus,
-  isSessionAwaitingInput,
-  sessionAwaitingReason,
-} from "../lib/types";
+import { Button, IconButton, PageHeader, SegmentedControl } from "../components/ui";
+import { isTransientProcess } from "../lib/format";
+import { isSessionAwaitingInput } from "../lib/types";
 import type { Session, DashboardEvent } from "../lib/types";
 
 const PAGE_SIZE = 10;
@@ -114,50 +93,22 @@ type SessionSort = "time" | "duration" | "price";
 
 const isTransientProcessSession = (session: Session) => isTransientProcess(session.metadata);
 
-/** Status filters in render order — also the order `1`…`6` addresses them.
- *  `""` is the "all" pseudo-filter the server treats as no status constraint. */
-const SESSION_FILTERS = ["", "active", "waiting", "completed", "error", "abandoned"] as const;
-
 export function Sessions() {
   const { t } = useTranslation("sessions");
-  const [searchParams, setSearchParams] = useSearchParams();
+  // Status and project filters live in the URL (`?status=`, repeated `?cwd=`)
+  // so the command palette, EntityRef(project) links and any shared link open
+  // the list already narrowed; `?q=` seeds the search box once.
+  const { status: filter, cwds, q, setStatus: setFilter, setCwds, clear } = useSessionsUrlFilters();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [total, setTotal] = useState(0);
-  // The status filter lives in the URL so the command palette (and any shared
-  // link) can open the list already narrowed. `""` is "all", which the hook
-  // treats as a valid value like any other.
-  const [filter, setFilter] = useUrlTab(SESSION_FILTERS, "", { param: "status" });
   // `searchInput` is what the user types; `search` is the debounced value
   // actually sent to the server. Without debouncing, every keystroke would
   // hit /api/sessions.
-  // `?q=` seeds the box so a shared link opens the list already searched.
-  const [searchInput, setSearchInput] = useState(() => searchParams.get("q") ?? "");
+  const [searchInput, setSearchInput] = useState(q);
   const searchRef = useRef<HTMLInputElement>(null);
-  const [search, setSearch] = useState(() => (searchParams.get("q") ?? "").trim());
+  const [search, setSearch] = useState(() => q.trim());
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
-
-  // Project filter lives in the URL as repeated `?cwd=` params (paths may
-  // contain commas) so the palette's project jump and EntityRef(project) links
-  // land on a filtered list. Written back with `replace` so Back walks pages,
-  // not filter states. Memoised on the joined value: `getAll` returns a fresh
-  // array per render and `load` keys off it.
-  const cwdKey = searchParams.getAll("cwd").join("\0");
-  const cwds = useMemo(() => (cwdKey ? cwdKey.split("\0") : []), [cwdKey]);
-  const setCwds = useCallback(
-    (next: string[]) => {
-      setSearchParams(
-        (previous) => {
-          const params = new URLSearchParams(previous);
-          params.delete("cwd");
-          for (const cwd of next) params.append("cwd", cwd);
-          return params;
-        },
-        { replace: true }
-      );
-    },
-    [setSearchParams]
-  );
   const [sortBy, setSortBy] = useState<SessionSort>("time");
   const [sortDesc, setSortDesc] = useState(true);
   const [directories, setDirectories] = useState<string[]>([]);
@@ -173,7 +124,7 @@ export function Sessions() {
 
   // Keyed off SESSION_FILTERS so the buttons, the `1`…`6` shortcuts, and the
   // `?status=` values can never fall out of order with one another.
-  const FILTER_LABELS: Record<(typeof SESSION_FILTERS)[number], string> = {
+  const FILTER_LABELS: Record<SessionFilter, string> = {
     "": t("filterAll"),
     active: t("filterActive"),
     waiting: t("filterWaiting"),
@@ -284,18 +235,7 @@ export function Sessions() {
   usePaletteAction("sessions.toggleSortDirection", () => setSortDesc((prev) => !prev));
   usePaletteAction("sessions.clearFilters", () => {
     setSearchInput("");
-    // One URL write: two functional setSearchParams calls in the same tick
-    // both derive from the render-time params, so the second would restore
-    // the `status` the first removed.
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
-        next.delete("status");
-        next.delete("cwd");
-        return next;
-      },
-      { replace: true }
-    );
+    clear();
   });
 
   useEffect(() => {
@@ -481,9 +421,7 @@ export function Sessions() {
           ariaLabel={t("statusFilterLabel")}
           items={FILTER_OPTIONS}
           value={filter || "all"}
-          onValueChange={(value) =>
-            setFilter(value === "all" ? "" : (value as (typeof SESSION_FILTERS)[number]))
-          }
+          onValueChange={(value) => setFilter(value === "all" ? "" : (value as SessionFilter))}
           className="ml-auto min-w-0 max-w-full overflow-x-auto no-scrollbar bg-surface-1 p-1"
         />
       </div>
@@ -533,157 +471,19 @@ export function Sessions() {
                   ? Array.from({ length: 8 }).map((_, i) => (
                       <TableRowSkeleton
                         key={`sk-${i}`}
-                        columns={8}
+                        columns={SESSION_ROW_COLUMNS}
                         widths={["w-40", "w-20", "w-28", "w-20", "w-10", "w-16", "w-44", "w-4"]}
                       />
                     ))
                   : null}
-                {paged.map((session) => {
-                  const transient = isTransientProcessSession(session);
-                  const menu = transient
-                    ? undefined
-                    : entityMenu(
-                        {
-                          kind: "session",
-                          id: session.id,
-                          name: session.name,
-                          cwd: session.cwd,
-                          source: session.source,
-                        },
-                        { t, copy: copyText }
-                      );
-                  return (
-                    <Clickable
-                      as="tr"
-                      key={session.id}
-                      to={transient ? undefined : routes.session(session.id)}
-                      menu={menu}
-                      kebab={false}
-                      className="hover:bg-surface-4 transition-colors group"
-                    >
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-2">
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium text-gray-200 truncate">
-                              <EntityRef
-                                kind="session"
-                                id={session.id}
-                                name={session.name}
-                                cwd={session.cwd}
-                                source={session.source}
-                                transient={transient}
-                                mono={false}
-                                className="text-sm font-medium text-gray-200"
-                              />
-                            </p>
-                            <p className="text-[11px] text-gray-600 font-mono truncate">
-                              {session.id.slice(0, 12)}
-                              {session.model && !transient && (
-                                <>
-                                  {" · "}
-                                  <EntityRef
-                                    kind="model"
-                                    model={session.model}
-                                    className="text-gray-500"
-                                    tabbable={false}
-                                  >
-                                    {formatModelName(session.model)}
-                                  </EntityRef>
-                                </>
-                              )}
-                            </p>
-                          </div>
-                          <div className="flex shrink-0 items-center gap-2">
-                            {session.source && session.source !== "local" && (
-                              <Badge
-                                tone="info"
-                                size="xs"
-                                icon={Server}
-                                title={t(
-                                  "remoteSourceBadgeTitle",
-                                  "Collected from a remote machine"
-                                )}
-                              >
-                                {sourceLabels.get(session.source) || session.source}
-                              </Badge>
-                            )}
-                            {dashboardRunIds.has(session.id) && (
-                              <Link
-                                to={routes.run({ session: session.id })}
-                                className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/25 hover:bg-emerald-500/20 hover:text-emerald-200 px-1.5 py-0.5 rounded-full transition-colors"
-                                title={t("dashboardRunBadge", "Driven by Run page · click to open")}
-                              >
-                                <Play className="w-2.5 h-2.5" />
-                                {t("common:dashboardRun", "Run")}
-                              </Link>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-2">
-                          <SessionStatusBadge
-                            status={effectiveSessionStatus(session)}
-                            reason={sessionAwaitingReason(session)}
-                            provider={session.provider}
-                          />
-                          {session.todo_summary && (
-                            <TodoProgressIndicator progress={session.todo_summary} />
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-5 py-4 text-sm text-gray-400">
-                        {formatDateTime(session.last_activity || session.started_at)}
-                      </td>
-                      <td className="px-5 py-4 text-sm text-gray-400 font-mono">
-                        {session.ended_at
-                          ? formatDuration(session.started_at, session.ended_at)
-                          : t("common:running")}
-                      </td>
-                      <td className="px-5 py-4 text-sm text-gray-400">
-                        {session.agent_count != null && !transient ? (
-                          <Link
-                            to={routes.session(session.id, { tab: "agents" })}
-                            title={t("detail.agents")}
-                            className="hover:text-gray-200 hover:underline decoration-dotted underline-offset-2"
-                          >
-                            {session.agent_count}
-                          </Link>
-                        ) : (
-                          (session.agent_count ?? "-")
-                        )}
-                      </td>
-                      <td className="px-5 py-4 text-sm text-gray-400 font-mono">
-                        {session.cost != null && session.cost > 0 ? fmtCost(session.cost) : "-"}
-                      </td>
-                      <td className="px-5 py-4 text-[11px] text-gray-500 font-mono max-w-[16rem]">
-                        {session.cwd ? (
-                          <EntityRef
-                            kind="project"
-                            cwd={session.cwd}
-                            source={session.source}
-                            className="text-gray-500"
-                            tabbable={false}
-                          />
-                        ) : (
-                          "-"
-                        )}
-                      </td>
-                      <td className="px-3 py-4">
-                        {menu && (
-                          <MenuButton
-                            size="xs"
-                            items={menu}
-                            label={t("common:ui.openMenuFor", {
-                              name: session.name?.trim() || session.id.slice(0, 8),
-                            })}
-                            reveal
-                          />
-                        )}
-                      </td>
-                    </Clickable>
-                  );
-                })}
+                {paged.map((session) => (
+                  <SessionRow
+                    key={session.id}
+                    session={session}
+                    sourceLabel={session.source ? sourceLabels.get(session.source) : undefined}
+                    isDashboardRun={dashboardRunIds.has(session.id)}
+                  />
+                ))}
               </tbody>
             </table>
           </div>

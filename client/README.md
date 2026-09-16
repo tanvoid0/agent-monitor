@@ -195,6 +195,7 @@ client/
 │   │   ├── CompactRow.tsx    # One-line row shared by AgentCard and SessionCard
 │   │   ├── EventRow.tsx      # Expandable event row shared by ActivityFeed and the SessionDetail timeline
 │   │   ├── AgentTree.tsx     # Recursive subagent tree (chevrons, collapsed counts, #agent-<id> anchors) shared by Dashboard and SessionDetail
+│   │   ├── SessionRow.tsx    # Sessions table row: Clickable <tr>, EntityRef name, chips, badges, entity-menu kebab
 │   │   ├── ProjectBadge.tsx  # Colour-keyed project chip + open-folder button (helpers re-exported from lib/project.ts)
 │   │   ├── StatCard.tsx
 │   │   ├── StatusBadge.tsx
@@ -241,7 +242,10 @@ client/
 │   ├── hooks/
 │   │   ├── useWebSocket.ts      # Auto-reconnecting WebSocket hook
 │   │   ├── useNotifications.ts  # Browser push notification triggers
-│   │   └── useSoundCues.ts      # Event-bus → synthesized audio cues
+│   │   ├── useSoundCues.ts      # Event-bus → synthesized audio cues
+│   │   ├── usePageShortcuts.ts  # Per-page keyboard shortcuts + useUrlTab (URL-backed tab / filter state)
+│   │   ├── useSessionsUrlFilters.ts # Sessions list ?status= / ?cwd= / ?q= — the page's single URL writer
+│   │   └── useSessionDeepLinks.ts   # Session Detail ?tool_name / ?agent_id seeds, ?event= expand-and-scroll, #agent-<id> expand-and-flash
 │   │
 │   ├── i18n/               # Internationalization (en / zh / vi / ko / es)
 │   ├── App.tsx             # Root component + router setup
@@ -909,7 +913,9 @@ The kit follows the shadcn *pattern* — Radix primitives (`@radix-ui/react-{con
 
 `EntityRef` (`components/entity/EntityRef.tsx`) is the link-by-reference chip: `<EntityRef kind="agent" id={id} sessionId={sid} type={type} />` renders the label, links to the entity's home (`lib/routes.ts`) and carries the kind's context menu from `entityMenu.tsx` (*Open session*, *Open agent*, *Open conversation*, *Show in Activity*, *Sessions in project*, *Show on board*, *Reveal folder*, *Copy ID*, …). Main agents are inferred from `type === "main"` or an id ending in `-main`. Pass `tabbable={false}` for chips inside dense `Clickable` rows so the row keeps two tab stops (primary control + kebab), `link={false}` on an entity's own page (plain span, menu kept), and `menu={false}` inside `aria-modal` dialogs (the Radix menu portals outside the dialog). Model chips route *Pricing rules* to the Claude or GPT pricing section by model prefix.
 
-Molecules built on the kit: `CompactRow` (row variant of `AgentCard`/`SessionCard`), `EventRow` (Activity Feed + Session Detail timeline: expander button, status badge, origin chips, tool chip, trailing slot), `AgentTree` (render-prop recursive subagent tree), and `dashboard/SystemHealthTab` with its panel/row/stat/bar atoms.
+Molecules built on the kit: `CompactRow` (row variant of `AgentCard`/`SessionCard`), `EventRow` (Activity Feed + Session Detail timeline: expander button, status badge, origin chips, tool chip, trailing slot), `AgentTree` (render-prop recursive subagent tree), `SessionRow` (the Sessions table row — `SESSION_ROW_COLUMNS` keeps the skeleton aligned), and `dashboard/SystemHealthTab` with its panel/row/stat/bar atoms.
+
+Deep-link state machines live in hooks rather than pages: `useSessionsUrlFilters` owns `/sessions?status=&cwd=&q=` behind one `setSearchParams` updater (so *Clear filters* drops `status` and every `cwd` atomically), and `useSessionDeepLinks` drives Session Detail's one-shot `?tool_name=` / `?agent_id=` filter seeds, `?event=<id>` expand-and-scroll (with a single extra batch load and a "not loaded" announcement), and `#agent-<id>` ancestor expansion + flash once the card exists in the DOM. Both are tested with `renderHook` inside a `MemoryRouter`.
 
 ---
 

@@ -507,11 +507,12 @@ graph TD
     KANBAN --> COL["Agents view: 4 columns<br/>(working/waiting/<br/>completed/error)<br/>Sessions view: 5 columns<br/>(active/waiting/completed/<br/>error/abandoned)"]
     COL --> AC2["AgentCard[] / SessionCard[]<br/>variant=card | row (?density=)"]
 
-    SESS --> TABLE["Session Table<br/>(Clickable rows + kebab, ?status=&cwd=&q=)"]
+    SESS --> TABLE["SessionRow[] table<br/>(Clickable rows + kebab;<br/>useSessionsUrlFilters owns ?status=&cwd=&q=)"]
     DETAIL --> OVERVIEW["SessionOverview<br/>(stat tiles, top tools,<br/>subagent breakdown,<br/>token flow, event mix)"]
     DETAIL --> AC3["AgentTree → AgentCard[]<br/>parent → children tree (#agent-<id>)"]
     DETAIL --> CONV["ConversationView<br/>(MarkdownContent + CodeBlock<br/>+ ToolCallBlock per-tool styling)"]
     DETAIL --> TL["EventRow[] timeline<br/>(?event=<id> expands + focuses)"]
+    DETAIL -.->|"?tool_name / ?agent_id seeds,<br/>?event=, #agent-<id>"| DL["hooks/useSessionDeepLinks"]
     ACTIVITY --> FEED["EventRow[] stream<br/>(click row → expand payload;<br/>chips / kebab → session detail)"]
     WORKFLOWS_P --> WFC["12 D3.js components<br/>(workflows/ directory)"]
 

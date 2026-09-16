@@ -6,7 +6,8 @@
  * agent's ancestors and scrolls to it, `?event=<id>` expands (loading one more
  * batch if needed) and scrolls to a timeline row, `?transcript=` selects a
  * conversation transcript (written back on change), and `?tool_name=` /
- * `?agent_id=` seed the timeline filters once.
+ * `?agent_id=` seed the timeline filters once. The deep-link guards live in
+ * `hooks/useSessionDeepLinks`; the page owns the state they drive.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -35,6 +36,7 @@
  * ## Internal dependencies
  * - `../lib/api`
  * - `../lib/eventBus`
+ * - `../hooks/useSessionDeepLinks`
  * - `../components/AgentCard`
  * - `../components/AgentTree`
  * - `../components/SessionOverview`
@@ -72,7 +74,7 @@
  * ----------------------------------------------------------------------------- */
 
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
-import { Link, useParams, useNavigate, useLocation, useSearchParams } from "react-router";
+import { Link, useParams, useNavigate, useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
@@ -107,6 +109,7 @@ import {
 } from "../components/ui";
 import { EntityRef, entityMenu } from "../components/entity";
 import { useUrlTab } from "../hooks/usePageShortcuts";
+import { useSessionDeepLinks } from "../hooks/useSessionDeepLinks";
 import { usePaletteAction } from "../components/PaletteActionProvider";
 import { announceAction } from "../lib/appEvents";
 import { eventBus } from "../lib/eventBus";
@@ -169,41 +172,10 @@ const EVENTS_MORE_BATCH = 500;
 // Live-refresh bounds - see ActivityFeed for rationale.
 const EVENTS_MAX_REFRESH = 500;
 const EVENTS_REFRESH_DEBOUNCE_MS = 500;
-const DEEP_LINK_RING_MS = 1500;
-
-/**
- * Scroll a deep-link target into view, ring it briefly, and move focus onto
- * it. Waits two frames: the caller's ancestor-expansion setState (expanding
- * collapsed agent nodes) commits after the first frame, so the target may not
- * exist in the DOM yet on frame one.
- */
-function flashElement(elementId: string) {
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      const el = document.getElementById(elementId);
-      if (!el) return;
-      el.scrollIntoView({ block: "center" });
-      (el.querySelector<HTMLElement>("button,a") ?? el).focus({ preventScroll: true });
-      el.classList.add("ring-2", "ring-accent/60");
-      setTimeout(() => el.classList.remove("ring-2", "ring-accent/60"), DEEP_LINK_RING_MS);
-    });
-  });
-}
-
-/** `#agent-<id>` → `<id>`; empty for any other (or malformed) hash. */
-function agentIdFromHash(hash: string): string {
-  if (!hash.startsWith("#agent-")) return "";
-  try {
-    return decodeURIComponent(hash.slice("#agent-".length));
-  } catch {
-    return "";
-  }
-}
 
 export function SessionDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useTranslation("sessions");
   const { t: wfT } = useTranslation("workflows");
@@ -588,31 +560,6 @@ export function SessionDetail() {
     loadEvents();
   }, [loadEvents]);
 
-  // `?tool_name=` / `?agent_id=` seed the timeline filters once per navigation,
-  // then leave the URL (replace) so a later tab switch cannot re-apply them.
-  const seededFiltersKeyRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (seededFiltersKeyRef.current === location.key) return;
-    seededFiltersKeyRef.current = location.key;
-    const toolName = searchParams.get("tool_name");
-    const agentId = searchParams.get("agent_id");
-    if (!toolName && !agentId) return;
-    setFilters((prev) => ({
-      ...prev,
-      tool_name: toolName ? [toolName] : prev.tool_name,
-      agent_id: agentId ? [agentId] : prev.agent_id,
-    }));
-    setSearchParams(
-      (previous) => {
-        const next = new URLSearchParams(previous);
-        next.delete("tool_name");
-        next.delete("agent_id");
-        return next;
-      },
-      { replace: true }
-    );
-  }, [location.key, searchParams, setSearchParams]);
-
   const loadMoreEvents = useCallback(async () => {
     if (!eventApiParams) return;
     setEventsLoadingMore(true);
@@ -631,73 +578,31 @@ export function SessionDetail() {
     }
   }, [eventApiParams, events.length]);
 
-  // `?event=<id>`: once the first batch is in, expand + scroll to the row. If
-  // it is not loaded yet, pull one more batch and retry; otherwise say so.
-  // Runs once per `event` value and never touches the filters.
-  const eventParam = searchParams.get("event");
-  const handledEventRef = useRef<string | null>(null);
-  const eventRetriedRef = useRef<string | null>(null);
   // The component is not remounted between /sessions/A and /sessions/B (only
-  // `id` changes), so without this the previous session's events, offset, and
-  // deep-link bookkeeping would leak into the newly loaded session.
+  // `id` changes), so without this the previous session's events and offset
+  // would leak into the newly loaded session.
   useEffect(() => {
     setEvents([]);
     setEventsTotal(0);
     setEventsLoaded(false);
-    handledEventRef.current = null;
-    eventRetriedRef.current = null;
   }, [id]);
-  useEffect(() => {
-    if (!eventParam || !eventsLoaded || eventsLoadingMore) return;
-    if (handledEventRef.current === eventParam) return;
-    const eventId = Number(eventParam);
-    if (events.some((e) => e.id === eventId)) {
-      handledEventRef.current = eventParam;
-      setExpandedEvents((prev) => new Set(prev).add(eventId));
-      flashElement(`event-${eventId}`);
-      return;
-    }
-    if (eventRetriedRef.current !== eventParam && events.length < eventsTotal) {
-      eventRetriedRef.current = eventParam;
-      void loadMoreEvents();
-      return;
-    }
-    handledEventRef.current = eventParam;
-    announceAction(t("detail.eventNotLoaded", { id: eventParam }));
-  }, [eventParam, events, eventsTotal, eventsLoaded, eventsLoadingMore, loadMoreEvents, t]);
 
-  // `#agent-<id>`: expand the target and every ancestor, then scroll to and
-  // ring the card. Runs once per navigation (location.key) per hash value.
-  // Split in two: the card nested under a collapsed ancestor does not exist
-  // in the DOM yet when `setExpandedAgents` and `flashElement` run in the same
-  // pass, so the rAF inside `flashElement` can fire before the expansion has
-  // committed and rendered the target. Effect 1 marks the hash handled and
-  // queues the flash; effect 2 fires it once the target element exists.
-  const agentHash = agentIdFromHash(location.hash);
-  const handledAgentHashRef = useRef<string | null>(null);
-  const pendingFlashRef = useRef<string | null>(null);
-  useEffect(() => {
-    const token = `${location.key}:${agentHash}`;
-    if (!agentHash || agents.length === 0 || handledAgentHashRef.current === token) return;
-    const agentMap = new Map(agents.map((a) => [a.id, a]));
-    if (!agentMap.has(agentHash)) return;
-    handledAgentHashRef.current = token;
-    const toExpand = new Set<string>();
-    let cur: string | null | undefined = agentHash;
-    while (cur && !toExpand.has(cur)) {
-      toExpand.add(cur);
-      cur = agentMap.get(cur)?.parent_agent_id;
-    }
-    setExpandedAgents((prev) => new Set([...prev, ...toExpand]));
-    pendingFlashRef.current = agentHash;
-  }, [agents, agentHash, location.key]);
-  useEffect(() => {
-    const pending = pendingFlashRef.current;
-    if (!pending || pending !== agentHash) return;
-    if (!document.getElementById(`agent-${pending}`)) return;
-    pendingFlashRef.current = null;
-    flashElement(`agent-${pending}`);
-  }, [expandedAgents, agentHash]);
+  // `?tool_name=` / `?agent_id=` seeds, `?event=<id>` expand-and-scroll and
+  // `#agent-<id>` expand-ancestors-and-flash — see the hook for the guards.
+  useSessionDeepLinks({
+    sessionId: id,
+    agents,
+    events,
+    eventsTotal,
+    eventsLoaded,
+    eventsLoadingMore,
+    expandedAgents,
+    loadMoreEvents,
+    setFilters,
+    setExpandedEvents,
+    setExpandedAgents,
+    onEventNotLoaded: (eventId) => announceAction(t("detail.eventNotLoaded", { id: eventId })),
+  });
   // Auto-expand agents that have working subagents (at any depth)
   useEffect(() => {
     const parentsWithActiveChildren = new Set<string>();
