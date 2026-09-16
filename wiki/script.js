@@ -955,6 +955,7 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Multi-Stage Build": "多阶段构建",
       "Namespaced resources": "命名空间化资源",
       "Native Application Menu": "原生应用菜单",
+      "Navigate by Reference": "按引用导航",
       "No sessions appearing after starting Claude Code": "启动 Claude Code 后没有出现会话",
       "Non-Blocking Detection": "非阻塞检测",
       "Notification Preferences": "通知偏好",
@@ -1192,6 +1193,7 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Multi-Stage Build": "Build nhiều giai đoạn",
       "Namespaced resources": "Tài nguyên theo namespace",
       "Native Application Menu": "Menu ứng dụng gốc",
+      "Navigate by Reference": "Điều hướng theo tham chiếu",
       "No sessions appearing after starting Claude Code":
         "Không có phiên nào sau khi khởi động Claude Code",
       "Non-Blocking Detection": "Phát hiện không chặn",
@@ -1409,6 +1411,7 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Multi-Stage Build": "멀티 스테이지 빌드",
       "Namespaced resources": "네임스페이스화된 리소스",
       "Native Application Menu": "네이티브 애플리케이션 메뉴",
+      "Navigate by Reference": "참조로 이동",
       "No sessions appearing after starting Claude Code":
         "Claude Code 시작 후 세션이 나타나지 않음",
       "Non-Blocking Detection": "논블로킹 감지",
@@ -1643,6 +1646,7 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Multi-Stage Build": "Construcción de múltiples etapas",
       "Namespaced resources": "Recursos con espacio de nombres",
       "Native Application Menu": "Menú de aplicaciones nativas",
+      "Navigate by Reference": "Navegar por referencia",
       "No sessions appearing after starting Claude Code":
         "No aparecen sesiones después de iniciar Claude Code",
       "Non-Blocking Detection": "Detección no bloqueante",

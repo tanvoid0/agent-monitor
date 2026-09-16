@@ -186,7 +186,16 @@ client/
 ├── src/
 │   ├── components/         # Reusable UI components
 │   │   ├── __tests__/      # Component tests
-│   │   ├── AgentCard.tsx
+│   │   ├── ui/             # shadcn-pattern kit (Radix + cva + cn()): Button, IconButton, Badge, LivePill, Tabs,
+│   │   │                   #   SegmentedControl, Menu/ContextMenu/DropdownMenu (MenuButton kebab), Clickable, PageHeader, SectionHeader
+│   │   ├── entity/         # EntityRef link-by-reference chip (session/agent/project/tool/eventType/model/event) + entityMenu item lists
+│   │   ├── dashboard/      # SystemHealthTab + its HealthPanel / KeyValueRow / MiniStat / RatioBar atoms
+│   │   ├── AgentCard.tsx     # variant="card" | "row" (row → CompactRow)
+│   │   ├── SessionCard.tsx   # variant="card" | "row" (row → CompactRow)
+│   │   ├── CompactRow.tsx    # One-line row shared by AgentCard and SessionCard
+│   │   ├── EventRow.tsx      # Expandable event row shared by ActivityFeed and the SessionDetail timeline
+│   │   ├── AgentTree.tsx     # Recursive subagent tree (chevrons, collapsed counts, #agent-<id> anchors) shared by Dashboard and SessionDetail
+│   │   ├── ProjectBadge.tsx  # Colour-keyed project chip + open-folder button (helpers re-exported from lib/project.ts)
 │   │   ├── StatCard.tsx
 │   │   ├── StatusBadge.tsx
 │   │   ├── EventDetail.tsx  # Inline hook payload viewer (used by ActivityFeed + SessionDetail)
@@ -209,7 +218,8 @@ client/
 │   │   ├── KanbanBoard.tsx
 │   │   ├── Sessions.tsx       # Server-paginated table with task-progress donut, page-zero transient Codex startup row, searchable multi-project filtering, and custom sort menus
 │   │   ├── SessionDetail.tsx  # Overview + full task tracker + agent tree + event timeline + cursor-paginated Conversation tab
-│   │   ├── ActivityFeed.tsx  # Real-time event log; row click expands payload; Session btn navigates
+│   │   ├── ActivityFeed.tsx  # Real-time event log; URL-backed filters; row click expands payload; chips/kebab navigate
+│   │   ├── Plan.tsx (plan/)   # Plan layer board, ?task= deep link
 │   │   ├── Analytics.tsx
 │   │   ├── Workflows.tsx
 │   │   ├── Settings.tsx
@@ -220,7 +230,11 @@ client/
 │   │   ├── api.ts          # REST API client
 │   │   ├── eventBus.ts     # WebSocket pub/sub + connection state
 │   │   ├── dataScope.ts    # Global data-scope store (app-wide ?sources= selection)
-│   │   ├── format.ts       # Formatters (formatTime, timeAgo, fmtCost)
+│   │   ├── format.ts       # Formatters (formatTime, timeAgo, fmtCost, formatCostShort, promptPreviewLines)
+│   │   ├── routes.ts       # Typed href builders for every page + deep-link param (routes.session, routes.activity, …, absoluteHref)
+│   │   ├── project.ts      # cwd → project-group helpers (normalizeCwd, projectRoots, projectLabel, projectColor, projectParts, revealCwd)
+│   │   ├── clipboard.ts    # copyText — navigator.clipboard with an execCommand fallback for plain-HTTP hosts
+│   │   ├── cn.ts           # clsx + tailwind-merge
 │   │   ├── sound.ts        # Web Audio cue synthesis + sound preferences
 │   │   └── types.ts        # TypeScript type definitions
 │   │
@@ -741,12 +755,13 @@ A one-line confirmation for commands that change something without moving the us
 
 #### SessionCard
 
-Displays session summary with status, model, cost, and agent count.
+Displays session summary with status, model, cost, agent count, and a `ProjectBadge` for the session's `cwd`.
 
 **Props:**
 ```typescript
 interface SessionCardProps {
   session: Session;
+  projectRoot?: string; // group root from projectRoots(); defaults to the cwd's own root
 }
 ```
 
@@ -781,8 +796,16 @@ ID replaces it; durable totals and later pages stay unchanged.
 ```typescript
 interface AgentCardProps {
   agent: Agent;
+  session?: Session;
+  projectRoot?: string; // as on SessionCard
 }
 ```
+
+#### ProjectBadge
+
+The project chip both cards render under their header: a colour dot keyed to the project group, the group's folder name, the sub-path when the session ran below the group root (`repo · apps/web`), the full `cwd` as tooltip, and — for `source = 'local'` sessions only — a folder button that calls `POST /api/sessions/open-cwd` and confirms through `ActionToast`. The click is stopped before it reaches the card, so it never navigates.
+
+The same file exports the pure helpers the Kanban board's project tabs use, so tabs and badges agree on colours: `normalizeCwd` (one separator style, so Windows and POSIX cwds compare), `projectRoots(cwds)` (each known cwd → the shortest known ancestor cwd; `<repo>/.claude/worktrees/<x>` and `<repo>/.worktrees/<x>` fold onto `<repo>` even when no session ran there), `projectLabel(root)`, and `projectColor(root)` (a stable pick from a ten-colour palette). The board passes `?project=<group root>` through the URL — "All projects" is the absence of the parameter — and renders one tab per group with the count in the active view.
 
 #### StatusBadge
 
@@ -870,6 +893,23 @@ flowchart LR
 #### EventDetail (`components/EventDetail.tsx`)
 
 Renders the hook payload for a single event inline below its row. Scalars appear as `key: value` pairs; objects and arrays render in a terminal-styled code block with a copy button.
+
+### UI kit (`components/ui/`) and entity chips (`components/entity/`)
+
+The kit follows the shadcn *pattern* — Radix primitives (`@radix-ui/react-{context-menu,dropdown-menu,tabs,toggle-group,slot}`), `class-variance-authority` variants and a `cn()` (`clsx` + `tailwind-merge`) helper over the repo's existing Tailwind tokens — with no shadcn theme or `components.json`. Import from the barrel: `import { Button, Clickable, MenuButton, PageHeader } from "../components/ui"`.
+
+| Atom | What it is |
+| --- | --- |
+| `Button`, `IconButton` | cva variants (`tone`, `size`); `asChild` forwards to a `Link` |
+| `Badge`, `LivePill` | Static tone chips; `LivePill` is the live/offline indicator beside page titles |
+| `Tabs`, `SegmentedControl` | Radix Tabs / ToggleGroup with the dashboard's tab and radiogroup styling |
+| `Menu`, `ContextMenu`, `DropdownMenu` | One `MenuItem[]` shape (`{ label, icon?, to?, onSelect?, danger?, disabled? }` | `{ type: "separator" }` | `{ type: "label", label }`) rendered as a right-click menu (`ContextMenuFor`) or a ⋯ kebab (`MenuButton`, `reveal` shows it on hover/focus-within/coarse pointers). Both stop `Escape` from reaching an enclosing modal and defer `onSelect` until the menu has closed; `ContextMenuFor` lets Shift+right-click and right-clicks on a text selection fall through to the browser's native menu; a disabled `to` item does not navigate |
+| `Clickable` | Row/card container. No `role`/`tabIndex` of its own — exactly one primary control inside carries the tab stop. Plain click navigates (`to`) or runs `onActivate`; clicks that end a text selection are ignored; `Ctrl`/`Cmd`/middle-click opens a new tab; `menu` becomes both the context menu and the kebab (kebab off by default for `as="tr"`); `menuLabel` names the kebab per row (`common:ui.openMenuFor`) |
+| `PageHeader`, `SectionHeader` | Title / description / actions shells so every page and panel shares one header grammar; both take `className` for outer spacing |
+
+`EntityRef` (`components/entity/EntityRef.tsx`) is the link-by-reference chip: `<EntityRef kind="agent" id={id} sessionId={sid} type={type} />` renders the label, links to the entity's home (`lib/routes.ts`) and carries the kind's context menu from `entityMenu.tsx` (*Open session*, *Open agent*, *Open conversation*, *Show in Activity*, *Sessions in project*, *Show on board*, *Reveal folder*, *Copy ID*, …). Main agents are inferred from `type === "main"` or an id ending in `-main`. Pass `tabbable={false}` for chips inside dense `Clickable` rows so the row keeps two tab stops (primary control + kebab), `link={false}` on an entity's own page (plain span, menu kept), and `menu={false}` inside `aria-modal` dialogs (the Radix menu portals outside the dialog). Model chips route *Pricing rules* to the Claude or GPT pricing section by model prefix.
+
+Molecules built on the kit: `CompactRow` (row variant of `AgentCard`/`SessionCard`), `EventRow` (Activity Feed + Session Detail timeline: expander button, status badge, origin chips, tool chip, trailing slot), `AgentTree` (render-prop recursive subagent tree), and `dashboard/SystemHealthTab` with its panel/row/stat/bar atoms.
 
 ---
 

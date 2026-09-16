@@ -964,11 +964,14 @@
                   <h3 id="feat-kanban">Kanban Board</h3>
                   <p>
                     Switch between <strong>Agent</strong> and <strong>Session</strong> swim lanes for
-                    working, waiting, completed, error, and abandoned states. Yellow Waiting cards
-                    identify work paused for user input, a permission gate, or the next prompt;
-                    hover badges and column headers for the exact reason and lifecycle rules. Cards
-                    show model, cumulative cost, and current tool, while WebSocket updates keep lane
-                    counts synchronized with the live event store.
+                    working, waiting, completed, error, and abandoned states, and narrow either to
+                    one project with the <strong>project tabs</strong> above the columns. Yellow
+                    Waiting cards identify work paused for user input, a permission gate, or the
+                    next prompt; hover badges and column headers for the exact reason. Cards show
+                    model, cumulative cost, current tool, and a project badge that opens the folder
+                    in your file manager, while WebSocket updates keep lane counts live. A
+                    <strong>density</strong> toggle (<code>?density=cards|rows</code>) swaps cards for
+                    one-line rows, and each column count links to the matching Sessions list.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -1041,7 +1044,7 @@
                   <h3 id="feat-command-palette">Command Palette</h3>
                   <p>
                     Press <strong>Cmd/Ctrl+K</strong> anywhere to open a launcher over the whole
-                    dashboard. One query resolves nine groups: recent commands, the nine pages,
+                    dashboard. One query resolves nine groups: recent commands, the ten pages,
                     live server-side session search, the current page's own actions, known project
                     directories, page sub-views and list filters, all 13 Settings sections, all 12
                     Agent Config tabs, and preference, data-scope and language actions.
@@ -1049,6 +1052,23 @@
                     finds Kanban Board, and a leading <code>&gt;</code>, <code>@</code>, or
                     <code>#</code> narrows to actions, pages, or sessions. The palette only
                     navigates — it never performs destructive operations.
+                  </p>
+                </div>
+                <div class="feature-card">
+                  <div class="feature-icon ic-violet">🔗</div>
+                  <h3 id="feat-navigate-by-reference">Navigate by Reference</h3>
+                  <p>
+                    Every session, agent, project, tool, event type, and model is an
+                    <strong>entity chip</strong> that links to its home and carries a right-click or
+                    long-press context menu, mirrored by a <strong>⋯ kebab</strong> on every row
+                    and card. Every page is addressable by URL:
+                    <code>/activity?session_id=&amp;agent_id=&amp;tool_name=&amp;event_type=&amp;status=</code>,
+                    <code>/sessions?status=&amp;cwd=&amp;q=</code>,
+                    <code>/sessions/:id?tab=…#agent-&lt;id&gt;</code> with <code>&amp;event=</code> or
+                    <code>&amp;transcript=</code>, <code>/kanban?project=&amp;density=</code>,
+                    <code>/workflows?session=&amp;run=</code>, <code>/plan/:slug?task=</code>, and
+                    <code>/run?session=&amp;cwd=</code>. Deep-link targets scroll into view, ring, and
+                    take focus.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -1548,7 +1568,7 @@
             </div>
             <div class="screenshot-card" id="ss-palette">
               <img src="../images/palette.png" alt="Command Palette open over the Sessions page" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">⌘</span> <span><strong>Command Palette</strong> — <code>Cmd/Ctrl+K</code> from anywhere opens the dashboard's only launcher: recent commands, the nine pages, live server-side session search, the current page's actions, project directories, sub-views and filters, all 13 Settings sections, all 12 Agent Config tabs, and preference, data-scope and language actions</span></div>
+              <div class="screenshot-caption"><span class="caption-icon">⌘</span> <span><strong>Command Palette</strong> — <code>Cmd/Ctrl+K</code> from anywhere opens the dashboard's only launcher: recent commands, the ten pages, live server-side session search, the current page's actions, project directories, sub-views and filters, all 13 Settings sections, all 12 Agent Config tabs, and preference, data-scope and language actions</span></div>
             </div>
             <div class="screenshot-card" id="ss-swagger">
               <img src="../images/swagger.png" alt="Swagger UI API docs" width="100%" loading="lazy" decoding="async" />
@@ -7106,8 +7126,8 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=94" defer></script>
-    <script src="script.js?v=57" defer></script>
+    <script src="i18n-content.js?v=96" defer></script>
+    <script src="script.js?v=58" defer></script>
     <script>
       (function () {
         var carousel = document.getElementById("feature-carousel");
