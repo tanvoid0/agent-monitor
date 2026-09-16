@@ -83,6 +83,7 @@ vi.mock("../../lib/api", () => ({
     pricing: {
       sessionCost: vi.fn(() => Promise.resolve(mockCost)),
     },
+    permissions: { list: vi.fn(() => Promise.resolve({ pending: [], hold_ms: 60000 })) },
     events: {
       list: vi.fn(() =>
         Promise.resolve({
@@ -103,6 +104,7 @@ vi.mock("../../lib/eventBus", () => ({
       eventBusHandlers.add(handler);
       return () => eventBusHandlers.delete(handler);
     }),
+    onConnection: vi.fn(() => () => {}),
   },
 }));
 

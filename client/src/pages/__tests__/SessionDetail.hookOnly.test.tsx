@@ -59,6 +59,7 @@ vi.mock("../../lib/api", () => ({
       ),
     },
     pricing: { sessionCost: vi.fn(() => Promise.resolve({ total_cost: 0, breakdown: [] })) },
+    permissions: { list: vi.fn(() => Promise.resolve({ pending: [], hold_ms: 60000 })) },
     events: {
       list: vi.fn(() =>
         Promise.resolve({ events: [] as DashboardEvent[], limit: 50, offset: 0, total: 0 })
@@ -68,7 +69,9 @@ vi.mock("../../lib/api", () => ({
   },
 }));
 
-vi.mock("../../lib/eventBus", () => ({ eventBus: { subscribe: vi.fn(() => () => {}) } }));
+vi.mock("../../lib/eventBus", () => ({
+  eventBus: { subscribe: vi.fn(() => () => {}), onConnection: vi.fn(() => () => {}) },
+}));
 
 function makeSession(metadata: string | null): Session {
   return {

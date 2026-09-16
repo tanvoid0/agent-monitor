@@ -162,6 +162,8 @@ import type {
   WorkflowRun,
 } from "../lib/types";
 import { WorkflowRunsPanel } from "../components/workflows/WorkflowRunsPanel";
+import { PermissionCard } from "../components/PermissionCard";
+import { usePermissionRelay } from "../hooks/usePermissionRelay";
 
 /** Tab keys in render order — also the order `1`…`3` and `[`/`]` address them. */
 const DETAIL_TABS = ["agents", "conversation", "timeline"] as const;
@@ -179,7 +181,12 @@ export function SessionDetail() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useTranslation("sessions");
   const { t: wfT } = useTranslation("workflows");
+  const { t: commonT } = useTranslation("common");
   const [scope] = useDataScope();
+  // Permission prompts parked for *this* session. The global floating relay
+  // skips them while this page is open so the prompt appears exactly once.
+  const permissions = usePermissionRelay();
+  const sessionPermissions = permissions.pending.filter((p) => p.session_id === id);
   const [session, setSession] = useState<Session | null>(null);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [workflows, setWorkflows] = useState<WorkflowRun[]>([]);
@@ -823,6 +830,32 @@ export function SessionDetail() {
           </Button>
         }
       />
+
+      {/* WHAT this session is blocked on, when the relay is holding a prompt
+          for it: the tool, its full input, and the answer buttons. Answering
+          here unblocks the CLI exactly as the floating card does — they share
+          `usePermissionRelay`, and the floating stack hides these while this
+          page is open. Rendered above the generic waiting callout, which only
+          says *why* a session is waiting, never *what* it wants. */}
+      {sessionPermissions.length > 0 && (
+        <div
+          className="flex flex-col gap-3"
+          role="region"
+          aria-label={commonT("permissions.title")}
+        >
+          {sessionPermissions.map((req) => (
+            <PermissionCard
+              key={req.id}
+              req={req}
+              disabled={permissions.busy === req.id}
+              {...(permissions.errors[req.id] ? { error: permissions.errors[req.id] } : {})}
+              onDecide={permissions.decide}
+              context={false}
+              className="rounded-lg border border-amber-500/40 bg-amber-500/[0.06] p-4"
+            />
+          ))}
+        </div>
+      )}
 
       {/* Waiting-for-input callout: WHY the session sits in the yellow Waiting
           state (awaiting_reason) and for how long. Reason-specific icon/label
