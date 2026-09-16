@@ -249,6 +249,20 @@
     "allowAlways": "Allow always",
     "deny": "Deny",
     "inTerminal": "Answer in terminal",
-    "alwaysRule": "Always: {{rule}} → {{destination}}"
+    "alwaysRule": "Always: {{rule}} → {{destination}}",
+    "field": {
+      "command": "Command",
+      "description": "Description",
+      "file": "File",
+      "content": "Content",
+      "url": "URL",
+      "prompt": "Prompt",
+      "pattern": "Pattern",
+      "path": "Path",
+      "query": "Query",
+      "agent": "Agent",
+      "emptyBefore": "(nothing)",
+      "emptyAfter": "(deleted)"
+    }
   }
 }

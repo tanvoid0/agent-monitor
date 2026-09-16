@@ -249,6 +249,20 @@
     "allowAlways": "Luôn cho phép",
     "deny": "Từ chối",
     "inTerminal": "Trả lời trong terminal",
-    "alwaysRule": "Luôn cho phép: {{rule}} → {{destination}}"
+    "alwaysRule": "Luôn cho phép: {{rule}} → {{destination}}",
+    "field": {
+      "command": "Lệnh",
+      "description": "Mô tả",
+      "file": "Tệp",
+      "content": "Nội dung",
+      "url": "URL",
+      "prompt": "Câu lệnh",
+      "pattern": "Mẫu",
+      "path": "Đường dẫn",
+      "query": "Truy vấn",
+      "agent": "Tác nhân",
+      "emptyBefore": "(trống)",
+      "emptyAfter": "(đã xóa)"
+    }
   }
 }

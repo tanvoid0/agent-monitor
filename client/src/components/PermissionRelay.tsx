@@ -15,6 +15,8 @@ import { useTranslation } from "react-i18next";
 import { ShieldAlert } from "lucide-react";
 import { api } from "../lib/api";
 import { eventBus } from "../lib/eventBus";
+import { summarisePermissionInput } from "../lib/permission-input";
+import { PermissionInputView } from "./PermissionInputView";
 import type { PermissionRequest, PermissionResolvedPayload, PermissionUpdate } from "../lib/types";
 
 function projectOf(cwd: string | null): string {
@@ -113,6 +115,7 @@ export function PermissionRelay() {
         );
         const always = allowAlwaysRule(req);
         const disabled = busy === req.id;
+        const summary = summarisePermissionInput(req.tool_name, req.tool_input);
         return (
           <div
             key={req.id}
@@ -133,10 +136,11 @@ export function PermissionRelay() {
                 {t("permissions.expiresIn", { seconds: secondsLeft })}
               </span>
             </div>
-            {/* Whole input, unabridged: the user is approving exactly this. */}
-            <pre className="mt-3 max-h-64 overflow-auto rounded-lg border border-border bg-surface-1 p-2 text-xs text-gray-300 whitespace-pre-wrap break-all">
-              {JSON.stringify(req.tool_input, null, 2)}
-            </pre>
+            {/* Whole input, unabridged — the user is approving exactly this —
+                but shaped per tool instead of dumped as one JSON blob. */}
+            <div className="mt-3 max-h-80 overflow-auto">
+              <PermissionInputView fields={summary.fields} />
+            </div>
             {always && (
               <div className="mt-2 text-xs text-gray-500">
                 {t("permissions.alwaysRule", {

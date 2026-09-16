@@ -249,6 +249,20 @@
     "allowAlways": "Permitir siempre",
     "deny": "Denegar",
     "inTerminal": "Responder en la terminal",
-    "alwaysRule": "Siempre: {{rule}} → {{destination}}"
+    "alwaysRule": "Siempre: {{rule}} → {{destination}}",
+    "field": {
+      "command": "Comando",
+      "description": "Descripción",
+      "file": "Archivo",
+      "content": "Contenido",
+      "url": "URL",
+      "prompt": "Indicación",
+      "pattern": "Patrón",
+      "path": "Ruta",
+      "query": "Consulta",
+      "agent": "Agente",
+      "emptyBefore": "(vacío)",
+      "emptyAfter": "(eliminado)"
+    }
   }
 }

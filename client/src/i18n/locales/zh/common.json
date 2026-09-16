@@ -249,6 +249,20 @@
     "allowAlways": "始终允许",
     "deny": "拒绝",
     "inTerminal": "在终端中回答",
-    "alwaysRule": "始终允许：{{rule}} → {{destination}}"
+    "alwaysRule": "始终允许：{{rule}} → {{destination}}",
+    "field": {
+      "command": "命令",
+      "description": "说明",
+      "file": "文件",
+      "content": "内容",
+      "url": "网址",
+      "prompt": "提示词",
+      "pattern": "匹配模式",
+      "path": "路径",
+      "query": "查询",
+      "agent": "代理",
+      "emptyBefore": "（无内容）",
+      "emptyAfter": "（已删除）"
+    }
   }
 }
