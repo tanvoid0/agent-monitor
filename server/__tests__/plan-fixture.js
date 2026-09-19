@@ -3,7 +3,7 @@
  * built from test/fixtures/plan/ledgerflow (PROGRESS.md at the root, the v2
  * log as .local/log.md — the layout the watcher reads) plus the fixture's
  * `now`. Not a test file; required by plan-*.test.js.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const path = require("path");

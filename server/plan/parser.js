@@ -4,7 +4,7 @@
  * nested checkbox tasks. Also the retired `.local/log.md` line grammar and the
  * `tick` text transform. A port of the v2 board's parse_plan/parse_log; pure
  * functions, no I/O.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const MODES = ["serial", "parallel", "inline", "optional"];

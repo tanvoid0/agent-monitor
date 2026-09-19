@@ -3,7 +3,7 @@
  * @description Square icon-only button built on {@link Button}. `label` is
  * required and becomes both `aria-label` and `title`. Sizes never drop below
  * the 24px WCAG target floor (xs 24px, sm 28px, md 32px).
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { forwardRef, type ButtonHTMLAttributes } from "react";

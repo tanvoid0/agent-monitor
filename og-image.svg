@@ -81,7 +81,7 @@
   <text x="290" y="298"
         font-family="'Inter', 'Helvetica Neue', Arial, sans-serif"
         font-size="72" font-weight="800" letter-spacing="-2"
-        fill="url(#titleGrad)">Agent Dashboard</text>
+        fill="url(#titleGrad)">AgentMonitor</text>
 
   <!-- Subtitle -->
   <text x="292" y="355"
@@ -118,5 +118,5 @@
   <text x="290" y="580"
         font-family="'Inter', 'Helvetica Neue', Arial, sans-serif"
         font-size="18" font-weight="500"
-        fill="#55556a">github.com/hoangsonww · sonnguyenhoang.com</text>
+        fill="#55556a">github.com/tanvoid0 · sonnguyenhoang.com</text>
 </svg>

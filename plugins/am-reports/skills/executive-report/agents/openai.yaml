@@ -1,0 +1,6 @@
+interface:
+  display_name: "Executive Report"
+  short_description: "Generate a concise stakeholder report from AgentMonitor..."
+  default_prompt: "Use $executive-report to inspect AgentMonitor data and complete this workflow safely."
+policy:
+  allow_implicit_invocation: true

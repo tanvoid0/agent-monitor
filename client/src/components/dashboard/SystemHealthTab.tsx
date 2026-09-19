@@ -5,7 +5,7 @@
  * and platform config panels, polled from `/api/settings/info` and
  * `/api/workflows` every 30s. Copy lives in `dashboard.json` under `health.*`;
  * repeated panel/row/stat/bar shapes come from `./atoms`.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { useEffect, useState, useCallback, useMemo } from "react";

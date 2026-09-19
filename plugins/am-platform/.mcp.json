@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "am-dashboard": {
+      "command": "am",
+      "args": ["mcp", "stdio"]
+    }
+  }
+}

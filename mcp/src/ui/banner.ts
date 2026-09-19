@@ -4,12 +4,12 @@
  * the ASCII-art wordmark, a boxed server-info panel (version, transport, dashboard URL, port,
  * tool count, mutation/destructive policy state), a "ready" line, and a shutdown message. The
  * stdio transport never calls any of these, since stdout there is the MCP JSON-RPC channel.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/mcp/src/ui/banner.ts`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/mcp/src/ui/banner.ts`
  * **Purpose:** Dashboard module consumed by the React client, MCP tools, or desktop shell depending on deployment mode.
  *
  * ## Design constraints
@@ -115,7 +115,7 @@ export function printServerInfo(info: {
 
   process.stdout.write(divider + "\n");
   process.stdout.write(
-    `  ${c.dim(c.cyan("│"))} ${c.bold(c.brightWhite("Agent Dashboard MCP Server"))}\n`
+    `  ${c.dim(c.cyan("│"))} ${c.bold(c.brightWhite("AgentMonitor MCP Server"))}\n`
   );
   process.stdout.write(divider + "\n");
   process.stdout.write(line("Version", c.brightCyan(info.version)) + "\n");

@@ -19,7 +19,7 @@
  * an early match — which is what makes short queries land on the obvious command
  * instead of an incidental deep one.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 /** Result of a successful match. `indices` are positions in the original text. */

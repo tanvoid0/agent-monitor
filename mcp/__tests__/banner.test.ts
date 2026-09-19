@@ -1,7 +1,7 @@
 /**
  * @file banner.test.ts
  * @description Unit tests for the banner module, which includes functions for printing the ASCII art banner, server information, ready message, and shutdown message to the console. The tests verify that the banner is printed correctly, that server information includes all expected fields, and that the ready and shutdown messages are displayed as intended. The tests use Node's built-in test framework and assert module for assertions.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it } from "node:test";
@@ -55,7 +55,7 @@ describe("banner", () => {
         })
       );
       const text = stripAnsi(output);
-      assert.ok(text.includes("Agent Dashboard MCP Server"));
+      assert.ok(text.includes("AgentMonitor MCP Server"));
       assert.ok(text.includes("2.0.0"));
       assert.ok(text.includes("HTTP"));
       assert.ok(text.includes("localhost:4820"));

@@ -4,12 +4,12 @@
  *   and to real timers. It is the only unit that subscribes to `eventBus`. It
  *   exposes the derived mood, a status summary, the current speech bubble, and
  *   imperative controls (mute, clear alerts, set thinking) for the UI shell.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/client/src/components/Tabby/useTabbyBrain.ts`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/client/src/components/Tabby/useTabbyBrain.ts`
  * **Purpose:** Tabby is the optional on-screen cat assistant — quips, intents, and lightweight event reactions layered above the dashboard chrome. React hook: isolates side effects and subscription wiring so presentational components stay declarative.
  *
  * ## Design constraints

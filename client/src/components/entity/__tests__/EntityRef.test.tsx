@@ -6,7 +6,7 @@
  * kind, copy items reach the clipboard, reveal folder calls the open-cwd API,
  * `menu={false}` opts out, and right-click does not bubble to an enclosing
  * container.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";

@@ -15,7 +15,7 @@
  * the full descendant list so it can count active ones), and the optional
  * slot rendered in the chevron column for leaf rows (`leafSlot`).
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import type { ReactNode } from "react";

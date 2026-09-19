@@ -1,7 +1,7 @@
 /**
  * @file Verifies that the Claude-only on-disk Workflow-run panel is absent
  * when the global dashboard data scope is set to Codex alone.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -88,7 +88,7 @@ async function settle() {
 
 afterEach(() => {
   setScope({ mode: "all", selected: [], provider: "claude" });
-  localStorage.removeItem("ccam-data-scope");
+  localStorage.removeItem("am-data-scope");
 });
 
 describe("Workflows — Codex scope", () => {

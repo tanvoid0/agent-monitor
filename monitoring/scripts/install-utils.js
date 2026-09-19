@@ -1,6 +1,6 @@
 /**
  * @file Archive extraction and install-dir discovery for cross-platform binaries.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 const fs = require("node:fs");
 const path = require("node:path");

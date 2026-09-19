@@ -23,7 +23,7 @@
  * register `page.refresh` under its own reload without any of them knowing about
  * the others.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import {

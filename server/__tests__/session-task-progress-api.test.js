@@ -1,7 +1,7 @@
 /**
  * @file Integration tests for task-progress summaries on the Sessions list
  * and full owner-attributed snapshots on Session Detail.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { after, before, describe, it } = require("node:test");
@@ -11,7 +11,7 @@ const http = require("node:http");
 const os = require("node:os");
 const path = require("node:path");
 
-const ROOT = fs.mkdtempSync(path.join(os.tmpdir(), "ccam-task-progress-api-"));
+const ROOT = fs.mkdtempSync(path.join(os.tmpdir(), "am-task-progress-api-"));
 const TEST_DB = path.join(ROOT, "test.db");
 process.env.DASHBOARD_DB_PATH = TEST_DB;
 process.env.DASHBOARD_REMOTE_SYNC_MS = "0";

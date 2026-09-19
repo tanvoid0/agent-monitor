@@ -1,16 +1,16 @@
 # Documentation Index
 
-Comprehensive documentation for the Agent Dashboard project.
+Comprehensive documentation for the AgentMonitor project.
 
 ---
 
 ## Quick Links
 
-- [Operator Handbook](https://github.com/hoangsonww/Claude-Code-Agent-Monitor/wiki) - Task-oriented usage, operations, automation, and troubleshooting
-- [Localized Product Wiki](https://hoangsonww.github.io/Claude-Code-Agent-Monitor/wiki/) - English, Vietnamese, Chinese, Korean, and Spanish product and architecture tour
+- [Operator Handbook](https://github.com/tanvoid0/agent-monitor/wiki) - Task-oriented usage, operations, automation, and troubleshooting
+- [Localized Product Wiki](https://tanvoid0.github.io/agent-monitor/wiki/) - English, Vietnamese, Chinese, Korean, and Spanish product and architecture tour
 - [Architecture Overview](../ARCHITECTURE.md) - System design and technical reference
 - [I18N Architecture](./I18N.md) - Internationalization architecture and usage guide
-- [CLI Reference](./CLI.md) - The `ccam` terminal CLI: every command, discovery, safety model
+- [CLI Reference](./CLI.md) - The `am` terminal CLI: every command, discovery, safety model
 - [Setup Guide](../SETUP.md) - Installation and configuration
 - [Installation](../INSTALL.md) - Detailed installation instructions
 
@@ -22,11 +22,11 @@ Start with the smallest set of documents for the job at hand, then use the catal
 
 | Goal | Start here | Continue with |
 | --- | --- | --- |
-| Use or troubleshoot CCAM day to day | [GitHub Wiki](https://github.com/hoangsonww/Claude-Code-Agent-Monitor/wiki) | [Localized product Wiki](https://hoangsonww.github.io/Claude-Code-Agent-Monitor/wiki/) or the exact references below |
-| Run CCAM locally | [INSTALL.md](../INSTALL.md) | [SETUP.md](../SETUP.md), then the dashboard |
+| Use or troubleshoot AgentMonitor day to day | [GitHub Wiki](https://github.com/tanvoid0/agent-monitor/wiki) | [Localized product Wiki](https://tanvoid0.github.io/agent-monitor/wiki/) or the exact references below |
+| Run AgentMonitor locally | [INSTALL.md](../INSTALL.md) | [SETUP.md](../SETUP.md), then the dashboard |
 | Integrate with the API or WebSocket | [API.md](./API.md) | [MCP.md](./MCP.md) for an MCP-based integration |
 | Understand captured activity | [HOOKS.md](./HOOKS.md) | [DATABASE.md](./DATABASE.md) and [ARCHITECTURE.md](../ARCHITECTURE.md) |
-| Operate CCAM in production | [DEPLOYMENT.md](./DEPLOYMENT.md) | [server/README.md](../server/README.md) and [monitoring/README.md](../monitoring/README.md) |
+| Operate AgentMonitor in production | [DEPLOYMENT.md](./DEPLOYMENT.md) | [server/README.md](../server/README.md) and [monitoring/README.md](../monitoring/README.md) |
 | Extend the UI or localization | [client/README.md](../client/README.md) | [I18N.md](./I18N.md) |
 
 ---
@@ -69,7 +69,7 @@ graph TB
 | [MCP.md](./MCP.md) | MCP server setup and tool reference | MCP integrators |
 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Production deployment strategies | DevOps engineers |
 | [I18N.md](./I18N.md) | Language architecture, locale strategy, and rollout checklist | Frontend and product teams |
-| [CLI.md](./CLI.md) | `ccam` command reference — monitoring, browsing, insights, alerts, pricing, import, administration | Terminal users and CI scripting |
+| [CLI.md](./CLI.md) | `am` command reference — monitoring, browsing, insights, alerts, pricing, import, administration | Terminal users and CI scripting |
 | [monitoring/README.md](../monitoring/README.md) | Prometheus + Grafana stack (`npm run monitoring:up` or Docker) | DevOps / observability |
 
 ---
@@ -514,8 +514,8 @@ graph LR
 
 ### Getting Help
 
-- **Issues:** [GitHub Issues](https://github.com/your-org/agent-dashboard/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/your-org/agent-dashboard/discussions)
+- **Issues:** [GitHub Issues](https://github.com/your-org/agentmonitor/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/your-org/agentmonitor/discussions)
 - **Documentation:** This folder
 
 ### Additional Resources

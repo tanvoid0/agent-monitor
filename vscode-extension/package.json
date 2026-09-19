@@ -1,6 +1,6 @@
 {
-  "name": "claude-code-agent-monitor",
-  "displayName": "Claude Code Agent Monitor",
+  "name": "agentmonitor",
+  "displayName": "AgentMonitor",
   "description": "Professional integrated dashboard for monitoring Claude Code AI agent activity, token usage, and costs directly in VS Code.",
   "version": "1.2.4",
   "publisher": "hoangsonw",
@@ -24,31 +24,31 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/hoangsonww/Claude-Code-Agent-Monitor"
+    "url": "https://github.com/tanvoid0/agent-monitor"
   },
-  "homepage": "https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/vscode-extension/README.md",
+  "homepage": "https://github.com/tanvoid0/agent-monitor/blob/master/vscode-extension/README.md",
   "contributes": {
     "commands": [
       {
-        "command": "claude-code-agent-monitor.openDashboard",
-        "title": "Open Agent Dashboard",
+        "command": "agentmonitor.openDashboard",
+        "title": "Open AgentMonitor",
         "category": "Claude Code",
         "icon": "$(dashboard)"
       },
       {
-        "command": "claude-code-agent-monitor.refreshStatus",
+        "command": "agentmonitor.refreshStatus",
         "title": "Refresh Dashboard Status",
         "category": "Claude Code",
         "icon": "$(refresh)"
       },
       {
-        "command": "claude-code-agent-monitor.clearHistory",
+        "command": "agentmonitor.clearHistory",
         "title": "Clear Monitor History",
         "category": "Claude Code",
         "icon": "$(trash)"
       },
       {
-        "command": "claude-code-agent-monitor.openInBrowser",
+        "command": "agentmonitor.openInBrowser",
         "title": "Open Dashboard in Browser",
         "category": "Claude Code",
         "icon": "$(globe)"
@@ -58,7 +58,7 @@
       "activitybar": [
         {
           "id": "claude-code-monitor",
-          "title": "Claude Code Agent Monitor",
+          "title": "AgentMonitor",
           "icon": "icon.svg"
         }
       ]
@@ -75,17 +75,17 @@
     "menus": {
       "view/title": [
         {
-          "command": "claude-code-agent-monitor.openDashboard",
+          "command": "agentmonitor.openDashboard",
           "when": "view == claude-code-monitor-view",
           "group": "navigation@1"
         },
         {
-          "command": "claude-code-agent-monitor.refreshStatus",
+          "command": "agentmonitor.refreshStatus",
           "when": "view == claude-code-monitor-view",
           "group": "navigation@2"
         },
         {
-          "command": "claude-code-agent-monitor.openInBrowser",
+          "command": "agentmonitor.openInBrowser",
           "when": "view == claude-code-monitor-view",
           "group": "navigation@3"
         }
@@ -110,6 +110,6 @@
     "tokens",
     "llm"
   ],
-  "author": "Son Nguyen",
+  "author": "Tanveer Hoque",
   "license": "MIT"
 }

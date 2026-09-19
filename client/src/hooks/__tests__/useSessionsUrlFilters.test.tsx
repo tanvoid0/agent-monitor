@@ -4,7 +4,7 @@
  * `?status=` / repeated `?cwd=` / `?q=`, ignoring unknown statuses, writing
  * each key without disturbing the others, and clearing status + cwd in one
  * atomic write (the clobber the previous two-writer layout produced).
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, expect, it } from "vitest";

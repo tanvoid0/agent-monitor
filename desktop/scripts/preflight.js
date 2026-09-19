@@ -12,7 +12,7 @@
  * This module is shared by `install.js` (wraps the dependency install) and
  * `prebuild.js` (gates every `desktop:*` build/dev script) so both surfaces
  * print the same guidance.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const fs = require("node:fs");
@@ -47,7 +47,7 @@ function printNativeDepHelp(reason) {
   const out = (s) => process.stderr.write(s + "\n");
   out("");
   out(line);
-  out("  Claude Code Monitor — desktop native dependency setup did not complete");
+  out("  AgentMonitor — desktop native dependency setup did not complete");
   out(line);
   if (reason) {
     out(`  ${reason}`);

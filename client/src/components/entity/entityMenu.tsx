@@ -5,7 +5,7 @@
  * and raw value of each, the project label/sub-path split, and `entityMenu`,
  * which builds the context-menu items (open/show/copy/reveal) for a target
  * from `lib/routes`, a copy function and an optional folder opener.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import type { TFunction } from "i18next";

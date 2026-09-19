@@ -21,7 +21,7 @@ Comprehensive guide to integrating with Claude Code's hook system for real-time 
 
 ## Overview
 
-Claude Code provides a hook system that allows external tools to receive real-time events during agent execution. Agent Dashboard uses these hooks to capture session lifecycle, tool executions, and notifications.
+Claude Code provides a hook system that allows external tools to receive real-time events during agent execution. AgentMonitor uses these hooks to capture session lifecycle, tool executions, and notifications.
 
 > **Cursor (informational):** Live hooks fire from Claude Code. **Cursor** sessions that only exist as JSONL under `~/.claude` (Cursor uses the same paths locally) are still counted — they appear via startup import, continuous project sync, or remote SSH sync, not via hooks.
 
@@ -174,13 +174,13 @@ Hook handlers use localhost discovery by default. To forward live Claude Code or
 Codex events to a remote dashboard, configure the host that runs the agent:
 
 ```bash
-export CCAM_DASHBOARD_URL=https://agent-monitor.example.com
-export CCAM_HOOK_TOKEN_FILE=/secure/path/hook-token
+export AM_DASHBOARD_URL=https://agent-monitor.example.com
+export AM_HOOK_TOKEN_FILE=/secure/path/hook-token
 ```
 
-Non-loopback `CCAM_DASHBOARD_URL` values must use HTTPS and must provide
-`CCAM_HOOK_TOKEN` or `CCAM_HOOK_TOKEN_FILE`. The handler sends the credential as
-`x-ccam-hook-token`; the dashboard verifies it against
+Non-loopback `AM_DASHBOARD_URL` values must use HTTPS and must provide
+`AM_HOOK_TOKEN` or `AM_HOOK_TOKEN_FILE`. The handler sends the credential as
+`x-am-hook-token`; the dashboard verifies it against
 `DASHBOARD_HOOK_TOKEN` or `DASHBOARD_HOOK_TOKEN_FILE` with constant-time token
 matching. The hook remains fail-safe and non-blocking: invalid configuration,
 connection failures, timeouts, or authentication failures never block Claude
@@ -204,7 +204,7 @@ internet, and it is **disabled until you configure it**:
 ```bash
 REMOTE_PUSH_TOKEN=change-me-to-a-long-random-string
 # or
-REMOTE_PUSH_TOKEN_FILE=/run/ccam-secrets/remote-push-token
+REMOTE_PUSH_TOKEN_FILE=/run/am-secrets/remote-push-token
 ```
 
 Unset, every request answers `503 REMOTE_PUSH_NOT_CONFIGURED`. The token is
@@ -233,7 +233,7 @@ implementation notes.
 > break every host hook with `MODULE_NOT_FOUND`. The host handler POSTs to
 > `http://localhost:4820`, which a containerized dashboard already publishes.
 > (Escape hatch for running Claude Code *inside* the same container:
-> `CCAM_ALLOW_CONTAINER_HOOKS=1 npm run install-hooks`.)
+> `AM_ALLOW_CONTAINER_HOOKS=1 npm run install-hooks`.)
 
 For Codex, the installer writes only this dashboard's lifecycle entries to `~/.codex/hooks.json`. Each entry runs `scripts/codex-hook-handler.js`, which immediately POSTs the rollout path — or the session/thread id every Codex hook carries — to `POST /api/hooks/codex` and exits. A rollout is **not** required: the thread id alone identifies the session, and only a payload carrying neither is answered as an unqueued no-op. The server acknowledges `202` before parsing, then incrementally consumes `~/.codex/sessions/**/rollout-*.jsonl`; duplicate hook and watcher notifications are idempotent through a durable byte cursor. Before Codex creates either a hook identity or a native live-thread row, a one-second process probe exposes an in-memory Waiting card to the live Dashboard and Kanban reads. It never writes a session, agent, event, token, workflow, alert, or history row, and disappears when the process exits or durable Codex data takes its place. If Codex defers a new hook for trust approval after assigning an id, the synchronizer reads the very recent native `state_*.sqlite` live-thread row and creates the durable startup card before the rollout is flushed. Newest rollouts are scanned first, a bad historical file remains eligible for retry without blocking the rest, and long cold scans yield between small batches so fresh sessions reach the dashboard promptly. Supported lifecycle notifications are `SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Stop`, and `SessionEnd`. `PreToolUse` intentionally ingests the just-completed model turn before a long-running tool delays its matching `PostToolUse` notification.
 
@@ -316,7 +316,7 @@ Before relying on hooks for production monitoring:
 - Confirm the target dashboard answers `curl http://127.0.0.1:4820/api/health` from the machine that runs Claude Code or Codex.
 - Run `npm run install-hooks` on that host, then review the provider's hook configuration to confirm the dashboard entries point at a real host-side `hook-handler.js` path.
 - Start one short test session and verify that it creates activity in the dashboard before assuming historical import or remote sync is covering live events.
-- For a remote dashboard, configure `CCAM_DASHBOARD_URL` and a file-backed `CCAM_HOOK_TOKEN_FILE`; do not put the hook token directly in a shared shell history or checked-in configuration.
+- For a remote dashboard, configure `AM_DASHBOARD_URL` and a file-backed `AM_HOOK_TOKEN_FILE`; do not put the hook token directly in a shared shell history or checked-in configuration.
 - Keep hook failures non-blocking. If delivery cannot be established, fix the dashboard connection rather than replacing the fail-safe hook behavior.
 
 ---
@@ -544,7 +544,7 @@ Triggered when a Claude Code session ends.
 ```mermaid
 flowchart LR
   STDIN["Hook JSON on stdin"] --> WRAP["Add hook_type"]
-  WRAP --> TARGET{"CCAM_DASHBOARD_URL set?"}
+  WRAP --> TARGET{"AM_DASHBOARD_URL set?"}
   TARGET -->|No| LOCAL["Discover local dashboard ports"]
   TARGET -->|Yes| VALIDATE["Require HTTP(S); remote requires HTTPS + hook token"]
   LOCAL --> SEND["Fire-and-forget POST"]
@@ -556,9 +556,9 @@ flowchart LR
 The real handlers are intentionally small. `scripts/hook-handler.js` and
 `scripts/codex-hook-handler.js` parse stdin and delegate delivery to
 `scripts/hook-transport.js`. Local mode fans out to one live dashboard per
-unique SQLite data directory. Remote mode uses `CCAM_DASHBOARD_URL`, requires
-HTTPS outside loopback, reads `CCAM_HOOK_TOKEN` or `CCAM_HOOK_TOKEN_FILE`, and
-sends `x-ccam-hook-token`. Requests resolve when the body is flushed, not when
+unique SQLite data directory. Remote mode uses `AM_DASHBOARD_URL`, requires
+HTTPS outside loopback, reads `AM_HOOK_TOKEN` or `AM_HOOK_TOKEN_FILE`, and
+sends `x-am-hook-token`. Requests resolve when the body is flushed, not when
 the dashboard replies, so a slow or unavailable server never delays the agent
 CLI. Parse errors are wrapped as raw input, and all network/configuration errors
 fail silently with exit code 0.
@@ -569,13 +569,13 @@ fail silently with exit code 0.
 > 1. If `CLAUDE_DASHBOARD_PORT` is set in the environment, the handler treats
 >    it as an explicit operator override and POSTs to that single port —
 >    no discovery, no fan-out (useful for tests and container setups).
-> 2. Otherwise it reads `~/.claude/.agent-dashboard.json`, a JSON document
+> 2. Otherwise it reads `~/.claude/.agentmonitor.json`, a JSON document
 >    that lists every dashboard server currently running on the machine.
 >    Each server appends its `{port, pid, startedAt, dataDir}` entry on
 >    startup and removes it on a clean shutdown. The handler **prunes any
 >    entry whose PID is no longer alive** and POSTs the hook payload to one
 >    port per **unique SQLite data directory** (lowest port wins when Docker
->    and `npm run dev` share `~/.claude/agent-dashboard`).
+>    and `npm run dev` share `~/.claude/agentmonitor`).
 > 3. If neither yields a target, the handler falls back to `4820`.
 >
 > Dashboards with **different** databases (e.g. the packaged desktop app using

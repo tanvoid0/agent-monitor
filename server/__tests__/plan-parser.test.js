@@ -2,7 +2,7 @@
  * @file server/plan/parser.js against the ledgerflow fixture (structure,
  * per-lane counts, milestones) and an inline sample for what the fixture
  * lacks: a sandbox story with depth-3 nesting, plus the tick transform.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { describe, it } = require("node:test");

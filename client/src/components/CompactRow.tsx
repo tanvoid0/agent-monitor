@@ -6,7 +6,7 @@
  * `Clickable` surface. Both cards render identical markup here; only the
  * pieces that differ per entity (badge, name, subtitle, chip) come in as
  * props.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import type { ReactNode } from "react";

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# validate-deployment.sh — advisory static review of CCAM container and cloud
+# validate-deployment.sh — advisory static review of AgentMonitor container and cloud
 # deployment assets. It checks the single-writer SQLite topology plus the
 # Docker, Compose, Nginx, Helm, Kustomize, Terraform, dependency, and header
 # contracts.
@@ -12,13 +12,13 @@
 # Dependency advisories from `npm audit --omit=dev` are reported the same way:
 # listed, never fatal (many have only semver-major fixes).
 #
-# Set `CCAM_DEPLOY_VALIDATE_STRICT=1` to exit non-zero when findings exist —
+# Set `AM_DEPLOY_VALIDATE_STRICT=1` to exit non-zero when findings exist —
 # use that for a deliberate release gate, never in the default CI path.
 #
 # Usage:
 #   npm run deploy:validate
-#   CCAM_DEPLOY_VALIDATE_STRICT=1 npm run deploy:validate   # hard gate
-# @author Son Nguyen <hoangson091104@gmail.com>
+#   AM_DEPLOY_VALIDATE_STRICT=1 npm run deploy:validate   # hard gate
+# @author Tanveer Hoque <tanvoid0@gmail.com>
 
 set -uo pipefail
 
@@ -28,7 +28,7 @@ readonly CHART_DIR="${PROJECT_ROOT}/deployments/helm/agent-monitor"
 readonly KUSTOMIZE_DIR="${PROJECT_ROOT}/deployments/kubernetes"
 
 readonly IN_ACTIONS="${GITHUB_ACTIONS:-}"
-readonly STRICT="${CCAM_DEPLOY_VALIDATE_STRICT:-0}"
+readonly STRICT="${AM_DEPLOY_VALIDATE_STRICT:-0}"
 FINDINGS=0
 SUMMARY_ROWS=()
 
@@ -122,7 +122,7 @@ write_summary() {
   {
     printf '## %s\n\n' "$heading"
     printf 'These findings are **informational**. This job does not gate the pipeline; '
-    printf 'run `CCAM_DEPLOY_VALIDATE_STRICT=1 npm run deploy:validate` for a hard gate.\n\n'
+    printf 'run `AM_DEPLOY_VALIDATE_STRICT=1 npm run deploy:validate` for a hard gate.\n\n'
     printf '| | Check | Detail |\n|---|---|---|\n'
     printf '%s\n' "${SUMMARY_ROWS[@]}"
   } >>"$GITHUB_STEP_SUMMARY"
@@ -136,7 +136,7 @@ audit_production_dependencies() {
   shift
   local attempt=1
   local max_attempts=3
-  local retry_base_seconds="${CCAM_AUDIT_RETRY_BASE_SECONDS:-2}"
+  local retry_base_seconds="${AM_AUDIT_RETRY_BASE_SECONDS:-2}"
   local output errors status report stdout_file stderr_file
 
   if [[ ! "$retry_base_seconds" =~ ^[0-9]+$ ]]; then
@@ -269,10 +269,10 @@ assert_no_unsafe_assets() {
 validate_docker() {
   need docker
   log "Dockerfile static checks"
-  docker build --check --target runtime -t ccam-dashboard:check "${PROJECT_ROOT}" >/dev/null
-  docker build --check --target agent-runtime -t ccam-dashboard-agent:check "${PROJECT_ROOT}" >/dev/null
+  docker build --check --target runtime -t am-dashboard:check "${PROJECT_ROOT}" >/dev/null
+  docker build --check --target agent-runtime -t am-dashboard-agent:check "${PROJECT_ROOT}" >/dev/null
   docker build --check -f "${PROJECT_ROOT}/mcp/Dockerfile" --target runtime \
-    -t ccam-mcp:check "${PROJECT_ROOT}" >/dev/null
+    -t am-mcp:check "${PROJECT_ROOT}" >/dev/null
 
   log "Compose rendering"
   docker compose -f "${PROJECT_ROOT}/docker-compose.yml" config >/dev/null
@@ -292,7 +292,7 @@ validate_docker() {
     -v "${PROJECT_ROOT}/deployments/nginx/snippets/hooks-blocked.conf:/etc/nginx/snippets/hooks-policy.conf:ro" \
     -v "${PROJECT_ROOT}/deployments/nginx/snippets/mcp-blocked.conf:/etc/nginx/snippets/mcp-policy.conf:ro" \
     --entrypoint /bin/sh nginxinc/nginx-unprivileged:1.30.0-alpine@sha256:808f7846d21a9c94cf53833e8807a00a33fd0b65cc47fb05b79efe366c2d201f -c \
-    'resolver=$(awk '\''/^nameserver[[:space:]]+/ {print $2; exit}'\'' /etc/resolv.conf); sed "s/__CCAM_DNS_RESOLVER__/${resolver}/g" /etc/nginx/nginx.conf.template >/tmp/nginx.conf; nginx -t -c /tmp/nginx.conf' \
+    'resolver=$(awk '\''/^nameserver[[:space:]]+/ {print $2; exit}'\'' /etc/resolv.conf); sed "s/__AM_DNS_RESOLVER__/${resolver}/g" /etc/nginx/nginx.conf.template >/tmp/nginx.conf; nginx -t -c /tmp/nginx.conf' \
     >/dev/null
 }
 
@@ -303,7 +303,7 @@ validate_helm() {
   for values in values.yaml values-dev.yaml values-staging.yaml values-production.yaml; do
     local output
     output="$(mktemp)"
-    helm template ccam "${CHART_DIR}" -f "${CHART_DIR}/${values}" \
+    helm template am "${CHART_DIR}" -f "${CHART_DIR}/${values}" \
       --namespace agent-monitor >"$output"
     assert_single_writer "$output"
     rm -f "$output"
@@ -378,7 +378,7 @@ validate_terraform() {
   docker run --rm \
     --user "$(id -u):$(id -g)" \
     --env HOME=/tmp \
-    --env TF_DATA_DIR=/tmp/ccam-terraform-data \
+    --env TF_DATA_DIR=/tmp/am-terraform-data \
     -v "${PROJECT_ROOT}:/workspace" \
     -w /workspace/deployments/terraform \
     --entrypoint /bin/sh \
@@ -389,11 +389,11 @@ validate_terraform() {
 }
 
 # Writes the summary and decides the exit status. Advisory by default; only
-# CCAM_DEPLOY_VALIDATE_STRICT=1 turns findings into a non-zero exit.
+# AM_DEPLOY_VALIDATE_STRICT=1 turns findings into a non-zero exit.
 finish() {
   write_summary
   if (( FINDINGS > 0 )) && [[ "$STRICT" == "1" ]]; then
-    log "CCAM_DEPLOY_VALIDATE_STRICT=1 — failing on ${FINDINGS} finding(s)"
+    log "AM_DEPLOY_VALIDATE_STRICT=1 — failing on ${FINDINGS} finding(s)"
     return 1
   fi
   if (( FINDINGS > 0 )); then

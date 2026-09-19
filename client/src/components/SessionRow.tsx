@@ -6,7 +6,7 @@
  * count, cost, and a trailing kebab carrying the session's entity menu. The
  * local transient Codex startup row (no durable id yet) renders the same cells
  * without links or a menu.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { Link } from "react-router";

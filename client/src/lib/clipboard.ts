@@ -5,7 +5,7 @@
  * `execCommand("copy")` so plain-HTTP and remote-browser sessions keep working, then
  * announces the outcome through the action toast (`common:eventDetail.copied` /
  * `common:ui.copyFailed`).
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import i18n from "../i18n";

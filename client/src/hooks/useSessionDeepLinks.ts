@@ -12,7 +12,7 @@
  *  - `#agent-<id>` expands the target and every ancestor, then scrolls to and
  *    rings the card once it exists in the DOM.
  * The page keeps ownership of the underlying state; this hook only drives it.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { useEffect, useRef } from "react";

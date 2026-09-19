@@ -2,12 +2,12 @@
  * @file useDocumentTitle.ts
  * @description Sets `document.title` for the current route/page and restores the
  * previous title on unmount so browser tabs stay distinguishable.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { useEffect } from "react";
 
-const APP_SUFFIX = "Claude Code Agent Monitor";
+const APP_SUFFIX = "AgentMonitor";
 
 /**
  * Update the browser tab title while this component is mounted.

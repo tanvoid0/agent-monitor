@@ -3,7 +3,7 @@
  * @description Kit pill: cva tones (neutral/accent/success/warning/danger/
  * info/violet) and sizes (xs, sm = legacy `.badge` metrics), optional leading
  * status dot (`dot`, `pulse`), Lucide icon, and monospace text.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import type { HTMLAttributes } from "react";

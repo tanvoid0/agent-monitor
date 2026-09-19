@@ -4,7 +4,7 @@
  * the only place a rules change is proven before it merges: every bucket,
  * precedence order, review signal, and the reconciliation that must never
  * remove a human's label.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { describe, it } = require("node:test");
@@ -132,7 +132,7 @@ describe("areas", () => {
       ["mcp/src/index.ts", "area/mcp"],
       ["desktop/main.js", "area/desktop"],
       ["vscode-extension/src/extension.ts", "area/vscode-extension"],
-      ["bin/ccam.js", "area/cli"],
+      ["bin/am.js", "area/cli"],
       ["statusline/statusline.js", "area/cli"],
       ["plugins/monitor/plugin.json", "area/plugins"],
       ["deployments/helm/values.yaml", "area/deploy"],
@@ -192,7 +192,7 @@ describe("areas", () => {
       ...Array.from({ length: 4 }, (_, i) => file(`client/src/${i}.tsx`)),
       ...Array.from({ length: 3 }, (_, i) => file(`mcp/src/${i}.ts`)),
       ...Array.from({ length: 2 }, (_, i) => file(`desktop/${i}.js`)),
-      file("bin/ccam.js"),
+      file("bin/am.js"),
       file("plugins/a/plugin.json"),
       file("deployments/helm/values.yaml"),
     ];
@@ -404,7 +404,7 @@ describe("needs-tests", () => {
     assert.ok(withTests([file("client/src/pages/Sessions.tsx")]));
     assert.ok(withTests([file("mcp/src/tools.ts")]));
     assert.ok(withTests([file("scripts/hook-handler.js")]));
-    assert.ok(withTests([file("bin/ccam.js")]));
+    assert.ok(withTests([file("bin/am.js")]));
   });
 
   it("stays quiet when a test changed alongside", () => {

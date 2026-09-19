@@ -4,7 +4,7 @@
  * parse `claude --output-format stream-json` output. Verifies chunked input,
  * partial lines spanning chunks, malformed lines, empty input, multiple
  * objects per chunk, and flush semantics.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { describe, it } = require("node:test");

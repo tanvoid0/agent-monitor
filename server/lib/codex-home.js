@@ -3,7 +3,7 @@
  * append-only rollout transcripts, live-thread state, and native session titles.
  * A Settings change persists a dashboard-only override and notifies the live
  * synchronizer without changing the Codex CLI.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const fs = require("fs");

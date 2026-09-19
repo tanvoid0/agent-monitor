@@ -29,12 +29,12 @@
  *     columns (PRAGMA table_info) with the keys present on each row, so older
  *     or newer bundles import cleanly without a migration step.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 "use strict";
 
-const EXPORT_FORMAT = "ccam-export";
+const EXPORT_FORMAT = "am-export";
 // v2 adds the independent GPT/Codex rate card while keeping v1 imports valid.
 const EXPORT_VERSION = 2;
 

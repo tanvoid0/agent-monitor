@@ -2,7 +2,7 @@
  * @file Verifies incremental Codex rollout ingestion: session metadata, token
  * deltas, context bands, duplicate safety, native live-thread startup cards,
  * transcript-derived prompt context, and transcript-driven card lifecycle.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { after, describe, it } = require("node:test");
@@ -12,7 +12,7 @@ const os = require("os");
 const path = require("path");
 const Database = require("better-sqlite3");
 
-const TMP = fs.mkdtempSync(path.join(os.tmpdir(), "ccam-codex-ingest-"));
+const TMP = fs.mkdtempSync(path.join(os.tmpdir(), "am-codex-ingest-"));
 process.env.DASHBOARD_DB_PATH = path.join(TMP, "dashboard.db");
 process.env.DASHBOARD_CODEX_HOME = path.join(TMP, "codex");
 
@@ -694,14 +694,14 @@ describe("Codex rollout ingestor", () => {
         ...own,
         turn_id: TURN_ID,
         hook_event_name: "UserPromptSubmit",
-        prompt: "Run the shell command 'echo hello-ccam' and then reply DONE.",
+        prompt: "Run the shell command 'echo hello-am' and then reply DONE.",
       });
       ingestCodexHook(null, "PreToolUse", {
         ...own,
         turn_id: TURN_ID,
         hook_event_name: "PreToolUse",
         tool_name: "Bash",
-        tool_input: { command: "echo hello-ccam" },
+        tool_input: { command: "echo hello-am" },
         tool_use_id: "exec-3c2ba208-b1e2-4980-8d9e-756175454f02",
       });
       ingestCodexHook(null, "PostToolUse", {
@@ -709,8 +709,8 @@ describe("Codex rollout ingestor", () => {
         turn_id: TURN_ID,
         hook_event_name: "PostToolUse",
         tool_name: "Bash",
-        tool_input: { command: "echo hello-ccam" },
-        tool_response: "hello-ccam\n",
+        tool_input: { command: "echo hello-am" },
+        tool_response: "hello-am\n",
         tool_use_id: "exec-3c2ba208-b1e2-4980-8d9e-756175454f02",
       });
       if (stop) {
@@ -746,13 +746,13 @@ describe("Codex rollout ingestor", () => {
         ...base,
         turn_id: TURN_ID,
         hook_event_name: "UserPromptSubmit",
-        prompt: "Run the shell command 'echo hello-ccam' and then reply DONE.",
+        prompt: "Run the shell command 'echo hello-am' and then reply DONE.",
       });
       assert.equal(prompted.session.status, "active");
       assert.equal(stmts.getAgent.get(`codex:${EPHEMERAL_ID}`).status, "working");
       assert.equal(
         prompted.session.name,
-        "Run the shell command 'echo hello-ccam' and then reply DONE.",
+        "Run the shell command 'echo hello-am' and then reply DONE.",
         "the hook prompt names the session exactly as a rollout user_message would"
       );
 
@@ -761,7 +761,7 @@ describe("Codex rollout ingestor", () => {
         turn_id: TURN_ID,
         hook_event_name: "PreToolUse",
         tool_name: "Bash",
-        tool_input: { command: "echo hello-ccam" },
+        tool_input: { command: "echo hello-am" },
         tool_use_id: "exec-3c2ba208-b1e2-4980-8d9e-756175454f02",
       });
       ingestCodexHook(null, "PostToolUse", {
@@ -769,8 +769,8 @@ describe("Codex rollout ingestor", () => {
         turn_id: TURN_ID,
         hook_event_name: "PostToolUse",
         tool_name: "Bash",
-        tool_input: { command: "echo hello-ccam" },
-        tool_response: "hello-ccam\n",
+        tool_input: { command: "echo hello-am" },
+        tool_response: "hello-am\n",
         tool_use_id: "exec-3c2ba208-b1e2-4980-8d9e-756175454f02",
       });
 
@@ -809,10 +809,10 @@ describe("Codex rollout ingestor", () => {
         ]
       );
       const [prompt, call, end, complete] = rows;
-      assert.equal(prompt.summary, "Run the shell command 'echo hello-ccam' and then reply DONE.");
+      assert.equal(prompt.summary, "Run the shell command 'echo hello-am' and then reply DONE.");
       assert.equal(call.tool_name, "Bash");
       assert.equal(call.summary, "Called Bash");
-      assert.equal(end.summary, "echo hello-ccam");
+      assert.equal(end.summary, "echo hello-am");
       assert.equal(complete.summary, "DONE");
       for (const row of rows) {
         assert.equal(JSON.parse(row.data).source, "hook", "every synthesized row is tagged");

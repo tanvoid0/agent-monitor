@@ -1,7 +1,7 @@
 /**
  * @file Helpers for WebSocket messages that signal remote SSH sources finished
  * syncing and scoped stats (sessions, costs, analytics) should refetch.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import type { ImportProgressMessage, RemoteSourceStatusPayload, WSMessage } from "./types";

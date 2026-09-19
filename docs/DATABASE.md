@@ -1,6 +1,6 @@
 # Database Schema Reference
 
-Comprehensive database schema documentation for Agent Dashboard SQLite database.
+Comprehensive database schema documentation for AgentMonitor SQLite database.
 
 ---
 
@@ -20,7 +20,7 @@ Comprehensive database schema documentation for Agent Dashboard SQLite database.
 
 ## Overview
 
-Agent Dashboard uses **SQLite 3** as its primary data store with the following characteristics:
+AgentMonitor uses **SQLite 3** as its primary data store with the following characteristics:
 
 - **File-based** - Single database file, portable across systems
 - **Embedded** - No separate server process required
@@ -64,7 +64,7 @@ graph TB
 ```
 
 **Database Location:**
-- **Canonical (default):** `~/.claude/agent-dashboard/dashboard.db` — shared by `npm start`, `npm run dev`, Docker (bind mount), and the desktop app when it uses the same data dir
+- **Canonical (default):** `~/.claude/agentmonitor/dashboard.db` — shared by `npm start`, `npm run dev`, Docker (bind mount), and the desktop app when it uses the same data dir
 - **Override:** set `DASHBOARD_DATA_DIR` (directory) or `DASHBOARD_DB_PATH` (file path) for tests or custom deployments
 - **Legacy:** repo-local `./data/dashboard.db` is migrated into the canonical location on first launch (see `server/db.js`)
 
@@ -923,13 +923,13 @@ Keep the verified snapshot outside the live data directory, and periodically per
 ```bash
 #!/bin/bash
 # Stop application
-systemctl stop agent-dashboard
+systemctl stop agentmonitor
 
 # Copy database file
-cp /var/lib/agent-dashboard/dashboard.db /backups/dashboard_$(date +%Y%m%d).db
+cp /var/lib/agentmonitor/dashboard.db /backups/dashboard_$(date +%Y%m%d).db
 
 # Start application
-systemctl start agent-dashboard
+systemctl start agentmonitor
 ```
 
 ### Backup Schedule

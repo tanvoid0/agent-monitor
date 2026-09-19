@@ -10,12 +10,12 @@
  * context menu; title, id and model are `EntityRef` chips. Durable cards
  * navigate to details; the brief pre-identity Codex process card stays
  * non-navigable until a real ID exists.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/client/src/components/SessionCard.tsx`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/client/src/components/SessionCard.tsx`
  * **Purpose:** Dashboard module consumed by the React client, MCP tools, or desktop shell depending on deployment mode.
  *
  * ## Design constraints

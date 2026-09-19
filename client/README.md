@@ -1,6 +1,6 @@
 # Client Application
 
-Enterprise-grade React + TypeScript dashboard for real-time Claude Code agent monitoring.
+Enterprise-grade React + TypeScript dashboard for real-time AgentMonitoring.
 
 ![Claude Code](https://img.shields.io/badge/Claude_Code-orange?style=flat-square&logo=claude&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-%3E%3D22.22-339933?style=flat-square&logo=node.js&logoColor=white)
@@ -718,7 +718,7 @@ Only non-session picks are remembered: a session id stops resolving as soon as t
 └────────────────────────────────────────────────────────┘
 ```
 
-Other chrome can open it without lifted state or a context provider by calling `openCommandPalette()` from `lib/appEvents.ts` (re-exported here), which dispatches a `ccam:command-palette` window event.
+Other chrome can open it without lifted state or a context provider by calling `openCommandPalette()` from `lib/appEvents.ts` (re-exported here), which dispatches a `am:command-palette` window event.
 
 Accessibility: modal `dialog`, `combobox` input driving an `aria-activedescendant` listbox, arrow-key navigation with feature-detected `scrollIntoView`, `Home`/`End` and `PageUp`/`PageDown` jumps, `Tab` between groups without leaking focus, `Enter` to run, `Escape` to close, and focus restored on close. Hover only takes the selection after a real `mousemove`, so keyboard navigation is never fought by `mouseenter` under a stationary cursor.
 
@@ -974,10 +974,10 @@ no central store — each feature owns its own key — so this is the inventory:
 | `agent-monitor-sound` | local | `lib/sound.ts` | Audio-cue preferences: master switch, volume, per-cue flags. Defaults to enabled |
 | `agent-monitor-notifications` | local | `hooks/useNotifications.ts` | Browser-notification preferences. Defaults to disabled (opt-in, needs permission) |
 | `agent-monitor-update-dismissed-sha` | local | `components/UpdateNotifier.tsx` | Upstream SHA the user dismissed, so a new commit re-surfaces the notice |
-| `agent-dashboard-tabby-enabled` | local | `components/Tabby/prefs.ts` | Whether the Tabby companion is shown |
-| `agent-dashboard-tabby-muted` | local | `components/Tabby/prefs.ts` | Whether Tabby's speech bubbles are muted |
-| `agent-dashboard-tabby-pos` | local | `components/Tabby/prefs.ts` | Tabby's docked edge and vertical offset, as a viewport fraction |
-| `ccam-data-scope` | local | `lib/dataScope.ts` | App-wide data scope — selected remote sources and providers |
+| `agentmonitor-tabby-enabled` | local | `components/Tabby/prefs.ts` | Whether the Tabby companion is shown |
+| `agentmonitor-tabby-muted` | local | `components/Tabby/prefs.ts` | Whether Tabby's speech bubbles are muted |
+| `agentmonitor-tabby-pos` | local | `components/Tabby/prefs.ts` | Tabby's docked edge and vertical offset, as a viewport fraction |
+| `am-data-scope` | local | `lib/dataScope.ts` | App-wide data scope — selected remote sources and providers |
 | `sidebar-collapsed` | local | `components/Sidebar.tsx` | Sidebar collapsed state |
 | `sidebar-connection-stats` | local | `components/Sidebar.tsx` | Cumulative WebSocket stats for the connection modal |
 | `provider-onboarding-shown-v1` | **session** | `components/SplashScreen.tsx` | Splash shown once per browser session, not once ever |

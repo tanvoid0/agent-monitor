@@ -12,7 +12,7 @@
  *      (subagents/workflows/<run>/agent-*.jsonl) as a subagent, not a top-level
  *      session.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { describe, it, before, after } = require("node:test");

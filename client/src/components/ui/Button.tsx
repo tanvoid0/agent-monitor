@@ -5,7 +5,7 @@
  * react-router `<Link>` through Radix `Slot` with identical classes; `asChild`
  * slots onto any element; `loading` swaps the icon for a spinner and marks the
  * control busy + disabled.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { forwardRef, type ButtonHTMLAttributes } from "react";

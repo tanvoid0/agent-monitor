@@ -3,7 +3,7 @@
  * @description Tests the network-exposure hardening (GHSA-gr74-4xfh-6jw9):
  * loopback-by-default bind, Host-header allowlist (anti DNS-rebinding),
  * loopback-only CORS, and the optional bearer-token gate on /api/* + WebSocket.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 const { describe, it, afterEach } = require("node:test");
 const assert = require("node:assert/strict");
@@ -148,7 +148,7 @@ describe("token gate (optional, opt-in)", () => {
   });
 
   it("loads the dashboard token from a mounted secret file", () => {
-    const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ccam-dashboard-token-"));
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), "am-dashboard-token-"));
     try {
       const tokenPath = path.join(directory, "token");
       fs.writeFileSync(tokenPath, "file-secret\n");
@@ -188,7 +188,7 @@ describe("hook token gate", () => {
 
     let nexted = false;
     sec.hookGuard(
-      { headers: { "x-ccam-hook-token": "hook-secret" }, query: {} },
+      { headers: { "x-am-hook-token": "hook-secret" }, query: {} },
       mockRes(),
       () => (nexted = true)
     );

@@ -13,28 +13,28 @@ Intended to be referenced from Claude Code's ``statusLine`` setting (see
 ``~/.claude/statusline.py``.
 
 :file: statusline/statusline.py
-:module: Claude-Code-Agent-Monitor.statusline
-:author: Son Nguyen <hoangson091104@gmail.com>
-:maintainer: Son Nguyen (a.k.a. David Nguyen, hoangsonww)
-:copyright: (c) 2026 Son Nguyen
+:module: agent-monitor.statusline
+:author: Tanveer Hoque <tanvoid0@gmail.com>
+:maintainer: Tanveer Hoque (a.k.a. David Nguyen, tanvoid0)
+:copyright: (c) 2026 Tanveer Hoque
 :license: MIT
-:repository: https://github.com/hoangsonww/Claude-Code-Agent-Monitor
+:repository: https://github.com/tanvoid0/agent-monitor
 :requires: Python 3.6+
 :encoding: utf-8
 
-@author Son Nguyen <hoangson091104@gmail.com>
+@author Tanveer Hoque <tanvoid0@gmail.com>
 """
 
 __file_name__ = "statusline.py"
-__module__ = "Claude-Code-Agent-Monitor.statusline"
-__author__ = "Son Nguyen"
-__email__ = "hoangson091104@gmail.com"
-__maintainer__ = "Son Nguyen"
-__copyright__ = "Copyright (c) 2026 Son Nguyen"
+__module__ = "agent-monitor.statusline"
+__author__ = "Tanveer Hoque"
+__email__ = "tanvoid0@gmail.com"
+__maintainer__ = "Tanveer Hoque"
+__copyright__ = "Copyright (c) 2026 Tanveer Hoque"
 __license__ = "MIT"
 __version__ = "1.0.0"
 __status__ = "Production"
-__repository__ = "https://github.com/hoangsonww/Claude-Code-Agent-Monitor"
+__repository__ = "https://github.com/tanvoid0/agent-monitor"
 
 import sys
 import json

@@ -1,6 +1,6 @@
 /**
  * @file Unit tests for cross-platform monitoring binary URL/path resolution.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 const { describe, it } = require("node:test");
 const assert = require("node:assert/strict");
@@ -41,8 +41,8 @@ describe("monitoring paths", () => {
 
   it("normalizes Windows paths for Grafana YAML", () => {
     assert.equal(
-      toGrafanaPath("C:\\ccam\\monitoring\\grafana\\dashboards"),
-      "C:/ccam/monitoring/grafana/dashboards"
+      toGrafanaPath("C:\\am\\monitoring\\grafana\\dashboards"),
+      "C:/am/monitoring/grafana/dashboards"
     );
   });
 

@@ -4,7 +4,7 @@
  * (`eventBus`, the same one `useWebSocket` publishes to in App.tsx) for
  * `plan_model` (applied directly), `plan_updated`, and `plan_log` (both
  * re-pull the model — see the ponytail note in Plan.tsx for why).
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";

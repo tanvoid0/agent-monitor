@@ -3,7 +3,7 @@
  * session identity. The resulting session and agent cards live only in memory,
  * never enter SQLite, and hand off immediately when the process opens a durable
  * thread writer lock, including before a resumed thread receives a new message.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const crypto = require("node:crypto");

@@ -1,7 +1,7 @@
 /**
  * @file Unit tests for owner-attributed Claude and Codex task-progress
  * extraction from JSONL transcripts and Claude lifecycle event fallbacks.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { afterEach, describe, it, mock } = require("node:test");
@@ -15,7 +15,7 @@ const { extractSessionTaskProgress, clearTaskProgressCache } = require("../lib/t
 const roots = [];
 
 function tempRoot() {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "ccam-task-progress-"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "am-task-progress-"));
   roots.push(root);
   return root;
 }

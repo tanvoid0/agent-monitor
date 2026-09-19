@@ -2,7 +2,7 @@
  * @file workflow-tools.ts
  * @description MCP tools for aggregate and per-session workflow intelligence,
  * including Workflow-tool run journals and individual run drill-down.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { z } from "zod";

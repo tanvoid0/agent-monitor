@@ -1,9 +1,9 @@
 # Contributor License Agreement (CLA)
 
-**Project:** Claude Code Agent Monitor
-**Maintainer / "Project Owner":** Son Nguyen ([@hoangsonww](https://github.com/hoangsonww))
+**Project:** AgentMonitor
+**Maintainer / "Project Owner":** Tanveer Hoque ([@tanvoid0](https://github.com/tanvoid0))
 
-Thank you for your interest in contributing to Claude Code Agent Monitor (the
+Thank you for your interest in contributing to AgentMonitor (the
 "Project"). This Contributor License Agreement ("Agreement") documents the rights
 granted by contributors to the Project Owner. It protects you as a contributor as
 well as the Project Owner and the Project's users; it does **not** change your

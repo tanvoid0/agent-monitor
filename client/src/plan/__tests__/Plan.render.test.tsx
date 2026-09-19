@@ -5,7 +5,7 @@
  * through a mocked `planApi`: rail, board, agents panel, and the task detail
  * drawer (click and `?task=` deep link), plus the project picker's
  * route-param default and the tick checkbox's `$`/waiting/say rendering.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";

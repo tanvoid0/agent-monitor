@@ -5,7 +5,7 @@
  * normalize) and the badge itself: its label is a project EntityRef link and
  * its open-in-file-manager button is local only, calls
  * `POST /api/sessions/open-cwd`, and never bubbles to the card click.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect, vi } from "vitest";

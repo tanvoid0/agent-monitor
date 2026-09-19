@@ -2,7 +2,7 @@
  * @file Database setup and access layer using SQLite for sessions, agents,
  * events, token usage, and model pricing. Handles schema/migrations and
  * exposes prepared statements, including card-ready task/prompt previews.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 let Database;
@@ -37,7 +37,7 @@ try {
 }
 const path = require("path");
 const fs = require("fs");
-const { getDataDir } = require("./lib/claude-home");
+const { getDataDir, getClaudeHome } = require("./lib/claude-home");
 
 /**
  * Seed `targetPath` from the richest pre-existing database when none exists
@@ -59,6 +59,7 @@ function migrateLegacyDatabase(targetPath) {
     const candidates = [
       process.env.DASHBOARD_LEGACY_DB_PATH, // desktop app's old per-user DB
       path.join(__dirname, "..", "data", "dashboard.db"), // repo-local `npm start` DB
+      path.join(getClaudeHome(), "agent-dashboard", "dashboard.db"), // pre-3.0 data dir
     ].filter((p) => p && fs.existsSync(p));
     if (candidates.length === 0) return;
 
@@ -113,7 +114,7 @@ function migrateLegacyDatabase(targetPath) {
 
 // Resolution order: explicit DASHBOARD_DB_PATH wins; otherwise the file lives in
 // the shared data dir — DASHBOARD_DATA_DIR if set, else the canonical user-global
-// `~/.claude/agent-dashboard/` (see getDataDir). Resolving every launch path to
+// `~/.claude/agentmonitor/` (see getDataDir). Resolving every launch path to
 // the same file is what lets the web app and the native apps share ONE database.
 const DB_PATH = process.env.DASHBOARD_DB_PATH || path.join(getDataDir(), "dashboard.db");
 const DB_DIR = path.dirname(DB_PATH);

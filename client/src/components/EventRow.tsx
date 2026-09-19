@@ -6,7 +6,7 @@
  * the caller's time cell, the status badge, the caller's origin chips followed
  * by `buildEventTitle`, the tool chip and any trailing controls. The expanded
  * `EventDetail` panel stays with the caller, rendered below this row.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import type { ReactNode } from "react";

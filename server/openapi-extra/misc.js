@@ -23,7 +23,7 @@
  * run-detail agents and events arrays reference the base `Agent` /
  * `DashboardEvent` schemas. The `SessionsFacetsResponse` schema additionally
  * exposes a `sources` array (the distinct `sessions.source` values).
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const tags = [];
@@ -40,10 +40,7 @@ const schemas = {
         description:
           "Distinct, non-empty session working directories (the `cwd` column), sorted ascending. Powers the cwd filter dropdown.",
         items: { type: "string" },
-        example: [
-          "/Users/son/WebstormProjects/Claude-Code-Agent-Monitor",
-          "/Users/son/code/another-project",
-        ],
+        example: ["/Users/son/WebstormProjects/agent-monitor", "/Users/son/code/another-project"],
       },
       sources: {
         type: "array",
@@ -626,7 +623,7 @@ const paths = {
               schema: { $ref: "#/components/schemas/SessionsFacetsResponse" },
               example: {
                 cwds: [
-                  "/Users/son/WebstormProjects/Claude-Code-Agent-Monitor",
+                  "/Users/son/WebstormProjects/agent-monitor",
                   "/Users/son/code/another-project",
                 ],
                 sources: ["local", "4d1f0e2a-7b9c-4c33-8a21-9e0f7b6d4c11"],

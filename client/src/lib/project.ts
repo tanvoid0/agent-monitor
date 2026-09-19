@@ -8,7 +8,7 @@
  * `components/` so `ProjectBadge` (which renders an `EntityRef`) and
  * `entityMenu` (which `EntityRef` uses to build its menu) can both depend on
  * it without a cycle.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import type { TFunction } from "i18next";

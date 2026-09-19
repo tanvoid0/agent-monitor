@@ -13,7 +13,7 @@
  * `aria-live="polite"`, so the same confirmation reaches screen readers without
  * interrupting whatever they were reading.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { useEffect, useState } from "react";

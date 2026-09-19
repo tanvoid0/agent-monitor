@@ -1,6 +1,6 @@
 # Installation
 
-A step-by-step guide to get the Claude Code Agent Monitor up and running on your machine, with optional sections for importing history, running in a container, and using the native desktop app (macOS & Windows).
+A step-by-step guide to get the AgentMonitor up and running on your machine, with optional sections for importing history, running in a container, and using the native desktop app (macOS & Windows).
 
 ## Requirements
 
@@ -17,8 +17,8 @@ A step-by-step guide to get the Claude Code Agent Monitor up and running on your
 ## Step 1 — Clone the repository
 
 ```bash
-git clone https://github.com/hoangsonww/Claude-Code-Agent-Monitor.git
-cd Claude-Code-Agent-Monitor
+git clone https://github.com/tanvoid0/agent-monitor.git
+cd agent-monitor
 ```
 
 ---
@@ -29,7 +29,7 @@ cd Claude-Code-Agent-Monitor
 npm run setup
 ```
 
-This installs all server and client dependencies, plus the VS Code extension, and links the `ccam` CLI.
+This installs all server and client dependencies, plus the VS Code extension, and links the `am` CLI.
 
 A plain root install already covers server **and** client — a `postinstall` hook installs the client dependencies automatically, so this alone is enough to build and run the dashboard:
 
@@ -37,7 +37,7 @@ A plain root install already covers server **and** client — a `postinstall` ho
 npm install
 ```
 
-`npm run setup` additionally installs the VS Code extension, installs and builds the MCP package, and links the `ccam` CLI. The bundled Claude/Codex plugins use `ccam mcp stdio`, so the MCP build is part of normal setup. If you install with `--ignore-scripts`, the `postinstall` hook is skipped. Run `cd client && npm install` manually in that case.
+`npm run setup` additionally installs the VS Code extension, installs and builds the MCP package, and links the `am` CLI. The bundled Claude/Codex plugins use `am mcp stdio`, so the MCP build is part of normal setup. If you install with `--ignore-scripts`, the `postinstall` hook is skipped. Run `cd client && npm install` manually in that case.
 
 Or via Makefile (also installs MCP dependencies):
 
@@ -148,14 +148,14 @@ can be raised (the defaults are generous for typical use):
 
 | Variable                          | Default | Purpose                                                     |
 | --------------------------------- | ------- | ----------------------------------------------------------- |
-| `CCAM_IMPORT_MAX_BYTES`           | 1 GB    | Maximum size per uploaded file                              |
-| `CCAM_IMPORT_MAX_FILES`           | 2000    | Maximum files per upload request                            |
-| `CCAM_IMPORT_MAX_EXTRACT_BYTES`   | 4 GB    | Ceiling on uncompressed bytes per archive (zip-bomb guard)  |
+| `AM_IMPORT_MAX_BYTES`           | 1 GB    | Maximum size per uploaded file                              |
+| `AM_IMPORT_MAX_FILES`           | 2000    | Maximum files per upload request                            |
+| `AM_IMPORT_MAX_EXTRACT_BYTES`   | 4 GB    | Ceiling on uncompressed bytes per archive (zip-bomb guard)  |
 
 Set them before `npm run dev` or `npm start`:
 
 ```bash
-CCAM_IMPORT_MAX_EXTRACT_BYTES=17179869184 npm start   # allow 16 GB extraction
+AM_IMPORT_MAX_EXTRACT_BYTES=17179869184 npm start   # allow 16 GB extraction
 ```
 
 ---
@@ -192,25 +192,25 @@ The fastest path. There are two flavours:
 
 **1a. From the latest GitHub Release** *(recommended — public, no sign-in)*
 
-Open [**Releases → latest**](https://github.com/hoangsonww/Claude-Code-Agent-Monitor/releases/latest) and download the asset for your platform. CI publishes a new `vX.Y.Z` release automatically every time the version in `package.json` is bumped on `master`, so this link always points at the current shipping build.
+Open [**Releases → latest**](https://github.com/tanvoid0/agent-monitor/releases/latest) and download the asset for your platform. CI publishes a new `vX.Y.Z` release automatically every time the version in `package.json` is bumped on `master`, so this link always points at the current shipping build.
 
 | Platform | Asset | Notes |
 |---|---|---|
-| macOS (Apple Silicon) | `ClaudeCodeMonitor-<ver>-arm64.dmg` | drag into `/Applications` |
-| macOS (Intel) | `ClaudeCodeMonitor-<ver>-x64.dmg` | drag into `/Applications` |
-| Windows (installer) | `ClaudeCodeMonitor-Setup-<ver>-x64.exe` | per-user install, no admin |
-| Windows (portable) | `ClaudeCodeMonitor-<ver>-x64-portable.exe` | run without installing |
+| macOS (Apple Silicon) | `AgentMonitor-<ver>-arm64.dmg` | drag into `/Applications` |
+| macOS (Intel) | `AgentMonitor-<ver>-x64.dmg` | drag into `/Applications` |
+| Windows (installer) | `AgentMonitor-Setup-<ver>-x64.exe` | per-user install, no admin |
+| Windows (portable) | `AgentMonitor-<ver>-x64-portable.exe` | run without installing |
 
 **1b. From the per-commit CI artifact** *(useful for testing master before it's tagged — sign-in required, 14-day retention)*
 
-Every green run of the desktop CI jobs uploads a packaged artifact — `ClaudeCodeMonitor-dmg` from the `🍎 macOS Desktop (DMG)` job and `ClaudeCodeMonitor-win` from the `🪟 Windows Desktop (EXE)` job:
+Every green run of the desktop CI jobs uploads a packaged artifact — `AgentMonitor-dmg` from the `🍎 macOS Desktop (DMG)` job and `AgentMonitor-win` from the `🪟 Windows Desktop (EXE)` job:
 
-- **Via the GitHub UI:** open the latest passing run under [Actions](https://github.com/hoangsonww/Claude-Code-Agent-Monitor/actions/workflows/ci.yml?query=branch%3Amaster+is%3Asuccess), scroll to **Artifacts**, and download `ClaudeCodeMonitor-dmg` (macOS) or `ClaudeCodeMonitor-win` (Windows).
+- **Via the GitHub UI:** open the latest passing run under [Actions](https://github.com/tanvoid0/agent-monitor/actions/workflows/ci.yml?query=branch%3Amaster+is%3Asuccess), scroll to **Artifacts**, and download `AgentMonitor-dmg` (macOS) or `AgentMonitor-win` (Windows).
 - **Via the `gh` CLI:**
 
   ```bash
-  gh run download <run-id> -R hoangsonww/Claude-Code-Agent-Monitor -n ClaudeCodeMonitor-dmg   # macOS
-  gh run download <run-id> -R hoangsonww/Claude-Code-Agent-Monitor -n ClaudeCodeMonitor-win   # Windows
+  gh run download <run-id> -R tanvoid0/agent-monitor -n AgentMonitor-dmg   # macOS
+  gh run download <run-id> -R tanvoid0/agent-monitor -n AgentMonitor-win   # Windows
   ```
 
   Unzip the macOS artifact to get the `.dmg`s, or the Windows artifact to get the NSIS installer + portable `.exe`s.
@@ -222,7 +222,7 @@ Then jump to [Install the app](#install-the-app).
 From the project root, after `git clone`. electron-builder packages for the **host OS**, so build the macOS DMG on a Mac and the Windows `.exe` on Windows. The common prelude is the same:
 
 ```bash
-npm run setup                # install root + client + vscode-extension + MCP deps, build MCP, link ccam
+npm run setup                # install root + client + vscode-extension + MCP deps, build MCP, link am
 npm run build                # build the React client (the SPA the window loads)
 npm run desktop:install      # install Electron + electron-builder into desktop/
 
@@ -255,35 +255,35 @@ The artifact lands in `desktop/release/`. Pick the build command that matches yo
 
 **macOS.** Each `desktop:dmg*` build wipes `release/` first. `desktop:dmg:arm64`
 → `…-arm64.dmg` and `desktop:dmg:x64` → `…-x64.dmg` each emit a single DMG whose
-mounted-volume title states the architecture (e.g. *Claude Code Monitor (Apple
+mounted-volume title states the architecture (e.g. *AgentMonitor (Apple
 Silicon)*); `desktop:dmg` emits **both** (`…-arm64.dmg` + `…-x64.dmg`) for
 release. Install the one matching your Mac: an x64 build on Apple Silicon makes
 macOS prompt for Rosetta.
 
 ```bash
-open desktop/release/ClaudeCodeMonitor-*-arm64.dmg   # the arch you built
+open desktop/release/AgentMonitor-*-arm64.dmg   # the arch you built
 ```
 
-1. The DMG mounts — drag **Claude Code Monitor** into your `Applications` folder.
+1. The DMG mounts — drag **AgentMonitor** into your `Applications` folder.
 2. The DMG is ad-hoc signed, so macOS Gatekeeper shows a warning (*"Apple could not verify…"*) on first launch. Strip the quarantine attribute, then open it:
 
    ```bash
-   xattr -cr "/Applications/Claude Code Monitor.app"
-   open "/Applications/Claude Code Monitor.app"
+   xattr -cr "/Applications/AgentMonitor.app"
+   open "/Applications/AgentMonitor.app"
    ```
 
    Alternatively, open  → *System Settings → Privacy & Security* and click *Open Anyway*.
 
 **Windows.**
 
-1. Run `ClaudeCodeMonitor-Setup-<ver>-x64.exe`. It installs **per-user** (no administrator elevation) and lets you pick the install directory — or run the `*-portable.exe` to launch without installing.
+1. Run `AgentMonitor-Setup-<ver>-x64.exe`. It installs **per-user** (no administrator elevation) and lets you pick the install directory — or run the `*-portable.exe` to launch without installing.
 2. The installer is **unsigned** by default, so Windows **SmartScreen** may show *"Windows protected your PC"* on first launch — click **More info → Run anyway**.
 3. Launch from the Start menu / desktop shortcut.
 
 Once running, the embedded server boots on port `4820` (or adopts an already-healthy server on `4820`, or falls back to `4821`–`4829` / a random high port), the menu-bar / notification-area (tray) icon appears, and the dashboard window opens. **Hooks are installed automatically on first boot** — an install-only user does not need `npm run install-hooks`; just start a new Claude Code session. Closing the window hides it but keeps the server running; **Quit** from the tray exits.
 
 > [!NOTE]
-> The packaged app stores its SQLite database and VAPID keys in a per-user app-data directory **outside** the app bundle / install dir — `~/Library/Application Support/Claude Code Monitor/data/` on macOS, `%APPDATA%\Claude Code Monitor\data\` on Windows. Your imported history and events therefore **survive app reinstalls and updates** (the Windows NSIS uninstaller keeps this data by default). (Older macOS builds kept the database inside the bundle, which is read-only once installed and code-signed — that broke History Import; it is now fixed. If you are upgrading from a pre-fix build, there is a one-time data gap: re-run **Settings → Import History → Rescan** once.)
+> The packaged app stores its SQLite database and VAPID keys in a per-user app-data directory **outside** the app bundle / install dir — `~/Library/Application Support/AgentMonitor/data/` on macOS, `%APPDATA%\AgentMonitor\data\` on Windows. Your imported history and events therefore **survive app reinstalls and updates** (the Windows NSIS uninstaller keeps this data by default). (Older macOS builds kept the database inside the bundle, which is read-only once installed and code-signed — that broke History Import; it is now fixed. If you are upgrading from a pre-fix build, there is a one-time data gap: re-run **Settings → Import History → Rescan** once.)
 
 Full user guide: [`DESKTOP.md`](DESKTOP.md). Contributor / architecture reference: [`desktop/README.md`](desktop/README.md). Desktop-specific setup details (logs, auto-start, port adoption) are in [SETUP.md → Desktop App Setup](./SETUP.md#desktop-app-setup).
 
@@ -351,7 +351,7 @@ See [`.codex/README.md`](./.codex/README.md) for Codex extension details.
 
 ## Optional: VS Code extension
 
-The **Claude Code Agent Monitor** is also available as a dedicated VS Code extension for seamless, integrated monitoring.
+The **AgentMonitor** is also available as a dedicated VS Code extension for seamless, integrated monitoring.
 
 <p align="center">
   <img src="vscode-extension/vscode.png" alt="VS Code Extension Screenshot" width="100%">
@@ -378,7 +378,7 @@ The **Claude Code Agent Monitor** is also available as a dedicated VS Code exten
 For advanced configuration, refer to the [.vscode](./.vscode) and [vscode-extension](./vscode-extension) directories.
 
 > [!TIP]
-> Extension on VS Code Marketplace: [Claude Code Agent Monitor](https://marketplace.visualstudio.com/items?itemName=hoangsonw.claude-code-agent-monitor)
+> Extension on VS Code Marketplace: [AgentMonitor](https://marketplace.visualstudio.com/items?itemName=hoangsonw.agentmonitor)
 
 ---
 
@@ -409,7 +409,7 @@ SQLite and dashboard-owned config.
 
 > [!IMPORTANT]
 > Install hooks on the host. For remote cloud hooks, use
-> `CCAM_DASHBOARD_URL=https://...` and `CCAM_HOOK_TOKEN`; non-loopback targets
+> `AM_DASHBOARD_URL=https://...` and `AM_HOOK_TOKEN`; non-loopback targets
 > require HTTPS. See [`DEPLOYMENT.md`](DEPLOYMENT.md) for the full stack,
 > Kubernetes, Terraform, backup, restore, and rollback.
 
@@ -498,13 +498,13 @@ See [SETUP.md — Troubleshooting](./SETUP.md#troubleshooting) for detailed hook
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| *"Apple could not verify…"* on first launch (macOS) | The DMG is ad-hoc signed (no paid Apple Developer ID) | `xattr -cr "/Applications/Claude Code Monitor.app"`, then open it — or use *System Settings → Privacy & Security → Open Anyway* |
+| *"Apple could not verify…"* on first launch (macOS) | The DMG is ad-hoc signed (no paid Apple Developer ID) | `xattr -cr "/Applications/AgentMonitor.app"`, then open it — or use *System Settings → Privacy & Security → Open Anyway* |
 | *"Windows protected your PC"* on first launch (Windows) | The `.exe` is unsigned by default, so SmartScreen prompts | Click **More info → Run anyway** |
 | `npm run desktop:dmg` seems slow (macOS) | Not hung — it packages two architectures back-to-back (`arch=x64` then `arch=arm64`) | Wait it out, or use `npm run desktop:dmg:arm64` / `npm run desktop:dmg:x64` for a fast single-arch build |
 | `entry file out/main.js does not exist` | `npm run clean` (in `desktop/`) deleted `out/`; `electron-builder` only packages, it does not compile | Re-run `npm run desktop:build` (or just use a `desktop:dmg*` / `desktop:win*` script, which chains the build) |
-| Desktop window opens but is blank | The embedded server failed `/api/health` within 30 s | Check the desktop log (`~/Library/Logs/Claude Code Monitor/desktop.log` on macOS, `%APPDATA%\Claude Code Monitor\logs\desktop.log` on Windows), then tray → *Restart Server* |
+| Desktop window opens but is blank | The embedded server failed `/api/health` within 30 s | Check the desktop log (`~/Library/Logs/AgentMonitor/desktop.log` on macOS, `%APPDATA%\AgentMonitor\logs\desktop.log` on Windows), then tray → *Restart Server* |
 | "Run Claude" says `claude` is not on your PATH | A Finder/Dock-launched macOS app only inherits launchd's minimal PATH, not your login-shell PATH (on Windows the process already inherits the user PATH) | The app recovers your login-shell PATH at startup so it can find and spawn the `claude` CLI. If it still fails, make sure `claude` is a real executable on your shell PATH — not a shell alias or function |
-| Imported history vanished after updating the app | Older builds stored the database inside the (replaceable) `.app` bundle | Fixed — data now lives in the per-user app-data dir (`~/Library/Application Support/Claude Code Monitor/data/` on macOS, `%APPDATA%\Claude Code Monitor\data\` on Windows) and survives reinstalls/updates. After upgrading from a pre-fix build, re-run **Settings → Import History → Rescan** once |
+| Imported history vanished after updating the app | Older builds stored the database inside the (replaceable) `.app` bundle | Fixed — data now lives in the per-user app-data dir (`~/Library/Application Support/AgentMonitor/data/` on macOS, `%APPDATA%\AgentMonitor\data\` on Windows) and survives reinstalls/updates. After upgrading from a pre-fix build, re-run **Settings → Import History → Rescan** once |
 
 ---
 

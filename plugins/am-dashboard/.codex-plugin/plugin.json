@@ -1,0 +1,30 @@
+{
+  "name": "am-dashboard",
+  "version": "3.0.0",
+  "description": "Direct MCP integration with the AgentMonitor dashboard — real-time session data access, quick stats, and dashboard health monitoring via Model Context Protocol.",
+  "author": {
+    "name": "Tanveer Hoque",
+    "email": "tanvoid0@gmail.com",
+    "url": "https://github.com/tanvoid0"
+  },
+  "homepage": "https://github.com/tanvoid0/agent-monitor",
+  "repository": "https://github.com/tanvoid0/agent-monitor",
+  "license": "MIT",
+  "keywords": ["dashboard", "mcp", "connector", "real-time", "monitoring", "claude-code"],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "AgentMonitor Dashboard",
+    "shortDescription": "Direct MCP integration with the AgentMonitor dashboard — real-time session data access,...",
+    "longDescription": "Direct MCP integration with the AgentMonitor dashboard — real-time session data access, quick stats, and dashboard health monitoring via Model Context Protocol.",
+    "developerName": "Tanveer Hoque",
+    "category": "Developer Tools",
+    "capabilities": ["Read", "Write"],
+    "websiteURL": "https://github.com/tanvoid0/agent-monitor",
+    "defaultPrompt": [
+      "Use AgentMonitor Dashboard to inspect the local AgentMonitor dashboard.",
+      "Use AgentMonitor Dashboard to analyze recent agent activity."
+    ],
+    "brandColor": "#6366F1"
+  }
+}

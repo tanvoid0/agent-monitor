@@ -4,7 +4,7 @@
  * grid: a card shell with a `SectionHeader`, a label/value row, a centered
  * mini-stat, and a labelled progress bar. Extracted from `SystemHealthTab`
  * where these shapes were copy-pasted across its nine panels.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import type { ReactNode } from "react";

@@ -3,7 +3,7 @@
  * @description Unit tests for the typed href builders in `lib/routes.ts`: param names,
  * encoding, omission of empty values, repeated `cwd` params, forced session tabs, the
  * `#agent-<id>` hash, and `absoluteHref`.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect } from "vitest";

@@ -11,7 +11,7 @@
  * `sessions.source`, or, for tables that only carry a `session_id`, as a
  * subquery so complex aggregate SQL (stats, analytics) needs only one extra AND.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 /**

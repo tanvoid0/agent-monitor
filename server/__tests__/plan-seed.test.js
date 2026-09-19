@@ -5,7 +5,7 @@
  * Lane D box D1). Not a join/route test — server/plan/**'s own tests (Lane S)
  * cover the read side.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { describe, it, before, after } = require("node:test");

@@ -2,7 +2,7 @@
  * @file remote-tools.ts
  * @description MCP tools for Remote Data Sources — list configured SSH sources
  * and trigger on-demand syncs so agents can operate remotes without the UI/CLI.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { z } from "zod";

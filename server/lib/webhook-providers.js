@@ -8,7 +8,7 @@
  * for the redacted provider metadata exposed to the UI.
  *
  * Adding a provider = one entry here (+ a formatter). No delivery/route changes.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 // ── Shared helpers ──────────────────────────────────────────────────────────
@@ -78,14 +78,14 @@ function formatDiscord(alert) {
   if (alert.agent_id)
     fields.push({ name: "Agent", value: truncate(alert.agent_id, 1024), inline: true });
   return {
-    username: "Claude Code Monitor",
+    username: "AgentMonitor",
     embeds: [
       {
         title: truncate(`🔔 ${alert.rule_name}`, 256),
         description: truncate(alert.message, 4000),
         color: ACCENT_INT,
         fields,
-        footer: { text: "Claude Code Agent Monitor" },
+        footer: { text: "AgentMonitor" },
         timestamp: alert.triggered_at,
       },
     ],
@@ -144,7 +144,7 @@ function formatGoogleChat(alert) {
 // Mattermost incoming webhook — Slack-compatible (legacy attachments).
 function formatMattermost(alert) {
   return {
-    username: "Claude Code Monitor",
+    username: "AgentMonitor",
     text: `🔔 **${alert.rule_name}**`,
     attachments: [
       {
@@ -152,7 +152,7 @@ function formatMattermost(alert) {
         color: ACCENT_HEX,
         text: truncate(alert.message, 3000),
         fields: attachmentFields(alert),
-        footer: "Claude Code Agent Monitor",
+        footer: "AgentMonitor",
       },
     ],
   };
@@ -161,7 +161,7 @@ function formatMattermost(alert) {
 // Rocket.Chat incoming webhook — text + Slack-style attachments.
 function formatRocketChat(alert) {
   return {
-    alias: "Claude Code Monitor",
+    alias: "AgentMonitor",
     text: `🔔 *${alert.rule_name}*`,
     attachments: [
       {
@@ -196,10 +196,10 @@ function formatPagerDuty(alert, config) {
   return {
     routing_key: config.routing_key,
     event_action: "trigger",
-    dedup_key: `ccam:${alert.rule_id || "test"}:${alert.session_id || ""}`,
+    dedup_key: `am:${alert.rule_id || "test"}:${alert.session_id || ""}`,
     payload: {
       summary: truncate(`${alert.rule_name}: ${alert.message}`, 1024),
-      source: alert.session_id || "claude-code-agent-monitor",
+      source: alert.session_id || "agentmonitor",
       severity: config.severity || "warning",
       custom_details: {
         rule_name: alert.rule_name,
@@ -219,9 +219,9 @@ function formatPagerDuty(alert, config) {
 function formatOpsgenie(alert) {
   return {
     message: truncate(`${alert.rule_name}: ${alert.message}`, 130),
-    alias: `ccam:${alert.rule_id || "test"}:${alert.session_id || ""}`,
+    alias: `am:${alert.rule_id || "test"}:${alert.session_id || ""}`,
     description: truncate(alert.message, 15000),
-    source: "claude-code-agent-monitor",
+    source: "agentmonitor",
     tags: ["claude-code", alert.rule_type].filter(Boolean),
     details: {
       rule_name: String(alert.rule_name),
@@ -238,13 +238,13 @@ function formatOpsgenie(alert) {
 function formatSplunkOnCall(alert, config) {
   return {
     message_type: config.severity || "WARNING",
-    entity_id: `ccam:${alert.rule_id || "test"}:${alert.session_id || ""}`,
+    entity_id: `am:${alert.rule_id || "test"}:${alert.session_id || ""}`,
     entity_display_name: truncate(alert.rule_name, 256),
     state_message: truncate(
       `${alert.message}\n\ntype: ${alert.rule_type}${alert.session_id ? `\nsession: ${alert.session_id}` : ""}`,
       20000
     ),
-    monitoring_tool: "claude-code-agent-monitor",
+    monitoring_tool: "agentmonitor",
   };
 }
 
@@ -254,7 +254,7 @@ function formatSplunkOnCall(alert, config) {
 function formatGeneric(alert) {
   return {
     event: "alert.triggered",
-    source: "claude-code-agent-monitor",
+    source: "agentmonitor",
     sent_at: new Date().toISOString(),
     alert: {
       id: alert.id ?? null,

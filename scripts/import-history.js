@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Import legacy Claude Code sessions from ~/.claude/ into the Agent Dashboard.
+ * Import legacy Claude Code sessions from ~/.claude/ into the AgentMonitor.
  * Reads per-project JSONL session files to populate sessions, agents, token
  * usage, and compact recent-human-turn card context that existed before the
  * dashboard was installed.
@@ -9,7 +9,7 @@
  * Can be run standalone: node scripts/import-history.js [--dry-run] [--project <name>]
  * Also exported for auto-import on server startup.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const fs = require("fs");
@@ -2156,7 +2156,7 @@ async function reconcileTokens(dbModule, options = {}) {
     // then fall back to the transcript path persisted on the session row. The
     // scan alone misses every Claude session whose transcript lives outside
     // the default tree — e.g. one imported from a custom directory via
-    // `ccam import path`, or a non-default CLAUDE_HOME — which would silently
+    // `am import path`, or a non-default CLAUDE_HOME — which would silently
     // leave those sessions un-repaired despite having a transcript on disk.
     let jsonlPath = sessionPaths.get(sessionId);
     if (!jsonlPath && storedPath && storedPath.endsWith(".jsonl")) {

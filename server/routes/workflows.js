@@ -1,6 +1,6 @@
 /**
  * @file Express router for provider-scoped workflow intelligence endpoints. It aggregates Claude Code and Codex session, agent, token, tool, compaction, and error data without presenting unsupported Codex capabilities as Claude-specific workflow runs.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { Router } = require("express");

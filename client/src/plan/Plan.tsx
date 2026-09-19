@@ -9,7 +9,7 @@
  * pipeline (`plan_updated`, `plan_model`, `plan_log`). `?task=<key>` opens the
  * task drawer (written back with replace semantics); agent rows, task-card
  * agent badges and the project cwd are `EntityRef` chips.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";

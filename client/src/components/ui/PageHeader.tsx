@@ -4,7 +4,7 @@
  * back button (function), right-aligned actions, and an optional second row
  * (`children`) for tabs or filters. Classes mirror the Dashboard header; no
  * outer margin — pages space with their own column gap.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import type { ReactNode } from "react";

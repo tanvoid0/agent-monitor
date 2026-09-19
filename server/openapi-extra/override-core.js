@@ -20,7 +20,7 @@
  *   - `schemas`: {} (no new schemas — reuse base `$ref`s only)
  *   - `paths`:   the enriched override operations keyed by path
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 "use strict";

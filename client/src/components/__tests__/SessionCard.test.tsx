@@ -4,7 +4,7 @@
  * preserving provider-native session titles, two-turn human task context, no
  * redundant ID badge, the EntityRef title link + session context menu, and
  * the one-line `row` variant.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, expect, it, vi } from "vitest";

@@ -1,12 +1,12 @@
 /**
  * @file index.ts
  * @description The main entry point for the MCP application, responsible for initializing the server, loading configuration, setting up logging, and starting the appropriate transport based on configuration or command-line arguments. The application supports multiple transport modes (stdio, http, repl) and includes graceful shutdown handling. It also collects tools and registers them with the server when using HTTP or REPL transports. The main function orchestrates the startup process and ensures that any unhandled errors are logged before exiting.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/mcp/src/index.ts`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/mcp/src/index.ts`
  * **Purpose:** Dashboard module consumed by the React client, MCP tools, or desktop shell depending on deployment mode.
  *
  * ## Design constraints
@@ -112,7 +112,7 @@ async function main() {
 
     await server.connect(stdioTransport);
 
-    logger.info("Agent Dashboard MCP server started", {
+    logger.info("AgentMonitor MCP server started", {
       serverName: config.serverName,
       serverVersion: config.serverVersion,
       dashboardBaseUrl: config.dashboardBaseUrl.toString(),

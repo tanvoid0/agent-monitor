@@ -17,12 +17,12 @@
  * because showing a hint twice is a nuisance while never showing it is the bug
  * this module exists to fix.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { useCallback, useSyncExternalStore } from "react";
 
-const STORAGE_KEY = "ccam-palette-discovered";
+const STORAGE_KEY = "am-palette-discovered";
 
 /** In-memory mirror so a hint hides the instant the palette opens. */
 let discovered = read();

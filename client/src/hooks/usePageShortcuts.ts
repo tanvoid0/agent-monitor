@@ -7,7 +7,7 @@
  * links shareable. Without it the palette could only ever reach a page, never a
  * view inside it.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { useCallback } from "react";

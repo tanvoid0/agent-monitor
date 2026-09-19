@@ -34,7 +34,6 @@ Under `.codex/skills/`:
 - `repo-onboarding` — architecture discovery and verification selection
 - `mcp-maintainer` — MCP server operations and troubleshooting
 - `release-guard` — release readiness checks
-- `push-to-forked-pr` — update a PR whose head branch lives on a fork
 - `i18n-parity` — keep every localization surface in parity across all supported
   languages (mirrored from `.claude/skills/i18n-parity/`, which also holds
   `i18n-audit.sh` and `sync-agent-mirrors.sh`)
@@ -46,9 +45,9 @@ Also reachable from the shared `.agents/skills/` tree:
 ## Plugin marketplace
 
 ```bash
-codex plugin marketplace add hoangsonww/Claude-Code-Agent-Monitor
-codex plugin list --marketplace claude-code-agent-monitor-plugins --available --json
-codex plugin add ccam-platform@claude-code-agent-monitor-plugins
+codex plugin marketplace add tanvoid0/agent-monitor
+codex plugin list --marketplace agentmonitor-plugins --available --json
+codex plugin add am-platform@agentmonitor-plugins
 ```
 
 The marketplace contains 14 plugins and 66 bundled skills. The same plugin
@@ -59,10 +58,10 @@ separate while skill instructions remain shared.
 
 ```bash
 # List all repository skills without installing
-npx skills add hoangsonww/Claude-Code-Agent-Monitor --list
+npx skills add tanvoid0/agent-monitor --list
 
 # Install mcp-server into the current project for Codex
-npx skills add hoangsonww/Claude-Code-Agent-Monitor \
+npx skills add tanvoid0/agent-monitor \
   --skill mcp-server \
   --agent codex \
   --yes
@@ -71,7 +70,7 @@ npx skills add hoangsonww/Claude-Code-Agent-Monitor \
 npx skills list --json
 
 # Install and verify globally
-npx skills add hoangsonww/Claude-Code-Agent-Monitor \
+npx skills add tanvoid0/agent-monitor \
   --skill mcp-server \
   --agent codex \
   --global \
@@ -87,7 +86,7 @@ npx skills update --global --yes
 npx skills remove --global mcp-server --yes
 ```
 
-The skills CLI discovers 77 repository skills. Codex project installs use
+The skills CLI discovers 76 repository skills. Codex project installs use
 `.agents/skills/`; global installs use `${CODEX_HOME:-~/.codex}/skills/`.
 Multi-agent installs may deduplicate files through a shared store and create
 agent-specific links. Run `npm run extensions:sync`

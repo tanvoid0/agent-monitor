@@ -3,7 +3,7 @@
  * @description Tests for the kit Button and IconButton: variant/size classes,
  * `to` rendering a react-router link with the same classes, loading state,
  * and IconButton's required accessible name.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect, vi } from "vitest";

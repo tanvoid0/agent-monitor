@@ -4,7 +4,7 @@
  * files. One fact per line, no tables, hh:mm:ss absolute, `12s ago` / `3m` /
  * `1.2h` relative. A port of the v2 board's text_* functions; `wip` adds the
  * `$` figure, `summary` adds the WAITING chip.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { walk } = require("./parser");

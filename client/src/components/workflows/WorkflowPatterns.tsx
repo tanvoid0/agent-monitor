@@ -1,12 +1,12 @@
 /**
  * @file WorkflowPatterns.tsx
  * @description Defines the WorkflowPatterns React component that visualizes common workflow patterns detected from session data. It displays a ranked list of patterns based on their frequency, showing the sequence of agent steps in each pattern along with an icon representing the type of workflow. The component also handles cases where no patterns are detected and includes a special item for solo sessions without subagents. Users can click on a pattern to trigger a callback with the pattern's steps for further analysis or filtering.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/client/src/components/workflows/WorkflowPatterns.tsx`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/client/src/components/workflows/WorkflowPatterns.tsx`
  * **Purpose:** Workflow analytics visualization built on D3; consumes aggregated session/run metrics from the workflows API.
  *
  * ## Design constraints

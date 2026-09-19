@@ -2,7 +2,7 @@
  * @file Small JSON-RPC client for Codex's local `app-server --stdio` bridge.
  * It intentionally owns no dashboard policy: callers start threads, turns,
  * and model discovery through the same protocol Codex's native app uses.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { EventEmitter } = require("node:events");
@@ -114,7 +114,7 @@ class CodexAppServer extends EventEmitter {
 
   async initialize() {
     return this.request("initialize", {
-      clientInfo: { name: "claude-code-agent-monitor", version: "1.0.0" },
+      clientInfo: { name: "agentmonitor", version: "1.0.0" },
       capabilities: { experimentalApi: true },
     });
   }

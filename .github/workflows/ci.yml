@@ -1,4 +1,4 @@
-# CI / CD Pipeline for Claude Code Agent Monitor
+# CI / CD Pipeline for AgentMonitor
 #
 # This workflow runs on every push and pull request, executing the following stages:
 # 1. Format Check: Ensures code adheres to formatting standards.
@@ -7,7 +7,7 @@
 # 4. Detect Changed Paths: A `dorny/paths-filter` job that flags `desktop/**` (or workflow) changes so the desktop job below stays
 #    path-filtered without hard-coding a branch name.
 # 5. Desktop Apps (DMG + EXE): Builds the Electron desktop app for macOS on `macos-latest` (uploads two
-#    `ClaudeCodeMonitor-*.dmg` artifacts, arm64 + x64) and for Windows on `windows-latest` (uploads `ClaudeCodeMonitor-win`:
+#    `AgentMonitor-*.dmg` artifacts, arm64 + x64) and for Windows on `windows-latest` (uploads `AgentMonitor-win`:
 #    an NSIS installer + a no-install portable `.exe`). Universal macOS builds were dropped because @electron/universal's
 #    merge step hangs/errors on this repo's extraResources layout (parent-path sources); two single-arch DMGs ship the same
 #    payload without the merge step. Both jobs run on any push, when the changes job flagged `desktop/**`, or when a PR
@@ -24,8 +24,8 @@
 #    icons, commit details, and links to artifacts if applicable.
 # Any failure in the stages will cause the pipeline to fail, ensuring that only well-formatted, tested, and built code is merged and deployed.
 #
-# Author: Son Nguyen <hoangson091104@gmail.com>
-name: 🚀 CI / CD Pipeline for Claude Code Agent Monitor
+# Author: Tanveer Hoque <tanvoid0@gmail.com>
+name: 🚀 CI / CD Pipeline for AgentMonitor
 
 on:
   push:
@@ -39,7 +39,7 @@ on:
 
 env:
   NODE_VERSION: "24"
-  IMAGE_NAME: claude-code-agent-monitor
+  IMAGE_NAME: agentmonitor
 
 jobs:
   # ────────────────────────────────────────────────────────────────
@@ -221,7 +221,7 @@ jobs:
             fi
             echo "::endgroup::"
             echo "DMG build attempt ${attempt} failed; detaching stale volumes"
-            for vol in "/Volumes/Claude Code Monitor"*; do
+            for vol in "/Volumes/AgentMonitor"*; do
               if [ -d "${vol}" ]; then
                 hdiutil detach -force "${vol}" || true
               fi
@@ -246,7 +246,7 @@ jobs:
       - name: Upload DMG artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: ClaudeCodeMonitor-dmg
+          name: AgentMonitor-dmg
           path: desktop/release/*.dmg
           retention-days: 14
 
@@ -255,7 +255,7 @@ jobs:
   #   Mirrors the macOS desktop job on windows-latest. Runs on any  #
   #   push, when the changes job flagged desktop/**, or when a PR    #
   #   carries the 'desktop' label. Produces an NSIS installer and a  #
-  #   no-install portable .exe, uploaded as ClaudeCodeMonitor-win.   #
+  #   no-install portable .exe, uploaded as AgentMonitor-win.   #
   # ────────────────────────────────────────────────────────────────
   desktop-win:
     name: "🪟 Windows Desktop (EXE)"
@@ -363,7 +363,7 @@ jobs:
       - name: Upload Windows artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: ClaudeCodeMonitor-win
+          name: AgentMonitor-win
           path: desktop/release/*.exe
           retention-days: 14
 
@@ -457,7 +457,7 @@ jobs:
           file: ./Dockerfile
           target: runtime
           load: true
-          tags: ccam-dashboard:ci
+          tags: am-dashboard:ci
           cache-from: type=gha,scope=app
           cache-to: type=gha,mode=max,scope=app
 
@@ -468,7 +468,7 @@ jobs:
           file: ./mcp/Dockerfile
           target: runtime
           load: true
-          tags: ccam-mcp:ci
+          tags: am-mcp:ci
           cache-from: type=gha,scope=mcp
           cache-to: type=gha,mode=max,scope=mcp
 
@@ -575,14 +575,14 @@ jobs:
         if: steps.check.outputs.exists == 'false'
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
-          name: ClaudeCodeMonitor-dmg
+          name: AgentMonitor-dmg
           path: dmg
 
       - name: Download Windows EXE artifact
         if: steps.check.outputs.exists == 'false'
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
-          name: ClaudeCodeMonitor-win
+          name: AgentMonitor-win
           path: win
 
       - name: Publish release

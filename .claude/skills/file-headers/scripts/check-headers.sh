@@ -2,12 +2,12 @@
 # check-headers.sh — audit the repo for applicable source files missing the
 # mandatory copyright/authorship header (see .claude/skills/file-headers).
 # Prints each non-compliant file; exits 0 when fully compliant, 1 otherwise.
-# @author Son Nguyen <hoangson091104@gmail.com>
+# @author Tanveer Hoque <tanvoid0@gmail.com>
 
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
-AUTHOR_MARK="@author Son Nguyen"
+AUTHOR_MARK="@author Tanveer Hoque"
 
 missing=0
 while IFS= read -r f; do
@@ -18,7 +18,8 @@ while IFS= read -r f; do
 done < <(
   find "$ROOT" \
     \( -name node_modules -o -name dist -o -name build -o -name .git \
-       -o -name .worktrees \
+       -o -name .worktrees -o -path "$ROOT/.claude/worktrees" \
+       -o -path "$ROOT/desktop/release" \
        -o -path "$ROOT/data" -o -path "$ROOT/monitoring/.bin" \
        -o -path "$ROOT/monitoring/.data" -o -name "__snapshots__" \) -prune -o \
     -type f \( -name "*.js" -o -name "*.ts" -o -name "*.tsx" -o -name "*.cjs" \

@@ -7,7 +7,7 @@ most common review comment on localization PRs. This file is the tie-breaker.
 
 | Category | Examples |
 |---|---|
-| Code and commands | anything inside `<code>` / backticks, `npm run dev`, `ccam sessions` |
+| Code and commands | anything inside `<code>` / backticks, `npm run dev`, `am sessions` |
 | Paths and URLs | `client/src/i18n/index.ts`, `~/.claude/settings.json`, any link target |
 | Env vars and CLI flags | `DASHBOARD_TOKEN_REPAIR`, `--list`, `PORT` |
 | HTTP | `GET`, `POST`, `404`, `WebSocket`, `SSE` |

@@ -1,0 +1,29 @@
+{
+  "name": "am-productivity",
+  "version": "3.0.0",
+  "description": "Productivity workflows for Claude Code — daily standups, weekly reports, sprint summaries, and intelligent workflow optimization powered by Agent Monitor session data.",
+  "author": {
+    "name": "Tanveer Hoque",
+    "email": "tanvoid0@gmail.com",
+    "url": "https://github.com/tanvoid0"
+  },
+  "homepage": "https://github.com/tanvoid0/agent-monitor",
+  "repository": "https://github.com/tanvoid0/agent-monitor",
+  "license": "MIT",
+  "keywords": ["productivity", "standup", "reports", "sprint", "workflow", "claude-code"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "AgentMonitor Productivity",
+    "shortDescription": "Productivity workflows for Claude Code — daily standups, weekly reports, sprint summaries,...",
+    "longDescription": "Productivity workflows for Claude Code — daily standups, weekly reports, sprint summaries, and intelligent workflow optimization powered by Agent Monitor session data.",
+    "developerName": "Tanveer Hoque",
+    "category": "Productivity",
+    "capabilities": ["Read"],
+    "websiteURL": "https://github.com/tanvoid0/agent-monitor",
+    "defaultPrompt": [
+      "Use AgentMonitor Productivity to inspect the local AgentMonitor dashboard.",
+      "Use AgentMonitor Productivity to analyze recent agent activity."
+    ],
+    "brandColor": "#6366F1"
+  }
+}

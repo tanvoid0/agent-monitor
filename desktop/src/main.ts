@@ -11,12 +11,12 @@
  * Single-instance is enforced on every platform via `requestSingleInstanceLock`
  * so double-launching (a second Dock click, or the Windows Start-Menu shortcut)
  * just focuses the existing window instead of spawning a second tray + server.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/desktop/src/main.ts`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/desktop/src/main.ts`
  * **Purpose:** Dashboard module consumed by the React client, MCP tools, or desktop shell depending on deployment mode.
  *
  * ## Design constraints
@@ -75,6 +75,13 @@ import { ensureUserPath } from "./shell-path";
 import { createTray } from "./tray";
 import { appIconPath, createDashboardWindow } from "./window";
 
+// Legacy `CCAM_*` env names still work: mirror them onto `AM_*` (new name wins).
+for (const [key, value] of Object.entries(process.env)) {
+  if (!key.startsWith("CCAM_")) continue;
+  const next = "AM_" + key.slice("CCAM_".length);
+  if (process.env[next] === undefined) process.env[next] = value;
+}
+
 /** Single mutable record of process-wide state, held in the module-level
  * `state` singleton below rather than passed around — this main-process
  * entry point has exactly one window, one tray, and one server, so a class
@@ -104,7 +111,7 @@ const state: AppState = {
 };
 
 /**
- * Show the "Quit Claude Code Monitor?" confirmation dialog. Clicking Quit
+ * Show the "Quit AgentMonitor?" confirmation dialog. Clicking Quit
  * runs the synchronous teardown and exits. Pressing ⌘Q again while the
  * dialog is open is caught by `before-quit` below and skips this prompt.
  */
@@ -120,7 +127,7 @@ function requestQuit(): void {
     defaultId: 0,
     cancelId: 1,
     title: APP_NAME,
-    message: "Quit Claude Code Monitor?",
+    message: "Quit AgentMonitor?",
     detail:
       "The embedded server will stop and your dashboard window will close. " +
       `Press ${quitAccel} again to skip this prompt and quit immediately.`,

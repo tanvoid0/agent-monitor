@@ -8,7 +8,7 @@
     <link rel="manifest" href="manifest.json" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <title>Claude Code Agent Monitor - Real-Time Dashboard for Claude Code</title>
+    <title>AgentMonitor - Real-Time Dashboard for Claude Code</title>
     <meta
       name="description"
       content="Real-time local dashboard for Claude Code: sessions, kanban, analytics, cost tracking, run / resume Claude from your browser, and a 12-tab inspector for every plugin, skill, hook, and setting."
@@ -17,14 +17,14 @@
       name="keywords"
       content="Claude Code, dashboard, agent monitor, real-time, MCP, plugin marketplace, hooks, sessions, analytics, workflow visualization, cost tracking, Run Claude, claude config explorer"
     />
-    <meta name="author" content="Son Nguyen" />
+    <meta name="author" content="Tanveer Hoque" />
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#6366f1" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Claude Code Agent Monitor" />
-    <meta property="og:title" content="Claude Code Agent Monitor - Real-Time Dashboard for Claude Code" />
+    <meta property="og:site_name" content="AgentMonitor" />
+    <meta property="og:title" content="AgentMonitor - Real-Time Dashboard for Claude Code" />
     <meta
       property="og:description"
       content="Real-time local dashboard for Claude Code with sessions, analytics, workflows, plugin marketplace, MCP server, in-browser Run page, and a 12-tab Claude Config Explorer."
@@ -33,24 +33,24 @@
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:type" content="image/svg+xml" />
-    <meta property="og:image:alt" content="Claude Code Agent Monitor - Real-time monitoring + run Claude in-browser" />
+    <meta property="og:image:alt" content="AgentMonitor - Real-time monitoring + run Claude in-browser" />
 
     <!-- Twitter / X Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Claude Code Agent Monitor" />
+    <meta name="twitter:title" content="AgentMonitor" />
     <meta
       name="twitter:description"
       content="Real-time local dashboard for Claude Code with 13 pages, plugin marketplace, MCP server, VS Code extension, in-browser Run page and 12-tab Config Explorer."
     />
     <meta name="twitter:image" content="og-image.svg" />
-    <meta name="twitter:creator" content="@hoangsonww" />
+    <meta name="twitter:creator" content="@tanvoid0" />
 
     <!-- JSON-LD structured data -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "WebApplication",
-        "name": "Claude Code Agent Monitor",
+        "name": "AgentMonitor",
         "description": "Real-time local dashboard for Claude Code with sessions, analytics, workflows, plugin marketplace, MCP server, in-browser Run page for spawning Claude subprocesses, and a 12-tab Claude Config Explorer.",
         "applicationCategory": "DeveloperApplication",
         "operatingSystem": "Windows, macOS, Linux",
@@ -58,10 +58,10 @@
         "license": "https://opensource.org/licenses/MIT",
         "author": {
           "@type": "Person",
-          "name": "Son Nguyen",
+          "name": "Tanveer Hoque",
           "url": "https://sonnguyenhoang.com"
         },
-        "codeRepository": "https://github.com/hoangsonww/Claude-Code-Agent-Monitor"
+        "codeRepository": "https://github.com/tanvoid0/agent-monitor"
       }
     </script>
 
@@ -2240,7 +2240,7 @@
             </svg>
           </a>
           <a
-            href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor"
+            href="https://github.com/tanvoid0/agent-monitor"
             class="nav-cta"
             target="_blank"
             rel="noopener noreferrer"
@@ -2309,7 +2309,7 @@
         Open the wiki
       </a>
       <a
-        href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor"
+        href="https://github.com/tanvoid0/agent-monitor"
         class="mp-cta"
         target="_blank"
         rel="noopener noreferrer"
@@ -2351,7 +2351,7 @@
             Read the wiki
           </a>
           <a
-            href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor"
+            href="https://github.com/tanvoid0/agent-monitor"
             class="btn btn-tertiary"
             target="_blank"
             rel="noopener noreferrer"
@@ -2394,7 +2394,7 @@
               <span class="marquee-item"><span class="dot amber"></span>Grafana · 4 dashboards</span>
               <span class="marquee-item"><span class="dot emerald"></span>Remote data sources</span>
               <span class="marquee-item"><span class="dot pink"></span>SSH tunnel federation</span>
-              <span class="marquee-item"><span class="dot rose"></span>ccam CLI</span>
+              <span class="marquee-item"><span class="dot rose"></span>am CLI</span>
               <!-- duplicate for seamless loop -->
               <span class="marquee-item"><span class="dot"></span>Real-time hooks ingestion</span>
               <span class="marquee-item"><span class="dot cyan"></span>Stream-json output</span>
@@ -2421,7 +2421,7 @@
               <span class="marquee-item"><span class="dot amber"></span>Grafana · 4 dashboards</span>
               <span class="marquee-item"><span class="dot emerald"></span>Remote data sources</span>
               <span class="marquee-item"><span class="dot pink"></span>SSH tunnel federation</span>
-              <span class="marquee-item"><span class="dot rose"></span>ccam CLI</span>
+              <span class="marquee-item"><span class="dot rose"></span>am CLI</span>
             </div>
           </div>
           <div class="marquee reverse">
@@ -2542,7 +2542,7 @@
           </div>
           <img
             src="images/analytics.png"
-            alt="Claude Code Agent Monitor - analytics page with token usage, tool frequency, activity heatmap and session trends"
+            alt="AgentMonitor - analytics page with token usage, tool frequency, activity heatmap and session trends"
             loading="lazy"
             decoding="async"
           />
@@ -2784,7 +2784,7 @@
             <div class="feature-icon violet">⌨</div>
             <h3>Terminal companion</h3>
             <p>
-              The dependency-free <code>ccam</code> CLI and <code>ccam repl</code> provide history,
+              The dependency-free <code>am</code> CLI and <code>am repl</code> provide history,
               live status, tab completion, and watch refreshes from your shell.
             </p>
           </div>
@@ -3311,33 +3311,33 @@
               </div>
             </div>
           </div>
-          <div class="showcase-card" data-cat="system" data-title="Grafana · CCAM Overview">
+          <div class="showcase-card" data-cat="system" data-title="Grafana · AgentMonitor Overview">
             <div class="showcase-img">
-              <img src="images/grafana.png" alt="Grafana CCAM Overview dashboard with live metrics" loading="lazy" />
+              <img src="images/grafana.png" alt="Grafana AgentMonitor Overview dashboard with live metrics" loading="lazy" />
               <span class="showcase-expand-icon">⤢</span>
               <div class="showcase-overlay">
-                <h4>Grafana · CCAM Overview</h4>
+                <h4>Grafana · AgentMonitor Overview</h4>
                 <p>Four auto-provisioned dashboards — fleet totals, breakdowns, and rates from bearer-authenticated /api/metrics scrapes</p>
               </div>
             </div>
           </div>
-          <div class="showcase-card" data-cat="system" data-title="Prometheus · CCAM Console">
+          <div class="showcase-card" data-cat="system" data-title="Prometheus · AgentMonitor Console">
             <div class="showcase-img">
-              <img src="images/prometheus-console.png" alt="Prometheus CCAM console landing page" loading="lazy" />
+              <img src="images/prometheus-console.png" alt="Prometheus AgentMonitor console landing page" loading="lazy" />
               <span class="showcase-expand-icon">⤢</span>
               <div class="showcase-overlay">
-                <h4>Prometheus · CCAM Console</h4>
+                <h4>Prometheus · AgentMonitor Console</h4>
                 <p>Pre-built console at /consoles/index.html — live cards, session/token tables, and Graph drill-down links</p>
               </div>
             </div>
           </div>
           <div class="showcase-card" data-cat="system" data-title="Prometheus · Graph">
             <div class="showcase-img">
-              <img src="images/prometheus-query.png" alt="Prometheus Graph UI with CCAM PromQL" loading="lazy" />
+              <img src="images/prometheus-query.png" alt="Prometheus Graph UI with AgentMonitor PromQL" loading="lazy" />
               <span class="showcase-expand-icon">⤢</span>
               <div class="showcase-overlay">
                 <h4>Prometheus · Graph</h4>
-                <p>Run PromQL against scraped CCAM metrics — sessions, events, tokens, and recording rules</p>
+                <p>Run PromQL against scraped AgentMonitor metrics — sessions, events, tokens, and recording rules</p>
               </div>
             </div>
           </div>
@@ -3595,7 +3595,7 @@
               Full setup guide
             </a>
             <a
-              href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor"
+              href="https://github.com/tanvoid0/agent-monitor"
               class="btn btn-tertiary"
               target="_blank"
               rel="noopener noreferrer"
@@ -3612,7 +3612,7 @@
               <span class="traffic red"></span>
               <span class="traffic yellow"></span>
               <span class="traffic green"></span>
-              <span class="code-window-title">~/Claude-Code-Agent-Monitor - zsh</span>
+              <span class="code-window-title">~/agent-monitor - zsh</span>
               <button class="code-window-copy" onclick="copyInstall(this)" aria-label="Copy install commands">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
@@ -3622,8 +3622,8 @@
               </button>
             </div>
             <pre class="code-block" id="install-block"><span class="comment"># Clone &amp; install</span>
-<span class="prompt">$</span>git clone https://github.com/hoangsonww/Claude-Code-Agent-Monitor
-<span class="prompt">$</span><span class="str">cd</span> Claude-Code-Agent-Monitor
+<span class="prompt">$</span>git clone https://github.com/tanvoid0/agent-monitor
+<span class="prompt">$</span><span class="str">cd</span> agent-monitor
 <span class="prompt">$</span>npm run setup
 
 <span class="comment"># Install the hooks (on the HOST — never inside a container, #193)</span>
@@ -3713,7 +3713,7 @@
             <div class="how-step-num">01</div>
             <h4>Download the right asset</h4>
             <p>
-              Open the <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/releases/latest">latest
+              Open the <a href="https://github.com/tanvoid0/agent-monitor/releases/latest">latest
               release</a>. <strong>macOS:</strong> grab
               <code>ClaudeCodeMonitor-&lt;version&gt;-arm64.dmg</code> for Apple Silicon (M1 / M2 /
               M3 / M4) or <code>-x64.dmg</code> for Intel Macs (<em>Apple menu &rarr; About This
@@ -3793,7 +3793,7 @@
               roughly 125&nbsp;MB, about 250&nbsp;MB installed.
             </p>
             <a
-              href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/releases/latest"
+              href="https://github.com/tanvoid0/agent-monitor/releases/latest"
               class="btn btn-primary"
               target="_blank"
               rel="noopener noreferrer"
@@ -3806,7 +3806,7 @@
               Download the latest release
             </a>
             <a
-              href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/actions/workflows/ci.yml?query=branch%3Amaster+is%3Asuccess"
+              href="https://github.com/tanvoid0/agent-monitor/actions/workflows/ci.yml?query=branch%3Amaster+is%3Asuccess"
               class="btn btn-tertiary"
               target="_blank"
               rel="noopener noreferrer"
@@ -3818,7 +3818,7 @@
               Per-commit CI builds
             </a>
             <a
-              href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/DESKTOP.md"
+              href="https://github.com/tanvoid0/agent-monitor/blob/master/DESKTOP.md"
               class="btn btn-tertiary"
               target="_blank"
               rel="noopener noreferrer"
@@ -3830,7 +3830,7 @@
               Full desktop app guide
             </a>
             <a
-              href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/desktop/README.md"
+              href="https://github.com/tanvoid0/agent-monitor/blob/master/desktop/README.md"
               class="btn btn-tertiary"
               target="_blank"
               rel="noopener noreferrer"
@@ -3847,7 +3847,7 @@
               <span class="traffic red"></span>
               <span class="traffic yellow"></span>
               <span class="traffic green"></span>
-              <span class="code-window-title">~/Claude-Code-Agent-Monitor - zsh</span>
+              <span class="code-window-title">~/agent-monitor - zsh</span>
               <button class="code-window-copy" onclick="copyInstall(this)" aria-label="Copy desktop build commands">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
@@ -4146,7 +4146,7 @@
                 window-close-hides-but-server-keeps-running. It also installs Claude Code hooks
                 and starts background services on first boot, so you get monitoring with
                 essentially zero manual setup. Get it from the
-                <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/releases/latest" target="_blank" rel="noopener noreferrer" style="color: var(--accent);">latest release</a>,
+                <a href="https://github.com/tanvoid0/agent-monitor/releases/latest" target="_blank" rel="noopener noreferrer" style="color: var(--accent);">latest release</a>,
                 from the <code>ClaudeCodeMonitor-dmg</code> / <code>ClaudeCodeMonitor-win</code> CI
                 artifacts, or by building locally with
                 <code>npm run desktop:dmg:arm64</code> / <code>:x64</code> on macOS or
@@ -4159,7 +4159,7 @@
                 app bundle, so it survives reinstalls and updates, and the
                 app recovers your shell <code>PATH</code> at startup so <em>Run Claude</em> can
                 launch the <code>claude</code> CLI. See the
-                <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/DESKTOP.md" target="_blank" rel="noopener noreferrer" style="color: var(--accent);">desktop app guide</a>.
+                <a href="https://github.com/tanvoid0/agent-monitor/blob/master/DESKTOP.md" target="_blank" rel="noopener noreferrer" style="color: var(--accent);">desktop app guide</a>.
               </p>
             </div></div>
           </details>
@@ -4204,7 +4204,7 @@
                   Read the wiki
                 </a>
                 <a
-                  href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor"
+                  href="https://github.com/tanvoid0/agent-monitor"
                   class="btn btn-tertiary"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -4250,7 +4250,7 @@
         <div class="footer-brand">
           <a href="#" class="brand">
             <span class="brand-mark">CC</span>
-            <span>Claude Code Agent Monitor</span>
+            <span>AgentMonitor</span>
           </a>
           <p>
             Local-first real-time dashboard for Claude Code. MIT licensed, single-user by default,
@@ -4272,25 +4272,25 @@
         <div class="footer-col">
           <h4>Resources</h4>
           <a
-            href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor"
+            href="https://github.com/tanvoid0/agent-monitor"
             target="_blank"
             rel="noopener noreferrer"
             >GitHub repo</a
           >
           <a
-            href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/issues"
+            href="https://github.com/tanvoid0/agent-monitor/issues"
             target="_blank"
             rel="noopener noreferrer"
             >Issues</a
           >
           <a
-            href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/releases"
+            href="https://github.com/tanvoid0/agent-monitor/releases"
             target="_blank"
             rel="noopener noreferrer"
             >Releases</a
           >
           <a
-            href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/LICENSE"
+            href="https://github.com/tanvoid0/agent-monitor/blob/master/LICENSE"
             target="_blank"
             rel="noopener noreferrer"
             >MIT License</a
@@ -4300,17 +4300,17 @@
         </div>
         <div class="footer-col">
           <h4>Author</h4>
-          <a href="https://sonnguyenhoang.com" target="_blank" rel="noopener noreferrer">Son Nguyen</a>
-          <a href="https://github.com/hoangsonww" target="_blank" rel="noopener noreferrer">GitHub @hoangsonww</a>
-          <a href="mailto:hoangson091104@gmail.com">Email</a>
+          <a href="https://sonnguyenhoang.com" target="_blank" rel="noopener noreferrer">Tanveer Hoque</a>
+          <a href="https://github.com/tanvoid0" target="_blank" rel="noopener noreferrer">GitHub @tanvoid0</a>
+          <a href="mailto:tanvoid0@gmail.com">Email</a>
         </div>
       </div>
       <div class="footer-bottom">
-        <span>© 2026 Son Nguyen - MIT License</span>
+        <span>© 2026 Tanveer Hoque - MIT License</span>
         <span>
           <a href="wiki/" target="_blank" rel="noopener noreferrer">Wiki</a>
           ·
-          <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor" target="_blank" rel="noopener noreferrer"
+          <a href="https://github.com/tanvoid0/agent-monitor" target="_blank" rel="noopener noreferrer"
             >GitHub</a
           >
           ·
@@ -4595,8 +4595,8 @@
       window.addEventListener("resize", updateActive, { passive: true });
       updateActive();
       function copyInstall(btn) {
-        const defaultText = `git clone https://github.com/hoangsonww/Claude-Code-Agent-Monitor
-cd Claude-Code-Agent-Monitor
+        const defaultText = `git clone https://github.com/tanvoid0/agent-monitor
+cd agent-monitor
 npm run setup
 npm run install-hooks
 npm run dev

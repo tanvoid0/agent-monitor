@@ -4,7 +4,7 @@
  * is real; the OS change notifications are injected through the watcher's
  * `watch` seam, because real ones are droppable and made this suite flaky (see
  * createWatchRecorder below).
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { afterEach, describe, it } = require("node:test");
@@ -92,7 +92,7 @@ describe("development server watcher", () => {
   });
 
   it("watches source files created beneath a new directory", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "ccam-dev-watch-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "am-dev-watch-"));
     temporaryDirectories.push(root);
     const changes = [];
     const recorder = createWatchRecorder();
@@ -130,7 +130,7 @@ describe("development server watcher", () => {
   });
 
   it("reports a source file that no longer exists when its change arrives", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "ccam-dev-watch-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "am-dev-watch-"));
     temporaryDirectories.push(root);
     const changes = [];
     const recorder = createWatchRecorder();

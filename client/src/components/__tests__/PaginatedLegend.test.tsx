@@ -2,7 +2,7 @@
  * @file PaginatedLegend.test.tsx
  * @description Verifies chart legends remain unpaginated when labels fit and
  * expose every longer-list label through accessible page controls.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, expect, it } from "vitest";

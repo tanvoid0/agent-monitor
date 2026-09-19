@@ -4,7 +4,7 @@
  * known from a local session that still exists as a directory reaches the
  * file-manager opener; cross-origin browsers are refused; the opener itself is
  * swapped out so no real window is spawned.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { after, before, describe, it } = require("node:test");
@@ -14,7 +14,7 @@ const http = require("node:http");
 const os = require("node:os");
 const path = require("node:path");
 
-const TEST_DB = path.join(os.tmpdir(), `ccam-sessions-open-${Date.now()}-${process.pid}.db`);
+const TEST_DB = path.join(os.tmpdir(), `am-sessions-open-${Date.now()}-${process.pid}.db`);
 process.env.DASHBOARD_DB_PATH = TEST_DB;
 process.env.DASHBOARD_REMOTE_SYNC_MS = "0";
 process.env.DASHBOARD_LIVENESS_PROBE = "0";
@@ -26,7 +26,7 @@ const sessionsRoute = require("../routes/sessions");
 let server;
 let baseUrl;
 const opened = [];
-const KNOWN_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "ccam-open-cwd-"));
+const KNOWN_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "am-open-cwd-"));
 const MISSING_DIR = path.join(KNOWN_DIR, "gone");
 
 function post(body, headers = {}) {

@@ -10,7 +10,7 @@
  * stopPropagation; shift+right-click or an active text selection lets the
  * native context menu through (shared with EntityRef via ContextMenuFor's
  * own passthrough in ContextMenu.tsx).
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import type { HTMLAttributes, MouseEvent, ReactNode } from "react";

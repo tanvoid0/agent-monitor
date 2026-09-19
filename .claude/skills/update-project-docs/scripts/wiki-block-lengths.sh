@@ -11,7 +11,7 @@
 #
 # Prints one line per block (character count of the tag-stripped text) plus the
 # min/median/max of the group and flags any block outside the existing range.
-# @author Son Nguyen <hoangson091104@gmail.com>
+# @author Tanveer Hoque <tanvoid0@gmail.com>
 
 set -u
 cd "$(git rev-parse --show-toplevel 2>/dev/null || echo .)" || exit 1

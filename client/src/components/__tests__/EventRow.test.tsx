@@ -4,7 +4,7 @@
  * `isOpen` via aria-expanded and routes both the button click and the
  * whole-row click through `onToggle`. Renders inside a MemoryRouter because
  * the tool chip is an EntityRef link.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect, vi } from "vitest";

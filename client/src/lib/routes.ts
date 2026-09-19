@@ -5,7 +5,7 @@
  * and returns the path string (query before hash) that `<Link to>`, `navigate()` and
  * `absoluteHref` consume — so no caller assembles `?tab=…&event=…` strings by hand and
  * the param names live in exactly one place.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 type Param = string | number | boolean | string[] | null | undefined;

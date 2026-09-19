@@ -3,7 +3,7 @@
  * @description Live/offline connection pill (`role="status"`) driven purely by
  * the `connected` prop — pulsing success badge when connected, neutral badge
  * otherwise.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { useTranslation } from "react-i18next";

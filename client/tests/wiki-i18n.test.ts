@@ -1,7 +1,7 @@
 /**
  * @file wiki-i18n.test.ts
  * @description Node-side live-DOM coverage tests for the static wiki's body, labels, metadata, attributes, markup, and cache versions.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import fs from "node:fs";

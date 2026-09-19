@@ -5,12 +5,12 @@
  * localStorage → query-param mapping consumed by the API layer, subscriber
  * notification, and malformed / empty input handling. Each case re-imports the
  * module so the singleton starts clean.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
-const STORAGE_KEY = "ccam-data-scope";
+const STORAGE_KEY = "am-data-scope";
 
 // Fresh module instance (resets the module-level `current`) with localStorage
 // pre-seeded, so we can test load-from-storage behavior deterministically.

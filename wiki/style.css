@@ -1,6 +1,6 @@
 /**
  * @file Main CSS for the wiki documentation site
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 /* ─── Reset & Base ──────────────────────────────────────────────────────── */
@@ -801,7 +801,7 @@ code {
     background 0.2s,
     border-color 0.2s;
   /* Allow long inline code (registry keys, file paths like
-   * HKCU\Software\...\Run or %APPDATA%\Claude Code Monitor\data\) to wrap
+   * HKCU\Software\...\Run or %APPDATA%\AgentMonitor\data\) to wrap
    * instead of forcing one unbreakable line that overflows its card/callout.
    * `anywhere` also shrinks the token's min-content size so flex/grid parents
    * can size down to fit. */

@@ -12,17 +12,17 @@
  * A window event is also the right coupling here regardless: no context provider,
  * no lifted state, and any component — or a test — can trigger the behavior.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 /** Opens the command palette. Handled by `CommandPalette`. */
-export const COMMAND_PALETTE_EVENT = "ccam:command-palette";
+export const COMMAND_PALETTE_EVENT = "am:command-palette";
 
 /** Asks the sidebar to run an update check. Handled by `Sidebar`. */
-export const UPDATE_CHECK_EVENT = "ccam:check-updates";
+export const UPDATE_CHECK_EVENT = "am:check-updates";
 
 /** Carries a short confirmation to the toast. Handled by `ActionToast`. */
-export const ACTION_TOAST_EVENT = "ccam:action-toast";
+export const ACTION_TOAST_EVENT = "am:action-toast";
 
 /** Open the command palette from outside the component. */
 export function openCommandPalette(): void {

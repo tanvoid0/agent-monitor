@@ -10,7 +10,7 @@
  *   - hook reactivation after a (hypothetical) false completion.
  * The probe is stubbed by swapping `liveness.probeLiveCwds` on the shared
  * module object — routes/hooks.js looks the function up at call time.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { describe, it, before, after, beforeEach } = require("node:test");
@@ -224,13 +224,13 @@ describe("probeLiveCwds — probe availability", () => {
     assert.equal(r.cwds.size, 0);
   });
 
-  it("is disabled inside a container (CCAM_FORCE_CONTAINER)", () => {
+  it("is disabled inside a container (AM_FORCE_CONTAINER)", () => {
     delete process.env.DASHBOARD_LIVENESS_PROBE;
-    process.env.CCAM_FORCE_CONTAINER = "1";
+    process.env.AM_FORCE_CONTAINER = "1";
     try {
       assert.equal(realProbe().available, false);
     } finally {
-      delete process.env.CCAM_FORCE_CONTAINER;
+      delete process.env.AM_FORCE_CONTAINER;
       process.env.DASHBOARD_LIVENESS_PROBE = "0";
     }
   });

@@ -2,7 +2,7 @@
  * @file TranscriptCache class for efficient extraction of token usage,
  * compaction data, titles, interruption state, and compact recent human-turn
  * context from JSONL transcript files with stat-based incremental reads.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const fs = require("fs");

@@ -7,7 +7,7 @@
  * "clear filters" are atomic by construction — two independent functional
  * writers in the same tick would each derive from the render-time params and
  * the second would restore what the first removed.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { useCallback, useMemo } from "react";

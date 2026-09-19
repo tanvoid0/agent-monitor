@@ -1,9 +1,9 @@
 {
-  "id": "claude-code-agent-monitor-landing",
-  "name": "Claude Code Agent Monitor",
-  "short_name": "CC Monitor",
+  "id": "agentmonitor-landing",
+  "name": "AgentMonitor",
+  "short_name": "AgentMonitor",
   "description": "Local-first monitoring dashboard for Claude Code sessions.",
-  "author": "Son Nguyen",
+  "author": "Tanveer Hoque",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",

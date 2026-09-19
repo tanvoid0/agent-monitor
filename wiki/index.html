@@ -9,26 +9,26 @@
     <link rel="manifest" href="manifest.json" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <title>Claude Code Agent Monitor - Project Wiki</title>
+    <title>AgentMonitor - Project Wiki</title>
     <meta
       name="description"
-      content="Comprehensive technical wiki for Claude Code Agent Monitor — real-time local monitoring with MCP server integration plus Claude Code and Codex extension scaffolding."
+      content="Comprehensive technical wiki for AgentMonitor — real-time local monitoring with MCP server integration plus Claude Code and Codex extension scaffolding."
     />
     <meta
       name="keywords"
-      content="Claude Code, Codex, MCP, Model Context Protocol, Claude Code Agent Monitor, AI monitoring, real-time dashboard, WebSocket, SQLite, React, TypeScript, developer tools, session tracking, agent skills"
+      content="Claude Code, Codex, MCP, Model Context Protocol, AgentMonitor, AI monitoring, real-time dashboard, WebSocket, SQLite, React, TypeScript, developer tools, session tracking, agent skills"
     />
-    <meta name="author" content="Son Nguyen" />
+    <meta name="author" content="Tanveer Hoque" />
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#6366f1" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Claude Code Agent Monitor" />
-    <meta property="og:title" content="Claude Code Agent Monitor - Project Wiki" />
+    <meta property="og:site_name" content="AgentMonitor" />
+    <meta property="og:title" content="AgentMonitor - Project Wiki" />
     <meta
       property="og:description"
-      content="Comprehensive technical wiki for Claude Code Agent Monitor — real-time local monitoring with MCP server integration plus Claude Code and Codex extension scaffolding."
+      content="Comprehensive technical wiki for AgentMonitor — real-time local monitoring with MCP server integration plus Claude Code and Codex extension scaffolding."
     />
     <meta property="og:image" content="../og-image.svg" />
     <meta property="og:image:width" content="1200" />
@@ -36,12 +36,12 @@
     <meta property="og:image:type" content="image/svg+xml" />
     <meta
       property="og:image:alt"
-      content="Claude Code Agent Monitor — real-time Claude Code monitoring platform"
+      content="AgentMonitor — real-time Claude Code monitoring platform"
     />
 
     <!-- Twitter / X Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Claude Code Agent Monitor - Project Wiki" />
+    <meta name="twitter:title" content="AgentMonitor - Project Wiki" />
     <meta
       name="twitter:description"
       content="Real-time local monitoring for Claude Code agent activity with MCP integration, extension scaffolding, analytics, and WebSocket push."
@@ -49,26 +49,26 @@
     <meta name="twitter:image" content="../og-image.svg" />
     <meta
       name="twitter:image:alt"
-      content="Claude Code Agent Monitor — real-time Claude Code monitoring platform"
+      content="AgentMonitor — real-time Claude Code monitoring platform"
     />
-    <meta name="twitter:creator" content="@hoangsonww" />
+    <meta name="twitter:creator" content="@tanvoid0" />
 
     <!-- JSON-LD structured data -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
-        "name": "Claude Code Agent Monitor",
+        "name": "AgentMonitor",
         "description": "Real-time monitoring platform for Claude Code agent activity. Tracks sessions, agents, and tool events via native hooks, stores them in SQLite, and streams updates to a React UI over WebSocket.",
         "applicationCategory": "DeveloperApplication",
         "operatingSystem": "Windows, macOS, Linux",
         "license": "https://opensource.org/licenses/MIT",
         "author": {
           "@type": "Person",
-          "name": "Son Nguyen",
+          "name": "Tanveer Hoque",
           "url": "https://sonnguyenhoang.com"
         },
-        "codeRepository": "https://github.com/hoangsonww/Claude-Code-Agent-Monitor",
+        "codeRepository": "https://github.com/tanvoid0/agent-monitor",
         "programmingLanguage": ["TypeScript", "JavaScript", "Python"],
         "runtimePlatform": "Node.js",
         "keywords": "Claude Code, Codex, MCP, Model Context Protocol, agent monitoring, real-time dashboard, WebSocket, SQLite, React"
@@ -173,7 +173,7 @@
         width: auto;
         font-size: 13px;
       }
-      .ccam-side-tip {
+      .am-side-tip {
         position: fixed;
         top: 0;
         left: 0;
@@ -196,11 +196,11 @@
         transition: opacity 0.15s ease, transform 0.15s ease;
         z-index: 10000;
       }
-      .ccam-side-tip.visible {
+      .am-side-tip.visible {
         opacity: 1;
         transform: translateX(0);
       }
-      .ccam-side-tip::before {
+      .am-side-tip::before {
         content: "";
         position: absolute;
         left: -6px;
@@ -507,7 +507,7 @@
             <a href="#hero" class="sidebar-logo">
               <div class="logo-icon">⬡</div>
               <div class="logo-text">
-                Claude Code Agent Monitor
+                AgentMonitor
                 <span class="logo-sub">Project Wiki</span>
               </div>
             </a>
@@ -562,7 +562,7 @@
           <a href="#quickstart" class="nav-link"><span class="nav-icon">◈</span>Quick Start</a>
           <a href="#configuration" class="nav-link"><span class="nav-icon">◈</span>Configuration</a>
           <a href="#scripts" class="nav-link"><span class="nav-icon">◈</span>Scripts Reference</a>
-          <a href="#cli" class="nav-link"><span class="nav-icon">◈</span>ccam CLI</a>
+          <a href="#cli" class="nav-link"><span class="nav-icon">◈</span>am CLI</a>
 
           <div class="nav-section">Architecture</div>
           <a href="#arch-overview" class="nav-link"
@@ -625,13 +625,13 @@
 
         <div class="sidebar-footer">
           <div class="sidebar-links">
-            <a href="https://github.com/hoangsonww" target="_blank" rel="noopener">
+            <a href="https://github.com/tanvoid0" target="_blank" rel="noopener">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                 <path
                   d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.741 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"
                 />
               </svg>
-              hoangsonww
+              tanvoid0
             </a>
             <a href="https://sonnguyenhoang.com" target="_blank" rel="noopener">
               <svg
@@ -652,7 +652,7 @@
               </svg>
               sonnguyenhoang.com
             </a>
-            <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/README.md" target="_blank" rel="noopener">
+            <a href="https://github.com/tanvoid0/agent-monitor/blob/master/README.md" target="_blank" rel="noopener">
               <svg
                 width="14"
                 height="14"
@@ -703,7 +703,7 @@
             <span class="dot"></span>
             Real-time · Local-first · Zero-config
           </div>
-          <h1 style="padding-bottom: 2px">Claude Code Agent Monitor</h1>
+          <h1 style="padding-bottom: 2px">AgentMonitor</h1>
           <p class="hero-desc">
             A professional monitoring platform for Claude Code agent activity. Captures sessions,
             agents, and tool events via native hooks, persists them in SQLite, and streams updates
@@ -779,7 +779,7 @@
                 <span class="tech-badge badge-grafana">4 Grafana dashboards</span>
                 <span class="tech-badge badge-ws">Remote data sources</span>
                 <span class="tech-badge badge-openapi">SSH tunnel federation</span>
-                <span class="tech-badge badge-ts">ccam CLI</span>
+                <span class="tech-badge badge-ts">am CLI</span>
                 <span class="tech-badge badge-react">Data scope (local/all/selected)</span>
                 <span class="tech-badge badge-express">Import history</span>
                 <span class="tech-badge badge-github">File-header PR CI</span>
@@ -855,7 +855,7 @@
                 <span class="tech-badge badge-grafana">4 Grafana dashboards</span>
                 <span class="tech-badge badge-ws">Remote data sources</span>
                 <span class="tech-badge badge-openapi">SSH tunnel federation</span>
-                <span class="tech-badge badge-ts">ccam CLI</span>
+                <span class="tech-badge badge-ts">am CLI</span>
                 <span class="tech-badge badge-react">Data scope (local/all/selected)</span>
                 <span class="tech-badge badge-express">Import history</span>
                 <span class="tech-badge badge-github">File-header PR CI</span>
@@ -874,13 +874,13 @@
 
           <div class="screenshot-gallery gallery-single">
             <div class="screenshot-card">
-              <img src="../images/analytics.png" alt="Claude Code Agent Monitor dashboard showing live agent cards, stats, and recent activity feed" width="1918" height="1046" loading="lazy" decoding="async" />
+              <img src="../images/analytics.png" alt="AgentMonitor dashboard showing live agent cards, stats, and recent activity feed" width="1918" height="1046" loading="lazy" decoding="async" />
               <div class="screenshot-caption"><span class="caption-icon">📡</span> Live dashboard — real-time agent cards, stats, and activity feed</div>
             </div>
           </div>
 
           <p>
-            Claude Code Agent Monitor integrates with Claude Code through its native hook system. When Claude
+            AgentMonitor integrates with Claude Code through its native hook system. When Claude
             Code performs any action — tool use, session start, subagent orchestration, session end
             — it fires a hook that calls a small Node.js script bundled with this project. That
             script forwards the event over HTTP to the dashboard server, which stores it in SQLite
@@ -1016,7 +1016,7 @@
                   <div class="feature-icon ic-cyan">🍎🪟</div>
                   <h3 id="feat-desktop-app">Desktop App (macOS &amp; Windows)</h3>
                   <p>
-                    Electron packages CCAM as a macOS <code>.dmg</code> and Windows installer or
+                    Electron packages AgentMonitor as a macOS <code>.dmg</code> and Windows installer or
                     portable <code>.exe</code>. The app embeds the Express server in-process and
                     renders the React client in a native window, with tray controls, application
                     menus, login startup, and a single-instance lock. Closing the window leaves the
@@ -1331,7 +1331,7 @@
                     One shared marketplace ships 14 plugins for Claude Code and Codex, with 66
                     packaged skills, 18 Claude subagents, 34 Claude commands, 3 CLI helpers, and
                     2 MCP-enabled plugins. Every skill includes canonical frontmatter and OpenAI
-                    metadata. The skills.sh CLI discovers 77 repository skills from the same
+                    metadata. The skills.sh CLI discovers 76 repository skills from the same
                     public source. Install with <code>claude plugin marketplace add</code>,
                     <code>codex plugin marketplace add</code>, or <code>npx skills add</code>.
                   </p>
@@ -1350,9 +1350,9 @@
                 </div>
                 <div class="feature-card">
                   <div class="feature-icon ic-cyan">⌨️</div>
-                  <h3 id="feat-ccam-cli">ccam CLI</h3>
+                  <h3 id="feat-am-cli">am CLI</h3>
                   <p>
-                    The whole dashboard as terminal commands — <code>ccam stats</code>,
+                    The whole dashboard as terminal commands — <code>am stats</code>,
                     <code>kanban</code>, <code>tail</code>, <code>session &lt;id&gt;</code>,
                     <code>analytics</code>, <code>alerts</code>, <code>pricing</code>,
                     <code>import</code>, <code>doctor</code>, <code>export</code> and more.
@@ -1579,16 +1579,16 @@
               <div class="screenshot-caption"><span class="caption-icon">📗</span> <span><strong>API Docs · ReDoc</strong> — a self-hosted, read-optimized rendering of the full OpenAPI 3.0 spec at <code>/api/redoc</code>, served entirely offline with no CDN. Complements the interactive Swagger UI at <code>/api/docs</code>; every backend route is documented with parameters, schemas, and examples</span></div>
             </div>
             <div class="screenshot-card" id="ss-grafana">
-              <img src="../images/grafana.png" alt="Grafana CCAM — Overview dashboard" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">📊</span> <span><strong>Observability · Grafana</strong> — default home dashboard <em>CCAM — Overview</em> (four boards auto-provisioned): live fleet snapshot, database totals, breakdown charts, and rates from <code>/api/metrics</code> scrapes. The npm-only local helper uses <code>admin</code> / <code>admin</code>; container stacks read the admin password from <code>deployments/secrets/grafana-admin-password</code>.</span></div>
+              <img src="../images/grafana.png" alt="Grafana AgentMonitor — Overview dashboard" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">📊</span> <span><strong>Observability · Grafana</strong> — default home dashboard <em>AgentMonitor — Overview</em> (four boards auto-provisioned): live fleet snapshot, database totals, breakdown charts, and rates from <code>/api/metrics</code> scrapes. The npm-only local helper uses <code>admin</code> / <code>admin</code>; container stacks read the admin password from <code>deployments/secrets/grafana-admin-password</code>.</span></div>
             </div>
             <div class="screenshot-card" id="ss-prometheus-console">
-              <img src="../images/prometheus-console.png" alt="Prometheus CCAM console" width="100%" loading="lazy" decoding="async" />
+              <img src="../images/prometheus-console.png" alt="Prometheus AgentMonitor console" width="100%" loading="lazy" decoding="async" />
               <div class="screenshot-caption"><span class="caption-icon">🔥</span> <span><strong>Observability · Prometheus console</strong> — pre-built landing page at <code>/consoles/index.html</code> with live metric cards, session/token tables, and drill-down links into the Graph UI (Prometheus 3.x compatible — queries the HTTP API directly)</span></div>
             </div>
             <div class="screenshot-card" id="ss-prometheus-query">
-              <img src="../images/prometheus-query.png" alt="Prometheus Graph with CCAM PromQL" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">📈</span> <span><strong>Observability · Prometheus Graph</strong> — run PromQL against scraped CCAM series (e.g. <code>sum(ccam_sessions)</code>, <code>ccam_events_total</code>, <code>rate(ccam_tokens_total[5m])</code>) with starter expressions from the CCAM console and recording rules in <code>monitoring/prometheus/ccam-rules.yml</code></span></div>
+              <img src="../images/prometheus-query.png" alt="Prometheus Graph with AgentMonitor PromQL" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">📈</span> <span><strong>Observability · Prometheus Graph</strong> — run PromQL against scraped AgentMonitor series (e.g. <code>sum(am_sessions)</code>, <code>am_events_total</code>, <code>rate(am_tokens_total[5m])</code>) with starter expressions from the AgentMonitor console and recording rules in <code>monitoring/prometheus/am-rules.yml</code></span></div>
             </div>
           </div>
 
@@ -1764,8 +1764,8 @@
 
           <div class="code-header"><span class="code-lang">bash</span></div>
           <pre><code># 1. Clone
-git clone https://github.com/hoangsonww/Claude-Code-Agent-Monitor.git
-cd Claude-Code-Agent-Monitor
+git clone https://github.com/tanvoid0/agent-monitor.git
+cd agent-monitor
 
 # 2. Install all dependencies (server + client)
 npm run setup
@@ -1845,7 +1845,7 @@ docker run -d --name agent-monitor \
                 container is up, then restart Claude Code. The installer refuses to run inside a
                 container (issue #193) so it never writes a container-internal handler path into a
                 bind-mounted host <code>~/.claude</code>; override with
-                <code>CCAM_ALLOW_CONTAINER_HOOKS=1</code> only if Claude Code itself runs in the
+                <code>AM_ALLOW_CONTAINER_HOOKS=1</code> only if Claude Code itself runs in the
                 container.
               </p>
             </div>
@@ -2021,7 +2021,7 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
                   <td>Writable dotenv path used when Settings persists Claude or Codex home overrides</td>
                 </tr>
                 <tr>
-                  <td><code>CCAM_DASHBOARD_URL</code></td>
+                  <td><code>AM_DASHBOARD_URL</code></td>
                   <td>local discovery</td>
                   <td>Optional remote hook destination; non-loopback URLs require HTTPS and a hook token</td>
                 </tr>
@@ -2268,14 +2268,14 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
                 <tr>
                   <td><code>mcp:docker:build</code></td>
                   <td><code>npm run mcp:docker:build</code></td>
-                  <td>Build MCP container image with Docker (<code>agent-dashboard-mcp:local</code>)</td>
+                  <td>Build MCP container image with Docker (<code>agentmonitor-mcp:local</code>)</td>
                 </tr>
                 <tr>
                   <td><code>mcp:podman:build</code></td>
                   <td><code>npm run mcp:podman:build</code></td>
                   <td>
                     Build MCP container image with Podman
-                    (<code>localhost/agent-dashboard-mcp:local</code>)
+                    (<code>localhost/agentmonitor-mcp:local</code>)
                   </td>
                 </tr>
                 <tr>
@@ -2326,12 +2326,12 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
                 <tr>
                   <td><code>desktop:win</code></td>
                   <td><code>npm run desktop:win</code></td>
-                  <td>Build the Windows NSIS installer <code>ClaudeCodeMonitor-Setup-&lt;ver&gt;-x64.exe</code> (Windows host)</td>
+                  <td>Build the Windows NSIS installer <code>AgentMonitor-Setup-&lt;ver&gt;-x64.exe</code> (Windows host)</td>
                 </tr>
                 <tr>
                   <td><code>desktop:win:portable</code></td>
                   <td><code>npm run desktop:win:portable</code></td>
-                  <td>Build the no-install portable <code>ClaudeCodeMonitor-&lt;ver&gt;-x64-portable.exe</code> (Windows host)</td>
+                  <td>Build the no-install portable <code>AgentMonitor-&lt;ver&gt;-x64-portable.exe</code> (Windows host)</td>
                 </tr>
                 <tr>
                   <td><code>build:win-icon</code></td>
@@ -2355,13 +2355,13 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
 
         <section id="cli">
           <div class="section-label">◈ Reference</div>
-          <h2>ccam CLI</h2>
+          <h2>am CLI</h2>
           <p>
             The full dashboard feature surface is also available from any terminal through the
-            dependency-free <code>ccam</code> CLI (<code>bin/ccam.js</code>). It is linked
+            dependency-free <code>am</code> CLI (<code>bin/am.js</code>). It is linked
             automatically by <code>npm run setup</code> (via a fail-soft <code>npm link</code>),
             discovers the running server through the same
-            <code>~/.claude/.agent-dashboard.json</code> registry the hook handler uses
+            <code>~/.claude/.agentmonitor.json</code> registry the hook handler uses
             (override with <code>CLAUDE_DASHBOARD_PORT</code> / <code>DASHBOARD_PORT</code>),
             and renders a full terminal UI — box-drawn tables, status icons, inline bar
             charts, and agent trees — that degrades to plain text when piped
@@ -2370,9 +2370,9 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
             <code>grep</code> pipelines, or CI.
           </p>
           <p>
-            For a live monitoring session, <code>ccam repl</code> (aliases
+            For a live monitoring session, <code>am repl</code> (aliases
             <code>shell</code> / <code>i</code>) opens an interactive shell where you type
-            commands without the <code>ccam</code> prefix — with a CCAM welcome banner,
+            commands without the <code>am</code> prefix — with a AgentMonitor welcome banner,
             tab-completion, persisted arrow-key history, a live server-status prompt
             (<code>●</code> up / <code>○</code> offline), a grouped <code>help</code> /
             <code>help &lt;cmd&gt;</code> menu, and a <code>watch [secs] &lt;cmd&gt;</code>
@@ -2396,7 +2396,7 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
                   <td><code>status</code> · <code>start</code> · <code>repl</code></td>
                   <td>
                     Up/down indicator, a background server start that waits for health, and the
-                    interactive <code>ccam repl</code> shell — tab-completion, persisted history, a
+                    interactive <code>am repl</code> shell — tab-completion, persisted history, a
                     live server-status prompt, and a <code>watch</code> auto-refresh
                   </td>
                 </tr>
@@ -2425,7 +2425,7 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
                     which can be scoped to a single session with <code>--session</code>,
                     surfaces server-tool surcharges (web search / code execution), warns about
                     models with usage but no matching pricing rule (priced at $0, excluded from
-                    the total), and points to <code>ccam pricing set</code>
+                    the total), and points to <code>am pricing set</code>
                   </td>
                 </tr>
                 <tr>
@@ -2476,8 +2476,8 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
           </div>
 
               <p>
-                The CLI also manages the server itself: <code>ccam status</code> shows an
-                up/down indicator and <code>ccam start</code> boots a detached production
+                The CLI also manages the server itself: <code>am status</code> shows an
+                up/down indicator and <code>am start</code> boots a detached production
                 server. When the server is down, read-only commands fall back to reading
                 <code>data/dashboard.db</code> directly under an explicit offline banner,
                 while live or server-computed commands refuse with the specific reason.
@@ -3398,7 +3398,7 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
               <span class="method method-get">GET</span>
               <span class="route-path">/api/metrics</span>
               <span class="route-desc"
-                >Live counters in Prometheus text-exposition format (v0.0.4): sessions and agents by status, total events, cumulative tokens by kind, connected WebSocket clients, configured remote sources, process uptime and RSS, and build version — so CCAM can be scraped into Prometheus / Grafana. Read-only, and — being under <code>/api</code> — behind the DNS-rebinding Host-header guard and the optional <code>DASHBOARD_TOKEN</code>: a non-loopback scraper (e.g. Prometheus in Docker via <code>host.docker.internal</code>) must be allowlisted with <code>DASHBOARD_ALLOWED_HOSTS</code> or the scrape returns <code>403 EBADHOST</code>, and must send the token when one is set. A ready-to-run Prometheus + Grafana stack with a pre-provisioned "CCAM — Overview" dashboard lives in <code>monitoring/</code> (<code>cd monitoring && docker compose up -d</code>; Grafana on port 3000).</span
+                >Live counters in Prometheus text-exposition format (v0.0.4): sessions and agents by status, total events, cumulative tokens by kind, connected WebSocket clients, configured remote sources, process uptime and RSS, and build version — so AgentMonitor can be scraped into Prometheus / Grafana. Read-only, and — being under <code>/api</code> — behind the DNS-rebinding Host-header guard and the optional <code>DASHBOARD_TOKEN</code>: a non-loopback scraper (e.g. Prometheus in Docker via <code>host.docker.internal</code>) must be allowlisted with <code>DASHBOARD_ALLOWED_HOSTS</code> or the scrape returns <code>403 EBADHOST</code>, and must send the token when one is set. A ready-to-run Prometheus + Grafana stack with a pre-provisioned "AgentMonitor — Overview" dashboard lives in <code>monitoring/</code> (<code>cd monitoring && docker compose up -d</code>; Grafana on port 3000).</span
               >
             </div>
           </div>
@@ -3742,7 +3742,7 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
             <code>SessionStart</code> hook, native live-thread row, or rollout then creates the
             durable session and main-agent rows without copying the temporary card into history.
             If the user selects an existing thread in Codex's Resume picker, that exact Codex PID
-            opens the resumed rollout or writer lock immediately. CCAM uses that signal to switch
+            opens the resumed rollout or writer lock immediately. AgentMonitor uses that signal to switch
             from the temporary card to the durable resumed session before the first new message.
           </p>
           <p>
@@ -3970,7 +3970,7 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
                 </tr>
                 <tr>
                   <td>Concurrent upload temp-dir collisions</td>
-                  <td>Per-request temp dir on <code>req._ccamUploadDir</code>; created in multer <code>destination</code>, reclaimed in <code>finally</code></td>
+                  <td>Per-request temp dir on <code>req._amUploadDir</code>; created in multer <code>destination</code>, reclaimed in <code>finally</code></td>
                 </tr>
                 <tr>
                   <td>Arbitrary absolute path on <code>scan-path</code></td>
@@ -3996,17 +3996,17 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
               </thead>
               <tbody>
                 <tr>
-                  <td><code>CCAM_IMPORT_MAX_BYTES</code></td>
+                  <td><code>AM_IMPORT_MAX_BYTES</code></td>
                   <td>1 GB</td>
                   <td>Maximum size per uploaded file on <code>/api/import/upload</code></td>
                 </tr>
                 <tr>
-                  <td><code>CCAM_IMPORT_MAX_FILES</code></td>
+                  <td><code>AM_IMPORT_MAX_FILES</code></td>
                   <td>2000</td>
                   <td>Maximum files per upload request</td>
                 </tr>
                 <tr>
-                  <td><code>CCAM_IMPORT_MAX_EXTRACT_BYTES</code></td>
+                  <td><code>AM_IMPORT_MAX_EXTRACT_BYTES</code></td>
                   <td>4 GB</td>
                   <td>Ceiling on total uncompressed bytes from any single archive (zip-bomb defense)</td>
                 </tr>
@@ -4030,7 +4030,7 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
     "source": "upload",
     "processed": 184,
     "total": 512,
-    "current": "/tmp/ccam-import-work-xyz/project/&lt;uuid&gt;.jsonl",
+    "current": "/tmp/am-import-work-xyz/project/&lt;uuid&gt;.jsonl",
     "counters": { "imported": 120, "backfilled": 40, "skipped": 20, "errors": 4 }
   }
 }</code></pre>
@@ -4208,7 +4208,7 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
           <h3>CLI</h3>
           <p>
             The same operations are available from the terminal via
-            <code>ccam remote-sources</code>, with subcommands <code>list</code>,
+            <code>am remote-sources</code>, with subcommands <code>list</code>,
             <code>add</code>, <code>test &lt;id&gt;</code>, <code>sync [id]</code> (all sources
             when no id is given), and <code>rm &lt;id&gt; [--purge]</code> to remove a source
             and optionally drop the sessions it imported.
@@ -4408,7 +4408,7 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
                 </tr>
                 <tr>
                   <td><code>server/routes/import.js</code></td>
-                  <td>Express router for Import History. Four endpoints: <code>GET /api/import/guide</code> (OS-aware instructions + default-dir stats), <code>POST /api/import/rescan</code> (default <code>~/.claude/projects</code>), <code>POST /api/import/scan-path</code> (arbitrary absolute dir with <code>~</code> expansion), <code>POST /api/import/upload</code> (multer multipart). Each request uses a per-request temp dir reclaimed in <code>finally</code>. Progress broadcast as throttled <code>import.progress</code> WebSocket messages. Limits tunable via <code>CCAM_IMPORT_MAX_BYTES</code>, <code>CCAM_IMPORT_MAX_FILES</code>, <code>CCAM_IMPORT_MAX_EXTRACT_BYTES</code></td>
+                  <td>Express router for Import History. Four endpoints: <code>GET /api/import/guide</code> (OS-aware instructions + default-dir stats), <code>POST /api/import/rescan</code> (default <code>~/.claude/projects</code>), <code>POST /api/import/scan-path</code> (arbitrary absolute dir with <code>~</code> expansion), <code>POST /api/import/upload</code> (multer multipart). Each request uses a per-request temp dir reclaimed in <code>finally</code>. Progress broadcast as throttled <code>import.progress</code> WebSocket messages. Limits tunable via <code>AM_IMPORT_MAX_BYTES</code>, <code>AM_IMPORT_MAX_FILES</code>, <code>AM_IMPORT_MAX_EXTRACT_BYTES</code></td>
                 </tr>
                 <tr>
                   <td><code>server/lib/archive.js</code></td>
@@ -4434,7 +4434,7 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
           <p>
             The Agent Monitor ships one shared marketplace containing 14 plugins for Claude Code and
             Codex, 66 packaged plugin skills, 18 Claude subagents, 34 Claude commands, 3 CLI helpers,
-            3 hook configurations, and 2 MCP-enabled plugins. The skills.sh CLI discovers 77 total
+            3 hook configurations, and 2 MCP-enabled plugins. The skills.sh CLI discovers 76 total
             repository skills. Product-specific manifests stay separate while skill instructions and
             validation remain shared.
           </p>
@@ -4442,25 +4442,25 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
           <h3>Installation</h3>
           <div class="code-header"><span class="code-lang">bash</span></div>
           <pre><code># Add the marketplace
-claude plugin marketplace add hoangsonww/Claude-Code-Agent-Monitor
-codex plugin marketplace add hoangsonww/Claude-Code-Agent-Monitor
-npx skills add hoangsonww/Claude-Code-Agent-Monitor --list
+claude plugin marketplace add tanvoid0/agent-monitor
+codex plugin marketplace add tanvoid0/agent-monitor
+npx skills add tanvoid0/agent-monitor --list
 
 # Install individual plugins
-claude plugin install ccam-analytics@claude-code-agent-monitor-plugins
-claude plugin install ccam-cost-guard@claude-code-agent-monitor-plugins
-claude plugin install ccam-productivity@claude-code-agent-monitor-plugins
-claude plugin install ccam-devtools@claude-code-agent-monitor-plugins
-claude plugin install ccam-insights@claude-code-agent-monitor-plugins
-claude plugin install ccam-sessions@claude-code-agent-monitor-plugins
-claude plugin install ccam-workflows@claude-code-agent-monitor-plugins
-claude plugin install ccam-quality@claude-code-agent-monitor-plugins
-claude plugin install ccam-config@claude-code-agent-monitor-plugins
-claude plugin install ccam-dashboard@claude-code-agent-monitor-plugins
-claude plugin install ccam-runner@claude-code-agent-monitor-plugins
-claude plugin install ccam-integrations@claude-code-agent-monitor-plugins
-claude plugin install ccam-platform@claude-code-agent-monitor-plugins
-claude plugin install ccam-reports@claude-code-agent-monitor-plugins</code></pre>
+claude plugin install am-analytics@agentmonitor-plugins
+claude plugin install am-cost-guard@agentmonitor-plugins
+claude plugin install am-productivity@agentmonitor-plugins
+claude plugin install am-devtools@agentmonitor-plugins
+claude plugin install am-insights@agentmonitor-plugins
+claude plugin install am-sessions@agentmonitor-plugins
+claude plugin install am-workflows@agentmonitor-plugins
+claude plugin install am-quality@agentmonitor-plugins
+claude plugin install am-config@agentmonitor-plugins
+claude plugin install am-dashboard@agentmonitor-plugins
+claude plugin install am-runner@agentmonitor-plugins
+claude plugin install am-integrations@agentmonitor-plugins
+claude plugin install am-platform@agentmonitor-plugins
+claude plugin install am-reports@agentmonitor-plugins</code></pre>
 
           <h3>Available Plugins</h3>
           <div class="table-wrap">
@@ -4476,98 +4476,98 @@ claude plugin install ccam-reports@claude-code-agent-monitor-plugins</code></pre
               </thead>
               <tbody>
                 <tr>
-                  <td><strong>ccam-analytics</strong></td>
+                  <td><strong>am-analytics</strong></td>
                   <td>session-report, cost-breakdown, usage-trends, productivity-score</td>
                   <td>analytics-advisor</td>
-                  <td><code>ccam-stats</code></td>
+                  <td><code>am-stats</code></td>
                   <td>Token usage (4 types + baselines), cost via pricing engine, daily trends, productivity scoring</td>
                 </tr>
                 <tr>
-                  <td><strong>ccam-cost-guard</strong></td>
+                  <td><strong>am-cost-guard</strong></td>
                   <td>budget-set, spend-forecast, cost-alert, model-savings, daily-budget-check</td>
                   <td>budget-sentinel</td>
                   <td>—</td>
                   <td>Budget guardrails: set budgets, forecast week/month-end spend, cost-threshold alerts, model-routing savings (fail-safe Stop hook)</td>
                 </tr>
                 <tr>
-                  <td><strong>ccam-productivity</strong></td>
+                  <td><strong>am-productivity</strong></td>
                   <td>daily-standup, weekly-report, sprint-summary, workflow-optimizer</td>
                   <td>productivity-coach</td>
                   <td>—</td>
                   <td>Standup reports, sprint tracking, workflow optimization via 11 workflow intelligence datasets</td>
                 </tr>
                 <tr>
-                  <td><strong>ccam-devtools</strong></td>
+                  <td><strong>am-devtools</strong></td>
                   <td>session-debug, hook-diagnostics, data-export, health-check</td>
                   <td>issue-triager</td>
-                  <td><code>ccam-doctor</code>, <code>ccam-export</code></td>
+                  <td><code>am-doctor</code>, <code>am-export</code></td>
                   <td>Session debugging, hook diagnostics, data export (JSON/CSV), system health</td>
                 </tr>
                 <tr>
-                  <td><strong>ccam-insights</strong></td>
+                  <td><strong>am-insights</strong></td>
                   <td>pattern-detect, anomaly-alert, optimization-suggest, session-compare</td>
                   <td>insights-advisor</td>
                   <td>—</td>
                   <td>Pattern detection via tool flow transitions, anomaly alerting, optimization, session comparison</td>
                 </tr>
                 <tr>
-                  <td><strong>ccam-sessions</strong></td>
+                  <td><strong>am-sessions</strong></td>
                   <td>session-search, session-timeline, transcript-replay, cwd-rollup, session-cleanup</td>
                   <td>session-investigator</td>
                   <td>—</td>
                   <td>Session forensics: search, timeline, transcript replay, per-cwd rollup, cleanup</td>
                 </tr>
                 <tr>
-                  <td><strong>ccam-workflows</strong></td>
+                  <td><strong>am-workflows</strong></td>
                   <td>dag-map, delegation-audit, concurrency-report, error-propagation, fleet-runs</td>
                   <td>orchestration-analyst</td>
                   <td>—</td>
                   <td>Multi-agent orchestration &amp; fleet intelligence: DAG map, delegation audit, concurrency, error propagation, fleet runs (11-dataset workflow intelligence API)</td>
                 </tr>
                 <tr>
-                  <td><strong>ccam-quality</strong></td>
+                  <td><strong>am-quality</strong></td>
                   <td>error-scan, api-error-report, hook-failure-audit, slo-check, regression-alert</td>
                   <td>reliability-engineer</td>
                   <td>—</td>
                   <td>Reliability &amp; SLOs: error scan, API-error report, hook-failure audit, SLO check, regression alert</td>
                 </tr>
                 <tr>
-                  <td><strong>ccam-config</strong></td>
+                  <td><strong>am-config</strong></td>
                   <td>config-audit, memory-review, skill-inventory, mcp-audit, hook-inventory</td>
                   <td>config-auditor</td>
                   <td>—</td>
                   <td>Claude Code config &amp; memory governance: config audit, memory review, skill/MCP/hook inventory (via the Config Explorer API)</td>
                 </tr>
                 <tr>
-                  <td><strong>ccam-dashboard</strong></td>
+                  <td><strong>am-dashboard</strong></td>
                   <td>dashboard-status, quick-stats</td>
                   <td>—</td>
                   <td>—</td>
                   <td>Dashboard connector with MCP integration and one-line metric summaries</td>
                 </tr>
                 <tr>
-                  <td><strong>ccam-runner</strong></td>
+                  <td><strong>am-runner</strong></td>
                   <td>run-agent, run-history</td>
                   <td>run-operator</td>
                   <td>—</td>
                   <td>Safe monitored Claude Code/Codex launch, follow-up, stop, resume, and run history</td>
                 </tr>
                 <tr>
-                  <td><strong>ccam-integrations</strong></td>
+                  <td><strong>am-integrations</strong></td>
                   <td>alert-management, webhook-management, remote-collection</td>
                   <td>integration-operator</td>
                   <td>—</td>
                   <td>Alert rules, webhook providers, push notifications, and SSH remote collection</td>
                 </tr>
                 <tr>
-                  <td><strong>ccam-platform</strong></td>
+                  <td><strong>am-platform</strong></td>
                   <td>config-explorer, history-portability, hook-setup, mcp-server</td>
                   <td>platform-admin</td>
                   <td>—</td>
                   <td>Claude/Codex config, hooks, provider imports, backup restore, updates, and MCP operations</td>
                 </tr>
                 <tr>
-                  <td><strong>ccam-reports</strong></td>
+                  <td><strong>am-reports</strong></td>
                   <td>executive-report, cost-report, reliability-report, workflow-report</td>
                   <td>report-analyst</td>
                   <td>—</td>
@@ -4580,41 +4580,41 @@ claude plugin install ccam-reports@claude-code-agent-monitor-plugins</code></pre
           <h3>Skill Usage Examples</h3>
           <div class="code-header"><span class="code-lang">claude code</span></div>
           <pre><code># Analytics — session report with per-model token breakdown + cost
-/ccam-analytics:session-report latest
+/am-analytics:session-report latest
 
 # Analytics — cost breakdown with cache efficiency analysis
-/ccam-analytics:cost-breakdown this week
+/am-analytics:cost-breakdown this week
 
 # Productivity — daily standup grouped by project
-/ccam-productivity:daily-standup today
+/am-productivity:daily-standup today
 
 # Productivity — workflow optimization using workflow intelligence API
-/ccam-productivity:workflow-optimizer analyze
+/am-productivity:workflow-optimizer analyze
 
 # DevTools — debug a session's full event chain
-/ccam-devtools:session-debug errors
+/am-devtools:session-debug errors
 
 # Insights — detect tool flow patterns and anti-patterns
-/ccam-insights:pattern-detect tools
+/am-insights:pattern-detect tools
 
 # Dashboard — one-line metrics summary
-/ccam-dashboard:quick-stats</code></pre>
+/am-dashboard:quick-stats</code></pre>
 
           <h3>CLI Tools</h3>
           <div class="code-header"><span class="code-lang">bash</span></div>
           <pre><code># Quick terminal dashboard
-ccam-stats                  # Sessions, costs (per-model), tokens (with baselines)
-ccam-stats --cost           # Cost summary with matched pricing rules
-ccam-stats --tokens         # Token usage including compaction baselines
-ccam-stats --json           # Raw JSON output
+am-stats                  # Sessions, costs (per-model), tokens (with baselines)
+am-stats --cost           # Cost summary with matched pricing rules
+am-stats --tokens         # Token usage including compaction baselines
+am-stats --json           # Raw JSON output
 
 # System diagnostics
-ccam-doctor                 # Full diagnostic: API, endpoints, database, hooks, freshness
-ccam-doctor --quick         # Basic connectivity check
+am-doctor                 # Full diagnostic: API, endpoints, database, hooks, freshness
+am-doctor --quick         # Basic connectivity check
 
 # Data export
-ccam-export sessions --format csv --limit 500
-ccam-export all --output backup.json</code></pre>
+am-export sessions --format csv --limit 500
+am-export all --output backup.json</code></pre>
 
           <h3>Plugin Architecture</h3>
           <p>
@@ -4623,7 +4623,7 @@ ccam-export all --output backup.json</code></pre>
             <code>.agents/plugins/marketplace.json</code>. Each plugin directory contains:
           </p>
           <div class="code-header"><span class="code-lang">text</span></div>
-          <pre><code>plugins/ccam-{name}/
+          <pre><code>plugins/am-{name}/
 ├── .claude-plugin/plugin.json    # Plugin manifest (name, version, description)
 ├── .codex-plugin/plugin.json     # Codex plugin manifest and interface metadata
 ├── skills/{skill-name}/SKILL.md  # Shared skill instructions
@@ -4632,7 +4632,7 @@ ccam-export all --output backup.json</code></pre>
 ├── agents/{agent-name}.md        # Agent definitions (model, tools, instructions)
 ├── hooks/hooks.json              # Event hooks (fail-safe, non-blocking)
 ├── bin/{cli-tool}                # CLI scripts (added to PATH)
-├── .mcp.json                     # Optional stable ccam mcp stdio launcher
+├── .mcp.json                     # Optional stable am mcp stdio launcher
 └── settings.json                 # Plugin settings (dashboard plugin)</code></pre>
 
           <h3>Data Model Reference</h3>
@@ -4678,7 +4678,7 @@ ccam-export all --output backup.json</code></pre>
           </div>
 
           <p>
-            📖 Full documentation: <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/docs/PLUGINS.md"><code>docs/plugins.md</code></a>
+            📖 Full documentation: <a href="https://github.com/tanvoid0/agent-monitor/blob/master/docs/PLUGINS.md"><code>docs/plugins.md</code></a>
           </p>
         </section>
 
@@ -4702,7 +4702,7 @@ ccam-export all --output backup.json</code></pre>
           </p>
 
           <div class="code-header"><span class="code-lang">terminal output</span></div>
-          <pre><code>nguyens6@host ~/agent-dashboard/client | Sonnet 4.6 | main | ████████░░ 79% | 3↑ 2↓ 156586c | $0.4231</code></pre>
+          <pre><code>nguyens6@host ~/agentmonitor/client | Sonnet 4.6 | main | ████████░░ 79% | 3↑ 2↓ 156586c | $0.4231</code></pre>
 
           <div class="table-wrap">
             <table>
@@ -4807,7 +4807,7 @@ ccam-export all --output backup.json</code></pre>
           </div>
 
           <p>
-            The <b>Claude Code Agent Monitor</b> is a premium, high-fidelity extension designed to minimize context 
+            The <b>AgentMonitor</b> is a premium, high-fidelity extension designed to minimize context 
             switching for AI engineers. It brings the full power of the dashboard directly into VS Code, 
             allowing you to monitor complex subagent orchestration without ever leaving your active code file.
           </p>
@@ -4875,7 +4875,7 @@ ccam-export all --output backup.json</code></pre>
           </div>
 
           <p>
-            📖 Full developer guide: <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/vscode-extension/README.md"><code>vscode-extension/README.md</code></a>
+            📖 Full developer guide: <a href="https://github.com/tanvoid0/agent-monitor/blob/master/vscode-extension/README.md"><code>vscode-extension/README.md</code></a>
           </p>
         </section>
 
@@ -4901,12 +4901,12 @@ ccam-export all --output backup.json</code></pre>
           </p>
 
           <div class="screenshot-card" style="margin: 8px 0 32px;">
-            <img src="../images/macos.png" alt="Claude Code Monitor running as a native desktop app" width="100%" loading="lazy" decoding="async" />
-            <div class="screenshot-caption"><span class="caption-icon">🍎🪟</span> <span>The full dashboard, natively on macOS <strong>and</strong> Windows — same React client, same Express server, real <code>BrowserWindow</code>. Menu-bar / notification-area (tray) icon included. Shipped as a macOS DMG and a Windows EXE (macOS shown) — see <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/DESKTOP.md"><code>DESKTOP.md</code></a>.</span></div>
+            <img src="../images/macos.png" alt="AgentMonitor running as a native desktop app" width="100%" loading="lazy" decoding="async" />
+            <div class="screenshot-caption"><span class="caption-icon">🍎🪟</span> <span>The full dashboard, natively on macOS <strong>and</strong> Windows — same React client, same Express server, real <code>BrowserWindow</code>. Menu-bar / notification-area (tray) icon included. Shipped as a macOS DMG and a Windows EXE (macOS shown) — see <a href="https://github.com/tanvoid0/agent-monitor/blob/master/DESKTOP.md"><code>DESKTOP.md</code></a>.</span></div>
           </div>
 
           <div class="screenshot-card" style="margin: 8px 0 32px;">
-            <img src="../images/windows_app.png" alt="Claude Code Monitor running as a native desktop app on Windows, showing the Activity Feed, native Windows window menu, and Tabby companion" width="100%" loading="lazy" decoding="async" />
+            <img src="../images/windows_app.png" alt="AgentMonitor running as a native desktop app on Windows, showing the Activity Feed, native Windows window menu, and Tabby companion" width="100%" loading="lazy" decoding="async" />
             <div class="screenshot-caption"><span class="caption-icon">🪟</span> <span>The same dashboard as a native <strong>Windows</strong> app — real <code>BrowserWindow</code> with the native Windows window menu, live Activity Feed, and the Tabby companion. A notification-area (system tray) icon sits beside the clock for quick access.</span></div>
           </div>
 
@@ -4997,7 +4997,7 @@ ccam-export all --output backup.json</code></pre>
                 per-user <code>HKCU\Software\Microsoft\Windows\CurrentVersion\Run</code> entry,
                 visible in <strong>Task Manager → Startup</strong>. When the app is launched at
                 login it starts tray-only, with no window jumping into view (on Windows the login
-                launch is detected via a <code>--ccam-hidden</code> argument).
+                launch is detected via a <code>--am-hidden</code> argument).
               </p>
             </div>
             <div class="feature-card">
@@ -5020,7 +5020,7 @@ ccam-export all --output backup.json</code></pre>
               <p>
                 Launch the desktop app and <code>npm run dev</code> at the same time and both
                 stay real-time. Each server appends its <code>{port, pid, startedAt}</code>
-                entry to <code>~/.claude/.agent-dashboard.json</code> on startup; the Claude
+                entry to <code>~/.claude/.agentmonitor.json</code> on startup; the Claude
                 Code hook handler reads that list and fan-outs every event to every live entry
                 in parallel. Stale entries self-evict via a PID liveness check on read, so a
                 crashed server can't misroute events to a dead port.
@@ -5063,8 +5063,8 @@ ccam-export all --output backup.json</code></pre>
               <p>
                 The SQLite database and VAPID keys live in a per-user app-data directory
                 <em>outside</em> the application bundle / install dir —
-                <code>~/Library/Application Support/Claude Code Monitor/data/</code> on macOS,
-                <code>%APPDATA%\Claude Code Monitor\data\</code> on Windows.
+                <code>~/Library/Application Support/AgentMonitor/data/</code> on macOS,
+                <code>%APPDATA%\AgentMonitor\data\</code> on Windows.
                 <code>server-host.ts</code> points <code>DASHBOARD_DATA_DIR</code> at that
                 per-user directory on boot. Because a packaged, code-signed, or
                 app-translocated bundle is read-only, older builds that stored the database
@@ -5091,8 +5091,8 @@ ccam-export all --output backup.json</code></pre>
                 make sure <code>claude</code> is a real executable on your <code>PATH</code> — a
                 shell alias or function cannot be spawned — and check the
                 <code>user PATH resolved</code> line in the desktop log
-                (<code>~/Library/Logs/Claude Code Monitor/desktop.log</code> on macOS,
-                <code>%APPDATA%\Claude Code Monitor\logs\desktop.log</code> on Windows).
+                (<code>~/Library/Logs/AgentMonitor/desktop.log</code> on macOS,
+                <code>%APPDATA%\AgentMonitor\logs\desktop.log</code> on Windows).
               </p>
             </div>
           </div>
@@ -5146,7 +5146,7 @@ ccam-export all --output backup.json</code></pre>
           <h4>Option A — download the latest GitHub Release (recommended)</h4>
           <p>
             Open
-            <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/releases/latest"
+            <a href="https://github.com/tanvoid0/agent-monitor/releases/latest"
                target="_blank" rel="noopener noreferrer"
                class="dl-chip">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -5170,22 +5170,22 @@ ccam-export all --output backup.json</code></pre>
               <tbody>
                 <tr>
                   <td>macOS (Apple Silicon)</td>
-                  <td><code>ClaudeCodeMonitor-&lt;ver&gt;-arm64.dmg</code></td>
+                  <td><code>AgentMonitor-&lt;ver&gt;-arm64.dmg</code></td>
                   <td>Drag the <code>.app</code> into <code>/Applications</code></td>
                 </tr>
                 <tr>
                   <td>macOS (Intel)</td>
-                  <td><code>ClaudeCodeMonitor-&lt;ver&gt;-x64.dmg</code></td>
+                  <td><code>AgentMonitor-&lt;ver&gt;-x64.dmg</code></td>
                   <td>Drag the <code>.app</code> into <code>/Applications</code></td>
                 </tr>
                 <tr>
                   <td>Windows (installer)</td>
-                  <td><code>ClaudeCodeMonitor-Setup-&lt;ver&gt;-x64.exe</code></td>
+                  <td><code>AgentMonitor-Setup-&lt;ver&gt;-x64.exe</code></td>
                   <td>NSIS installer — per-user, no admin elevation</td>
                 </tr>
                 <tr>
                   <td>Windows (portable)</td>
-                  <td><code>ClaudeCodeMonitor-&lt;ver&gt;-x64-portable.exe</code></td>
+                  <td><code>AgentMonitor-&lt;ver&gt;-x64-portable.exe</code></td>
                   <td>Run without installing</td>
                 </tr>
               </tbody>
@@ -5197,18 +5197,18 @@ ccam-export all --output backup.json</code></pre>
             Want a build straight off the tip of <code>master</code>, ahead of the next tagged
             release? Every green run of the <code>🍎 macOS Desktop (DMG)</code> job on
             <code>macos-latest</code> uploads both per-arch DMGs as the
-            <code>ClaudeCodeMonitor-dmg</code> workflow artifact, and the
+            <code>AgentMonitor-dmg</code> workflow artifact, and the
             <code>🪟 Windows Desktop (EXE)</code> job on <code>windows-latest</code> uploads the
-            installer + portable EXEs as the <code>ClaudeCodeMonitor-win</code> artifact. Open
+            installer + portable EXEs as the <code>AgentMonitor-win</code> artifact. Open
             the
-            <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/actions/workflows/ci.yml?query=branch%3Amaster+is%3Asuccess"
+            <a href="https://github.com/tanvoid0/agent-monitor/actions/workflows/ci.yml?query=branch%3Amaster+is%3Asuccess"
                target="_blank" rel="noopener noreferrer"
                class="dl-chip">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
               latest passing run
             </a>,
             scroll to its Artifacts section, and download
-            <code>ClaudeCodeMonitor-dmg</code> or <code>ClaudeCodeMonitor-win</code>. (GitHub
+            <code>AgentMonitor-dmg</code> or <code>AgentMonitor-win</code>. (GitHub
             sign-in required; 14-day retention.)
           </p>
 
@@ -5235,14 +5235,14 @@ npm run desktop:dmg:x64      # Intel only — fast
 npm run desktop:dmg          # both per-arch DMGs (arm64 + x64) — for release, SLOWER
 
 # 4b. ON Windows — build an EXE, pick ONE:
-npm run desktop:win          # NSIS installer → ClaudeCodeMonitor-Setup-<ver>-x64.exe
-npm run desktop:win:portable # no-install portable → ClaudeCodeMonitor-<ver>-x64-portable.exe
+npm run desktop:win          # NSIS installer → AgentMonitor-Setup-<ver>-x64.exe
+npm run desktop:win:portable # no-install portable → AgentMonitor-<ver>-x64-portable.exe
 
 # electron-builder packages for the HOST OS — build DMGs on a Mac, EXEs on Windows.
 # desktop:dmg:arm64 / desktop:dmg:x64 each emit ONE arch-labelled DMG (the volume
-# title states the arch, e.g. "Claude Code Monitor (Apple Silicon)"). desktop:dmg
+# title states the arch, e.g. "AgentMonitor (Apple Silicon)"). desktop:dmg
 # builds BOTH per-arch DMGs at once (arm64 + x64) — the release pair.
-open desktop/release/ClaudeCodeMonitor-*-arm64.dmg   # match the arch you built</code></pre>
+open desktop/release/AgentMonitor-*-arm64.dmg   # match the arch you built</code></pre>
 
           <div class="callout callout-warning">
             <div class="callout-icon">⚠</div>
@@ -5256,7 +5256,7 @@ open desktop/release/ClaudeCodeMonitor-*-arm64.dmg   # match the arch you built<
                 per-arch DMGs. For running on a single Mac, use <code>desktop:dmg:arm64</code>
                 (Apple Silicon) or <code>desktop:dmg:x64</code> (Intel) — one architecture,
                 finishing in roughly a minute. CI runs <code>desktop:dmg</code> and uploads
-                both DMGs as <code>ClaudeCodeMonitor-dmg</code>, so you rarely need to build
+                both DMGs as <code>AgentMonitor-dmg</code>, so you rarely need to build
                 them yourself.
               </p>
             </div>
@@ -5274,7 +5274,7 @@ open desktop/release/ClaudeCodeMonitor-*-arm64.dmg   # match the arch you built<
             <div class="qs-card">
               <div class="qs-step">2</div>
               <h3>Drag to Applications</h3>
-              <p>Drag <code>Claude Code Monitor.app</code> into your <code>Applications</code> folder</p>
+              <p>Drag <code>AgentMonitor.app</code> into your <code>Applications</code> folder</p>
             </div>
             <div class="qs-card">
               <div class="qs-step">3</div>
@@ -5302,7 +5302,7 @@ open desktop/release/ClaudeCodeMonitor-*-arm64.dmg   # match the arch you built<
           </div>
           <div class="code-header"><span class="code-lang">bash</span></div>
           <pre><code># After dragging the app into /Applications:
-xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
+xattr -cr "/Applications/AgentMonitor.app"</code></pre>
           <p>
             Alternatively, open <strong>System Settings → Privacy &amp; Security</strong>,
             find the blocked app, and click <em>Open Anyway</em>. Code signing and Apple
@@ -5315,7 +5315,7 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
             <div class="qs-card">
               <div class="qs-step">1</div>
               <h3>Run the Installer</h3>
-              <p>Run <code>ClaudeCodeMonitor-Setup-&lt;ver&gt;-x64.exe</code> — a per-user NSIS install (no admin), or run the <code>*-portable.exe</code> to skip installing</p>
+              <p>Run <code>AgentMonitor-Setup-&lt;ver&gt;-x64.exe</code> — a per-user NSIS install (no admin), or run the <code>*-portable.exe</code> to skip installing</p>
             </div>
             <div class="qs-card">
               <div class="qs-step">2</div>
@@ -5336,7 +5336,7 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
 
           <div class="screenshot-card" style="margin: 8px 0 32px;">
             <img src="../images/setup_win_wizard2.png" alt="Windows NSIS installer step 2 — Choose Install Location" width="100%" loading="lazy" decoding="async" />
-            <div class="screenshot-caption"><span class="caption-icon">2️⃣</span> <span>NSIS installer, step 2 — <strong>Choose Install Location</strong>: defaults to <code>%LOCALAPPDATA%\Programs\Claude Code Monitor</code>, or point it anywhere.</span></div>
+            <div class="screenshot-caption"><span class="caption-icon">2️⃣</span> <span>NSIS installer, step 2 — <strong>Choose Install Location</strong>: defaults to <code>%LOCALAPPDATA%\Programs\AgentMonitor</code>, or point it anywhere.</span></div>
           </div>
 
           <div class="screenshot-card" style="margin: 8px 0 32px;">
@@ -5354,9 +5354,9 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
                 <strong>SmartScreen</strong> may show <em>"Windows protected your PC"</em> the
                 first time you run it; click <strong>More info → Run anyway</strong>. The
                 installer lays the app down <strong>per-user</strong> under
-                <code>%LOCALAPPDATA%\Programs\Claude Code Monitor</code> (and lets you choose the
+                <code>%LOCALAPPDATA%\Programs\AgentMonitor</code> (and lets you choose the
                 install directory) and sets an <code>AppUserModelId</code>
-                (<code>com.hoangsonww.ccam.desktop</code>) so native toast notifications are
+                (<code>tanvoid0.agentmonitor.desktop</code>) so native toast notifications are
                 attributed correctly and the window groups under one taskbar entry.
               </p>
             </div>
@@ -5370,17 +5370,17 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
                 The DMG is roughly 80&nbsp;MB, about 250&nbsp;MB installed on disk — the
                 standard Electron tax; the Windows installer is comparable. The app runs
                 natively on <strong>macOS and Windows</strong>; Linux is tracked as a follow-up.
-                Logs live at <code>~/Library/Logs/Claude Code Monitor/desktop.log</code> on macOS
-                or <code>%APPDATA%\Claude Code Monitor\logs\desktop.log</code> on Windows (reach
+                Logs live at <code>~/Library/Logs/AgentMonitor/desktop.log</code> on macOS
+                or <code>%APPDATA%\AgentMonitor\logs\desktop.log</code> on Windows (reach
                 them from the tray menu → <em>Show Logs</em>).
               </p>
             </div>
           </div>
 
           <p>
-            📖 User-facing guide: <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/DESKTOP.md"><code>DESKTOP.md</code></a> ·
+            📖 User-facing guide: <a href="https://github.com/tanvoid0/agent-monitor/blob/master/DESKTOP.md"><code>DESKTOP.md</code></a> ·
             architecture &amp; contributor reference:
-            <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/desktop/README.md"><code>desktop/README.md</code></a>
+            <a href="https://github.com/tanvoid0/agent-monitor/blob/master/desktop/README.md"><code>desktop/README.md</code></a>
           </p>
         </section>
 
@@ -5892,7 +5892,7 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
           <div class="code-header"><span class="code-lang">json — generic webhook payload</span></div>
           <pre><code>{
   "event": "alert.triggered",
-  "source": "claude-code-agent-monitor",
+  "source": "agentmonitor",
   "sent_at": "2026-06-13T17:00:00.000Z",
   "alert": {
     "id": 42,
@@ -5961,7 +5961,7 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
           </p>
 
           <p>
-            The same status is available from any terminal: <code>ccam update-check</code> asks
+            The same status is available from any terminal: <code>am update-check</code> asks
             the server for the branch- and fork-aware comparison, prints the behind-by count and
             the copy-paste update command, and triggers the <code>update_status</code> WebSocket
             broadcast so any open dashboard tab refreshes at the same time.
@@ -6136,21 +6136,21 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
 
           <div class="screenshot-gallery">
             <div class="screenshot-card">
-              <img src="../images/grafana.png" alt="Grafana CCAM — Overview dashboard with live fleet metrics" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">📊</span> <span><strong>Grafana · CCAM — Overview</strong> — default home dashboard after login on port 3000: fleet snapshot, database totals, breakdown charts, and rates from live <code>/api/metrics</code> scrapes — no sample or synthetic data. The npm-only local helper uses <code>admin</code> / <code>admin</code>; container stacks use <code>deployments/secrets/grafana-admin-password</code>.</span></div>
+              <img src="../images/grafana.png" alt="Grafana AgentMonitor — Overview dashboard with live fleet metrics" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">📊</span> <span><strong>Grafana · AgentMonitor — Overview</strong> — default home dashboard after login on port 3000: fleet snapshot, database totals, breakdown charts, and rates from live <code>/api/metrics</code> scrapes — no sample or synthetic data. The npm-only local helper uses <code>admin</code> / <code>admin</code>; container stacks use <code>deployments/secrets/grafana-admin-password</code>.</span></div>
             </div>
             <div class="screenshot-card">
-              <img src="../images/prometheus-console.png" alt="Prometheus CCAM console landing page" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">🔥</span> <span><strong>Prometheus · CCAM console</strong> — static HTML at <code>/consoles/index.html</code> (Prometheus 3.x compatible): live metric cards, session/token tables, and one-click Graph drill-down links that query the Prometheus HTTP API directly</span></div>
+              <img src="../images/prometheus-console.png" alt="Prometheus AgentMonitor console landing page" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">🔥</span> <span><strong>Prometheus · AgentMonitor console</strong> — static HTML at <code>/consoles/index.html</code> (Prometheus 3.x compatible): live metric cards, session/token tables, and one-click Graph drill-down links that query the Prometheus HTTP API directly</span></div>
             </div>
             <div class="screenshot-card">
-              <img src="../images/prometheus-query.png" alt="Prometheus Graph UI running CCAM PromQL" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">📈</span> <span><strong>Prometheus · Graph</strong> — ad-hoc PromQL against scraped CCAM series; starter expressions ship in the CCAM console and <code>monitoring/README.md</code>, with derived rates in <code>monitoring/prometheus/ccam-rules.yml</code></span></div>
+              <img src="../images/prometheus-query.png" alt="Prometheus Graph UI running AgentMonitor PromQL" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">📈</span> <span><strong>Prometheus · Graph</strong> — ad-hoc PromQL against scraped AgentMonitor series; starter expressions ship in the AgentMonitor console and <code>monitoring/README.md</code>, with derived rates in <code>monitoring/prometheus/am-rules.yml</code></span></div>
             </div>
           </div>
 
           <p>
-            CCAM exposes a read-only <strong>Prometheus text-exposition</strong> endpoint at
+            AgentMonitor exposes a read-only <strong>Prometheus text-exposition</strong> endpoint at
             <code>GET /api/metrics</code> — sessions and agents by status, cumulative events and
             tokens, connected WebSocket clients, configured remote sources, process uptime/RSS, and
             build version — so the same dashboard you use for Claude Code monitoring can be scraped
@@ -6163,12 +6163,12 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
             <strong>Quick start (npm):</strong> run the dashboard on loopback, then
             <code>npm run monitoring:install</code> once and <code>npm run monitoring:up</code>.
             Open Grafana at <code>http://localhost:3000</code> and Prometheus at
-            <code>http://localhost:9090</code>. The pre-built CCAM console is at
+            <code>http://localhost:9090</code>. The pre-built AgentMonitor console is at
             <code>http://localhost:9090/consoles/index.html</code> (also reachable from the
             Prometheus UI under <strong>Consoles</strong>). For an all-Docker path use
             <code>npm run monitoring:docker:up</code> or <code>npm run docker:full:up</code> for
             dashboard + Prometheus + Grafana together. Verify with
-            <code>npm run monitoring:verify</code> — the <code>ccam</code> scrape target should read
+            <code>npm run monitoring:verify</code> — the <code>am</code> scrape target should read
             <strong>UP</strong>.
           </p>
 
@@ -6177,10 +6177,10 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
               <div class="feature-icon ic-amber">📊</div>
               <h3>Four Grafana boards</h3>
               <p>
-                <strong>CCAM — Overview</strong> (default home),
-                <strong>CCAM — Sessions &amp; Agents</strong>,
-                <strong>CCAM — Tokens &amp; Events</strong>, and
-                <strong>CCAM — Platform</strong> — all provisioned from
+                <strong>AgentMonitor — Overview</strong> (default home),
+                <strong>AgentMonitor — Sessions &amp; Agents</strong>,
+                <strong>AgentMonitor — Tokens &amp; Events</strong>, and
+                <strong>AgentMonitor — Platform</strong> — all provisioned from
                 <code>monitoring/grafana/dashboards/</code> with PromQL against your live scrape.
                 The npm-only local helper uses <code>admin</code> / <code>admin</code> via
                 <code>monitoring/grafana.defaults.env</code>. Container stacks read the password
@@ -6191,7 +6191,7 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
               <div class="feature-icon ic-rose">🔥</div>
               <h3>Prometheus console</h3>
               <p>
-                Prometheus 3.x dropped the legacy console template libraries, so CCAM ships a
+                Prometheus 3.x dropped the legacy console template libraries, so AgentMonitor ships a
                 <strong>static HTML console</strong> at
                 <code>monitoring/prometheus/consoles/index.html</code> that fetches
                 <code>/api/v1/query</code> directly — live cards, session tables, and Graph links
@@ -6202,9 +6202,9 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
               <div class="feature-icon ic-cyan">📈</div>
               <h3>Recording rules</h3>
               <p>
-                <code>monitoring/prometheus/ccam-rules.yml</code> derives convenient rates and
-                aggregates from raw <code>ccam_*</code> series (e.g.
-                <code>rate(ccam_tokens_total[5m])</code>) so Grafana panels and ad-hoc Graph queries
+                <code>monitoring/prometheus/am-rules.yml</code> derives convenient rates and
+                aggregates from raw <code>am_*</code> series (e.g.
+                <code>rate(am_tokens_total[5m])</code>) so Grafana panels and ad-hoc Graph queries
                 stay fast without hand-rolling every expression.
               </p>
             </div>
@@ -6689,7 +6689,7 @@ npm run docker:full:up</code></pre>
               <strong>One SQLite writer</strong>
               <p>
                 Run exactly one dashboard container per data volume. Install hooks on the host.
-                Remote hook destinations must use HTTPS plus <code>CCAM_HOOK_TOKEN</code>.
+                Remote hook destinations must use HTTPS plus <code>AM_HOOK_TOKEN</code>.
               </p>
             </div>
           </div>
@@ -7027,7 +7027,7 @@ npm run install-hooks</code></pre>
                 <tr>
                   <td><strong>React 19</strong></td>
                   <td>
-                    Current supported client runtime with strong TypeScript support. CCAM remains a
+                    Current supported client runtime with strong TypeScript support. AgentMonitor remains a
                     client-rendered SPA and does not enable Server Components or RSC.
                   </td>
                 </tr>
@@ -7092,7 +7092,7 @@ npm run install-hooks</code></pre>
         <!-- ─── Footer ─────────────────────────────────────────────────────── -->
         <footer class="wiki-footer footer-enhanced">
           <div>
-            <div class="footer-brand-name">Claude Code Agent Monitor</div>
+            <div class="footer-brand-name">AgentMonitor</div>
             <p class="footer-note">
               Local-first monitoring for Claude Code sessions, agents, and tool events. Built for
               real-time visibility with zero external dependencies.
@@ -7101,16 +7101,16 @@ npm run install-hooks</code></pre>
           <div>
             <div class="footer-col-title">Documentation</div>
             <div class="footer-col-links">
-              <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/README.md">README</a>
-              <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/ARCHITECTURE.md">Architecture</a>
-              <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/INSTALL.md">Install</a>
-              <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/SETUP.md">Setup</a>
+              <a href="https://github.com/tanvoid0/agent-monitor/blob/master/README.md">README</a>
+              <a href="https://github.com/tanvoid0/agent-monitor/blob/master/ARCHITECTURE.md">Architecture</a>
+              <a href="https://github.com/tanvoid0/agent-monitor/blob/master/INSTALL.md">Install</a>
+              <a href="https://github.com/tanvoid0/agent-monitor/blob/master/SETUP.md">Setup</a>
             </div>
           </div>
           <div>
             <div class="footer-col-title">Relevant Links</div>
             <div class="footer-col-links">
-              <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/" target="_blank" rel="noopener">GitHub Repo</a>
+              <a href="https://github.com/tanvoid0/agent-monitor/" target="_blank" rel="noopener">GitHub Repo</a>
               <a href="https://sonnguyenhoang.com/" target="_blank" rel="noopener"
                 >About the Creator</a
               >
@@ -7126,7 +7126,7 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=96" defer></script>
+    <script src="i18n-content.js?v=97" defer></script>
     <script src="script.js?v=58" defer></script>
     <script>
       (function () {

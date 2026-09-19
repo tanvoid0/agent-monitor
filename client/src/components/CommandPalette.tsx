@@ -41,7 +41,7 @@
  * PageUp/PageDown jump, Tab moves between groups, Enter runs, Escape closes, and
  * focus returns to the previously focused element on close.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";

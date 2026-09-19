@@ -1,12 +1,12 @@
 /**
  * @file SessionDrillIn.tsx
  * @description Defines the SessionDrillIn component, which provides a detailed view of a specific session in the agent dashboard application. It allows users to drill into the agent tree, tool timeline, and event sequence for a selected session. The component manages its own state for loading, error handling, and active tab selection (Radix Tabs), and it fetches the necessary data from the backend API when a session is selected. It also includes a session selector for searching and selecting different sessions to view. The session header, agent-tree rows and tool pills are `EntityRef` chips linking to the session, agent and Activity feed.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/client/src/components/workflows/SessionDrillIn.tsx`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/client/src/components/workflows/SessionDrillIn.tsx`
  * **Purpose:** Workflow analytics visualization built on D3; consumes aggregated session/run metrics from the workflows API.
  *
  * ## Design constraints

@@ -1,10 +1,10 @@
 /**
  * @file sw.js
  * @description Service worker for the project landing page — precaches the shell (index, favicon, OG image, manifest) and manages cache lifecycle for offline support.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
-const CACHE_NAME = "landing-v2";
+const CACHE_NAME = "landing-v3";
 const PRECACHE = ["./", "./index.html", "./favicon.svg", "./og-image.svg", "./manifest.json"];
 
 self.addEventListener("install", (event) => {

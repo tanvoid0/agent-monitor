@@ -7,7 +7,7 @@
  * shared mapping produces, matching what Activity Feed and Session Detail show
  * for the same event. Also covers the row's deep link (session at event),
  * its session/tool EntityRef chips and the event context menu.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";

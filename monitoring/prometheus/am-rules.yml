@@ -1,0 +1,21 @@
+# Recording rules derived from live AgentMonitor scrapes — no synthetic data.
+# Pre-aggregates common queries so Prometheus Graph/Explore autocomplete
+# surfaces useful series immediately after the am target comes up.
+groups:
+  - name: am_recording
+    interval: 15s
+    rules:
+      - record: am:sessions:total
+        expr: sum(am_sessions)
+      - record: am:sessions:active
+        expr: am_sessions{status="active"}
+      - record: am:sessions:completed
+        expr: am_sessions{status="completed"}
+      - record: am:agents:working
+        expr: am_agents{status="working"}
+      - record: am:events:rate5m
+        expr: rate(am_events_total[5m])
+      - record: am:tokens:rate5m
+        expr: sum by (kind) (rate(am_tokens_total[5m]))
+      - record: am:tokens:total
+        expr: sum(am_tokens_total)

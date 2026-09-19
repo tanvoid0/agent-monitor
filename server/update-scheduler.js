@@ -1,6 +1,6 @@
 /**
  * @file Periodic git upstream check and WebSocket broadcast when update availability changes.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { getUpdatesStatus } = require("./lib/update-check");
@@ -51,7 +51,7 @@ function startUpdateScheduler({ broadcast }) {
       if (becameAvailable) {
         const line = "━".repeat(52);
         console.log(`\n${line}`);
-        console.log("  Agent Dashboard: upstream update available");
+        console.log("  AgentMonitor: upstream update available");
         console.log(`  ${status.message || ""}`);
         if (status.situation_note) {
           console.log(`  ${status.situation_note}`);

@@ -1,0 +1,36 @@
+{
+  "name": "am-insights",
+  "version": "3.0.0",
+  "description": "AI-powered insights for Claude Code — pattern detection, anomaly alerting, optimization recommendations, and session comparison using Agent Monitor analytics.",
+  "author": {
+    "name": "Tanveer Hoque",
+    "email": "tanvoid0@gmail.com",
+    "url": "https://github.com/tanvoid0"
+  },
+  "homepage": "https://github.com/tanvoid0/agent-monitor",
+  "repository": "https://github.com/tanvoid0/agent-monitor",
+  "license": "MIT",
+  "keywords": [
+    "insights",
+    "patterns",
+    "anomaly-detection",
+    "optimization",
+    "ai-analytics",
+    "claude-code"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "AgentMonitor Insights",
+    "shortDescription": "AI-powered insights for Claude Code — pattern detection, anomaly alerting, optimization...",
+    "longDescription": "AI-powered insights for Claude Code — pattern detection, anomaly alerting, optimization recommendations, and session comparison using Agent Monitor analytics.",
+    "developerName": "Tanveer Hoque",
+    "category": "Productivity",
+    "capabilities": ["Read"],
+    "websiteURL": "https://github.com/tanvoid0/agent-monitor",
+    "defaultPrompt": [
+      "Use AgentMonitor Insights to inspect the local AgentMonitor dashboard.",
+      "Use AgentMonitor Insights to analyze recent agent activity."
+    ],
+    "brandColor": "#6366F1"
+  }
+}

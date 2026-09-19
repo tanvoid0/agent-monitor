@@ -5,7 +5,7 @@ expand-ts-module-docs.py — append rich TSDoc blocks to TypeScript modules (com
 Used to deepen in-file documentation for client, MCP, and desktop packages without
 changing runtime behavior. Idempotent: skips files that already contain MODULE_GUIDE.
 
-@author Son Nguyen <hoangson091104@gmail.com>
+@author Tanveer Hoque <tanvoid0@gmail.com>
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ import re
 import sys
 from pathlib import Path
 
-AUTHOR = "@author Son Nguyen <hoangson091104@gmail.com>"
+AUTHOR = "@author Tanveer Hoque <tanvoid0@gmail.com>"
 MARKER = "MODULE_GUIDE"
 
 EXPORT_RE = re.compile(

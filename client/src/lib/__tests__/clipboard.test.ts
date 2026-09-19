@@ -2,7 +2,7 @@
  * @file clipboard.test.ts
  * @description Unit tests for `lib/clipboard.copyText`: the Clipboard API path, the hidden
  * textarea + `execCommand("copy")` fallback, and the success/failure toast announcements.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";

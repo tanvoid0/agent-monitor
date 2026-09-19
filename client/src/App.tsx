@@ -1,6 +1,6 @@
 /**
  * @file App.tsx
- * @description Top-level React tree for the Claude Code Agent Monitor dashboard.
+ * @description Top-level React tree for the AgentMonitor dashboard.
  * Wires together routing, real-time WebSocket ingestion, browser notifications,
  * and the splash screen shown on cold load.
  *
@@ -18,12 +18,12 @@
  * passes `wsConnected` for the connection badge. Unknown paths fall through to
  * {@link NotFound}.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/client/src/App.tsx`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/client/src/App.tsx`
  * **Purpose:** Dashboard module consumed by the React client, MCP tools, or desktop shell depending on deployment mode.
  *
  * ## Design constraints

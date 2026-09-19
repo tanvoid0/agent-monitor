@@ -14,12 +14,12 @@
  * session, inner-agent and model labels are `EntityRef` chips. Optional
  * `expandedRunId` / `onExpandedRunChange` let a page mirror the open run in
  * its URL (`?run=`).
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/client/src/components/workflows/WorkflowRunsPanel.tsx`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/client/src/components/workflows/WorkflowRunsPanel.tsx`
  * **Purpose:** Workflow analytics visualization built on D3; consumes aggregated session/run metrics from the workflows API.
  *
  * ## Design constraints

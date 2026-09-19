@@ -24,7 +24,7 @@
  * Every function here is best-effort and never throws: discovery must never
  * block server startup, and the hook handler must never fail because of it.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const fs = require("fs");
@@ -37,7 +37,7 @@ const DEFAULT_PORT = 4820;
 
 /** Absolute path of the discovery file. */
 function getServerInfoPath() {
-  return path.join(getClaudeHome(), ".agent-dashboard.json");
+  return path.join(getClaudeHome(), ".agentmonitor.json");
 }
 
 /**

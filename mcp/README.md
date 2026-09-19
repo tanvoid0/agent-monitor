@@ -1,18 +1,18 @@
-# CCAM MCP Server Reference
+# AgentMonitor MCP Server Reference
 
-The Claude Code Agent Monitor (CCAM) MCP server exposes the local dashboard's complete supported action surface as **97 typed tools**. The same canonical catalog is used by stdio, Streamable HTTP, legacy SSE, and the interactive REPL, so tool names, schemas, and policy guards cannot drift between transports.
+The AgentMonitor (AgentMonitor) MCP server exposes the local dashboard's complete supported action surface as **97 typed tools**. The same canonical catalog is used by stdio, Streamable HTTP, legacy SSE, and the interactive REPL, so tool names, schemas, and policy guards cannot drift between transports.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    H["Claude Code / Codex / MCP host"] -->|stdio or HTTP| M["CCAM MCP server"]
-    R["Operator"] -->|ccam mcp repl| M
-    M -->|loopback HTTP| A["CCAM /api/*"]
+    H["Claude Code / Codex / MCP host"] -->|stdio or HTTP| M["AgentMonitor MCP server"]
+    R["Operator"] -->|am mcp repl| M
+    M -->|loopback HTTP| A["AgentMonitor /api/*"]
     A --> D[(SQLite)]
 ```
 
-The MCP server does not read the dashboard database directly. Every tool calls the same Express routes used by the web app and `ccam` CLI. This keeps validation, redaction, WebSocket broadcasts, backups, and provider-specific behavior in one backend.
+The MCP server does not read the dashboard database directly. Every tool calls the same Express routes used by the web app and `am` CLI. This keeps validation, redaction, WebSocket broadcasts, backups, and provider-specific behavior in one backend.
 
 ## Setup
 
@@ -20,7 +20,7 @@ The MCP server does not read the dashboard database directly. Every tool calls t
 npm run setup
 npm run mcp:typecheck
 npm run test:mcp
-ccam mcp stdio
+am mcp stdio
 ```
 
 `npm run setup` installs and builds the MCP package. The direct npm launchers remain available:
@@ -35,9 +35,9 @@ npm run mcp:start:repl
 
 | Mode | Command | Endpoint or stream |
 | --- | --- | --- |
-| stdio | `ccam mcp stdio` | MCP JSON-RPC on stdin/stdout |
-| Streamable HTTP + SSE | `ccam mcp http` | `/mcp`, `/sse`, `/messages`, `/health` on port `8819` by default |
-| REPL | `ccam mcp repl` | Direct validated tool invocation with domain filtering |
+| stdio | `am mcp stdio` | MCP JSON-RPC on stdin/stdout |
+| Streamable HTTP + SSE | `am mcp http` | `/mcp`, `/sse`, `/messages`, `/health` on port `8819` by default |
+| REPL | `am mcp repl` | Direct validated tool invocation with domain filtering |
 
 A stdio server self-terminates when its host process goes away — stdin reaching end/close, or the process being re-parented away from the parent it started under (polled every 5s). This prevents the orphaned, unreachable servers that a host crashing without `SIGTERM`/`SIGINT` would otherwise leave behind. Re-parenting is measured against the startup parent rather than pid 1, so a server launched under an init-like parent (a container running `tini` as PID 1) is not killed off as a false positive. See `docs/MCP.md` for the full lifecycle.
 
@@ -181,7 +181,7 @@ Deleting a source retains imported data by default. Purging requires `confirmati
 Enable controlled writes with:
 
 ```bash
-MCP_DASHBOARD_ALLOW_MUTATIONS=true ccam mcp stdio
+MCP_DASHBOARD_ALLOW_MUTATIONS=true am mcp stdio
 ```
 
 Full data clearing additionally requires:
@@ -189,7 +189,7 @@ Full data clearing additionally requires:
 ```bash
 MCP_DASHBOARD_ALLOW_MUTATIONS=true \
 MCP_DASHBOARD_ALLOW_DESTRUCTIVE=true \
-ccam mcp stdio
+am mcp stdio
 ```
 
 The call must also pass `confirmation_token = "CLEAR_ALL_DATA"`.
@@ -225,15 +225,15 @@ Claude and Codex plugins use the stable launcher:
 ```json
 {
   "mcpServers": {
-    "ccam-dashboard": {
-      "command": "ccam",
+    "am-dashboard": {
+      "command": "am",
       "args": ["mcp", "stdio"]
     }
   }
 }
 ```
 
-This avoids plugin-cache-relative paths. Run `npm run setup` in the CCAM checkout first so `ccam` is linked and `mcp/build/index.js` exists.
+This avoids plugin-cache-relative paths. Run `npm run setup` in the AgentMonitor checkout first so `am` is linked and `mcp/build/index.js` exists.
 
 ## Validation
 
@@ -248,13 +248,13 @@ npm run extensions:validate
 
 ## Troubleshooting
 
-- Dashboard unreachable: run `ccam status`, then `ccam start` or `npm run dev`.
+- Dashboard unreachable: run `am status`, then `am start` or `npm run dev`.
 - Auth failure: set `MCP_DASHBOARD_API_TOKEN` or its `DASHBOARD_API_TOKEN` fallback to the same value as `DASHBOARD_TOKEN`.
 - MCP HTTP `401`: set `MCP_HTTP_AUTH_TOKEN` or `_FILE`, then send `Authorization: Bearer <token>` or `x-mcp-token`.
 - Tokenized container-host alias rejected: terminate TLS for the dashboard and use an `https://` base URL, or run the MCP process on the host and use direct loopback HTTP.
 - Upload or image is too large: keep each history file at or below 50 MiB, each upload call at or below 100 MiB total, transcript images at or below 10 MiB, and backup exports at or below 25 MiB.
 - Mutation denied: set `MCP_DASHBOARD_ALLOW_MUTATIONS=true` for that MCP process.
-- Plugin MCP launch fails: run `npm run setup`, then verify `ccam mcp repl`.
+- Plugin MCP launch fails: run `npm run setup`, then verify `am mcp repl`.
 - HTTP clients cannot connect: verify `/health`, bind host, firewall, and the exact `/mcp` endpoint.
 - Streamable HTTP requests fail with `Bad Request: No valid session or initialization`: send the `mcp-session-id` header returned by `initialize` on every later request. A session ends when the client sends `DELETE /mcp` with that header, and `/health` reports the live count as `activeSessions`.
 - stdio server exited on its own: check stderr for `shutting down orphaned stdio server` and its `reason` (`stdin_end`, `stdin_close`, or `reparented`) — the host process ended or the server was re-parented.

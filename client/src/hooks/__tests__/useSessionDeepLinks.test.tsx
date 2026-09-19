@@ -5,7 +5,7 @@
  * loaded row / pulls one more batch / reports a missing row exactly once,
  * `#agent-<id>` expands the target with its ancestors and flashes the card
  * only once it exists, and bookkeeping resets when the session id changes.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";

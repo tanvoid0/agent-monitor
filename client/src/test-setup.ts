@@ -10,7 +10,7 @@
  *
  * Imported from `vitest.config.ts` via `setupFiles`.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import "@testing-library/jest-dom/vitest";

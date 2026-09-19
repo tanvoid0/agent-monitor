@@ -3,7 +3,7 @@
  * @description Render smoke tests for the kit's small standalone atoms:
  * PageHeader, SectionHeader, LivePill, Badge — each renders without throwing
  * and shows its given text.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect } from "vitest";

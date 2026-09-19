@@ -3,8 +3,8 @@
  * The audit is advisory: transient registry failures retry, a valid report with
  * advisories is recorded as a finding without failing, malformed reports are
  * reported rather than passing as clean, and only
- * CCAM_DEPLOY_VALIDATE_STRICT=1 turns findings into a non-zero exit.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * AM_DEPLOY_VALIDATE_STRICT=1 turns findings into a non-zero exit.
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { describe, it } = require("node:test");
@@ -18,7 +18,7 @@ const ROOT = path.resolve(__dirname, "..", "..");
 const VALIDATOR = path.join(ROOT, "deployments", "scripts", "validate-deployment.sh");
 
 function runAuditScenario(fakeNpmBody, retryBaseSeconds = "0", extraEnv = {}) {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "ccam-audit-gate-"));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "am-audit-gate-"));
   const fakeNpm = path.join(tmp, "npm");
   const fakeSleep = path.join(tmp, "sleep");
   const attempts = path.join(tmp, "attempts");
@@ -54,14 +54,14 @@ printf '%s\n' "$1" >>${JSON.stringify(delays)}
     env: {
       ...process.env,
       PATH: `${tmp}:${process.env.PATH}`,
-      CCAM_AUDIT_RETRY_BASE_SECONDS: retryBaseSeconds,
+      AM_AUDIT_RETRY_BASE_SECONDS: retryBaseSeconds,
       // Pin the reporting mode: these tests run *inside* CI, so inheriting the
       // real GITHUB_ACTIONS would silently move findings from stderr onto
       // stdout as annotations, and GITHUB_STEP_SUMMARY would append to the
       // live job summary. Cases that want Actions mode opt in via extraEnv.
       GITHUB_ACTIONS: "",
       GITHUB_STEP_SUMMARY: "",
-      CCAM_DEPLOY_VALIDATE_STRICT: "",
+      AM_DEPLOY_VALIDATE_STRICT: "",
       ...extraEnv,
     },
     encoding: "utf8",
@@ -200,7 +200,7 @@ describe("deployment validator exit policy", () => {
         ...process.env,
         GITHUB_ACTIONS: "",
         GITHUB_STEP_SUMMARY: "",
-        CCAM_DEPLOY_VALIDATE_STRICT: "",
+        AM_DEPLOY_VALIDATE_STRICT: "",
         ...env,
       },
       encoding: "utf8",
@@ -214,10 +214,10 @@ describe("deployment validator exit policy", () => {
     assert.match(result.stdout, /1 advisory finding\(s\) reported; exiting 0/);
   });
 
-  it("exits non-zero with findings only under CCAM_DEPLOY_VALIDATE_STRICT=1", () => {
-    const result = runFinish({ CCAM_DEPLOY_VALIDATE_STRICT: "1" });
+  it("exits non-zero with findings only under AM_DEPLOY_VALIDATE_STRICT=1", () => {
+    const result = runFinish({ AM_DEPLOY_VALIDATE_STRICT: "1" });
     assert.notEqual(result.status, 0);
-    assert.match(result.stdout, /CCAM_DEPLOY_VALIDATE_STRICT=1 — failing on 1 finding\(s\)/);
+    assert.match(result.stdout, /AM_DEPLOY_VALIDATE_STRICT=1 — failing on 1 finding\(s\)/);
   });
 
   it("records a validator that fails mid-function, not just on its last command", () => {
@@ -244,15 +244,12 @@ describe("deployment validator exit policy", () => {
   });
 
   it("writes an advisory markdown table to the GitHub step summary", () => {
-    const summary = path.join(
-      fs.mkdtempSync(path.join(os.tmpdir(), "ccam-summary-")),
-      "summary.md"
-    );
+    const summary = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "am-summary-")), "summary.md");
     const result = runFinish({ GITHUB_STEP_SUMMARY: summary, GITHUB_ACTIONS: "true" });
     assert.equal(result.status, 0, result.stderr);
     const written = fs.readFileSync(summary, "utf8");
     assert.match(written, /advisory finding\(s\)/);
     assert.match(written, /\| ⚠️ \| example check \| example detail \|/);
-    assert.match(written, /CCAM_DEPLOY_VALIDATE_STRICT=1/);
+    assert.match(written, /AM_DEPLOY_VALIDATE_STRICT=1/);
   });
 });

@@ -17,12 +17,12 @@
  * We run the user's login shell once at startup, capture its `PATH`, and merge
  * it into `process.env.PATH`. The embedded server runs in this same process,
  * so it (and every `claude` it spawns) inherits the corrected `PATH`.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/desktop/src/shell-path.ts`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/desktop/src/shell-path.ts`
  * **Purpose:** Dashboard module consumed by the React client, MCP tools, or desktop shell depending on deployment mode.
  *
  * ## Design constraints
@@ -79,7 +79,7 @@ import { log } from "./logger";
 // `-c` command (e.g. a `.zshrc` `neofetch` call); scanning for this sentinel
 // pair — rather than trusting the last line of stdout — makes extraction
 // robust to whatever the user's shell profile prints.
-const DELIM = "__CCAM_SHELL_PATH__";
+const DELIM = "__AM_SHELL_PATH__";
 
 /**
  * Run the user's login+interactive shell and capture its `PATH`. Returns null

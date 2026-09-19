@@ -3,7 +3,7 @@
  * @description Verifies ConversationView requests the preceding transcript page
  * when the scroll container reaches its top boundary, and reports the selected
  * transcript through `onTranscriptChange` without needing a router.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { afterEach, describe, expect, it, vi } from "vitest";

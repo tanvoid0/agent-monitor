@@ -1,6 +1,6 @@
 {
-  "brand": "Agent Dashboard",
-  "brandSub": "Claude Code Monitor",
+  "brand": "AgentMonitor",
+  "brandSub": "Monitorización de Claude Code",
   "dashboard": "Panel",
   "agentBoard": "Tablero Kanban",
   "plan": "Plan",

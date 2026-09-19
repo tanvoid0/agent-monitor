@@ -5,7 +5,7 @@
  * adds card-ready prompt context, safely exposes transcript images, reveals a
  * known local project directory in the OS file manager, and broadcasts live
  * changes.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { Router } = require("express");

@@ -69,7 +69,7 @@
  * Usage:
  *   node test/fixtures/plan/seed.js --from <events.jsonl> --cwd <project cwd> [--fixture-dir <dir>]
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const fs = require("fs");

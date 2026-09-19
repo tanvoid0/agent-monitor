@@ -3,7 +3,7 @@
  * .local/log.md import and its re-import on change, slug collisions, re-parse
  * on change with `plan_updated`, the half-written and gone-file guards, and
  * the 7-day window.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { describe, it, before, after } = require("node:test");

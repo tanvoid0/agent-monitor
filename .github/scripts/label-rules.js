@@ -6,7 +6,7 @@
  * evolves — without ever touching a label a human applied. Pure and free of
  * network or filesystem access so `server/__tests__/label-rules.test.js` can
  * pin every rule.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 // Every label this module can apply, with the color and description used when
@@ -29,7 +29,7 @@ const LABELS = {
   "area/mcp": { color: "1d76db", description: "Local MCP server and its tools" },
   "area/desktop": { color: "1d76db", description: "Electron desktop app" },
   "area/vscode-extension": { color: "1d76db", description: "VS Code extension" },
-  "area/cli": { color: "1d76db", description: "ccam CLI and statusline" },
+  "area/cli": { color: "1d76db", description: "am CLI and statusline" },
   "area/scripts": {
     color: "1d76db",
     description: "Installer, import, seed and maintenance scripts",

@@ -6,7 +6,7 @@
  * terminal-styled code view, and JSON parse failures fall back to showing the
  * raw data as a single row. Renders inside a MemoryRouter because the
  * session/agent/cwd/model/tool rows are EntityRef links.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect } from "vitest";

@@ -11,12 +11,12 @@
  * process answers `/api/health` with `{ status: "ok" }`, we adopt it instead
  * of starting a second server. This covers the case where the user already
  * runs `npm start` in a terminal — we should not double-bind.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/desktop/src/server-host.ts`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/desktop/src/server-host.ts`
  * **Purpose:** Dashboard module consumed by the React client, MCP tools, or desktop shell depending on deployment mode.
  *
  * ## Design constraints
@@ -466,17 +466,17 @@ async function waitForHealthy(port: number, timeoutMs = HEALTH_TIMEOUT_MS): Prom
  * the BrowserWindow and to shut down cleanly on quit.
  *
  * Two environment overrides exist primarily for testing:
- *   - `CCAM_DESKTOP_BIND_PORT`: bind exactly this port (no adoption, no fallback).
+ *   - `AM_DESKTOP_BIND_PORT`: bind exactly this port (no adoption, no fallback).
  *     Used by the smoke test to verify the spawned process actually started a
  *     server rather than finding an unrelated one.
- *   - `CCAM_DESKTOP_NO_ADOPT=1`: skip the "is there already a healthy server
+ *   - `AM_DESKTOP_NO_ADOPT=1`: skip the "is there already a healthy server
  *     on 4820?" check and always start our own.
  */
 export async function startEmbeddedServer(): Promise<ServerHandle> {
-  const forcedPort = process.env.CCAM_DESKTOP_BIND_PORT
-    ? parseInt(process.env.CCAM_DESKTOP_BIND_PORT, 10)
+  const forcedPort = process.env.AM_DESKTOP_BIND_PORT
+    ? parseInt(process.env.AM_DESKTOP_BIND_PORT, 10)
     : null;
-  const noAdopt = process.env.CCAM_DESKTOP_NO_ADOPT === "1" || forcedPort !== null;
+  const noAdopt = process.env.AM_DESKTOP_NO_ADOPT === "1" || forcedPort !== null;
 
   if (!noAdopt) {
     // Adopt an already-running healthy server (e.g. user has `npm start` open).
@@ -503,7 +503,7 @@ export async function startEmbeddedServer(): Promise<ServerHandle> {
   process.env.DASHBOARD_PORT = String(port);
 
   // The server now defaults its writable state (SQLite DB, VAPID keys,
-  // transcript snapshots) to the shared user-global `~/.claude/agent-dashboard/`
+  // transcript snapshots) to the shared user-global `~/.claude/agentmonitor/`
   // — outside the read-only `.app`/installed bundle AND identical to what
   // `npm start`/`npm run dev` use, so the desktop app and the web app share ONE
   // database. We therefore no longer override DASHBOARD_DATA_DIR to this app's

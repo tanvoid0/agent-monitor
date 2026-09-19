@@ -26,7 +26,7 @@
  * If a test genuinely needs git behavior, inject a runner (see the `execGit`
  * option on getUpdatesStatus and the `fakeGit` helper in update-check.test.js).
  * Do not "fix" a failure here by loosening the pattern.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { describe, it } = require("node:test");

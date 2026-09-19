@@ -24,7 +24,7 @@
  * confirmation modals on purpose — the palette navigates to them instead of
  * performing them.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import {
@@ -599,11 +599,7 @@ export function buildPaletteCommands(ctx: PaletteContext): PaletteCommand[] {
       group: "actions",
       icon: Github,
       run: () =>
-        window.open(
-          "https://github.com/hoangsonww/Claude-Code-Agent-Monitor",
-          "_blank",
-          "noopener,noreferrer"
-        ),
+        window.open("https://github.com/tanvoid0/agent-monitor", "_blank", "noopener,noreferrer"),
     },
     {
       id: "action:website",
@@ -631,7 +627,7 @@ export function buildPaletteCommands(ctx: PaletteContext): PaletteCommand[] {
       icon: Github,
       run: () =>
         window.open(
-          "https://github.com/hoangsonww/Claude-Code-Agent-Monitor/issues/new",
+          "https://github.com/tanvoid0/agent-monitor/issues/new",
           "_blank",
           "noopener,noreferrer"
         ),
@@ -645,7 +641,7 @@ export function buildPaletteCommands(ctx: PaletteContext): PaletteCommand[] {
       icon: History,
       run: () =>
         window.open(
-          "https://github.com/hoangsonww/Claude-Code-Agent-Monitor/releases",
+          "https://github.com/tanvoid0/agent-monitor/releases",
           "_blank",
           "noopener,noreferrer"
         ),

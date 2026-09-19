@@ -1,0 +1,29 @@
+{
+  "name": "am-integrations",
+  "version": "3.0.0",
+  "description": "Manage AgentMonitor alert rules, universal webhook providers, browser push notifications, and SSH Remote Data Sources with explicit mutation and external-send confirmation.",
+  "author": {
+    "name": "Tanveer Hoque",
+    "email": "tanvoid0@gmail.com",
+    "url": "https://github.com/tanvoid0"
+  },
+  "homepage": "https://github.com/tanvoid0/agent-monitor",
+  "repository": "https://github.com/tanvoid0/agent-monitor",
+  "license": "MIT",
+  "keywords": ["alerts", "webhooks", "push", "remote-sources", "ssh", "integrations"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "AgentMonitor Integrations",
+    "shortDescription": "Manage AgentMonitor alert rules, universal webhook providers, browser push notifications,...",
+    "longDescription": "Manage AgentMonitor alert rules, universal webhook providers, browser push notifications, and SSH Remote Data Sources with explicit mutation and external-send confirmation.",
+    "developerName": "Tanveer Hoque",
+    "category": "Developer Tools",
+    "capabilities": ["Read", "Write"],
+    "websiteURL": "https://github.com/tanvoid0/agent-monitor",
+    "defaultPrompt": [
+      "Use AgentMonitor Integrations to inspect the local AgentMonitor dashboard.",
+      "Use AgentMonitor Integrations to analyze recent agent activity."
+    ],
+    "brandColor": "#6366F1"
+  }
+}

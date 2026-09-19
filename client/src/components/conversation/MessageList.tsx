@@ -5,12 +5,12 @@
  * blocks, inline ToolCallBlocks for tool_use / tool_result pairs, and
  * MarkdownContent for prose. Used by ConversationView as the main body of
  * the Conversation tab on the Session detail page.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/client/src/components/conversation/MessageList.tsx`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/client/src/components/conversation/MessageList.tsx`
  * **Purpose:** Renders Claude transcript rows (user, assistant, tool calls) inside Session Detail with markdown, syntax highlighting, and TUI-style segments.
  *
  * ## Design constraints

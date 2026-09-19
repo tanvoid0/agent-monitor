@@ -2,7 +2,7 @@
  * @file CompactRow.test.tsx
  * @description Smoke test for the shared one-line row: renders name,
  * timestamp, and the kebab menu when a menu is given.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, expect, it } from "vitest";

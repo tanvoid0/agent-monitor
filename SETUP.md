@@ -1,10 +1,10 @@
 # Setup Guide
 
-A comprehensive guide to setting up and configuring the Agent Dashboard, including how it integrates with Claude Code, environment variables, container deployment, and troubleshooting common issues.
+A comprehensive guide to setting up and configuring the AgentMonitor, including how it integrates with Claude Code, environment variables, container deployment, and troubleshooting common issues.
 
 ## How it works
 
-Agent Dashboard integrates with Claude Code through its native hook system. When Claude Code performs any action (session start, tool use, turn completion, subagent finish, session exit), it fires a hook that calls a small Node.js script bundled with this project. That script forwards the event over HTTP to the dashboard server, which stores it in SQLite and broadcasts it to the browser over WebSocket.
+AgentMonitor integrates with Claude Code through its native hook system. When Claude Code performs any action (session start, tool use, turn completion, subagent finish, session exit), it fires a hook that calls a small Node.js script bundled with this project. That script forwards the event over HTTP to the dashboard server, which stores it in SQLite and broadcasts it to the browser over WebSocket.
 
 ```
 Claude Code  →  hook fires  →  hook-handler.js  →  POST /api/hooks/event
@@ -48,7 +48,7 @@ npm run install-hooks
 ```
 
 > [!TIP]
-> Container note: do not rely on hook auto-install from inside Docker or Podman. The hook path written by a container would point at the container filesystem, not the host. Start the container first, then run `npm run install-hooks` on the host. As a safeguard (issue #193), the installer now **detects container execution and refuses to run** (exiting non-zero) so it can never poison a bind-mounted host `~/.claude`; the containerized server logs the same guidance instead of silently writing a bad path. If you genuinely run Claude Code inside the same container, override with `CCAM_ALLOW_CONTAINER_HOOKS=1 npm run install-hooks`.
+> Container note: do not rely on hook auto-install from inside Docker or Podman. The hook path written by a container would point at the container filesystem, not the host. Start the container first, then run `npm run install-hooks` on the host. As a safeguard (issue #193), the installer now **detects container execution and refuses to run** (exiting non-zero) so it can never poison a bind-mounted host `~/.claude`; the containerized server logs the same guidance instead of silently writing a bad path. If you genuinely run Claude Code inside the same container, override with `AM_ALLOW_CONTAINER_HOOKS=1 npm run install-hooks`.
 
 > [!NOTE]
 > Prefer a ready-made dev environment? This repo ships an **optional** Dev Container (`.devcontainer/`) for VS Code / GitHub Codespaces — Node 24 LTS, native build tools for `better-sqlite3`, Python, and ports `4820`/`5173` preconfigured. It's purely opt-in and changes nothing for host-based development. See [`.devcontainer/README.md`](.devcontainer/README.md). (Hooks remain host-side there too.)
@@ -94,9 +94,9 @@ For cloud deployment, Run Agent containers, remote hooks, Kubernetes, Terraform,
 | `CLAUDE_DASHBOARD_PORT` | `4820` | Port the hook handler uses when posting events to the dashboard |
 | `DASHBOARD_DB_PATH` | `data/dashboard.db` | Path to the SQLite database file |
 | `NODE_ENV` | `development` | Set to `production` to serve built client |
-| `CCAM_IMPORT_MAX_BYTES` | `1073741824` (1 GB) | Maximum size per uploaded file on `/api/import/upload` |
-| `CCAM_IMPORT_MAX_FILES` | `2000` | Maximum number of files per upload request |
-| `CCAM_IMPORT_MAX_EXTRACT_BYTES` | `4294967296` (4 GB) | Maximum uncompressed bytes any single archive is allowed to expand to (zip-bomb defense) |
+| `AM_IMPORT_MAX_BYTES` | `1073741824` (1 GB) | Maximum size per uploaded file on `/api/import/upload` |
+| `AM_IMPORT_MAX_FILES` | `2000` | Maximum number of files per upload request |
+| `AM_IMPORT_MAX_EXTRACT_BYTES` | `4294967296` (4 GB) | Maximum uncompressed bytes any single archive is allowed to expand to (zip-bomb defense) |
 | `MCP_DASHBOARD_BASE_URL` | `http://127.0.0.1:4820` | Base URL used by the local MCP server to call dashboard APIs |
 | `MCP_DASHBOARD_ALLOW_MUTATIONS` | `false` | Enables mutating MCP tools |
 | `MCP_DASHBOARD_ALLOW_DESTRUCTIVE` | `false` | Enables destructive MCP tools (in addition to mutations) |
@@ -108,8 +108,8 @@ For cloud deployment, Run Agent containers, remote hooks, Kubernetes, Terraform,
 | `DASHBOARD_TOKEN_FILE` | unset | File-backed dashboard API/WebSocket token |
 | `DASHBOARD_HOOK_TOKEN` / `_FILE` | unset | Dedicated credential for remote hook ingestion |
 | `DASHBOARD_ENV_PATH` | repo `.env` | Writable dotenv path for persisted Settings overrides |
-| `CCAM_DASHBOARD_URL` | localhost discovery | Remote hook destination; non-loopback requires HTTPS and hook auth |
-| `CCAM_HOOK_TOKEN` / `_FILE` | unset | Credential sent by Claude/Codex hook handlers |
+| `AM_DASHBOARD_URL` | localhost discovery | Remote hook destination; non-loopback requires HTTPS and hook auth |
+| `AM_HOOK_TOKEN` / `_FILE` | unset | Credential sent by Claude/Codex hook handlers |
 
 Example with a custom port:
 
@@ -118,7 +118,7 @@ DASHBOARD_PORT=9000 npm run dev
 ```
 
 > [!NOTE]
-> You usually do **not** need to set `DASHBOARD_PORT` manually. `npm run dev` is wrapped by `scripts/dev.js`, which probes both `127.0.0.1` and `::1` (so an SSH `LocalForward` bound to one loopback can't slip past) and picks the first free port in `4820–4859` automatically. The chosen port is propagated to the Vite dev proxy via `DASHBOARD_PORT`, and the Express server writes it to `~/.claude/.agent-dashboard.json` so the Claude Code hook handler discovers it without any env var.
+> You usually do **not** need to set `DASHBOARD_PORT` manually. `npm run dev` is wrapped by `scripts/dev.js`, which probes both `127.0.0.1` and `::1` (so an SSH `LocalForward` bound to one loopback can't slip past) and picks the first free port in `4820–4859` automatically. The chosen port is propagated to the Vite dev proxy via `DASHBOARD_PORT`, and the Express server writes it to `~/.claude/.agentmonitor.json` so the Claude Code hook handler discovers it without any env var.
 >
 > Multiple dashboards can run side by side — for example `npm run dev` and the desktop app (macOS or Windows) at the same time. Each one appends its `{port, pid, startedAt}` entry to the discovery file, and `scripts/hook-handler.js` fan-outs every hook event to every live entry, so both UIs keep their real-time stream.
 >
@@ -157,7 +157,7 @@ Quick start. Normal `npm run setup` already installs and builds MCP:
 npm run mcp:start              # stdio (for Claude Code / Claude Desktop)
 npm run mcp:start:http         # HTTP + SSE server on port 8819
 npm run mcp:start:repl         # interactive CLI with tab completion
-ccam mcp stdio                 # stable launcher used by bundled plugins
+am mcp stdio                 # stable launcher used by bundled plugins
 ```
 
 For full host config and tool catalog, see [mcp/README.md](./mcp/README.md).
@@ -190,7 +190,7 @@ installation details.
 
 ### VS Code extension setup
 
-The **Claude Code Agent Monitor** is available as an integrated VS Code extension for seamless monitoring within your editor.
+The **AgentMonitor** is available as an integrated VS Code extension for seamless monitoring within your editor.
 
 - **Activity Bar View**: Adds a custom "Radar" icon to the activity bar providing real-time agent health, token counts, and session stats.
 - **Status Bar Integration**: Displays live session and agent pulse counts in the bottom bar.
@@ -207,7 +207,7 @@ To install or develop the extension:
 3. For developer details, see [vscode-extension/README.md](./vscode-extension/README.md).
 
 > [!TIP]
-> Extension on VS Code Marketplace: [Claude Code Agent Monitor](https://marketplace.visualstudio.com/items?itemName=hoangsonw.claude-code-agent-monitor)
+> Extension on VS Code Marketplace: [AgentMonitor](https://marketplace.visualstudio.com/items?itemName=hoangsonw.agentmonitor)
 
 ### PWA configuration (optional)
 
@@ -228,7 +228,7 @@ The dashboard, landing page, and wiki each ship as independent Progressive Web A
 
 ### Desktop App Setup
 
-The `desktop/` workspace ships the dashboard as a **native desktop app** for both **macOS** (a `.app` distributed as a `.dmg`) and **Windows** (an `.exe` — an NSIS installer plus a no-install portable build), built with Electron 35. It is an Electron shell that **embeds the existing Express server in-process** — it does not reimplement anything. For installation (download a pre-built installer from the [latest GitHub Release](https://github.com/hoangsonww/Claude-Code-Agent-Monitor/releases/latest) or the per-commit `ClaudeCodeMonitor-dmg` / `ClaudeCodeMonitor-win` CI artifact, or build one locally — then on macOS mount, drag, Gatekeeper bypass; on Windows run the installer / portable, SmartScreen bypass), see [INSTALL.md → Desktop App (macOS & Windows)](./INSTALL.md#desktop-app-macos--windows-optional). The full user guide is [`DESKTOP.md`](./DESKTOP.md); the contributor / architecture reference is [`desktop/README.md`](./desktop/README.md).
+The `desktop/` workspace ships the dashboard as a **native desktop app** for both **macOS** (a `.app` distributed as a `.dmg`) and **Windows** (an `.exe` — an NSIS installer plus a no-install portable build), built with Electron 35. It is an Electron shell that **embeds the existing Express server in-process** — it does not reimplement anything. For installation (download a pre-built installer from the [latest GitHub Release](https://github.com/tanvoid0/agent-monitor/releases/latest) or the per-commit `AgentMonitor-dmg` / `AgentMonitor-win` CI artifact, or build one locally — then on macOS mount, drag, Gatekeeper bypass; on Windows run the installer / portable, SmartScreen bypass), see [INSTALL.md → Desktop App (macOS & Windows)](./INSTALL.md#desktop-app-macos--windows-optional). The full user guide is [`DESKTOP.md`](./DESKTOP.md); the contributor / architecture reference is [`desktop/README.md`](./desktop/README.md).
 
 This section covers the parts of running the desktop app that matter for setup.
 
@@ -262,7 +262,7 @@ This section covers the parts of running the desktop app that matter for setup.
 
 The chosen port is shown in the tray menu. The embedded server also honors the dashboard env vars in [Environment variables](#environment-variables) (`DASHBOARD_PORT` is set automatically by the desktop host).
 
-**Data directory.** The packaged app stores its SQLite database and VAPID keys in a per-user app-data directory — `~/Library/Application Support/Claude Code Monitor/data/` on macOS, `%APPDATA%\Claude Code Monitor\data\` on Windows — **outside** the app bundle / install dir. The desktop host sets `DASHBOARD_DATA_DIR` to this per-user location automatically. Keeping writable state out of the bundle means a packaged, code-signed (and therefore read-only) `.app` never tries to write inside itself, and your imported history and events **survive app reinstalls and updates** (the Windows NSIS uninstaller keeps this data by default). (Older macOS builds kept the database inside the bundle, which broke History Import; after upgrading from a pre-fix build, re-run **Settings → Import History → Rescan** once to close the one-time data gap.)
+**Data directory.** The packaged app stores its SQLite database and VAPID keys in a per-user app-data directory — `~/Library/Application Support/AgentMonitor/data/` on macOS, `%APPDATA%\AgentMonitor\data\` on Windows — **outside** the app bundle / install dir. The desktop host sets `DASHBOARD_DATA_DIR` to this per-user location automatically. Keeping writable state out of the bundle means a packaged, code-signed (and therefore read-only) `.app` never tries to write inside itself, and your imported history and events **survive app reinstalls and updates** (the Windows NSIS uninstaller keeps this data by default). (Older macOS builds kept the database inside the bundle, which broke History Import; after upgrading from a pre-fix build, re-run **Settings → Import History → Rescan** once to close the one-time data gap.)
 
 **`claude` CLI resolution.** A Finder/Dock-launched macOS app inherits only launchd's minimal `PATH`, not your login-shell `PATH`. So the app can find and spawn the `claude` CLI for the "Run Claude" feature, the desktop host recovers your login-shell `PATH` at startup. (On Windows the process already inherits the user `PATH`, so no recovery is needed.) If "Run Claude" still reports that `claude` is not on `PATH`, make sure `claude` is a real executable on your shell `PATH` — a shell alias or function cannot be spawned.
 
@@ -271,11 +271,11 @@ The chosen port is shown in the tray menu. The embedded server also honors the d
 **Logs.** The Electron main process has no terminal when launched from Finder / the Start menu, so it writes to a per-user log file:
 
 ```
-~/Library/Logs/Claude Code Monitor/desktop.log     # macOS
-%APPDATA%\Claude Code Monitor\logs\desktop.log      # Windows
+~/Library/Logs/AgentMonitor/desktop.log     # macOS
+%APPDATA%\AgentMonitor\logs\desktop.log      # Windows
 ```
 
-Open it from the tray menu → **Show Logs**. Set `CCAM_DESKTOP_VERBOSE=1` to also mirror `info`/`warn` lines to stdout when running via `npm run desktop:dev`.
+Open it from the tray menu → **Show Logs**. Set `AM_DESKTOP_VERBOSE=1` to also mirror `info`/`warn` lines to stdout when running via `npm run desktop:dev`.
 
 **Lifecycle reminder.** Closing the dashboard window only **hides** it — the server and tray keep running. **Quit** (⌘Q or tray → *Quit*) shuts the embedded server down gracefully and exits. Double-launching just focuses the existing window (single-instance lock); it never starts a second server.
 
@@ -394,8 +394,8 @@ folder given to **Scan a folder**:
 Archive extraction is hardened against path traversal and archive bombs.
 The defaults are generous for real-world transcripts but tight enough to
 stop obvious attacks; see the env vars table above for
-`CCAM_IMPORT_MAX_BYTES`, `CCAM_IMPORT_MAX_FILES`, and
-`CCAM_IMPORT_MAX_EXTRACT_BYTES`.
+`AM_IMPORT_MAX_BYTES`, `AM_IMPORT_MAX_FILES`, and
+`AM_IMPORT_MAX_EXTRACT_BYTES`.
 
 ### CLI alternative
 
@@ -435,7 +435,7 @@ Scope, precisely:
 - A session's transcript is found by scanning `~/.claude/projects/` for the
   default `<proj>/<sid>.jsonl` layout, then by the `transcript_path` stored on
   the session row — so a session imported from a custom directory via
-  `ccam import path` is covered too.
+  `am import path` is covered too.
 - Only **non-workflow** rows are rewritten. Workflow rows (`service_tier =
   'workflow'`) come from run journals, not transcripts, and are preserved.
 - **Codex sessions are skipped entirely.** Their usage comes from rollout
@@ -451,7 +451,7 @@ Scope, precisely:
 
 | Script | Command | Description |
 |---|---|---|
-| `setup` | `npm run setup` | Install root, client, VS Code extension, and MCP dependencies, build MCP, and link `ccam` |
+| `setup` | `npm run setup` | Install root, client, VS Code extension, and MCP dependencies, build MCP, and link `am` |
 | `dev` | `npm run dev` | Start server + client in development mode |
 | `start` | `npm start` | Start server in production mode |
 | `build` | `npm run build` | Build the React client to `client/dist/` |
@@ -494,7 +494,7 @@ Commonly used targets:
 
 | Make target | Equivalent npm command | Description |
 |---|---|---|
-| `make setup` | `npm run setup` | Install all dependencies, build MCP, and link `ccam` |
+| `make setup` | `npm run setup` | Install all dependencies, build MCP, and link `am` |
 | `make dev` | `npm run dev` | Start server + client in watch mode |
 | `make build` | `npm run build` | Build the React client for production |
 | `make start` | `npm start` | Start the production server |
@@ -670,7 +670,7 @@ npm run desktop:dmg:arm64   # Apple Silicon
 npm run desktop:dmg:x64     # Intel
 ```
 
-CI already produces both DMGs — pulled either from the [latest GitHub Release](https://github.com/hoangsonww/Claude-Code-Agent-Monitor/releases/latest) (CI auto-publishes a `vX.Y.Z` when `package.json` is bumped on `master`) or from the per-commit `ClaudeCodeMonitor-dmg` workflow artifact — so you rarely need to build them locally.
+CI already produces both DMGs — pulled either from the [latest GitHub Release](https://github.com/tanvoid0/agent-monitor/releases/latest) (CI auto-publishes a `vX.Y.Z` when `package.json` is bumped on `master`) or from the per-commit `AgentMonitor-dmg` workflow artifact — so you rarely need to build them locally.
 
 ---
 
@@ -685,7 +685,7 @@ You ran `electron-builder` without a TypeScript compile. `npm run clean` (in `de
 The DMG is **ad-hoc signed** by default (the project ships no paid Apple Developer ID), so macOS shows *"Apple could not verify…"* the first time you open the app. Strip the quarantine attribute:
 
 ```bash
-xattr -cr "/Applications/Claude Code Monitor.app"
+xattr -cr "/Applications/AgentMonitor.app"
 ```
 
 Or open  → *System Settings → Privacy & Security* and click *Open Anyway*. Real Developer ID signing and notarization are opt-in via the `CSC_LINK` / `CSC_KEY_PASSWORD` and `APPLE_ID` / `APPLE_TEAM_ID` / `APPLE_APP_SPECIFIC_PASSWORD` repository secrets — see [`DESKTOP.md`](./DESKTOP.md#notarization-for-the-maintainer).
@@ -700,4 +700,4 @@ The Windows `.exe` (NSIS installer and portable build) is **unsigned** by defaul
 
 ### Desktop app — no sessions appearing
 
-The desktop app installs hooks on its **first owned-server boot**, not before. After the app is running, start a **new** Claude Code session and confirm `~/.claude/settings.json` contains entries referencing `hook-handler.js`. If the app adopted an existing server on `4820`, that server's own hook configuration applies instead. For a blank dashboard window, check the desktop log (`~/Library/Logs/Claude Code Monitor/desktop.log` on macOS, `%APPDATA%\Claude Code Monitor\logs\desktop.log` on Windows) via tray → *Show Logs* and use tray → *Restart Server*.
+The desktop app installs hooks on its **first owned-server boot**, not before. After the app is running, start a **new** Claude Code session and confirm `~/.claude/settings.json` contains entries referencing `hook-handler.js`. If the app adopted an existing server on `4820`, that server's own hook configuration applies instead. For a blank dashboard window, check the desktop log (`~/Library/Logs/AgentMonitor/desktop.log` on macOS, `%APPDATA%\AgentMonitor\logs\desktop.log` on Windows) via tray → *Show Logs* and use tray → *Restart Server*.

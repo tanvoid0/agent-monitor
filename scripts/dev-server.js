@@ -4,7 +4,7 @@
  * source watcher. Save bursts become one graceful restart, and the server
  * inherits stdio directly so an intermediary output pipe cannot fail with
  * EPIPE and strand Vite without its API backend.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const fs = require("node:fs");

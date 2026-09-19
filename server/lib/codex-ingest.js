@@ -5,7 +5,7 @@
  * live-thread state, resume-picker reactivation, and dashboard card lifecycle.
  * Independent byte cursors make watcher/hook notifications idempotent and
  * real-time safe.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const fs = require("fs");

@@ -1,9 +1,9 @@
 {
-  "id": "claude-code-agent-monitor-wiki",
-  "name": "Claude Code Agent Monitor - Wiki",
-  "author": "Son Nguyen",
+  "id": "agentmonitor-wiki",
+  "name": "AgentMonitor - Wiki",
+  "author": "Tanveer Hoque",
   "short_name": "CC Wiki",
-  "description": "Comprehensive technical wiki for Claude Code Agent Monitor.",
+  "description": "Comprehensive technical wiki for AgentMonitor.",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",

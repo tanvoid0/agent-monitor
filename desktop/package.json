@@ -1,14 +1,14 @@
 {
-  "name": "agent-dashboard-desktop",
-  "version": "2.3.0",
+  "name": "agentmonitor-desktop",
+  "version": "3.0.0",
   "private": true,
-  "description": "Native macOS and Windows desktop shell for Claude Code Agent Monitor.",
-  "author": "Son Nguyen <hoangson091104@gmail.com>",
+  "description": "Native macOS and Windows desktop shell for AgentMonitor.",
+  "author": "Tanveer Hoque <tanvoid0@gmail.com>",
   "license": "MIT",
-  "homepage": "https://github.com/hoangsonww/Claude-Code-Agent-Monitor",
+  "homepage": "https://github.com/tanvoid0/agent-monitor",
   "repository": {
     "type": "git",
-    "url": "https://github.com/hoangsonww/Claude-Code-Agent-Monitor.git"
+    "url": "https://github.com/tanvoid0/agent-monitor.git"
   },
   "main": "out/main.js",
   "scripts": {
@@ -20,9 +20,9 @@
     "dev": "npm run build && electron out/main.js",
     "package": "rm -rf release && npm run build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac --arm64 --x64 --publish never",
     "dmg": "npm run package",
-    "dmg:arm64": "rm -rf release && npm run build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac --arm64 --publish never --config.dmg.title='Claude Code Monitor (Apple Silicon)'",
-    "dmg:x64": "rm -rf release && npm run build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac --x64 --publish never --config.dmg.title='Claude Code Monitor (Intel)'",
-    "dmg:universal": "rm -rf release && npm run build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac --universal --publish never --config.dmg.title='Claude Code Monitor (Universal)'",
+    "dmg:arm64": "rm -rf release && npm run build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac --arm64 --publish never --config.dmg.title='AgentMonitor (Apple Silicon)'",
+    "dmg:x64": "rm -rf release && npm run build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac --x64 --publish never --config.dmg.title='AgentMonitor (Intel)'",
+    "dmg:universal": "rm -rf release && npm run build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac --universal --publish never --config.dmg.title='AgentMonitor (Universal)'",
     "win": "npm run build && electron-builder --win nsis --x64 --publish never",
     "win:portable": "npm run build && electron-builder --win portable --x64 --publish never",
     "test": "npm run build && node --test --test-reporter=spec tests/smoke.test.mjs",

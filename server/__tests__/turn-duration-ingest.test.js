@@ -1,7 +1,7 @@
 /**
  * @file Regression tests for replay-safe Claude TurnDuration ingestion and
  * automatic repair of legacy duplicate rows and inflated session counters.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { after, before, describe, it } = require("node:test");
@@ -11,7 +11,7 @@ const http = require("http");
 const os = require("os");
 const path = require("path");
 
-const TMP = fs.mkdtempSync(path.join(os.tmpdir(), "ccam-turn-duration-"));
+const TMP = fs.mkdtempSync(path.join(os.tmpdir(), "am-turn-duration-"));
 process.env.DASHBOARD_DB_PATH = path.join(TMP, "dashboard.db");
 process.env.CLAUDE_HOME = path.join(TMP, "claude");
 process.env.DASHBOARD_DATA_DIR = path.join(TMP, "data");

@@ -1,6 +1,6 @@
-# Agent Dashboard - System Design and Technical Reference
+# AgentMonitor - System Design and Technical Reference
 
-Architectural overview and technical reference for the Agent Dashboard system, covering design goals, high-level architecture, data flow, server and client components, database design, WebSocket protocol, hook integration, MCP extension layer, Claude Code plugins & skills, state management, security considerations, performance characteristics, deployment modes, and technology choices.
+Architectural overview and technical reference for the AgentMonitor system, covering design goals, high-level architecture, data flow, server and client components, database design, WebSocket protocol, hook integration, MCP extension layer, Claude Code plugins & skills, state management, security considerations, performance characteristics, deployment modes, and technology choices.
 
 ![Claude Code](https://img.shields.io/badge/Claude_Code-orange?style=flat-square&logo=claude&logoColor=white)
 ![Claude Code Plugins](https://img.shields.io/badge/Claude_Code-Plugins_&_Skills-orange?style=flat-square&logo=anthropic&logoColor=white)
@@ -99,9 +99,9 @@ Architectural overview and technical reference for the Agent Dashboard system, c
 
 ## System Overview
 
-Agent Dashboard is a local-first monitoring platform for Claude Code sessions. It captures agent lifecycle events via Claude Code's native hook system, persists them in SQLite, and presents them through a React dashboard with real-time WebSocket updates.
+AgentMonitor is a local-first monitoring platform for Claude Code sessions. It captures agent lifecycle events via Claude Code's native hook system, persists them in SQLite, and presents them through a React dashboard with real-time WebSocket updates.
 
-> **Cursor sessions (informational):** The same `~/.claude` transcript paths also pick up **Cursor** agent sessions — Cursor happens to use that layout locally alongside Claude Code. CCAM does not distinguish which editor created a session.
+> **Cursor sessions (informational):** The same `~/.claude` transcript paths also pick up **Cursor** agent sessions — Cursor happens to use that layout locally alongside Claude Code. AgentMonitor does not distinguish which editor created a session.
 
 ```mermaid
 C4Context
@@ -109,7 +109,7 @@ C4Context
 
     Person(user, "Developer", "Uses Claude Code CLI")
     System(claude, "Claude Code", "AI coding assistant with hook system")
-    System(dashboard, "Agent Dashboard", "Monitoring platform")
+    System(dashboard, "AgentMonitor", "Monitoring platform")
     SystemDb(sqlite, "SQLite", "Persistent storage")
 
     Rel(user, claude, "Interacts with")
@@ -147,20 +147,20 @@ graph TB
     subgraph "Plugin Layer"
         direction TB
         PM["Claude + Codex Marketplace<br/>(14 plugins, 66 bundled skills)"]
-        PA["ccam-analytics"]
-        PP["ccam-productivity"]
-        PD["ccam-devtools"]
-        PI["ccam-insights"]
-        PC["ccam-dashboard"]
-        PG["ccam-cost-guard"]
-        PS["ccam-sessions"]
-        PW["ccam-workflows"]
-        PQ["ccam-quality"]
-        PF["ccam-config"]
-        PN["ccam-runner"]
-        PX["ccam-integrations"]
-        PL["ccam-platform"]
-        PR["ccam-reports"]
+        PA["am-analytics"]
+        PP["am-productivity"]
+        PD["am-devtools"]
+        PI["am-insights"]
+        PC["am-dashboard"]
+        PG["am-cost-guard"]
+        PS["am-sessions"]
+        PW["am-workflows"]
+        PQ["am-quality"]
+        PF["am-config"]
+        PN["am-runner"]
+        PX["am-integrations"]
+        PL["am-platform"]
+        PR["am-reports"]
         PM --> PA & PP & PD & PI & PC & PG & PS & PW & PQ & PF & PN & PX & PL & PR
     end
 
@@ -353,7 +353,7 @@ graph TD
 | `server/compat-sqlite.js` | Compatibility wrapper that gives Node.js built-in `node:sqlite` (`DatabaseSync`) the same API as `better-sqlite3` — pragma, transaction, prepare. Used as automatic fallback when the native module is unavailable (Node 22+)                                                                                                                                                                                                                                                                                                        |
 | `server/websocket.js`     | WebSocket server on `/ws` path, 30s heartbeat with ping/pong dead connection detection, typed broadcast function. Upgrades run through the same Host-header allowlist and optional `DASHBOARD_TOKEN` check as the HTTP surface (`isWebSocketAuthorized`)                                                                                                                                                                                                                                                                                                                                                  |
 | `server/lib/security.js`  | Network-hardening module (fix for GHSA-gr74-4xfh-6jw9). `resolveHost()` picks the bind address. `hostGuard` rejects requests whose `Host` is not loopback, operator-allowlisted, or the Kubernetes `POD_IP`. `DASHBOARD_TOKEN` / `DASHBOARD_TOKEN_FILE` protects REST and WebSocket access. Independent `DASHBOARD_HOOK_TOKEN` / `DASHBOARD_HOOK_TOKEN_FILE` protects the loopback hook routes (`/api/hooks/event`, `/api/hooks/codex`) when remote ingestion is enabled. A third, deliberately separate `REMOTE_PUSH_TOKEN` / `REMOTE_PUSH_TOKEN_FILE` gates `POST /api/hooks/ingest-batch` — the only route meant to be reachable from the public internet — so hardening the loopback routes never opens the internet-writable one as a side effect; unset, that route answers `503 REMOTE_PUSH_NOT_CONFIGURED`, and it accepts the token only as `Authorization: Bearer` or `X-Dashboard-Token`, never `?token=`, which would land in proxy access logs. Token matching is constant-time. |
-| `scripts/hook-transport.js` | Shared fail-safe hook delivery for Claude Code and Codex. Defaults to local dashboard discovery, accepts an explicit `CCAM_DASHBOARD_URL`, rejects non-HTTP(S) schemes, requires HTTPS plus `CCAM_HOOK_TOKEN` / `_FILE` for non-loopback destinations, and sends the token as `x-ccam-hook-token` without blocking the agent CLI on the response. |
+| `scripts/hook-transport.js` | Shared fail-safe hook delivery for Claude Code and Codex. Defaults to local dashboard discovery, accepts an explicit `AM_DASHBOARD_URL`, rejects non-HTTP(S) schemes, requires HTTPS plus `AM_HOOK_TOKEN` / `_FILE` for non-loopback destinations, and sends the token as `x-am-hook-token` without blocking the agent CLI on the response. |
 | `scripts/dev-server.js` | Development-only Express supervisor used by `npm run dev:server`. It watches runtime JavaScript/JSON under `server/` and `scripts/` (excluding tests), coalesces editor/formatter save bursts for 500 ms, waits for graceful shutdown before relaunching, and gives each server child inherited stdio. This avoids overlapping instances and the built-in `node --watch` proxy's fatal `EPIPE`, which previously left Vite running without an API backend after repeated restarts. |
 | `routes/hooks.js`         | Core event processing inside a SQLite transaction. Auto-creates sessions/agents. Also hosts `POST /api/hooks/ingest-batch` — see the `remote push` row below. Handles 9 hook types: SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, Stop, SubagentStart, SubagentStop, Notification, SessionEnd, plus synthetic `Compaction` events. `SubagentStart` binds the row the `Agent` dispatch created to Claude Code's `agent_id` (`agents.claude_agent_id`) and records its transcript path; tool hooks and `SubagentStop` carrying that id then attribute exactly to the row, falling back to the deepest-working / name-type-task heuristics only for payloads without one. Manages the agent state machine plus the `awaiting_input_since` overlay (stamped on SessionStart for fresh CLIs — `startup`/`resume`/`clear` only, since a `compact`-source SessionStart fires mid-turn while Claude is working and is deliberately skipped so a working session stays Active — on non-error Stop, and on permission Notifications (which now also set agent status to `waiting`); cleared on UserPromptSubmit / PreToolUse / PostToolUse / SessionStart-resume / SessionEnd; SubagentStop intentionally does NOT clear it; and stamped by the 15 s watchdog on user-interrupt (Esc) recovery — see the `index.js` row — since `Esc` fires no hook). After `res.json()` returns on `SubagentStop`, fires a fire-and-forget `scanAndImportSubagents` (from `scripts/import-history.js`) that parses every `subagents/agent-*.jsonl`, pairs `tool_use` ↔ `tool_result` blocks by `tool_use_id`, and emits per-tool `PreToolUse` + `PostToolUse` events under each subagent's own `agent_id` — closes the gap where subagent-internal tool calls would otherwise never reach the events table. The same scan also reparents nested subagents under their true spawner (see the `import-history.js` row); it returns `{ created, reparented }`, and the follow-up `new_event` refetch nudge fires when **either** is non-zero so a pure re-parent (tree shape changed, no new rows) still refreshes the UI. The same scan attributes each subagent's tokens to **its own model** (resolved from the subagent transcript) and stamps `metadata.model` on the subagent row (issue #185), so a tiered pipeline (Opus orchestrator + Sonnet/Haiku subagents) is priced per real model rather than entirely at the orchestrator's rate; the parent-model bucket is skipped to avoid colliding with the main-transcript token writer's compaction baseline logic. Session reactivation on resume (including Stop/SubagentStop reactivation for imported completed/abandoned sessions), orphaned-session cleanup uses `DASHBOARD_STALE_MINUTES` (default 180). Uses a shared `TranscriptCache` instance (`server/lib/transcript-cache.js`) for extraction of tokens, API errors, turn durations, thinking blocks, usage extras, and the two newest distinct real human prompts — stat-based caching with incremental byte-offset reads avoids re-reading entire JSONL files on every event. That bounded prompt summary is stored in `sessions.card_prompt_preview` and emits `session_updated`, so Claude's compact cards use the same live two-row context as Codex. Detects compaction via `isCompactSummary` in JSONL transcripts and creates compaction agents + events (deduplicated by uuid). Token baselines (`baseline_*` columns) preserve pre-compaction totals so no usage is lost. Cache entries are evicted on SessionEnd. **SessionEnd preserves error state** — but only when the error is still unrecovered at the transcript tail (`isErrorAtTail`: latest API error with no successful turn after it); a transient error the CLI retried past finalizes as `completed` instead of freezing in a stale `error`. **Error recovery**: `UserPromptSubmit` and `PreToolUse` recover a session from `error`; additionally the 15 s watchdog now scans `error` sessions and self-heals one back to `active` when its transcript has progressed past the last API error (`isErrorAtTail` false) — closing the gap where a transient API error left an imported or sweep-monitored session (no live recovery hook) pinned in `error` forever. **Session naming**: on every event, syncs `sessions.name` from the transcript title surfaced by `TranscriptCache` and broadcasts `session_updated` — an explicit `custom-title` (`/rename`, `claude -n`, picker Ctrl+R) always wins, an `ai-title` (auto / plan-accept) only fills a placeholder/auto name (`Session <id8>` or a cwd-folder import name) so a user-chosen name is never clobbered. When neither title exists, the session's **first user prompt** (surfaced by `TranscriptCache` as `firstUserMessage`; tool-result / meta / slash-command plumbing entries skipped) fills the placeholder session name plus the main agent's placeholder name and empty task (issue #201) — a later `ai-title` can still replace a descriptor-filled name, and the agent fill passes the in-flight `current_tool` through (the shared `updateAgent` statement writes that column verbatim) so it is never wiped mid-turn. The guarded `updateSessionName` no-ops on the unchanged case, so the broadcast path stays quiet; the 15 s error-watchdog runs the same sync for idle sessions that fire no hook after a rename. **Dead-session liveness reap**: the same watchdog completes any `active` session whose `cwd` has no running `claude` CLI process (probe via `lib/session-liveness.js`) — recovering a `SessionEnd` lost while the dashboard was down (e.g. Ctrl+C) that previously left the session in Waiting until the 3 h stale sweep; watchdog ticks are gated on the transcript mtime (fallback `updated_at` when no transcript exists) being older than `DASHBOARD_LIVENESS_IDLE_SECONDS` (default 60 s); the boot passes — immediately at startup and again ~5 s later (post-import) — skip the gate so a session quit moments before launch clears at once, disabled via `DASHBOARD_LIVENESS_PROBE=0` / on Windows / in containers, and a false completion self-heals through hook reactivation. Sessions whose `cwd` is not POSIX-absolute (household-hook-forwarded from another machine, e.g. a Windows `D:\…` path a local `/proc`/`lsof` scan can never match) are skipped by the reap — so a mixed local + forwarded deployment stays correct without disabling the whole probe. **Remote Data Source sessions** (`sessions.source` ≠ `local`) are excluded from the reap, the error/interrupt watchdog scan, and both stale sweeps (all gated on `source = 'local'`): their POSIX-absolute `cwd` lives on another machine, so local process/clock heuristics would wrongly terminate a running remote session — their status is reconciled from the SSH mirror by `remote-sync.js` instead |
 | `routes/hooks.js` — remote push | `POST /api/hooks/ingest-batch` is the third session-data ingestion path, alongside local hooks and the SSH pull of **Remote Data Sources**. It exists for the machine the dashboard can never reach to pull FROM — a roaming laptop behind NAT, a CGNAT'd home connection — which pushes its own data instead. One batch carries `tokens[]` (each entry a bucket's **full current total**, like a transcript re-parse, not a delta), `tool_events[]`, and `turns[]`, persisted as `RemoteToolEvent` / `RemoteTurn` events. Unlike every other route in the server it is meant to be reachable from the public internet, so: it is disabled until `REMOTE_PUSH_TOKEN` / `REMOTE_PUSH_TOKEN_FILE` is set (`503 REMOTE_PUSH_NOT_CONFIGURED`), it uses that token rather than `DASHBOARD_HOOK_TOKEN` (hardening the loopback routes must not open this one), and it rejects `?token=` so the credential never reaches a proxy access log — only `Authorization: Bearer` or `X-Dashboard-Token`. Items dedup on `(session_id, event_type, uuid)` against committed rows **and** within the batch (resend-safe, served by `idx_events_session_type_uuid`); `tokens + tool_events + turns` is capped at 1000 per request (`413 BATCH_TOO_LARGE`); and a `session_id` already owned by a local or SSH-pulled session is refused per-item (`SESSION_LOCALLY_OWNED`), so a pushed session can only create a NEW session or append to one it created itself. Partial failures still answer `200` with per-item `errors[]` and a `skipped` count, and WebSocket broadcasts are flushed **after** the transaction commits rather than during it |
@@ -374,12 +374,12 @@ graph TD
 | `routes/workflows.js`     | Provider/source-scoped aggregate workflow visualization data (agent orchestration graphs, tool transition flows, collaboration networks, workflow pattern detection, model delegation, error propagation, concurrency timelines, session complexity metrics, compaction impact). It reads Codex `response_item` tool calls and `context_compacted` events without fabricating Claude subagents or Workflow-tool runs; `?status=active\|completed`, `?sources=...`, and `?providers=claude\|codex` filter every aggregate and drill-in. |
 | `lib/transcript-cache.js` | Stat-based JSONL transcript cache with incremental byte-offset reads. Shared between `hooks.js` (token extraction on every event) and the periodic compaction scanner (`index.js`). Extracts tokens, compaction entries, API errors (`isApiErrorMessage` + raw error responses), turn durations (`system` subtype `turn_duration`), thinking block counts, usage extras (service_tier, speed, inference_geo), user-interrupt markers (the transcript `[Request interrupted by user]` entry / `interruptedMessageId` field — surfaced as `pendingInterrupt`, computed from transcript ordering: latest interrupt vs latest real turn activity, both on Claude Code's clock), and the latest session title — `custom-title` (`/rename`, `claude -n`, picker Ctrl+R) and `ai-title` (auto / plan-accept), append-only so the last value wins, carried through both full and incremental reads — plus the session's **first user prompt** (`firstUserMessage`: tool-result, meta/caveat, slash-command plumbing, compact-summary, and interrupt entries skipped; whitespace-collapsed, capped at 500 chars; first value wins across incremental reads), used as a fallback descriptor for placeholder-named sessions/agents. **Token usage is reconciled per `message.id`, not per record** — Claude Code writes one JSONL record per content block and each copies the message's `usage`, so summing every record inflated totals 2–4× (issue #293); a later record for the same id retracts the earlier contribution (`subtractBucket`) and counts its own, because streaming writes partial usage first and the LAST record is authoritative. The `message.id → contribution` map is seeded from the cached result across incremental read boundaries (so a message whose records straddle a read still reconciles, with the transient negative netted out by `_merge`) and bounded to a `TRANSCRIPT_CACHE_MAX_ARRAY_LEN` tail window; id-less records and per-record block counting are unchanged. Uses `(path, mtime, size)` cache key — unchanged files return cached results instantly, grown files only parse new bytes, shrunk files (compaction) trigger full re-read. Each cache entry stores **only** `{mtimeMs, size, bytesRead, result}` — the previous shape that duplicated every growable array at both the top level and inside `result` is gone, halving steady-state memory per entry. Per-entry growable arrays (`turnDurations`, `errors`, `compaction.entries`, `usageExtras.*`) are bounded to `TRANSCRIPT_CACHE_MAX_ARRAY_LEN` (default `1000`, tail-kept) — older items remain in the `events` table thanks to hook dedup, so the cap only affects the in-memory view. Trimming runs both during parse (when an array reaches `2 * MAX_ARRAY_LEN`, amortized O(N)) and at finalize, so even a fresh full-file parse on a multi-day session cannot accumulate an unbounded transient before returning. **Chunked sync byte-stream reader** (`_streamRange`, 4 MiB chunks split on `0x0A` bytes — safe across UTF-8 multibyte sequences — with a growable per-line byte buffer capped at 64 MiB) replaces the previous `readFileSync("utf8")` so transcripts larger than V8's max JS string length (~512 MiB on 64-bit Node 20) parse without aborting Node with `FATAL ERROR: v8::ToLocalChecked Empty MaybeLocal`. Both full and incremental reads share the same line-level state machine (`_initParseState` / `_consumeLine` / `_finalizeState`). LRU eviction caps at 200 entries. Entries evicted on SessionEnd and abandoned session cleanup |
 | `lib/session-liveness.js` | Provider-aware process-liveness probe for the watchdog's dead-session reap. `probeLiveCwds(binary)` enumerates matching `claude` or `codex` CLI processes (`ps -Ao pid=,args=`, then `lsof -a -p <pids> -d cwd -Fn` on macOS or `/proc/<pid>/cwd` on Linux) and returns the set of their working directories; `isAgentCommand()` matches the requested bare binary and `node`/`bun`-launched shims while rejecting lookalikes (`claude-mem`, `Claude.app`). Fail-safe by contract: returns `available: false` (callers must change nothing) on Windows, inside containers (reuses `isInsideContainer` from `scripts/install-hooks.js` — host processes are invisible there, so an empty list would lie), on `ps`/`lsof` failure, or when `DASHBOARD_LIVENESS_PROBE=0` |
-| `bin/ccam.js` | Dependency-free umbrella CLI (`ccam <command>`) exposing the full dashboard surface in the terminal: monitoring (health / stats / kanban / tail via short-interval event polling), data browsing (sessions, per-session detail with an indented agent tree + cost + recent events, agents, events), insights (analytics, workflow intelligence, dynamic Workflow-tool runs, per-model cost), alerts + rules + webhook test probes, pricing CRUD, imports (rescan / scan-path), and administration (doctor, info, export, cleanup, reinstall-hooks, clear-data). Linked globally by `npm run setup` via a fail-soft `npm link` (`link-cli` script). Discovers the live server through `server/lib/server-info.js` (`~/.claude/.agent-dashboard.json`, PID-liveness-checked) with `CLAUDE_DASHBOARD_PORT` / `DASHBOARD_PORT` env overrides and a 4820 fallback; renders a full terminal UI — box-drawn width-fitted tables with right-aligned numeric columns, status icons, inline bar charts (stats / analytics / cost), `├─`/`└─` agent trees, and a TTY spinner for `start` — whose ANSI styling degrades to plain text when piped (`--no-color` / `NO_COLOR` / `FORCE_COLOR` / `CCAM_COLOR` respected); the one destructive command (`clear-data`) refuses to run without `--yes`. Server lifecycle: `ccam status` shows a ●/○ up/down indicator and `ccam start` boots a detached production server (waits for /api/health, logs to `data/ccam-server.log`). `ccam stop` reads the PID from the discovery file and stops it — `SIGTERM` first, escalating to `SIGKILL` after 5 s. `ccam repl` (aliases `shell` / `i`) opens an interactive shell — a readline prompt with tab-completion (commands / subcommands / flags), persisted arrow-key history (`data/.ccam_repl_history`), and a live server-status prompt; each entered line runs as a short-lived child `ccam` process (via `runCommand` dispatch), so an offline refusal or a blocking `tail` cannot take the shell down, and piped input runs each line in order then exits at EOF. When the server is down, read-only commands (sessions / session / agents / events / kanban / stats / pricing list / alerts list / rules / export / doctor) fall back to direct SQLite reads of `data/dashboard.db` under a ⚠ Offline-mode banner — the connection is opened without SQLite readonly mode so a live WAL stays visible, and is SELECT-only by construction — while server-only commands (tail, analytics, workflows, runs, cost, mutations) refuse with the specific reason |
-| `scripts/import-history.js` | Batch history importer used by (a) server startup auto-import, (b) the `/api/import/*` routes, (c) the `import-history` CLI, and (d) live `SubagentStop` ingestion via the exported `scanAndImportSubagents(dbModule, sessionId, transcriptPath)`. Exposes `importAllSessions(dbModule)` for the default `~/.claude/projects` tree, `syncDefaultProjects(dbModule, {mtimeCache})` (the incremental, mtime-fingerprinted re-sweep that backs the continuous background sync — parses only new/changed files and reports `[{sessionId, isNew}]`), and the generalized `importFromDirectory(dbModule, rootDir, {onProgress})` which walks any directory recursively, classifies each `.jsonl` as session vs subagent (with `findSessionSubagents` probing both `<proj>/<sid>/subagents/*` and `<proj>/subagents/<sid>/*` layouts), and funnels everything through the shared `parseSessionFile` + `importSession` pipeline. The durable transcript snapshot (`snapshotTranscript`) additionally preserves **nested** Workflow-tool inner-agent transcripts (`subagents/workflows/<runId>/agent-*.jsonl`) via the separate `findSessionWorkflowSubagents` probe — mirroring the run subpath so the read route resolves the snapshot identically to the live file, without pulling those nested agents into the flat sub-agent import (no double-count). After each batch imports, `importAllSessions` / `importFromDirectory` also call `ingestWorkflowsForSession` (from `server/lib/workflow-ingest.js`) per session — outside the SQLite transaction, since the ingest is async — so a **Workflow-tool** run whose journal never reached a live server (a headless `claude -p` run, a CI job, or an HPC/cluster node emits no hooks) still links its inner agents to their `run_id` on a plain `ccam import rescan` / `ccam import path`, instead of leaving them orphaned (`workflow_run_id = NULL`) with the run stuck at 1 agent — see "Workflow-Tool Run Ingestion". `parseSubagentFile` extracts ordered `toolEvents` (tool_use + tool_result paired by `tool_use_id`) so `importSubagentFromJsonl` can emit per-tool `PreToolUse` + `PostToolUse` rows under each subagent's own `agent_id`. The importer dedups against live hook-created subagent rows via `findLiveSubagentForJsonl` (session + subagent_type + start-time within 30 s) so backfill never produces parallel `<sid>-jsonl-*` rows. It also **skips `importSubagents` entirely when subagent transcripts exist** — the main-transcript `Agent`-block rows (`<sid>-subagent-N`) and the transcript rows (`<sid>-jsonl-*`) would otherwise both be created and only deduped by a fragile type+timing match, doubling every subagent; when transcripts are present the richer `-jsonl-` rows are authoritative and the `-subagent-N` fallback runs only when there are none. `importSession` now also **persists `transcript_path`** on the session row (via `setSessionTranscriptPath`) so the abandon sweep, compaction scanner, and per-agent cost backfill can locate the transcript later, and **stamps each subagent's own token buckets into `metadata.tokens`** (used for per-agent cost). `backfillSubagentTokenMetadata` (a deferred, self-limiting startup pass) fills `metadata.tokens` on subagents that predate per-agent cost, deriving the transcript path from `<projectsDir>/<slug>/<sid>.jsonl` when `transcript_path` is null and covering both subagent-dir layouts — metadata-only, so it never touches session `token_usage`. `classifyJsonl` treats any file under a `subagents/` ancestor at any depth (including the `subagents/workflows/<runId>/` tree) as a subagent, so workflow inner-agent transcripts are never misimported as top-level sessions. **Nested-subagent hierarchy** is rebuilt by `reconcileSubagentParents`: every subagent is inserted flat under the main agent (no single hook/JSONL carries the spawner id), then `parseSubagentFile` also returns `spawnedChildren` — the child agent ids named on each Task tool result (`toolUseResult.agentId`) — which are inverted to a child→parent map and used to repoint `parent_agent_id` (via the `setAgentParent` statement) so a subagent that spawns its own subagents nests under its true spawner instead of collapsing flat under main; any subagent no other subagent claims stays under main. It resolves both the child and parent to their live-or-jsonl DB id (mirroring `importSubagentFromJsonl`), so it also corrects the live hook heuristic's guesses once the transcripts land. Idempotent and additive (only rewrites `parent_agent_id`), it runs in all three group-import paths (`importSession` ×2, live `scanAndImportSubagents`); `scanAndImportSubagents` returns a `reparented` count alongside `created`. **Re-import is fully incremental**: for each existing session a per-event-type high-water mark (`MAX(created_at) GROUP BY event_type`) is read up-front and only JSONL entries with `ts > cutoff[type]` are inserted for Stop / PostToolUse / TurnDuration / ToolError — so long-running sessions whose transcripts grow across multiple days continue to receive new events on every re-run instead of being blocked by the old "if zero of type X then dump all" check. `sessions.ended_at` is rolled forward to the JSONL's last activity when it surpasses the stored value, and `metadata.user_messages` / `assistant_messages` / `turn_count` are refreshed on every pass. `parseSessionFile` also captures the transcript title (`custom-title` / `ai-title`) and `importSession` prefers it for `sessions.name` over the cwd-folder fallback, backfilling existing auto/placeholder names on re-import (same precedence as the live hook sync). Other idempotency keys are unchanged: `data LIKE '%"tool_use_id":"X"%'` skips any tool event already inserted, compaction agents/events dedup by uuid, API errors dedup by summary, and `baseline_*` columns preserve pre-compaction token totals. `parseSessionFile` and `parseSubagentFile` **reconcile usage per `message.id`** (last record wins, via the shared `rememberUsageContribution` / `subtractBucket` helpers in `server/lib/token-usage.js`) exactly as the live `TranscriptCache` does — see "Per-message usage reconciliation". `reconcileTokens(dbModule, {all, resetBaselines})` is the historical repair sweep behind `npm run repair-tokens`: `--all` covers every session with a transcript on disk rather than only `imported`-marked ones, and `--reset-baselines` clears each session's non-workflow `token_usage` rows and writes fresh totals with zeroed baselines (`resetTokenUsage`), since the ordinary high-water fold would otherwise migrate a historical over-count into `baseline_*` instead of removing it. It refuses to run while a dashboard answers on a known port (transcripts are parsed outside the write transaction, so live ingestion would race it) and rejects `--dry-run` rather than ignoring it. Token totals, per-model cost, compactions, subagents, tool events, API errors, and turn durations are identical to live ingestion. Creates `APIError`, `TurnDuration`, and `ToolError` event types during import; subagent tool events carry `imported: true, source: "subagent_jsonl"` in their data payload so analytics can distinguish backfilled rows when needed |
-| `server/routes/import.js`   | Provider-aware Import History router. `provider: "claude"\|"codex"` selects the Claude JSONL importer or Codex rollout importer for `GET /api/import/guide`, default rescans, arbitrary paths, and multipart uploads. External Codex rollouts are snapshotted before temp extraction is reclaimed, while default scans retain their live path; all progress frames include the provider. Limits remain configurable via `CCAM_IMPORT_MAX_BYTES` / `CCAM_IMPORT_MAX_FILES`. |
+| `bin/am.js` | Dependency-free umbrella CLI (`am <command>`) exposing the full dashboard surface in the terminal: monitoring (health / stats / kanban / tail via short-interval event polling), data browsing (sessions, per-session detail with an indented agent tree + cost + recent events, agents, events), insights (analytics, workflow intelligence, dynamic Workflow-tool runs, per-model cost), alerts + rules + webhook test probes, pricing CRUD, imports (rescan / scan-path), and administration (doctor, info, export, cleanup, reinstall-hooks, clear-data). Linked globally by `npm run setup` via a fail-soft `npm link` (`link-cli` script). Discovers the live server through `server/lib/server-info.js` (`~/.claude/.agentmonitor.json`, PID-liveness-checked) with `CLAUDE_DASHBOARD_PORT` / `DASHBOARD_PORT` env overrides and a 4820 fallback; renders a full terminal UI — box-drawn width-fitted tables with right-aligned numeric columns, status icons, inline bar charts (stats / analytics / cost), `├─`/`└─` agent trees, and a TTY spinner for `start` — whose ANSI styling degrades to plain text when piped (`--no-color` / `NO_COLOR` / `FORCE_COLOR` / `AM_COLOR` respected); the one destructive command (`clear-data`) refuses to run without `--yes`. Server lifecycle: `am status` shows a ●/○ up/down indicator and `am start` boots a detached production server (waits for /api/health, logs to `data/am-server.log`). `am stop` reads the PID from the discovery file and stops it — `SIGTERM` first, escalating to `SIGKILL` after 5 s. `am repl` (aliases `shell` / `i`) opens an interactive shell — a readline prompt with tab-completion (commands / subcommands / flags), persisted arrow-key history (`data/.am_repl_history`), and a live server-status prompt; each entered line runs as a short-lived child `am` process (via `runCommand` dispatch), so an offline refusal or a blocking `tail` cannot take the shell down, and piped input runs each line in order then exits at EOF. When the server is down, read-only commands (sessions / session / agents / events / kanban / stats / pricing list / alerts list / rules / export / doctor) fall back to direct SQLite reads of `data/dashboard.db` under a ⚠ Offline-mode banner — the connection is opened without SQLite readonly mode so a live WAL stays visible, and is SELECT-only by construction — while server-only commands (tail, analytics, workflows, runs, cost, mutations) refuse with the specific reason |
+| `scripts/import-history.js` | Batch history importer used by (a) server startup auto-import, (b) the `/api/import/*` routes, (c) the `import-history` CLI, and (d) live `SubagentStop` ingestion via the exported `scanAndImportSubagents(dbModule, sessionId, transcriptPath)`. Exposes `importAllSessions(dbModule)` for the default `~/.claude/projects` tree, `syncDefaultProjects(dbModule, {mtimeCache})` (the incremental, mtime-fingerprinted re-sweep that backs the continuous background sync — parses only new/changed files and reports `[{sessionId, isNew}]`), and the generalized `importFromDirectory(dbModule, rootDir, {onProgress})` which walks any directory recursively, classifies each `.jsonl` as session vs subagent (with `findSessionSubagents` probing both `<proj>/<sid>/subagents/*` and `<proj>/subagents/<sid>/*` layouts), and funnels everything through the shared `parseSessionFile` + `importSession` pipeline. The durable transcript snapshot (`snapshotTranscript`) additionally preserves **nested** Workflow-tool inner-agent transcripts (`subagents/workflows/<runId>/agent-*.jsonl`) via the separate `findSessionWorkflowSubagents` probe — mirroring the run subpath so the read route resolves the snapshot identically to the live file, without pulling those nested agents into the flat sub-agent import (no double-count). After each batch imports, `importAllSessions` / `importFromDirectory` also call `ingestWorkflowsForSession` (from `server/lib/workflow-ingest.js`) per session — outside the SQLite transaction, since the ingest is async — so a **Workflow-tool** run whose journal never reached a live server (a headless `claude -p` run, a CI job, or an HPC/cluster node emits no hooks) still links its inner agents to their `run_id` on a plain `am import rescan` / `am import path`, instead of leaving them orphaned (`workflow_run_id = NULL`) with the run stuck at 1 agent — see "Workflow-Tool Run Ingestion". `parseSubagentFile` extracts ordered `toolEvents` (tool_use + tool_result paired by `tool_use_id`) so `importSubagentFromJsonl` can emit per-tool `PreToolUse` + `PostToolUse` rows under each subagent's own `agent_id`. The importer dedups against live hook-created subagent rows via `findLiveSubagentForJsonl` (session + subagent_type + start-time within 30 s) so backfill never produces parallel `<sid>-jsonl-*` rows. It also **skips `importSubagents` entirely when subagent transcripts exist** — the main-transcript `Agent`-block rows (`<sid>-subagent-N`) and the transcript rows (`<sid>-jsonl-*`) would otherwise both be created and only deduped by a fragile type+timing match, doubling every subagent; when transcripts are present the richer `-jsonl-` rows are authoritative and the `-subagent-N` fallback runs only when there are none. `importSession` now also **persists `transcript_path`** on the session row (via `setSessionTranscriptPath`) so the abandon sweep, compaction scanner, and per-agent cost backfill can locate the transcript later, and **stamps each subagent's own token buckets into `metadata.tokens`** (used for per-agent cost). `backfillSubagentTokenMetadata` (a deferred, self-limiting startup pass) fills `metadata.tokens` on subagents that predate per-agent cost, deriving the transcript path from `<projectsDir>/<slug>/<sid>.jsonl` when `transcript_path` is null and covering both subagent-dir layouts — metadata-only, so it never touches session `token_usage`. `classifyJsonl` treats any file under a `subagents/` ancestor at any depth (including the `subagents/workflows/<runId>/` tree) as a subagent, so workflow inner-agent transcripts are never misimported as top-level sessions. **Nested-subagent hierarchy** is rebuilt by `reconcileSubagentParents`: every subagent is inserted flat under the main agent (no single hook/JSONL carries the spawner id), then `parseSubagentFile` also returns `spawnedChildren` — the child agent ids named on each Task tool result (`toolUseResult.agentId`) — which are inverted to a child→parent map and used to repoint `parent_agent_id` (via the `setAgentParent` statement) so a subagent that spawns its own subagents nests under its true spawner instead of collapsing flat under main; any subagent no other subagent claims stays under main. It resolves both the child and parent to their live-or-jsonl DB id (mirroring `importSubagentFromJsonl`), so it also corrects the live hook heuristic's guesses once the transcripts land. Idempotent and additive (only rewrites `parent_agent_id`), it runs in all three group-import paths (`importSession` ×2, live `scanAndImportSubagents`); `scanAndImportSubagents` returns a `reparented` count alongside `created`. **Re-import is fully incremental**: for each existing session a per-event-type high-water mark (`MAX(created_at) GROUP BY event_type`) is read up-front and only JSONL entries with `ts > cutoff[type]` are inserted for Stop / PostToolUse / TurnDuration / ToolError — so long-running sessions whose transcripts grow across multiple days continue to receive new events on every re-run instead of being blocked by the old "if zero of type X then dump all" check. `sessions.ended_at` is rolled forward to the JSONL's last activity when it surpasses the stored value, and `metadata.user_messages` / `assistant_messages` / `turn_count` are refreshed on every pass. `parseSessionFile` also captures the transcript title (`custom-title` / `ai-title`) and `importSession` prefers it for `sessions.name` over the cwd-folder fallback, backfilling existing auto/placeholder names on re-import (same precedence as the live hook sync). Other idempotency keys are unchanged: `data LIKE '%"tool_use_id":"X"%'` skips any tool event already inserted, compaction agents/events dedup by uuid, API errors dedup by summary, and `baseline_*` columns preserve pre-compaction token totals. `parseSessionFile` and `parseSubagentFile` **reconcile usage per `message.id`** (last record wins, via the shared `rememberUsageContribution` / `subtractBucket` helpers in `server/lib/token-usage.js`) exactly as the live `TranscriptCache` does — see "Per-message usage reconciliation". `reconcileTokens(dbModule, {all, resetBaselines})` is the historical repair sweep behind `npm run repair-tokens`: `--all` covers every session with a transcript on disk rather than only `imported`-marked ones, and `--reset-baselines` clears each session's non-workflow `token_usage` rows and writes fresh totals with zeroed baselines (`resetTokenUsage`), since the ordinary high-water fold would otherwise migrate a historical over-count into `baseline_*` instead of removing it. It refuses to run while a dashboard answers on a known port (transcripts are parsed outside the write transaction, so live ingestion would race it) and rejects `--dry-run` rather than ignoring it. Token totals, per-model cost, compactions, subagents, tool events, API errors, and turn durations are identical to live ingestion. Creates `APIError`, `TurnDuration`, and `ToolError` event types during import; subagent tool events carry `imported: true, source: "subagent_jsonl"` in their data payload so analytics can distinguish backfilled rows when needed |
+| `server/routes/import.js`   | Provider-aware Import History router. `provider: "claude"\|"codex"` selects the Claude JSONL importer or Codex rollout importer for `GET /api/import/guide`, default rescans, arbitrary paths, and multipart uploads. External Codex rollouts are snapshotted before temp extraction is reclaimed, while default scans retain their live path; all progress frames include the provider. Limits remain configurable via `AM_IMPORT_MAX_BYTES` / `AM_IMPORT_MAX_FILES`. |
 | `server/lib/codex-import.js` | Historical Codex rollout facade over `codex-ingest.js`: recursively discovers rollouts, preserves native titles from `session_index.jsonl`, keeps byte cursors idempotent, and stores external/imported transcripts under the dashboard data directory for durable conversation access. |
-| `server/lib/data-transfer.js` | Full-dataset export/import ("backup / restore"). `buildExportBundle(db, stmts)` serializes every user-owned table (sessions, agents, events, token_usage, workflows, dashboard_runs, alert_rules, model_pricing, gpt_model_pricing) into one versioned JSON bundle (`format: "ccam-export"`); machine-bound/secret tables (push_subscriptions, webhook_targets/deliveries, alert_events, local Codex ingest cursors) are excluded. `importExportBundle(db, bundle)` restores it session-atomically inside one transaction with `defer_foreign_keys` ON: a session already present (by UUID) is skipped WHOLE (with its agents/events/token_usage/workflows) so re-import and cross-machine merges never duplicate or clobber; events are re-inserted without their non-portable autoincrement id; config rows use `INSERT OR IGNORE` on their natural key. Backs `GET/POST /api/settings/{export,import}` and `ccam import-data` |
-| `server/lib/archive.js`     | Safe archive extraction: `.zip` via `adm-zip`, `.tar`/`.tar.gz`/`.tgz` via `tar`, plain `.gz` via `zlib` in streaming mode. Every entry is validated through `safeJoin` which rejects absolute paths and `..` traversal before any bytes are written. Enforces a hard extraction cap (`MAX_EXTRACT_BYTES`, default 4 GB, tunable via `CCAM_IMPORT_MAX_EXTRACT_BYTES`) with `ExtractionLimitError` surfaced as HTTP 413 from the upload route — defense against zip/tar/gzip bombs. Also provides `detectKind` for filename-based dispatch and `mkTempDir`/`rmTempDir` helpers |
+| `server/lib/data-transfer.js` | Full-dataset export/import ("backup / restore"). `buildExportBundle(db, stmts)` serializes every user-owned table (sessions, agents, events, token_usage, workflows, dashboard_runs, alert_rules, model_pricing, gpt_model_pricing) into one versioned JSON bundle (`format: "am-export"`); machine-bound/secret tables (push_subscriptions, webhook_targets/deliveries, alert_events, local Codex ingest cursors) are excluded. `importExportBundle(db, bundle)` restores it session-atomically inside one transaction with `defer_foreign_keys` ON: a session already present (by UUID) is skipped WHOLE (with its agents/events/token_usage/workflows) so re-import and cross-machine merges never duplicate or clobber; events are re-inserted without their non-portable autoincrement id; config rows use `INSERT OR IGNORE` on their natural key. Backs `GET/POST /api/settings/{export,import}` and `am import-data` |
+| `server/lib/archive.js`     | Safe archive extraction: `.zip` via `adm-zip`, `.tar`/`.tar.gz`/`.tgz` via `tar`, plain `.gz` via `zlib` in streaming mode. Every entry is validated through `safeJoin` which rejects absolute paths and `..` traversal before any bytes are written. Enforces a hard extraction cap (`MAX_EXTRACT_BYTES`, default 4 GB, tunable via `AM_IMPORT_MAX_EXTRACT_BYTES`) with `ExtractionLimitError` surfaced as HTTP 413 from the upload route — defense against zip/tar/gzip bombs. Also provides `detectKind` for filename-based dispatch and `mkTempDir`/`rmTempDir` helpers |
 | `server/lib/remote-sync.js` | **Remote Data Sources** — live remote/multi-machine Claude Code and Codex collection over SSH. It independently mirrors `~/.claude/projects` and `~/.codex/sessions` into isolated provider stages (plus Codex's safe `session_index.jsonl` title index), then routes them through `importFromDirectory` / `importCodexFromDirectory` and tags each imported row with `sessions.source`. A source may be Claude-only, Codex-only, or mixed: each provider owns its own `ok` / `unavailable` / `error` state, and a source remains healthy when either importer succeeds. The connectivity probe reports both paths. SSH auth still defers entirely to the host stack and all shell-outs use argument arrays. The remote poller broadcasts provider-aware `remote_source.status`, `remote_data.updated`, and session/agent updates. `reconcileRemoteSessionStatus` uses the matching provider's transcript for lifecycle; only a failed, unavailable, or stuck provider falls back to stale sweeping, so a healthy sibling never loses mirror ownership. |
 | `server/routes/remote-sources.js` | HTTP surface for **Remote Data Sources**: `GET /api/remote-sources` (list), `POST /api/remote-sources` (create), `PATCH /api/remote-sources/:id`, `DELETE /api/remote-sources/:id` (`?purge=true` also deletes that source's imported sessions), `POST /api/remote-sources/:id/test` (SSH connectivity probe), and `POST /api/remote-sources/:id/sync` (on-demand pull). Delegates the pull/validation to `remote-sync.js`; broadcasts `remote_source.status` on every transition |
 | `server/lib/source-filter.js` | Parses the optional `?sources=` query param (comma-separated source ids) into SQL predicates + bind params, shared by the data endpoints (`GET /api/sessions`, `/api/events`, `/api/agents`, `/api/stats`, `/api/analytics`) so a client **data-scope** selection narrows every query consistently. No filter → the existing unscoped queries run unchanged |
@@ -678,7 +678,7 @@ Session search is deliberately **server-side**. The dashboard routinely holds th
 
 The palette **navigates rather than mutates** for anything destructive: purging the database or deleting a session stays behind its confirmation modal, and the palette only offers the jump. `paletteCommands.test.ts` asserts no command id matches `/delete|purge|wipe/`.
 
-The sidebar trigger opens the palette by dispatching a `ccam:command-palette` window event (defined in `client/src/lib/appEvents.ts`) rather than through lifted state or a context provider, which keeps the trigger decoupled from the component and usable from anywhere in the tree. The same module carries `ccam:check-updates`, which the palette uses to ask the sidebar to run an update check — the check owns the spinner, the failure state, and the modal, so it stays in one place.
+The sidebar trigger opens the palette by dispatching a `am:command-palette` window event (defined in `client/src/lib/appEvents.ts`) rather than through lifted state or a context provider, which keeps the trigger decoupled from the component and usable from anywhere in the tree. The same module carries `am:check-updates`, which the palette uses to ask the sidebar to run an update check — the check owns the spinner, the failure state, and the modal, so it stays in one place.
 
 Accessibility: the panel is a modal `dialog` whose input is a `combobox` driving an `aria-activedescendant` listbox. Arrow keys move the active option (with feature-detected `scrollIntoView`), `Home`/`End` and `PageUp`/`PageDown` jump, `Tab` moves between groups without leaking focus out of the dialog, `Enter` runs the highlighted row, `Escape` closes, and focus returns to the previously focused element on close. Pointer hover only takes the selection after a real `mousemove`, so arrowing through a scrolled list under a stationary cursor is not fought by `mouseenter`.
 
@@ -1260,7 +1260,7 @@ flowchart TD
 - Uses Node.js `http` module directly — no dependencies.
 - Resolution order is **env override → discovery file → default**:
   - `CLAUDE_DASHBOARD_PORT` forces a single target (no fan-out, no discovery).
-  - Otherwise `server/lib/server-info.js` reads `~/.claude/.agent-dashboard.json`, prunes dead-PID entries, and returns one live `port` per unique `dataDir` (lowest port wins when Docker and `npm run dev` share `~/.claude/agent-dashboard`). The handler POSTs to each returned port in parallel.
+  - Otherwise `server/lib/server-info.js` reads `~/.claude/.agentmonitor.json`, prunes dead-PID entries, and returns one live `port` per unique `dataDir` (lowest port wins when Docker and `npm run dev` share `~/.claude/agentmonitor`). The handler POSTs to each returned port in parallel.
   - If neither yields anything, the handler falls back to `4820`.
 - Per-target promises never reject — a dead listener can't starve the others, and the handler can wait on `Promise.all` for clean exit timing.
 
@@ -1412,12 +1412,12 @@ sequenceDiagram
 
     UI->>API: POST multipart files[]
     API->>M: route through uploadMiddleware
-    M->>M: mkTempDir('ccam-upload-*')<br/>stored on req._ccamUploadDir
-    M->>M: fileFilter: reject unsupported<br/>(tracked in req._ccamRejected)
+    M->>M: mkTempDir('am-upload-*')<br/>stored on req._amUploadDir
+    M->>M: fileFilter: reject unsupported<br/>(tracked in req._amRejected)
     alt All files rejected
       API-->>UI: 400 NO_FILES<br/>+ rejected_files[]
     else Files accepted
-      API->>AR: mkTempDir('ccam-import-work-*')
+      API->>AR: mkTempDir('am-import-work-*')
       loop per uploaded file
         API->>AR: extractInto(srcPath, workDir, name)
         AR->>AR: safeJoin: reject absolute / ..
@@ -1441,7 +1441,7 @@ sequenceDiagram
       API-->>UI: 200 {imported, backfilled,<br/>skipped, errors, rejected_files}
     end
     API->>AR: rmTempDir(workDir)
-    API->>M: rmTempDir(req._ccamUploadDir)
+    API->>M: rmTempDir(req._amUploadDir)
 ```
 
 ### Idempotence and cost accuracy
@@ -1551,7 +1551,7 @@ npm run repair-tokens
   default `<proj>/<sid>.jsonl` layout, falling back to the `transcript_path`
   persisted on the session row. The fallback matters: without it, every Claude
   session whose transcript lives outside the default tree — imported from a
-  custom directory via `ccam import path`, or under a non-default
+  custom directory via `am import path`, or under a non-default
   `CLAUDE_HOME` — would be silently skipped despite having a transcript.
 - **Codex sessions are excluded outright.** Their `token_usage` is derived from
   rollout journals via `upsertCodexTokenDelta`, never from a Claude JSONL
@@ -1602,7 +1602,7 @@ clears whatever accumulates.
 | Per-file upload size abuse                  | multer `limits.fileSize = MAX_UPLOAD_BYTES` (default 1 GB)                                           |
 | Too many files per request                  | multer `limits.files = MAX_UPLOAD_FILES` (default 2000)                                              |
 | Unsupported file types                      | `fileFilter` drops them early and reports them in `rejected_files[]`                                 |
-| Concurrent upload temp-dir collisions       | Per-request temp dir on `req._ccamUploadDir`; created in multer `destination`, cleaned in `finally`  |
+| Concurrent upload temp-dir collisions       | Per-request temp dir on `req._amUploadDir`; created in multer `destination`, cleaned in `finally`  |
 | Arbitrary absolute path on `scan-path`      | Validated: must be absolute (after `~` expansion), exist, and be a directory                         |
 | Relative / traversal paths on `scan-path`   | Rejected with `INVALID_INPUT`                                                                        |
 
@@ -1610,9 +1610,9 @@ clears whatever accumulates.
 
 | Variable                          | Default     | Purpose                                                           |
 | --------------------------------- | ----------- | ----------------------------------------------------------------- |
-| `CCAM_IMPORT_MAX_BYTES`           | 1 GB        | Maximum size per uploaded file                                    |
-| `CCAM_IMPORT_MAX_FILES`           | 2000        | Maximum files per upload request                                  |
-| `CCAM_IMPORT_MAX_EXTRACT_BYTES`   | 4 GB        | Ceiling on total uncompressed bytes from any single archive       |
+| `AM_IMPORT_MAX_BYTES`           | 1 GB        | Maximum size per uploaded file                                    |
+| `AM_IMPORT_MAX_FILES`           | 2000        | Maximum files per upload request                                  |
+| `AM_IMPORT_MAX_EXTRACT_BYTES`   | 4 GB        | Ceiling on total uncompressed bytes from any single archive       |
 
 ### WebSocket progress events
 
@@ -1631,7 +1631,7 @@ are never throttled.
     "source": "upload",
     "processed": 184,
     "total": 512,
-    "current": "/tmp/ccam-import-work-xyz/project/<uuid>.jsonl",
+    "current": "/tmp/am-import-work-xyz/project/<uuid>.jsonl",
     "counters": { "imported": 120, "backfilled": 40, "skipped": 20, "errors": 4 }
   }
 }
@@ -1730,8 +1730,8 @@ Ingestion runs from five fail-safe, off-the-response-path triggers:
 4. **Backfill** — a one-time pass in `autoImportLegacySessions` ingests
    historical on-disk workflows for every recorded session.
 5. **Offline CLI import** — the batch importer (`importAllSessions` /
-   `importFromDirectory` in `scripts/import-history.js`, backing `ccam import
-   rescan` / `ccam import path` and the `/api/import/*` routes) calls
+   `importFromDirectory` in `scripts/import-history.js`, backing `am import
+   rescan` / `am import path` and the `/api/import/*` routes) calls
    `ingestWorkflowsForSession` per imported session, **after** the batch's
    transcripts land and **outside** the SQLite transaction (the ingest is
    async). Triggers 1–3 all run inside the server; this is the only path that
@@ -1799,7 +1799,7 @@ changes.
 
 ## Agent Extension Layer
 
-CCAM uses one shared extension source tree with product-specific manifests:
+AgentMonitor uses one shared extension source tree with product-specific manifests:
 
 - Claude Code project guidance: `CLAUDE.md`, `.claude/rules/`, `.claude/skills/`, `.claude/agents/`
 - Codex project guidance: `AGENTS.md`, `.codex/config.toml`, `.codex/rules/`, `.codex/agents/`, `.codex/skills/`
@@ -1823,22 +1823,22 @@ graph TD
     S --> SKILLS
 ```
 
-The verified distribution contains **14 plugins, 66 bundled plugin skills, 18 Claude subagents, 34 Claude commands, 3 CLI helpers, 3 hook configurations, and 2 MCP-enabled plugins**. `npx skills add hoangsonww/Claude-Code-Agent-Monitor --list` discovers **77 total repository skills** because repository-maintenance skills are included alongside plugin skills.
+The verified distribution contains **14 plugins, 66 bundled plugin skills, 18 Claude subagents, 34 Claude commands, 3 CLI helpers, 3 hook configurations, and 2 MCP-enabled plugins**. `npx skills add tanvoid0/agent-monitor --list` discovers **77 total repository skills** because repository-maintenance skills are included alongside plugin skills.
 
 Three focused packs extend the original analytics and governance catalog:
 
-- `ccam-runner`: monitored Claude Code/Codex launch, follow-up, stop, resume, and persistent run history
-- `ccam-integrations`: alert rules, webhook providers, browser push, and SSH remote collection
-- `ccam-platform`: Claude/Codex Config Explorer, history import, backup restore, hook setup, updates, and MCP operations
-- `ccam-reports`: executive, cost, reliability, and workflow reporting
+- `am-runner`: monitored Claude Code/Codex launch, follow-up, stop, resume, and persistent run history
+- `am-integrations`: alert rules, webhook providers, browser push, and SSH remote collection
+- `am-platform`: Claude/Codex Config Explorer, history import, backup restore, hook setup, updates, and MCP operations
+- `am-reports`: executive, cost, reliability, and workflow reporting
 
 `node scripts/sync-agent-extensions.js` deterministically adds missing skill names, writes `agents/openai.yaml`, generates Codex manifests, and rebuilds both catalogs. `scripts/validate-agent-extensions.js` and `server/__tests__/plugins-marketplace.test.js` enforce the Claude/Codex marketplace bijection, dual manifests, skill metadata, agent/command frontmatter, hook JSON, and stable MCP launcher.
 
 Claude Code and Codex install from the same Git repository:
 
 ```bash
-claude plugin marketplace add hoangsonww/Claude-Code-Agent-Monitor
-codex plugin marketplace add hoangsonww/Claude-Code-Agent-Monitor
+claude plugin marketplace add tanvoid0/agent-monitor
+codex plugin marketplace add tanvoid0/agent-monitor
 ```
 
 Skills install directly from the public repository. No upstream skills.sh PR is required. Public OpenAI universal-directory inclusion remains a separate reviewed submission and is not performed by repository code.
@@ -1863,7 +1863,7 @@ plugins/<name>/
 └── .mcp.json
 ```
 
-`ccam-dashboard` and `ccam-platform` use `{ "command": "ccam", "args": ["mcp", "stdio"] }`. The launcher resolves `mcp/build/index.js` from the linked checkout, avoiding plugin-cache-relative paths. `npm run setup` now installs/builds MCP before linking `ccam`.
+`am-dashboard` and `am-platform` use `{ "command": "am", "args": ["mcp", "stdio"] }`. The launcher resolves `mcp/build/index.js` from the linked checkout, avoiding plugin-cache-relative paths. `npm run setup` now installs/builds MCP before linking `am`.
 
 The canonical catalog and install/validation procedures live in [`docs/PLUGINS.md`](docs/PLUGINS.md).
 
@@ -1875,7 +1875,7 @@ The MCP server exposes **97 typed tools across 16 domain modules**. It covers ev
 
 ```mermaid
 flowchart LR
-    HOST["Claude Code / Codex / MCP host"] -->|stdio or HTTP| MCP["CCAM MCP server"]
+    HOST["Claude Code / Codex / MCP host"] -->|stdio or HTTP| MCP["AgentMonitor MCP server"]
     HUMAN["Operator"] -->|REPL| MCP
     MCP --> CATALOG["Canonical registerAllTools catalog"]
     CATALOG --> API["Dashboard /api/*"]
@@ -1922,7 +1922,7 @@ Protocol transports and REPL no longer maintain separate tool implementations. D
 - Webhook tests, push sends, imports, syncs, and Run Agent operations are treated as mutations.
 - Stdio logs remain on stderr.
 
-Transport commands are `ccam mcp stdio`, `ccam mcp http`, and `ccam mcp repl`. The full catalog and host configuration are in [`mcp/README.md`](mcp/README.md).
+Transport commands are `am mcp stdio`, `am mcp http`, and `am mcp repl`. The full catalog and host configuration are in [`mcp/README.md`](mcp/README.md).
 
 ---
 
@@ -2337,7 +2337,7 @@ Tabby's only contact with the rest of the app is four light, additive touchpoint
 
 ## VS Code Extension Architecture
 
-The **Claude Code Agent Monitor** VS Code extension provides an integrated monitoring experience directly within the editor. It communicates with the local dashboard server via standard HTTP APIs and renders the dashboard UI in a webview.
+The **AgentMonitor** VS Code extension provides an integrated monitoring experience directly within the editor. It communicates with the local dashboard server via standard HTTP APIs and renders the dashboard UI in a webview.
 
 <p align="center">
   <img src="vscode-extension/vscode.png" alt="VS Code Extension Screenshot" width="100%">
@@ -2383,19 +2383,19 @@ graph TD
 
 1. **Auto-Detection**: The extension checks both port `5173` (Vite dev server) and `4820` (Production server) on `localhost`. It prioritizes the production port for API data but can render the UI from either.
 2. **Real-time Status**: The `SidebarProvider` uses a background loop with `onDidChangeTreeData` to automatically toggle between **Online** and **Offline** states as the local server starts or stops.
-3. **Deep Linking**: Commands like `claude-code-agent-monitor.openDashboard` accept arguments (e.g., a session ID or page path like `analytics`) to route the webview to specific views within the React SPA.
+3. **Deep Linking**: Commands like `agentmonitor.openDashboard` accept arguments (e.g., a session ID or page path like `analytics`) to route the webview to specific views within the React SPA.
 4. **Theme Awareness**: The Activity Bar icon (`icon.svg` or `apple-touch-icon.png`) and sidebar icons use VS Code's `ThemeIcon` and `ThemeColor` to ensure they adapt to Light, Dark, and High Contrast themes.
 
 For the extension source code, refer to the [vscode-extension/](./vscode-extension/) directory.
 
 > [!TIP]
-> Extension on VS Code Marketplace: [Claude Code Agent Monitor](https://marketplace.visualstudio.com/items?itemName=hoangsonw.claude-code-agent-monitor)
+> Extension on VS Code Marketplace: [AgentMonitor](https://marketplace.visualstudio.com/items?itemName=hoangsonw.agentmonitor)
 
 ---
 
 ## Desktop App Architecture (macOS & Windows / Electron)
 
-The `desktop/` workspace ships the dashboard as a **native desktop app** for **macOS** (`Claude Code Monitor.app`, distributed as a `.dmg`) **and Windows** (`Claude Code Monitor.exe`, distributed as an NSIS installer plus a no-install portable build). It is an Electron shell that **embeds the existing Express server in-process** and renders the already-built React client in a `BrowserWindow`. The desktop app does not reimplement the dashboard -- it `require()`s `server/index.js` directly, in the same Node runtime as the Electron main process, and points a Chromium window at it.
+The `desktop/` workspace ships the dashboard as a **native desktop app** for **macOS** (`AgentMonitor.app`, distributed as a `.dmg`) **and Windows** (`AgentMonitor.exe`, distributed as an NSIS installer plus a no-install portable build). It is an Electron shell that **embeds the existing Express server in-process** and renders the already-built React client in a `BrowserWindow`. The desktop app does not reimplement the dashboard -- it `require()`s `server/index.js` directly, in the same Node runtime as the Electron main process, and points a Chromium window at it.
 
 For the user-facing guide (download, install, Gatekeeper / SmartScreen, tray menu, auto-start), see [DESKTOP.md](./DESKTOP.md). For the full contributor/architecture reference -- including build performance, code signing, notarization, and CI details -- see [desktop/README.md](./desktop/README.md).
 
@@ -2405,7 +2405,7 @@ For the user-facing guide (download, install, Gatekeeper / SmartScreen, tray men
 
 ```mermaid
 flowchart TD
-    subgraph repo["Claude-Code-Agent-Monitor (repo root)"]
+    subgraph repo["agent-monitor (repo root)"]
         server["server/<br/>Express API · SQLite · WebSocket"]
         client["client/<br/>React + Vite SPA"]
         scripts["scripts/<br/>hook installer/handler, import, seed"]
@@ -2470,10 +2470,10 @@ flowchart LR
 | **`server-host.ts`** | In-process Express boot: port discovery, adoption, `better-sqlite3` ABI patch, `startBackgroundServices()` + hook bootstrap, clean DB close. Returns a `ServerHandle`. |
 | **`window.ts`** | `BrowserWindow` with persisted geometry (`userData/window-state.json`). External links open in the system browser. Sets the window/taskbar `icon` to the colored app logo (`assets/icon.ico` on Windows, `icon.png` elsewhere) so an unpackaged `desktop:dev` run no longer shows the generic Electron icon. |
 | **`menu.ts` / `tray.ts`** | Native application menu and menu-bar / notification-area (tray) icon. `tray.ts` selects a platform tray image — a macOS template glyph that the OS tints for the menu bar, or the colored `assets/icon.ico` for the Windows notification area (a black template would vanish on the dark taskbar). Tray uses a single-click dropdown (left or right) with a **live status snapshot** queried straight from SQLite at click time — server port, active sessions, working agents, events today — followed by *Open Dashboard*, *Open in Browser*, *Restart Server*, *Show Logs*, *Open at Login* (toggle), and *Quit*. The menu is rebuilt on each open so every value stays current. Snapshot rows are enabled and click-to-open-dashboard rather than disabled (which the OS dims). The application menu's *File ▸ Open Dashboard* (⌘1) is **macOS-only** — there the global menu bar persists after the window hides; on Windows/Linux the window-attached menu can't reopen a hidden window, so reopening is the tray's job. `focusOrCreateWindow` calls `show()` unconditionally so the tray reliably raises a backgrounded/minimized window (a bare `focus()` on Windows often only flashes the taskbar). |
-| **`login-item.ts`** | Auto-start-at-login toggle through Electron's first-party `app.setLoginItemSettings` API on every platform. On macOS it drives the modern `SMAppService` Login Items (not a `LaunchAgent` plist); on Windows it writes a per-user `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` entry. Login launches are tagged with a `--ccam-hidden` arg so the app can stay tray-only at startup — Windows has no `wasOpenedAtLogin` signal, so the arg is the cross-platform detection mechanism. |
+| **`login-item.ts`** | Auto-start-at-login toggle through Electron's first-party `app.setLoginItemSettings` API on every platform. On macOS it drives the modern `SMAppService` Login Items (not a `LaunchAgent` plist); on Windows it writes a per-user `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` entry. Login launches are tagged with a `--am-hidden` arg so the app can stay tray-only at startup — Windows has no `wasOpenedAtLogin` signal, so the arg is the cross-platform detection mechanism. |
 | **`shell-path.ts`** | (macOS) Recovers the user's login-shell `PATH` at startup and merges it onto `process.env.PATH`, so the embedded server (and the `claude` CLI it spawns) is not limited to launchd's minimal `PATH`. On Windows the process already inherits the full user `PATH`, so no recovery is needed. |
-| **`logger.ts`** | File logger to `~/Library/Logs/Claude Code Monitor/desktop.log` (macOS) or `%APPDATA%\Claude Code Monitor\logs\desktop.log` (Windows) -- the main process has no console when launched from Finder / Explorer. |
-| **`constants.ts`** | Shared identifiers, including the `APP_ID` (`com.hoangsonww.ccam.desktop`) that `main.ts` sets as the Windows AppUserModelId. |
+| **`logger.ts`** | File logger to `~/Library/Logs/AgentMonitor/desktop.log` (macOS) or `%APPDATA%\AgentMonitor\logs\desktop.log` (Windows) -- the main process has no console when launched from Finder / Explorer. |
+| **`constants.ts`** | Shared identifiers, including the `APP_ID` (`tanvoid0.agentmonitor.desktop`) that `main.ts` sets as the Windows AppUserModelId. |
 
 `server-host.ts` resolves the directory containing the bundled `server/` and `client/dist/` via `resolveAppRoot()`: `process.resourcesPath/app` when packaged, or the repo root (one directory up from `desktop/`) in development.
 
@@ -2494,7 +2494,7 @@ On startup `server-host.ts` picks a port, then either adopts an already-healthy 
 
 ```mermaid
 flowchart TD
-    start["startEmbeddedServer()"] --> forced{"CCAM_DESKTOP_BIND_PORT set?"}
+    start["startEmbeddedServer()"] --> forced{"AM_DESKTOP_BIND_PORT set?"}
     forced -->|yes| bind["bind exactly that port<br/>(no adoption, no fallback)"]
     forced -->|no| adopt{"healthy server<br/>already on :4820?"}
     adopt -->|yes| reuse["adopt it<br/>ownedByUs = false"]
@@ -2521,7 +2521,7 @@ flowchart TD
     style fail fill:#da3633,stroke:#b62324,color:#fff
 ```
 
-Port preference order is **4820 → 4821–4829 → a random port in 49152–49500**. Two environment overrides exist primarily for testing: `CCAM_DESKTOP_BIND_PORT` binds an exact port (disabling adoption and fallback, used by the smoke test), and `CCAM_DESKTOP_NO_ADOPT=1` always starts a fresh server. Before `require()`ing the server module, the host sets `NODE_ENV=production`, `DASHBOARD_PORT=<port>`, and `DASHBOARD_DATA_DIR=<userData>/data` (see [Writable Data Directory](#writable-data-directory) below) so the server reads them from `process.env`.
+Port preference order is **4820 → 4821–4829 → a random port in 49152–49500**. Two environment overrides exist primarily for testing: `AM_DESKTOP_BIND_PORT` binds an exact port (disabling adoption and fallback, used by the smoke test), and `AM_DESKTOP_NO_ADOPT=1` always starts a fresh server. Before `require()`ing the server module, the host sets `NODE_ENV=production`, `DASHBOARD_PORT=<port>`, and `DASHBOARD_DATA_DIR=<userData>/data` (see [Writable Data Directory](#writable-data-directory) below) so the server reads them from `process.env`.
 
 ### Writable Data Directory
 
@@ -2530,7 +2530,7 @@ A packaged install directory is **read-only** in practice: on macOS a `.app` bun
 - `server/db.js` honors `DASHBOARD_DATA_DIR` for the SQLite file.
 - `server/lib/push.js` honors it for the persisted VAPID keys.
 
-The resulting per-user location is `~/Library/Application Support/Claude Code Monitor/data/` on macOS and `%APPDATA%\Claude Code Monitor\data\` on Windows. Because this lives outside the bundle / install dir, imported history and persisted events **survive an app reinstall or update** (the Windows NSIS uninstaller keeps this data by default). Without this, writing a database into the read-only install location failed on a packaged build and broke History Import and event persistence.
+The resulting per-user location is `~/Library/Application Support/AgentMonitor/data/` on macOS and `%APPDATA%\AgentMonitor\data\` on Windows. Because this lives outside the bundle / install dir, imported history and persisted events **survive an app reinstall or update** (the Windows NSIS uninstaller keeps this data by default). Without this, writing a database into the read-only install location failed on a packaged build and broke History Import and event persistence.
 
 The standalone `node server/index.js` path is **unaffected**: `DASHBOARD_DATA_DIR` is unset there, and `server-host.ts` only sets it when it is not already defined -- so `server/db.js` falls back to its usual repo-relative default.
 
@@ -2633,7 +2633,7 @@ sequenceDiagram
     end
     Host-->>Main: ServerHandle { url, port, ownedByUs, stop }
     Main->>Main: installApplicationMenu() · createTray()
-    alt launched at login (--ccam-hidden / wasOpenedAtLogin)
+    alt launched at login (--am-hidden / wasOpenedAtLogin)
         Main->>OS: stay tray-only, hide dock (macOS)
     else normal launch
         Main->>UI: createDashboardWindow(url)
@@ -2649,19 +2649,19 @@ sequenceDiagram
 | **Second launch** | `requestSingleInstanceLock()` (enabled on **every platform**) fails -- the new process exits and the existing window is focused. |
 | **Window close** | Intercepted -- the window **hides** (`hide()`); the server and tray keep running. |
 | **`window-all-closed`** | App stays alive in tray-only mode (the handler is intentionally a no-op). |
-| **Launched at login** | The dashboard window is **not** shown -- only the tray icon. Detected via macOS `wasOpenedAtLogin` (dock hidden, `openAsHidden`) or, on Windows, the `--ccam-hidden` arg written into the `HKCU\…\Run` startup command. |
+| **Launched at login** | The dashboard window is **not** shown -- only the tray icon. Detected via macOS `wasOpenedAtLogin` (dock hidden, `openAsHidden`) or, on Windows, the `--am-hidden` arg written into the `HKCU\…\Run` startup command. |
 | **Quit shortcut** | ⌘Q (macOS) / Ctrl+Q (Windows) shows a confirmation dialog; a second press bypasses it. |
 | **`before-quit`** | If the server is owned: stop the HTTP server, then `closeEmbeddedDatabase()` for a clean WAL checkpoint, then `app.exit(0)`. The DB handle is closed here -- never on `Restart Server`, where the cached `server/db.js` singleton must stay usable. |
 
 ### Packaged App Layout
 
-`electron-builder` produces `Claude Code Monitor.app` on macOS and `Claude Code Monitor.exe` (NSIS installer + portable) on Windows. On both platforms the Electron main-process code is compiled (`tsc` → `out/`) and packed into `app.asar`; the rest of the repo is shipped as **`extraResources`** -- plain files under the bundle's `Resources/app/` (macOS) or the install dir's `resources\app\` (Windows). The internal layout is the same shape on both:
+`electron-builder` produces `AgentMonitor.app` on macOS and `AgentMonitor.exe` (NSIS installer + portable) on Windows. On both platforms the Electron main-process code is compiled (`tsc` → `out/`) and packed into `app.asar`; the rest of the repo is shipped as **`extraResources`** -- plain files under the bundle's `Resources/app/` (macOS) or the install dir's `resources\app\` (Windows). The internal layout is the same shape on both:
 
 ```mermaid
 flowchart TD
-    appbundle["Claude Code Monitor.app (macOS)<br/>Claude Code Monitor install dir (Windows)"]
+    appbundle["AgentMonitor.app (macOS)<br/>AgentMonitor install dir (Windows)"]
     appbundle --> contents["Contents/ (macOS)<br/>install root (Windows)"]
-    contents --> macos["MacOS/ — Electron binary (macOS)<br/>Claude Code Monitor.exe (Windows)"]
+    contents --> macos["MacOS/ — Electron binary (macOS)<br/>AgentMonitor.exe (Windows)"]
     contents --> res["Resources/ (macOS)<br/>resources\ (Windows)"]
     res --> asar["app.asar<br/>(compiled out/**, package.json)"]
     res --> unpacked["app.asar.unpacked/<br/>node_modules/better-sqlite3 (.node)"]
@@ -2676,9 +2676,9 @@ flowchart TD
     style appdir fill:#238636,stroke:#196c2e,color:#fff
 ```
 
-At runtime `server-host.ts` resolves this root as `process.resourcesPath/app` when packaged, on both platforms. Everything under the packaged `app/` is **read-only** on a packaged, signed, or app-translocated macOS bundle and on a Windows install under `%ProgramFiles%` (or a portable build's mount) -- so all writable state (the SQLite database, VAPID keys) lives in the per-user data dir (`~/Library/Application Support/Claude Code Monitor/data/` on macOS, `%APPDATA%\Claude Code Monitor\data\` on Windows), **never inside the bundle / install dir** (see [Writable Data Directory](#writable-data-directory)).
+At runtime `server-host.ts` resolves this root as `process.resourcesPath/app` when packaged, on both platforms. Everything under the packaged `app/` is **read-only** on a packaged, signed, or app-translocated macOS bundle and on a Windows install under `%ProgramFiles%` (or a portable build's mount) -- so all writable state (the SQLite database, VAPID keys) lives in the per-user data dir (`~/Library/Application Support/AgentMonitor/data/` on macOS, `%APPDATA%\AgentMonitor\data\` on Windows), **never inside the bundle / install dir** (see [Writable Data Directory](#writable-data-directory)).
 
-On macOS `electron-builder` produces **two per-architecture DMGs** — one `arm64` (Apple Silicon), one `x64` (Intel) — via `--mac --arm64 --x64` (not a merged universal binary; the release ships both), ad-hoc signed by default so anyone can build a working `.dmg` without a paid Apple Developer account; real Developer ID signing and notarization are opt-in via environment variables (`CSC_LINK`, `APPLE_ID`, etc.). On Windows it produces an **NSIS installer `.exe`** and a **no-install portable `.exe`** (both x64), using `assets/icon.ico` (generated from the source PNG by `desktop/scripts/build-win-icon.ps1`) as the application and tray icon. **`electron-builder` packages for the host OS** -- DMGs build on macOS, Windows `.exe`s build on Windows -- so the two artifacts come from two CI jobs (see below). The `desktop/scripts/prebuild.js` guard also **self-heals** a `better-sqlite3` native binary that a prior cross-arch DMG build (`electron-builder --mac --x64/--arm64`) left compiled for the wrong CPU architecture -- it detects the mismatch via `file` and re-runs `electron-builder install-app-deps`, so `desktop:dev` and `desktop:test` do not fail with `ERR_DLOPEN_FAILED`; on Windows it shells the `.cmd` shims for `npm`/`npx`. CI runs a path-filtered `🍎 macOS Desktop (DMG)` job on `macos-latest` (artifact `ClaudeCodeMonitor-dmg`) and a `🪟 Windows Desktop (EXE)` job on `windows-latest` (artifact `ClaudeCodeMonitor-win`); the release attaches both. See [`desktop/README.md`](./desktop/README.md) for the full build pipeline, build-performance notes, and signing details.
+On macOS `electron-builder` produces **two per-architecture DMGs** — one `arm64` (Apple Silicon), one `x64` (Intel) — via `--mac --arm64 --x64` (not a merged universal binary; the release ships both), ad-hoc signed by default so anyone can build a working `.dmg` without a paid Apple Developer account; real Developer ID signing and notarization are opt-in via environment variables (`CSC_LINK`, `APPLE_ID`, etc.). On Windows it produces an **NSIS installer `.exe`** and a **no-install portable `.exe`** (both x64), using `assets/icon.ico` (generated from the source PNG by `desktop/scripts/build-win-icon.ps1`) as the application and tray icon. **`electron-builder` packages for the host OS** -- DMGs build on macOS, Windows `.exe`s build on Windows -- so the two artifacts come from two CI jobs (see below). The `desktop/scripts/prebuild.js` guard also **self-heals** a `better-sqlite3` native binary that a prior cross-arch DMG build (`electron-builder --mac --x64/--arm64`) left compiled for the wrong CPU architecture -- it detects the mismatch via `file` and re-runs `electron-builder install-app-deps`, so `desktop:dev` and `desktop:test` do not fail with `ERR_DLOPEN_FAILED`; on Windows it shells the `.cmd` shims for `npm`/`npx`. CI runs a path-filtered `🍎 macOS Desktop (DMG)` job on `macos-latest` (artifact `AgentMonitor-dmg`) and a `🪟 Windows Desktop (EXE)` job on `windows-latest` (artifact `AgentMonitor-win`); the release attaches both. See [`desktop/README.md`](./desktop/README.md) for the full build pipeline, build-performance notes, and signing details.
 
 ### Relation to Standalone Deployment
 
@@ -2778,7 +2778,7 @@ The native desktop app (macOS `.app`/`.dmg`, Windows NSIS / portable `.exe`) is 
 
 ```mermaid
 graph LR
-    LAUNCH["Open Claude Code Monitor<br/>(.app / .exe)"] --> MAIN["Electron main process<br/>(Node 22 / Electron 35)"]
+    LAUNCH["Open AgentMonitor<br/>(.app / .exe)"] --> MAIN["Electron main process<br/>(Node 22 / Electron 35)"]
     MAIN --> HOST["server-host.ts<br/>port discovery + adopt"]
     HOST --> SERVER["server/index.js (in-process)<br/>Port 4820 → fallback"]
     SERVER -->|serves| DIST["client/dist/<br/>(extraResources)"]
@@ -2838,7 +2838,7 @@ The multi-stage OCI image uses digest-pinned Node 24 LTS on Alpine 3.24, builds 
 ```mermaid
 flowchart LR
   BUILD["server-deps + client-build"] --> RUNTIME["non-root runtime"]
-  RUNTIME --> APP["CCAM :4820"]
+  RUNTIME --> APP["AgentMonitor :4820"]
   DATA[("/app/data")] --> APP
   CONFIG[("/app/config")] --> APP
   CLAUDE["Claude home, read-only"] --> APP
@@ -2872,7 +2872,7 @@ flowchart LR
   IMG --> SUPPLY["Grype scan + SBOM + SLSA provenance + Cosign"]
   SUPPLY --> DEPLOY["Helm / Kustomize / Terraform"]
   DEPLOY --> EDGE["Ingress or Gateway API + TLS"]
-  EDGE --> APP["CCAM, exactly 1 Recreate replica"]
+  EDGE --> APP["AgentMonitor, exactly 1 Recreate replica"]
   APP --> PVC[("retained ReadWriteOnce PVC")]
   PROM["Prometheus Operator"] -->|"Bearer /api/metrics"| APP
 ```
@@ -2975,7 +2975,7 @@ Claude Code invokes this command on each update, piping a JSON payload to stdin.
 | **SQLite** (via `better-sqlite3` or built-in `node:sqlite`) | Zero-config, embedded, no server process. WAL mode gives concurrent reads. Synchronous API is simpler than async alternatives for this use case. Falls back to Node.js built-in `node:sqlite` when `better-sqlite3` cannot be compiled |
 | **Express**                     | Battle-tested, minimal, well-understood. Overkill would be Fastify for this scale; underkill would be raw `http` module                         |
 | **ws**                          | Fastest, most lightweight WebSocket library for Node. No Socket.IO overhead needed since we only push JSON messages                             |
-| **React 19**                    | Current supported client runtime with strong TypeScript support. CCAM remains a client-rendered SPA and does not enable Server Components or RSC |
+| **React 19**                    | Current supported client runtime with strong TypeScript support. AgentMonitor remains a client-rendered SPA and does not enable Server Components or RSC |
 | **Vite**                        | Fast builds, native ESM, excellent dev experience. Proxy config handles the dev server split cleanly                                            |
 | **Tailwind CSS**                | Utility-first approach keeps styles colocated with markup. No CSS module boilerplate. Custom theme config for the dark UI                       |
 | **React Router 8**              | Standard declarative routing for React SPAs. Layout routes with `<Outlet>` give clean shell composition without enabling framework or RSC modes    |

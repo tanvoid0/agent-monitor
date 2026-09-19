@@ -18,7 +18,7 @@
  *      process (Run Agent, open-in-file-manager) so a cross-origin page can't
  *      drive them by CSRF.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 const crypto = require("node:crypto");
 const fs = require("node:fs");
@@ -209,7 +209,7 @@ function extractHeaderOnlyToken(req) {
 }
 
 function extractHookToken(req) {
-  const hookHeader = req.headers["x-ccam-hook-token"];
+  const hookHeader = req.headers["x-am-hook-token"];
   if (typeof hookHeader === "string" && hookHeader) return hookHeader;
   return extractToken(req);
 }

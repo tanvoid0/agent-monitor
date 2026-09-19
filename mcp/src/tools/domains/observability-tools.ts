@@ -1,12 +1,12 @@
 /**
  * @file observability-tools.ts
- * @description Tool registration for observability-related tools in the MCP server. This module defines a set of tools that interact with the Agent Dashboard API to provide health checks, stats, analytics, system information, data export, and operational snapshots. These tools enable users to monitor and analyze the performance and usage of their agents and sessions through the dashboard. Each tool is registered with a name, description, input schema (if applicable), and an asynchronous handler function that makes API calls to retrieve the necessary data.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @description Tool registration for observability-related tools in the MCP server. This module defines a set of tools that interact with the AgentMonitor API to provide health checks, stats, analytics, system information, data export, and operational snapshots. These tools enable users to monitor and analyze the performance and usage of their agents and sessions through the dashboard. Each tool is registered with a name, description, input schema (if applicable), and an asynchronous handler function that makes API calls to retrieve the necessary data.
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/mcp/src/tools/domains/observability-tools.ts`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/mcp/src/tools/domains/observability-tools.ts`
  * **Purpose:** Dashboard module consumed by the React client, MCP tools, or desktop shell depending on deployment mode.
  *
  * ## Design constraints
@@ -71,11 +71,8 @@ export function registerObservabilityTools(context: ToolContext): void {
   // Calls GET /api/health. Output: dashboard liveness payload — a fast
   // pre-flight check, since every other tool needs the dashboard running at
   // config.dashboardBaseUrl or it fails with an ApiError network/timeout.
-  register(
-    "dashboard_health_check",
-    "Check health of the local Agent Dashboard API.",
-    {},
-    async () => api.get("/api/health")
+  register("dashboard_health_check", "Check health of the local AgentMonitor API.", {}, async () =>
+    api.get("/api/health")
   );
 
   // Calls GET /api/stats. Output: session/agent counts by status,

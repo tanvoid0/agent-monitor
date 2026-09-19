@@ -1,12 +1,12 @@
 /**
  * @file Workflows.tsx
  * @description Displays comprehensive analytics on agent orchestration patterns, including DAGs of agent spawning, tool usage flows, collaboration networks, and session complexity metrics, with real-time updates and interactive filtering. Deep links: `?session=<id>` opens (and scrolls to) the session drill-in, `?run=<id>` expands that Workflow-tool run; both are written back with replace semantics.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/client/src/pages/Workflows.tsx`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/client/src/pages/Workflows.tsx`
  * **Purpose:** Workflow analytics visualization built on D3; consumes aggregated session/run metrics from the workflows API.
  *
  * ## Design constraints

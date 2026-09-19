@@ -4,7 +4,7 @@
  * tool events triggered by deeply nested subagents identify their full
  * lineage instead of collapsing to just the leaf agent.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect } from "vitest";
@@ -127,9 +127,7 @@ describe("agentOriginLabel - parent chain walk", () => {
 
 describe("projectFromCwd - session-cwd fallback for the dir prefix", () => {
   it("returns the last path segment of a POSIX cwd", () => {
-    expect(projectFromCwd("/Users/dev/WebstormProjects/Claude-Code-Agent-Monitor")).toBe(
-      "Claude-Code-Agent-Monitor"
-    );
+    expect(projectFromCwd("/Users/dev/WebstormProjects/agent-monitor")).toBe("agent-monitor");
   });
 
   it("ignores a trailing slash", () => {

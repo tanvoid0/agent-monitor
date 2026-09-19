@@ -7,7 +7,7 @@
  * on any agent, and `window` only on agents with a resolved model. Those
  * fields are typed optional so the page renders gracefully whether the data
  * came from the v2-shaped fixture or the fuller v3 join once Lane S lands.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 export type PlanTaskStatus = "todo" | "doing" | "reported" | "blocked" | "done";
@@ -179,7 +179,7 @@ export function boardColumnFor(status: PlanTaskStatus): "todo" | "doing" | "repo
 
 /** Badge color per task status, matching the `badge`/`STATUS_CONFIG` palette
  *  convention in `lib/types.ts` (green=live/good, amber=attention, violet=
- *  done, gray=idle) so plan cards read consistently with the rest of CCAM. */
+ *  done, gray=idle) so plan cards read consistently with the rest of AgentMonitor. */
 export const TASK_STATUS_STYLE: Record<PlanTaskStatus, { color: string; bg: string; dot: string }> =
   {
     todo: { color: "text-gray-400", bg: "bg-gray-500/10 border-gray-500/20", dot: "bg-gray-400" },

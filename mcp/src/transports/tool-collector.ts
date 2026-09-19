@@ -3,7 +3,7 @@
  * @description Collects the canonical MCP domain registrations for direct
  * REPL invocation, preserving the same input schemas and policy guards used by
  * stdio and HTTP protocol transports.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import type { AppConfig } from "../config/app-config.js";

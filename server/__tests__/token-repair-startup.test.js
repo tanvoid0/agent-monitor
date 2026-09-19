@@ -12,7 +12,7 @@
  * Covers the guards that keep an automatic, row-rewriting migration safe:
  * marker gating (runs once, retries after a crash), the `DASHBOARD_TOKEN_REPAIR=0`
  * opt-out, the shared-database peer check, and the pre-repair snapshot table.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { describe, it, before, after, beforeEach } = require("node:test");

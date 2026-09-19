@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Coralogix Alert Definitions for Claude Code Agent Monitor
+# Coralogix Alert Definitions for AgentMonitor
 #
 # These alerts can be imported via the Coralogix Alerts API or Terraform
 # provider (coralogix/coralogix). They mirror the Prometheus/Alertmanager
@@ -154,7 +154,7 @@ alerts:
       service: agent-monitor
 
   - name: "Dashboard Replica Contract Violated"
-    description: "CCAM must run exactly one dashboard replica while SQLite is the persistence backend"
+    description: "AgentMonitor must run exactly one dashboard replica while SQLite is the persistence backend"
     severity: warning
     type: metric
     condition:

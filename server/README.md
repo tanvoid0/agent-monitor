@@ -1,6 +1,6 @@
 # Server Application
 
-Enterprise-grade Node.js backend for Claude Code agent monitoring with real-time WebSocket updates.
+Enterprise-grade Node.js backend for AgentMonitoring with real-time WebSocket updates.
 
 ![Claude Code](https://img.shields.io/badge/Claude_Code-orange?style=flat-square&logo=claude&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-%3E%3D22.22-339933?style=flat-square&logo=node.js&logoColor=white)
@@ -472,7 +472,7 @@ The OpenAPI spec is generated from `server/openapi.js` (`createOpenApiSpec()`), 
 | `GET`   | `/api/analytics`    | Analytics aggregates for charts/trends           |
 | `GET`   | `/api/metrics`      | Prometheus / OpenMetrics exposition (text; v0.0.4) |
 
-**Prometheus metrics (`GET /api/metrics`).** Exposes the dashboard's live counters — `ccam_sessions`/`ccam_agents` by status, `ccam_events_total`, `ccam_tokens_total` by kind, `ccam_websocket_clients`, `ccam_remote_sources` by enabled state, `ccam_process_uptime_seconds`/`ccam_process_resident_memory_bytes`, and `ccam_build_info{version}` — in the Prometheus v0.0.4 text-exposition format for scraping into Prometheus / Grafana (`server/routes/metrics.js`). Values come from the same `server/db.js` prepared statements the REST API uses, so they match the UI; status series are enumerated so a gauge never drops out of the exposition at zero. The route is read-only and, being under `/api`, sits behind both the Host-header (DNS-rebinding) guard and the optional `DASHBOARD_TOKEN` guard: a non-loopback scraper (e.g. Prometheus in Docker via `host.docker.internal`) must be allowlisted with `DASHBOARD_ALLOWED_HOSTS` or it gets `403 EBADHOST`, and must send the token when one is set. A ready-to-run Prometheus + Grafana stack with four auto-provisioned dashboards (default home **CCAM — Overview**) lives in [`monitoring/`](../monitoring/README.md).
+**Prometheus metrics (`GET /api/metrics`).** Exposes the dashboard's live counters — `am_sessions`/`am_agents` by status, `am_events_total`, `am_tokens_total` by kind, `am_websocket_clients`, `am_remote_sources` by enabled state, `am_process_uptime_seconds`/`am_process_resident_memory_bytes`, and `am_build_info{version}` — in the Prometheus v0.0.4 text-exposition format for scraping into Prometheus / Grafana (`server/routes/metrics.js`). Values come from the same `server/db.js` prepared statements the REST API uses, so they match the UI; status series are enumerated so a gauge never drops out of the exposition at zero. The route is read-only and, being under `/api`, sits behind both the Host-header (DNS-rebinding) guard and the optional `DASHBOARD_TOKEN` guard: a non-loopback scraper (e.g. Prometheus in Docker via `host.docker.internal`) must be allowlisted with `DASHBOARD_ALLOWED_HOSTS` or it gets `403 EBADHOST`, and must send the token when one is set. A ready-to-run Prometheus + Grafana stack with four auto-provisioned dashboards (default home **AgentMonitor — Overview**) lives in [`monitoring/`](../monitoring/README.md).
 
 **Data scope (`?sources=` and `?providers=`).** `GET /api/sessions`, `/api/events`, `/api/agents`, `/api/stats`, `/api/analytics`, `/api/workflows`, workflow drill-ins, and pricing cost endpoints accept an optional source list and a provider list (`claude`, `codex`, or both). The filters compose, so a single Settings choice immediately scopes every page by both machine and product. `server/lib/source-filter.js` and `server/lib/provider-filter.js` build the SQL predicates; `/api/stats` and `/api/analytics` use their scoped aggregates only when a filter is present. `GET /api/sessions/facets` returns both `sources` and `providers`.
 
@@ -486,7 +486,7 @@ The OpenAPI spec is generated from `server/openapi.js` (`createOpenApiSpec()`), 
 
 **Provider-aware card context.** Compact dashboard and Kanban cards use an optional, newline-separated `prompt_preview` containing the two newest distinct real human turns. For Claude Code, the shared JSONL cache filters command plumbing, tool results, interruption markers, and duplicates, then writes this small card-only summary on live hooks, history imports, and watchdog sweeps; full conversation text remains in JSONL. Codex obtains the equivalent context from durable `codex_user_message` rollout events: both legacy `event_msg.user_message` records and modern `response_item` messages explicitly tagged `user.text` qualify, while user-role instruction/environment records do not. Distinct Codex turn IDs populate `metadata.turn_count`, and active sessions already consumed by an older byte cursor are repaired once from their rollout. The main-agent task remains a historical fallback. The changed summary emits the ordinary `session_updated` frame, so scoped clients refresh immediately.
 
-**Codex lifecycle, discovery, and workflow data.** A Codex hook may identify a rollout by path or by its session/thread id; the latter resolves against the configured rollout tree and is ingested immediately. Before Codex exposes either identity, a one-second process probe keeps a local pre-identity card in memory for the Dashboard and Kanban views. That card never enters SQLite, history, analytics, pricing, workflows, alerts, or completion notifications. The probe also inspects open rollout files and thread-writer locks for each exact Codex PID. When the user selects an existing thread in Codex's Resume picker, the resumed rollout or lock is opened before any new message is appended, so CCAM immediately reactivates the durable session as Waiting and removes the transient startup card. Unknown lock IDs remain transient until normal hooks, live-thread state, or rollout ingestion create a durable row. Once a stable id exists, the continuous synchronizer reads the very recent native `state_*.sqlite` live-thread row or rollout JSONL and normal durable ingestion remains authoritative. It reads newest rollouts first, yields between bounded batches, and leaves a failed historical file eligible for retry so it cannot delay a fresh session. A separate, transactional byte cursor indexes only tool-call-shaped `response_item` records once, so the Workflows tool timeline and transitions represent actual Codex commands, edits, MCP calls, searches, and agent tools without replaying token or lifecycle accounting. Rollout records are authoritative: real human prompts / `task_started` make the main agent `working`, `task_complete` keeps the session `active` while showing **Waiting** (`awaiting_reason = stop`), and `turn_aborted` shows interrupted **Waiting**. Each real prompt also updates the Codex main agent's `task`, preserving a native `/rename` as the card title while compact cards render up to two recent distinct human messages below it. `context_compacted` is included in provider-scoped compaction metrics. A later rollout turn reactivates a prematurely completed session; restart reconciliation repairs the latest persisted state and only changes a silent Codex `working` turn to interrupted Waiting after 90 seconds.
+**Codex lifecycle, discovery, and workflow data.** A Codex hook may identify a rollout by path or by its session/thread id; the latter resolves against the configured rollout tree and is ingested immediately. Before Codex exposes either identity, a one-second process probe keeps a local pre-identity card in memory for the Dashboard and Kanban views. That card never enters SQLite, history, analytics, pricing, workflows, alerts, or completion notifications. The probe also inspects open rollout files and thread-writer locks for each exact Codex PID. When the user selects an existing thread in Codex's Resume picker, the resumed rollout or lock is opened before any new message is appended, so AgentMonitor immediately reactivates the durable session as Waiting and removes the transient startup card. Unknown lock IDs remain transient until normal hooks, live-thread state, or rollout ingestion create a durable row. Once a stable id exists, the continuous synchronizer reads the very recent native `state_*.sqlite` live-thread row or rollout JSONL and normal durable ingestion remains authoritative. It reads newest rollouts first, yields between bounded batches, and leaves a failed historical file eligible for retry so it cannot delay a fresh session. A separate, transactional byte cursor indexes only tool-call-shaped `response_item` records once, so the Workflows tool timeline and transitions represent actual Codex commands, edits, MCP calls, searches, and agent tools without replaying token or lifecycle accounting. Rollout records are authoritative: real human prompts / `task_started` make the main agent `working`, `task_complete` keeps the session `active` while showing **Waiting** (`awaiting_reason = stop`), and `turn_aborted` shows interrupted **Waiting**. Each real prompt also updates the Codex main agent's `task`, preserving a native `/rename` as the card title while compact cards render up to two recent distinct human messages below it. `context_compacted` is included in provider-scoped compaction metrics. A later rollout turn reactivates a prematurely completed session; restart reconciliation repairs the latest persisted state and only changes a silent Codex `working` turn to interrupted Waiting after 90 seconds.
 
 > **Codex startup and resume:** A fresh interactive Codex process is visible immediately through an in-memory Waiting card even before Codex creates a stable session/thread ID. The live Dashboard and Kanban calls opt in with `include_transient=true`; ordinary API pagination remains durable-only. `SessionStart`, the local live-thread state, rollout JSONL, or an existing resumed rollout/writer lock then identifies the real row, and the process card disappears without leaving history. Resume selection switches immediately rather than waiting for the first new message. The probe is fail-safe and disabled on Windows, inside containers, when `ps`/`lsof` is unavailable, or when `DASHBOARD_LIVENESS_PROBE=0`.
 
@@ -613,7 +613,7 @@ Codex accounting keeps fresh input, cached input, cache writes, output, and reas
 
 Live remote/multi-machine data collection over SSH. `server/lib/remote-sync.js` independently mirrors a source's Claude Code tree (`~/.claude/projects`) and Codex tree (`~/.codex/sessions` plus the lightweight native `session_index.jsonl` title index) into isolated staging dirs. Each uses its normal local importer — `importFromDirectory` for Claude and `importCodexFromDirectory` for Codex — then tags imported sessions with `sessions.source`. A source can be Claude-only, Codex-only, or both; either provider can keep the source healthy while provider-specific state preserves correct lifecycle fallback. Authentication defers entirely to the host SSH stack (ssh-agent / `~/.ssh/config` / identity file) — **no secrets are stored**; every command runs via `execFile`/`spawn` argument arrays (never a shell string) and `StrictHostKeyChecking` is left at its SSH default.
 
-> **Cursor on remotes (informational):** The same note applies on synced machines — if Cursor on a remote host writes to `~/.claude`, those sessions are imported too. CCAM reads the paths, not the app name.
+> **Cursor on remotes (informational):** The same note applies on synced machines — if Cursor on a remote host writes to `~/.claude`, those sessions are imported too. AgentMonitor reads the paths, not the app name.
 
 | Method   | Path                          | Description |
 | -------- | ----------------------------- | ----------- |
@@ -635,11 +635,11 @@ Because sync runs non-interactively (`ssh -o BatchMode=yes`), the connection mus
 2. **Make auth passwordless:** load your key into `ssh-agent` (`ssh-add`), or set an `IdentityFile` in `~/.ssh/config`, or point the source's optional `identity_file` at the key. Passphrase prompts and password auth will not work under `BatchMode`.
 3. **OpenSSH on both sides** — the dashboard machine needs the OpenSSH **client** (`ssh` + `scp`). The remote needs a running OpenSSH **server** (default on most Linux/macOS hosts; enable the OpenSSH Server optional feature on Windows). **Nothing else is installed on the remote.**
 4. **Cross-platform notes:**
-   - **macOS auth (Secretive, 1Password, ssh-agent, or file keys):** leave **Identity file** blank unless you need a specific key path. CCAM mirrors your shell: `ssh -G` supplies `IdentityAgent` when your `~/.ssh/config` does; otherwise it uses `SSH_AUTH_SOCK` (including `launchctl getenv` when the dashboard is GUI-launched) or plain `~/.ssh` keys. Secretive is used only when your SSH config points at it — never forced.
-   - **Windows dashboard:** OpenSSH Client optional feature; CCAM prefers `ssh`/`scp` on `PATH`, then falls back to `System32\OpenSSH\`.
-   - **Windows remote:** default homes check the Windows profile **and** WSL (`~/.claude` / `~/.codex` inside the default distro). If either CLI runs only in WSL, leave that home blank — CCAM auto-detects WSL and pulls via `wsl.exe` + `tar`, or set `wsl:~/.claude` / `wsl:~/.codex` explicitly. Native Windows installs can use `C:/Users/you/.claude` / `C:/Users/you/.codex`; UNC paths also work when `scp` can read them.
+   - **macOS auth (Secretive, 1Password, ssh-agent, or file keys):** leave **Identity file** blank unless you need a specific key path. AgentMonitor mirrors your shell: `ssh -G` supplies `IdentityAgent` when your `~/.ssh/config` does; otherwise it uses `SSH_AUTH_SOCK` (including `launchctl getenv` when the dashboard is GUI-launched) or plain `~/.ssh` keys. Secretive is used only when your SSH config points at it — never forced.
+   - **Windows dashboard:** OpenSSH Client optional feature; AgentMonitor prefers `ssh`/`scp` on `PATH`, then falls back to `System32\OpenSSH\`.
+   - **Windows remote:** default homes check the Windows profile **and** WSL (`~/.claude` / `~/.codex` inside the default distro). If either CLI runs only in WSL, leave that home blank — AgentMonitor auto-detects WSL and pulls via `wsl.exe` + `tar`, or set `wsl:~/.claude` / `wsl:~/.codex` explicitly. Native Windows installs can use `C:/Users/you/.claude` / `C:/Users/you/.codex`; UNC paths also work when `scp` can read them.
    - **Linux/macOS remote:** defaults are `~/.claude/projects` and `~/.codex/sessions`; custom POSIX roots (`/home/ubuntu/.claude`, `/home/ubuntu/.codex`) also work. Prefer SSH directly into WSL/Linux rather than Windows→WSL when possible.
-5. **Add the source** (Settings → Remote Data Sources, or `ccam remote-sources add`), click **Test**, then **Sync**.
+5. **Add the source** (Settings → Remote Data Sources, or `am remote-sources add`), click **Test**, then **Sync**.
 
 | Symptom (surfaced in `last_error` / the Test result) | Cause & fix |
 | --- | --- |
@@ -647,7 +647,7 @@ Because sync runs non-interactively (`ssh -o BatchMode=yes`), the connection mus
 | `Permission denied (publickey)` | No usable key for non-interactive auth. `ssh-add` your key, set `IdentityFile` in `~/.ssh/config`, or set the source's `identity_file`. |
 | `… does not exist on the remote` | The Test result identifies Claude Code or Codex. Set that provider's optional **Remote Claude home** / **Remote Codex home** field (defaults `~/.claude` / `~/.codex`). |
 | `scp` / `ssh` not recognized (Windows) | Install the **OpenSSH Client** optional feature, restart the dashboard, or confirm `C:\Windows\System32\OpenSSH\scp.exe` exists. |
-| `Permission denied (publickey,password)` | SSH auth failed in the **dashboard process** (not necessarily your Terminal). Leave **Identity file** blank for Secretive, ssh-agent, or default `~/.ssh` keys — CCAM follows `ssh -G` / your config and does not force Secretive. Start the dashboard from the same shell as `ssh user@host`, or ensure your agent is running. Set **Identity file** only for an explicit on-disk key. |
+| `Permission denied (publickey,password)` | SSH auth failed in the **dashboard process** (not necessarily your Terminal). Leave **Identity file** blank for Secretive, ssh-agent, or default `~/.ssh` keys — AgentMonitor follows `ssh -G` / your config and does not force Secretive. Start the dashboard from the same shell as `ssh user@host`, or ensure your agent is running. Set **Identity file** only for an explicit on-disk key. |
 | Connected but directory missing | Claude Code or Codex may not be installed on the remote, or its `remote_home` / `remote_codex_home` points at the wrong path. On Windows SSH with either CLI in WSL, leave the matching home blank (auto WSL) or set `wsl:~/.claude` / `wsl:~/.codex`. Default native paths are `~/.claude/projects` and `~/.codex/sessions`. |
 | Sync hangs then errors after ~10 min | Bounded by `DASHBOARD_REMOTE_SYNC_TIMEOUT_MS`; usually a network/host issue — verify with **Test** (bounded by `DASHBOARD_REMOTE_TEST_TIMEOUT_MS`). |
 
@@ -799,7 +799,7 @@ sequenceDiagram
     I->>DB: importSession in one tx
     I->>WS: import.progress{phase:parse, complete}
     R-->>UI: 200 {imported, backfilled, skipped,<br/>errors, rejected_files}
-    R->>A: rmTempDir(workDir + req._ccamUploadDir)
+    R->>A: rmTempDir(workDir + req._amUploadDir)
 ```
 
 **Supported source layouts.** Both canonical Claude Code JSONL layouts
@@ -813,10 +813,10 @@ matches one probed from either layout candidate.
 
 | Variable                          | Default     | Purpose                                                           |
 | --------------------------------- | ----------- | ----------------------------------------------------------------- |
-| `CCAM_IMPORT_MAX_BYTES`           | `1073741824` | Maximum size per uploaded file                                   |
+| `AM_IMPORT_MAX_BYTES`           | `1073741824` | Maximum size per uploaded file                                   |
 | `DASHBOARD_TOKEN_REPAIR`          | `1`         | One-time automatic repair of token totals inflated before usage was reconciled per `message.id`; `0` skips it (repair manually with `npm run repair-tokens`) |
-| `CCAM_IMPORT_MAX_FILES`           | `2000`      | Maximum files per upload request                                 |
-| `CCAM_IMPORT_MAX_EXTRACT_BYTES`   | `4294967296` | Total uncompressed bytes allowed per archive (zip-bomb guard)   |
+| `AM_IMPORT_MAX_FILES`           | `2000`      | Maximum files per upload request                                 |
+| `AM_IMPORT_MAX_EXTRACT_BYTES`   | `4294967296` | Total uncompressed bytes allowed per archive (zip-bomb guard)   |
 
 **WebSocket event schema.** Progress is broadcast on `/ws` with type
 `import.progress`. Messages are throttled at ~150 ms; the terminal
@@ -832,7 +832,7 @@ matches one probed from either layout candidate.
     "source": "upload",
     "processed": 184,
     "total": 512,
-    "current": "/tmp/ccam-import-work-xyz/project/<uuid>.jsonl",
+    "current": "/tmp/am-import-work-xyz/project/<uuid>.jsonl",
     "counters": { "imported": 120, "backfilled": 40, "skipped": 20, "errors": 4 }
   }
 }
@@ -1503,9 +1503,9 @@ test("POST /api/hooks/event ingests hook payload", async () => {
 
 ---
 
-## Terminal Access (`ccam` CLI)
+## Terminal Access (`am` CLI)
 
-Everything this server exposes over JSON REST is reachable from the dependency-free `ccam` CLI (`bin/ccam.js`, linked by `npm run setup`). High-level commands cover monitoring, data browsing, workflows/cost, Run Agent, alerts/rules/webhooks, Claude and GPT pricing, provider-aware imports, remote sources, Claude/Codex config, hooks, backup restore, and administration. `ccam api <METHOD> /api/path` provides future-proof low-level coverage with `--yes` on writes and exact confirmation tokens for destructive actions. Multipart history upload is available through `ccam import upload`. It resolves the live server through the same `~/.claude/.agent-dashboard.json` registry as the hook handler and supports `DASHBOARD_API_TOKEN` / `CCAM_API_TOKEN` when the API is protected. See [docs/CLI.md](../docs/CLI.md).
+Everything this server exposes over JSON REST is reachable from the dependency-free `am` CLI (`bin/am.js`, linked by `npm run setup`). High-level commands cover monitoring, data browsing, workflows/cost, Run Agent, alerts/rules/webhooks, Claude and GPT pricing, provider-aware imports, remote sources, Claude/Codex config, hooks, backup restore, and administration. `am api <METHOD> /api/path` provides future-proof low-level coverage with `--yes` on writes and exact confirmation tokens for destructive actions. Multipart history upload is available through `am import upload`. It resolves the live server through the same `~/.claude/.agentmonitor.json` registry as the hook handler and supports `DASHBOARD_API_TOKEN` / `AM_API_TOKEN` when the API is protected. See [docs/CLI.md](../docs/CLI.md).
 
 ## Deployment
 
@@ -1591,10 +1591,10 @@ LOG_LEVEL=info                     # Log level (debug, info, warn, error)
 NODE_ENV=production node server/index.js
 
 # With PM2 (process manager)
-pm2 start server/index.js --name agent-dashboard
+pm2 start server/index.js --name agentmonitor
 
 # With systemd
-sudo systemctl start agent-dashboard
+sudo systemctl start agentmonitor
 ```
 
 ### Docker, Podman, and Kubernetes

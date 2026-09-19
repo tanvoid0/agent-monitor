@@ -10,7 +10,7 @@
  *
  * Delivery is detached and fully fail-safe: it never throws into, slows, or
  * blocks the alert path or hook ingestion.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const crypto = require("crypto");
@@ -87,7 +87,7 @@ function buildRequest(target, alert) {
 
   const headers = {
     "Content-Type": "application/json",
-    "User-Agent": "claude-code-agent-monitor/webhooks",
+    "User-Agent": "agentmonitor/webhooks",
     ...resolveAuthHeaders(target),
   };
 
@@ -287,7 +287,7 @@ function sendTest(target) {
     rule_type: "test",
     session_id: null,
     agent_id: null,
-    message: `Test notification from Claude Code Agent Monitor to "${target.name}". If you can read this, delivery works.`,
+    message: `Test notification from AgentMonitor to "${target.name}". If you can read this, delivery works.`,
     details: { test: true, target: target.name, type: target.type },
     triggered_at: new Date().toISOString(),
   };

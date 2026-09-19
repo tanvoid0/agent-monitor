@@ -3,12 +3,12 @@
  * @description Tiny localStorage-backed preference store for Tabby (enabled +
  *   muted). Broadcasts changes via a window CustomEvent so the Settings toggle
  *   and the live widget stay in sync within the same tab without a reload.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/client/src/components/Tabby/prefs.ts`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/client/src/components/Tabby/prefs.ts`
  * **Purpose:** Tabby is the optional on-screen cat assistant — quips, intents, and lightweight event reactions layered above the dashboard chrome.
  *
  * ## Design constraints
@@ -57,9 +57,9 @@
  *
  * ----------------------------------------------------------------------------- */
 
-const ENABLED_KEY = "agent-dashboard-tabby-enabled";
-const MUTED_KEY = "agent-dashboard-tabby-muted";
-const POS_KEY = "agent-dashboard-tabby-pos";
+const ENABLED_KEY = "agentmonitor-tabby-enabled";
+const MUTED_KEY = "agentmonitor-tabby-muted";
+const POS_KEY = "agentmonitor-tabby-pos";
 const EVENT = "tabby:prefs";
 
 /**

@@ -1,4 +1,4 @@
-# Contributing to Agent Dashboard
+# Contributing to AgentMonitor
 
 Thanks for taking the time to contribute. Please read this guide before opening a PR or issue.
 
@@ -39,7 +39,7 @@ All contributions require a signed **[Contributor License Agreement](../CLA.md)*
 
 3. The bot records your signature and turns the **CLA Assistant** status check green. The PR cannot be merged until it is green.
 
-You sign **once** — the signature covers all of your current and future contributions, so returning contributors are never asked again. If you contribute **on behalf of a company**, contact the maintainer ([@hoangsonww](https://github.com/hoangsonww)) to arrange a Corporate CLA first.
+You sign **once** — the signature covers all of your current and future contributions, so returning contributors are never asked again. If you contribute **on behalf of a company**, contact the maintainer ([@tanvoid0](https://github.com/tanvoid0)) to arrange a Corporate CLA first.
 
 ---
 
@@ -53,8 +53,8 @@ You sign **once** — the signature covers all of your current and future contri
 ### Setup
 
 ```bash
-git clone https://github.com/hoangsonww/Claude-Code-Agent-Monitor.git
-cd Claude-Code-Agent-Monitor
+git clone https://github.com/tanvoid0/agent-monitor.git
+cd agent-monitor
 npm run setup
 npm run dev
 ```
@@ -120,7 +120,7 @@ bash .claude/skills/file-headers/scripts/check-headers-pr.sh origin/master HEAD
 ```
 
 Applicable source files (`.js`, `.ts`, `.tsx`, `.py`, `.sh`, `.css`, etc.) must
-include the `@author Son Nguyen <hoangson091104@gmail.com>` header — CI enforces
+include the `@author Tanveer Hoque <tanvoid0@gmail.com>` header — CI enforces
 this on every PR via the **File Headers** workflow.
 
 ---

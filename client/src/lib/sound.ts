@@ -7,7 +7,7 @@
  * enabled by default), a shared `AudioContext` that is unlocked on the first
  * user gesture to satisfy browser autoplay policies, and the rate limiting that
  * keeps bursty WebSocket traffic from turning into a stream of beeps.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 /** `localStorage` key holding the serialized {@link SoundPrefs}. */

@@ -14,7 +14,7 @@ Example statusline with all segments visible in a git repo and 24% context windo
 | ----------- | -------------------- | -------------------------------------------------- |
 | Model       | Cyan                 | `Sonnet 4.6`                                       |
 | User        | Green                | `nguyens6`                                         |
-| CWD         | Yellow               | `~/agent-dashboard/client`                         |
+| CWD         | Yellow               | `~/agentmonitor/client`                         |
 | Git branch  | Magenta              | `main` (hidden outside git repos)                  |
 | Context bar | Green → Yellow → Red | `████████░░ 79%`                                   |
 | Tokens      | Green / Cyan / Dim   | `3↑ 2↓ 156586c` (green `↑` in, cyan `↓` out, dim `c` cache reads) |

@@ -6,7 +6,7 @@
  * Dashboard hand-rolled a mapping that knew only three types, and neither knew
  * any Codex-native type, so every Codex row rendered a misleading yellow
  * "Waiting" badge (issue #310).
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect } from "vitest";

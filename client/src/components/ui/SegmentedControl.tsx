@@ -4,7 +4,7 @@
  * (`role="radiogroup"` / `role="radio"`, `aria-checked`). Never goes empty:
  * re-selecting the current item is a no-op. Same look as the segmented
  * `TabsList`; use it for filters and toggles, not for panel switching.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import * as ToggleGroup from "@radix-ui/react-toggle-group";

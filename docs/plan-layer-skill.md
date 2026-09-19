@@ -74,7 +74,7 @@ separately at §8 step 6, but the two file-convention sections that survive it s
 
 `PROGRESS.md` is where the build stands. Read it at session start. The live board renders it:
 https://claude.ai/artifact/1BMUASrvJX45WrPFCaxfD5 — republished by `export` below, never edited by hand.
-The dashboard (CCAM, this repo's board layer) is at http://localhost:4820 — hooks in `~/.claude/settings.json`
+The dashboard (AgentMonitor, this repo's board layer) is at http://localhost:4820 — hooks in `~/.claude/settings.json`
 feed it globally, no per-project setup. Design, probe results and ceilings: `.local/adr/0001-agent-board.md`
 (superseded record); current contract: `docs/plan-layer.md` in the agent-monitor fork.
 

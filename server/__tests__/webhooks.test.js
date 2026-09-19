@@ -4,7 +4,7 @@
  * redaction, validation, the synchronous test probe, rule-scoped dispatch,
  * disabled-target skipping, retry/backoff with delivery-log recording, and the
  * clear-data wipe.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { describe, it, before, after, beforeEach } = require("node:test");

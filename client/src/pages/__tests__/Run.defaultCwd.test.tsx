@@ -7,7 +7,7 @@
  * back to the dashboard cwd only when no home suggestion is available. A
  * `?cwd=` deep link wins over every suggestion, and a `?session=` that no
  * live run is driving lands in resume mode instead of erroring.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";

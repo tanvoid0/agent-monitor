@@ -2,7 +2,7 @@
  * @file Guards release metadata that must carry the root package version.
  * The checks make version bumps fail fast when packaged artifacts or published
  * API specifications, or deployment configurations drift.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { describe, it } = require("node:test");
@@ -85,8 +85,8 @@ describe("release version consistency", () => {
     const compose = readText("docker-compose.yml");
     const chart = yaml.load(readText("deployments/helm/agent-monitor/Chart.yaml"));
 
-    assert.match(compose, new RegExp(`ccam-dashboard:${packageVersion}`));
-    assert.match(compose, new RegExp(`ccam-mcp:${packageVersion}`));
+    assert.match(compose, new RegExp(`am-dashboard:${packageVersion}`));
+    assert.match(compose, new RegExp(`am-mcp:${packageVersion}`));
     assert.equal(chart.version, packageVersion);
     assert.equal(chart.appVersion, packageVersion);
   });
@@ -100,7 +100,7 @@ describe("release version consistency", () => {
     for (const manifest of manifests) {
       const contents = fs.readFileSync(manifest, "utf8");
       versionLabels.push(...contents.matchAll(/app\.kubernetes\.io\/version:\s*["']?([^"'\s]+)/g));
-      imageTags.push(...contents.matchAll(/image: ccam-(?:dashboard|mcp):([^\s]+)/g));
+      imageTags.push(...contents.matchAll(/image: am-(?:dashboard|mcp):([^\s]+)/g));
       releaseTags.push(...contents.matchAll(/newTag:\s*["']?([^"'\s]+)/g));
     }
 
@@ -169,7 +169,7 @@ describe("release version consistency", () => {
   });
 
   it("keeps deployment image substitutions and examples aligned", () => {
-    const image = `ccam-dashboard:${packageVersion}`;
+    const image = `am-dashboard:${packageVersion}`;
 
     for (const guide of ["DEPLOYMENT.md", "docs/DEPLOYMENT.md", "deployments/scripts/deploy.sh"]) {
       assert.ok(readText(guide).includes(image), `${guide} must use ${image}`);

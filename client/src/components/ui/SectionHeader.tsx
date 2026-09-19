@@ -2,7 +2,7 @@
  * @file SectionHeader.tsx
  * @description In-page section heading: optional icon, title (`xs` uppercase
  * label or `sm` medium text), count badge, and right-aligned actions.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import type { ReactNode } from "react";

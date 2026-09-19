@@ -4,7 +4,7 @@
  * `entityMenu` builder with its href/value/project helpers. Types are
  * re-exported with `export type` because the client compiles with
  * `isolatedModules`.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 export { EntityRef } from "./EntityRef";

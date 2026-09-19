@@ -6,7 +6,7 @@
  * `export` (the v2 snapshot page + model.json + events.jsonl into a caller-
  * named directory). Requiring this module also starts the plan watcher and
  * the websocket pusher.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const fs = require("fs");

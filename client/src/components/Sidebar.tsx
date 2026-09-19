@@ -1,12 +1,12 @@
 /**
  * @file Sidebar.tsx
  * @description Defines the Sidebar component that provides navigation links to different sections of the application, displays the connection status, and includes a toggle button for collapsing or expanding the sidebar. The component uses React Router's NavLink for navigation and Lucide icons for visual representation, including a portal-backed language picker that stays usable when the sidebar is collapsed. The collapsed state of the sidebar is stored in localStorage to persist user preferences across sessions.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/client/src/components/Sidebar.tsx`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/client/src/components/Sidebar.tsx`
  * **Purpose:** Dashboard module consumed by the React client, MCP tools, or desktop shell depending on deployment mode.
  *
  * ## Design constraints
@@ -772,7 +772,7 @@ export function Sidebar({ wsConnected, collapsed, onToggle }: SidebarProps) {
         {!collapsed && (
           <div className="space-y-1.5">
             <a
-              href="https://github.com/hoangsonww"
+              href="https://github.com/tanvoid0"
               target="_blank"
               rel="noopener noreferrer"
               className="group flex items-center gap-2.5 rounded-lg border border-transparent px-2.5 py-2 text-xs text-gray-300 hover:text-gray-200 hover:bg-surface-3 hover:border-border transition-colors"
@@ -800,7 +800,7 @@ export function Sidebar({ wsConnected, collapsed, onToggle }: SidebarProps) {
         {collapsed && (
           <div className="flex flex-col items-center gap-2 pt-0.5">
             <a
-              href="https://github.com/hoangsonww"
+              href="https://github.com/tanvoid0"
               target="_blank"
               rel="noopener noreferrer"
               className="w-8 h-8 rounded-md border border-transparent flex items-center justify-center text-gray-400 hover:text-gray-300 hover:bg-surface-3 hover:border-border transition-colors"

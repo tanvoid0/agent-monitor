@@ -1,10 +1,10 @@
 /**
  * @file The plan join (docs/plan-layer.md §4.4): plans.parsed + plan_log for
- * the current step + CCAM's sessions / agents / events for that cwd + the
+ * the current step + AgentMonitor's sessions / agents / events for that cwd + the
  * per-agent transcript figures → the v2 model shape. A port of the v2 board's
- * `_build`, reading CCAM rows instead of events.jsonl. `now` is a parameter
+ * `_build`, reading AgentMonitor rows instead of events.jsonl. `now` is a parameter
  * (default wall clock) because every relative figure is against it.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const path = require("path");
@@ -78,7 +78,7 @@ function counts(tasks) {
   return c;
 }
 
-// v2's tool_fields: what a tool call was "about", from CCAM's tool_input.
+// v2's tool_fields: what a tool call was "about", from AgentMonitor's tool_input.
 function toolFields(tool, input, cwd) {
   const rel = (p) => {
     if (!p) return "";
@@ -492,7 +492,7 @@ function eventLines(plan, { limit = 5000 } = {}) {
     const line = {
       ts: r.created_at,
       session: r.session_id.slice(0, 8),
-      // the v2 page keys model.agents by `agent`; CCAM ids for everyone
+      // the v2 page keys model.agents by `agent`; AgentMonitor ids for everyone
       agent: r.agent_id,
       agentId: r.agent_id,
       type: isMain ? "main" : r.subagent_type || "agent",

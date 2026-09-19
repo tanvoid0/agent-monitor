@@ -3,7 +3,7 @@
  * fixture: `summary` at the fixture's `now` must equal expected/summary.txt
  * byte for byte; per-agent transcript figures for the live agent; the pure
  * helpers (lane from a prompt, log-label matching, tool fields).
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { describe, it, before, after } = require("node:test");
@@ -93,7 +93,7 @@ describe("plan join — ledgerflow fixture", () => {
     assert.equal(step.lanes[2].tasks[2].status, "doing"); // I3: note line, unticked
   });
 
-  it("events in the v2 line shape carry the CCAM agent id", () => {
+  it("events in the v2 line shape carry the AgentMonitor agent id", () => {
     const lines = join.eventLines(plan, { limit: 50 });
     assert.equal(lines.length, 50);
     const last = lines[lines.length - 1];
@@ -232,13 +232,13 @@ describe("plan join — helpers", () => {
   });
 
   it("labelMatches: type, lane, id, claude id and its suffix, main", () => {
-    const a = { id: "ccam-1", claudeId: "a41bd1302af678ba7", type: "crew:coder", lane: "I" };
-    for (const l of ["crew:coder", "I", "ccam-1", "a41bd1302af678ba7", "78ba7"]) {
+    const a = { id: "am-1", claudeId: "a41bd1302af678ba7", type: "crew:coder", lane: "I" };
+    for (const l of ["crew:coder", "I", "am-1", "a41bd1302af678ba7", "78ba7"]) {
       assert.ok(join.labelMatches(l, a), l);
     }
     assert.equal(join.labelMatches("main", a), false);
     assert.ok(join.labelMatches("main", { id: "s-main", claudeId: null, type: "main", lane: "C" }));
-    // without a claude id the suffix is the CCAM id's
+    // without a claude id the suffix is the AgentMonitor id's
     assert.ok(
       join.labelMatches("e1968", { id: "af01d6844fb0e1968", claudeId: null, type: "x", lane: null })
     );

@@ -8,7 +8,7 @@
  * subagents of one type ran at once. This suite drives three concurrent
  * `crew:coder`s through the hook route and checks every event lands on its
  * own row, and that payloads without `agent_id` still behave as before.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { describe, it, before, after } = require("node:test");

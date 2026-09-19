@@ -2,7 +2,7 @@
  * @file Runs interactive Codex conversations through its local app-server.
  * Every dashboard handle owns a real persistent Codex thread, preserving
  * native turns, tools, cancellation, resumability, and session ingestion.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { randomUUID } = require("node:crypto");

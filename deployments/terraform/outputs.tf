@@ -1,11 +1,11 @@
 output "namespace" {
-  description = "Namespace containing CCAM."
-  value       = kubernetes_namespace_v1.ccam.metadata[0].name
+  description = "Namespace containing AgentMonitor."
+  value       = kubernetes_namespace_v1.am.metadata[0].name
 }
 
 output "release_name" {
   description = "Helm release name."
-  value       = helm_release.ccam.name
+  value       = helm_release.am.name
 }
 
 output "application_url" {

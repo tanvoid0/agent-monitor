@@ -1,5 +1,5 @@
 /**
- * @file Sidebar provider for Claude Code Agent Monitor VSCode extension
+ * @file Sidebar provider for AgentMonitor VSCode extension
  * Renders a rich, real-time WebviewView showing backend status, live agent
  * health, usage analytics, recent sessions, and quick navigation.
  *
@@ -8,7 +8,7 @@
  * (open dashboard, open session, refresh, browser, clear history) back from
  * the webview UI.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const vscode = require("vscode");
@@ -82,16 +82,16 @@ class DashboardWebviewProvider {
     if (!msg || !msg.command) return;
     switch (msg.command) {
       case "openDashboard":
-        vscode.commands.executeCommand("claude-code-agent-monitor.openDashboard", msg.target || "");
+        vscode.commands.executeCommand("agentmonitor.openDashboard", msg.target || "");
         break;
       case "openInBrowser":
-        vscode.commands.executeCommand("claude-code-agent-monitor.openInBrowser");
+        vscode.commands.executeCommand("agentmonitor.openInBrowser");
         break;
       case "refresh":
-        vscode.commands.executeCommand("claude-code-agent-monitor.refreshStatus");
+        vscode.commands.executeCommand("agentmonitor.refreshStatus");
         break;
       case "clearHistory":
-        vscode.commands.executeCommand("claude-code-agent-monitor.clearHistory");
+        vscode.commands.executeCommand("agentmonitor.clearHistory");
         break;
       case "ready":
         this.log("webview READY");
@@ -510,7 +510,7 @@ class DashboardWebviewProvider {
     </svg>
   </div>
   <div>
-    <div class="hero-title">Claude Code Monitor</div>
+    <div class="hero-title">AgentMonitor</div>
     <div class="hero-sub" id="hero-sub">Connecting…</div>
   </div>
   <div class="pill off" id="pill"><span class="dot"></span><span id="pill-text">Offline</span></div>

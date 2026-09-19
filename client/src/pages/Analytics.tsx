@@ -1,12 +1,12 @@
 /**
  * @file Analytics.tsx
  * @description Provides a comprehensive analytics dashboard for monitoring Claude Code sessions, agents, token usage, and events in real-time. Features include an activity heatmap, token distribution charts, paginated chart legends, session outcome breakdowns, and more, all with interactive tooltips and live updates via WebSocket. Uses the kit PageHeader and Radix Tabs (URL-backed `?tab=`); tool, event-type and model labels are `EntityRef` chips that link to the Activity feed / cost analytics and carry the entity context menu.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/client/src/pages/Analytics.tsx`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/client/src/pages/Analytics.tsx`
  * **Purpose:** Dashboard module consumed by the React client, MCP tools, or desktop shell depending on deployment mode.
  *
  * ## Design constraints

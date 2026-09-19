@@ -15,7 +15,7 @@
  * host's SSH stack. All inputs are validated in remote-sync.validateSourceInput
  * before touching the DB or any command.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { Router } = require("express");

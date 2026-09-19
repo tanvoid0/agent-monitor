@@ -4,7 +4,7 @@
  * activates, clicks on inner controls are ignored, ctrl/meta/middle click
  * opens a new tab, the kebab and `data-menu` render when a menu is given,
  * right-click opens the menu, and shift+right-click passes through.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";

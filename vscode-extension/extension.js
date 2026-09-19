@@ -1,10 +1,10 @@
 /**
- * @file Main extension file for Claude Code Agent Monitor VSCode extension
+ * @file Main extension file for AgentMonitor VSCode extension
  * Sets up the extension, registers commands, and manages the status bar item.
  * Implements a dynamic dashboard view that checks for active servers on ports 5173 and 4820.
  * Provides real-time status updates in the sidebar and status bar with background polling.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const vscode = require("vscode");
@@ -15,7 +15,7 @@ let statusBarItem;
 let outputChannel;
 
 function activate(context) {
-  outputChannel = vscode.window.createOutputChannel("Claude Code Monitor");
+  outputChannel = vscode.window.createOutputChannel("AgentMonitor");
   outputChannel.appendLine("[activate] " + new Date().toISOString());
   context.subscriptions.push(outputChannel);
 
@@ -27,7 +27,7 @@ function activate(context) {
   );
 
   statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-  statusBarItem.command = "claude-code-agent-monitor.openDashboard";
+  statusBarItem.command = "agentmonitor.openDashboard";
   context.subscriptions.push(statusBarItem);
 
   updateStatusBar();
@@ -36,11 +36,11 @@ function activate(context) {
   }, 5000); // Auto-refresh every 5 seconds
 
   let openDashboard = vscode.commands.registerCommand(
-    "claude-code-agent-monitor.openDashboard",
+    "agentmonitor.openDashboard",
     async (target) => {
       const panel = vscode.window.createWebviewPanel(
         "agentMonitor",
-        "Claude Code Agent Monitor",
+        "AgentMonitor",
         vscode.ViewColumn.One,
         { enableScripts: true, retainContextWhenHidden: true }
       );
@@ -73,44 +73,35 @@ function activate(context) {
     }
   );
 
-  let openInBrowser = vscode.commands.registerCommand(
-    "claude-code-agent-monitor.openInBrowser",
-    async () => {
-      const isDevUp = await checkPort(5173);
-      const url = isDevUp ? "http://localhost:5173" : "http://localhost:4820";
-      vscode.env.openExternal(vscode.Uri.parse(url));
-    }
-  );
+  let openInBrowser = vscode.commands.registerCommand("agentmonitor.openInBrowser", async () => {
+    const isDevUp = await checkPort(5173);
+    const url = isDevUp ? "http://localhost:5173" : "http://localhost:4820";
+    vscode.env.openExternal(vscode.Uri.parse(url));
+  });
 
-  let refreshStatus = vscode.commands.registerCommand(
-    "claude-code-agent-monitor.refreshStatus",
-    () => {
-      statusProvider.refresh();
-      updateStatusBar();
-      vscode.window.showInformationMessage("Claude Code Monitor refreshed.");
-    }
-  );
+  let refreshStatus = vscode.commands.registerCommand("agentmonitor.refreshStatus", () => {
+    statusProvider.refresh();
+    updateStatusBar();
+    vscode.window.showInformationMessage("AgentMonitor refreshed.");
+  });
 
-  let clearHistory = vscode.commands.registerCommand(
-    "claude-code-agent-monitor.clearHistory",
-    async () => {
-      if (
-        (await vscode.window.showWarningMessage("Clear all history?", { modal: true }, "Yes")) ===
-        "Yes"
-      ) {
-        try {
-          const res = await request("DELETE", 4820, "/api/sessions");
-          if (res.statusCode === 200) {
-            statusProvider.refresh();
-            updateStatusBar();
-            vscode.window.showInformationMessage("History cleared.");
-          }
-        } catch (e) {
-          vscode.window.showErrorMessage("Failed to clear history.");
+  let clearHistory = vscode.commands.registerCommand("agentmonitor.clearHistory", async () => {
+    if (
+      (await vscode.window.showWarningMessage("Clear all history?", { modal: true }, "Yes")) ===
+      "Yes"
+    ) {
+      try {
+        const res = await request("DELETE", 4820, "/api/sessions");
+        if (res.statusCode === 200) {
+          statusProvider.refresh();
+          updateStatusBar();
+          vscode.window.showInformationMessage("History cleared.");
         }
+      } catch (e) {
+        vscode.window.showErrorMessage("Failed to clear history.");
       }
     }
-  );
+  });
 
   context.subscriptions.push(openDashboard, openInBrowser, refreshStatus, clearHistory);
   context.subscriptions.push({ dispose: () => clearInterval(statusInterval) });
@@ -279,7 +270,7 @@ function getErrorHtml() {
                 </svg>
             </div>
             <h1>Dashboard Offline</h1>
-            <div class="subtitle">Unable to connect to the Claude Code Monitor server</div>
+            <div class="subtitle">Unable to connect to the AgentMonitor server</div>
         </div>
 
         <div class="main-card">
@@ -288,8 +279,8 @@ function getErrorHtml() {
                 <div class="timeline">
                     <div class="t-step">
                         <div class="t-label">Initialize Repository</div>
-                        <div class="t-code">git clone https://github.com/hoangsonww/Claude-Code-Agent-Monitor.git
-cd Claude-Code-Agent-Monitor
+                        <div class="t-code">git clone https://github.com/tanvoid0/agent-monitor.git
+cd agent-monitor
 npm run setup</div>
                     </div>
                     <div class="t-step" style="margin-bottom: 0;">
@@ -317,16 +308,16 @@ npm run setup</div>
                     Retry Connection
                 </button>
                 
-                <a href="https://hoangsonww.github.io/Claude-Code-Agent-Monitor/" class="btn btn-secondary">
+                <a href="https://tanvoid0.github.io/agent-monitor/" class="btn btn-secondary">
                     View Documentation
                 </a>
             </div>
         </div>
 
         <div class="footer">
-            <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor">GitHub</a>
-            <a href="https://hoangsonww.github.io/Claude-Code-Agent-Monitor/">Wiki</a>
-            <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/issues">Support</a>
+            <a href="https://github.com/tanvoid0/agent-monitor">GitHub</a>
+            <a href="https://tanvoid0.github.io/agent-monitor/">Wiki</a>
+            <a href="https://github.com/tanvoid0/agent-monitor/issues">Support</a>
         </div>
     </div>
 </body>

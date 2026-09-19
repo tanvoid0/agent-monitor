@@ -4,7 +4,7 @@
  * work boundaries expire older tracker state, turn-end markers discard
  * unfinished state, and bounded incremental transcript caching keeps session
  * APIs safe.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const fs = require("fs");

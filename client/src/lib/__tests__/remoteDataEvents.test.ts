@@ -1,6 +1,6 @@
 /**
  * @file Tests for remote-data WebSocket refresh helpers.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, expect, it } from "vitest";

@@ -1,8 +1,8 @@
-# Claude Code Agent Monitor for VS Code
+# AgentMonitor for VS Code
 
-**Claude Code Agent Monitor** brings a high-fidelity, real-time dashboard for your Claude Code AI sessions directly into your VS Code workspace. Monitor token usage, track agent health, and view deep analytics without switching windows.
+**AgentMonitor** brings a high-fidelity, real-time dashboard for your Claude Code AI sessions directly into your VS Code workspace. Monitor token usage, track agent health, and view deep analytics without switching windows.
 
-![Extension Screenshot](https://raw.githubusercontent.com/hoangsonww/Claude-Code-Agent-Monitor/refs/heads/master/vscode-extension/vscode.png)
+![Extension Screenshot](https://raw.githubusercontent.com/tanvoid0/agent-monitor/refs/heads/master/vscode-extension/vscode.png)
 
 ---
 
@@ -36,14 +36,14 @@ Jump directly to specific views from the sidebar:
 ## 🛠️ Getting Started
 
 ### 1. Requirements
-Ensure you have the Claude Code Agent Monitor server running locally:
+Ensure you have the AgentMonitor server running locally:
 ```bash
 npm install
 npm run dev
 ```
 
 ### 2. Installation
-- Search for **"Claude Code Agent Monitor"** in the VS Code Marketplace.
+- Search for **"AgentMonitor"** in the VS Code Marketplace.
 - Click **Install**.
 
 ### 3. Usage
@@ -69,7 +69,7 @@ To generate a `.vsix` file for manual installation or marketplace upload:
    ```bash
    vsce package
    ```
-   *This will generate `claude-code-agent-monitor-1.0.0.vsix`.*
+   *This will generate `agentmonitor-1.0.0.vsix`.*
 
 ---
 

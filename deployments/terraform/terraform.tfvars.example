@@ -1,4 +1,4 @@
-image_repository     = "ghcr.io/your-org/claude-code-agent-monitor"
+image_repository     = "ghcr.io/your-org/agentmonitor"
 image_tag            = "sha-0123456789abcdef"
 allowed_hosts        = "agent-monitor.example.com"
 existing_secret_name = "agent-monitor-secrets"

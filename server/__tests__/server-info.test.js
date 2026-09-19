@@ -1,7 +1,7 @@
 /**
  * @file Tests for multi-server discovery and hook-ingest deduplication by
  * SQLite data directory (`server/lib/server-info.js`).
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { describe, it, beforeEach, afterEach } = require("node:test");
@@ -25,7 +25,7 @@ function freshModule(dataDir) {
 }
 
 function writeDiscovery(servers) {
-  const infoPath = path.join(CLAUDE_HOME, ".agent-dashboard.json");
+  const infoPath = path.join(CLAUDE_HOME, ".agentmonitor.json");
   fs.mkdirSync(CLAUDE_HOME, { recursive: true });
   const recent = servers.reduce((a, b) =>
     Date.parse(b.startedAt) > Date.parse(a.startedAt) ? b : a

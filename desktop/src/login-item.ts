@@ -11,12 +11,12 @@
  *     standard startup location), which shows up in Task Manager → Startup.
  *
  * Linux has no Electron-supported equivalent, so the toggle is a no-op there.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/desktop/src/login-item.ts`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/desktop/src/login-item.ts`
  * **Purpose:** Dashboard module consumed by the React client, MCP tools, or desktop shell depending on deployment mode.
  *
  * ## Design constraints
@@ -84,7 +84,7 @@ import { app } from "electron";
  * `process.argv` to recognise a login-triggered launch (Windows has no
  * `wasOpenedAtLogin`). Harmless if it ever reaches another code path.
  */
-const WIN_LAUNCH_FLAG = "--ccam-hidden";
+const WIN_LAUNCH_FLAG = "--am-hidden";
 
 /** True on macOS and Windows — the only platforms Electron can register an
  * auto-start entry for. Every exported function below is a no-op on Linux. */

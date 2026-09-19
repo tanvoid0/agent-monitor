@@ -1,0 +1,30 @@
+{
+  "name": "am-platform",
+  "version": "3.0.0",
+  "description": "Administer AgentMonitor's Claude Code and Codex configuration explorers, provider-aware history import, backup restore, hook installation, home directories, updates, and MCP server.",
+  "author": {
+    "name": "Tanveer Hoque",
+    "email": "tanvoid0@gmail.com",
+    "url": "https://github.com/tanvoid0"
+  },
+  "homepage": "https://github.com/tanvoid0/agent-monitor",
+  "repository": "https://github.com/tanvoid0/agent-monitor",
+  "license": "MIT",
+  "keywords": ["claude-code", "codex", "config", "hooks", "import", "backup", "mcp"],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "AgentMonitor Platform",
+    "shortDescription": "Administer AgentMonitor's Claude Code and Codex configuration explorers, provider-aware...",
+    "longDescription": "Administer AgentMonitor's Claude Code and Codex configuration explorers, provider-aware history import, backup restore, hook installation, home directories, updates, and MCP server.",
+    "developerName": "Tanveer Hoque",
+    "category": "Developer Tools",
+    "capabilities": ["Read", "Write"],
+    "websiteURL": "https://github.com/tanvoid0/agent-monitor",
+    "defaultPrompt": [
+      "Use AgentMonitor Platform to inspect the local AgentMonitor dashboard.",
+      "Use AgentMonitor Platform to analyze recent agent activity."
+    ],
+    "brandColor": "#6366F1"
+  }
+}

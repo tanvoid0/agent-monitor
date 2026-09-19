@@ -5,7 +5,7 @@
  * context to pick its selected styling and accepts an optional icon and count.
  * Callers must render a `TabsContent` per tab so Radix can wire
  * `aria-controls`.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { createContext, forwardRef, useContext, type ComponentPropsWithoutRef } from "react";

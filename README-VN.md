@@ -74,7 +74,7 @@ Bảng điều khiển chuyên nghiệp để theo dõi và trực quan hóa cá
 Tài liệu đã bản địa hóa: [`README.md`](./README.md) · [`README-CN.md`](./README-CN.md) · [`README-VN.md`](./README-VN.md) · [`README-KO.md`](./README-KO.md) · [`README-ES.md`](./README-ES.md)
 
 > [!NOTE]
-> Bạn cần hướng dẫn theo tác vụ? [GitHub Wiki](https://github.com/hoangsonww/Claude-Code-Agent-Monitor/wiki) là sổ tay thực hành về sử dụng hằng ngày, vận hành theo nhóm, khắc phục sự cố, tự động hóa CLI/MCP và các quy trình triển khai. [Wiki tĩnh đã bản địa hóa](https://hoangsonww.github.io/Claude-Code-Agent-Monitor/wiki/) vẫn là phần giới thiệu sản phẩm và kiến trúc bằng tiếng Anh, Việt, Trung, Hàn và Tây Ban Nha; các hợp đồng kỹ thuật chính xác vẫn nằm trong [`docs/`](./docs/README.md).
+> Bạn cần hướng dẫn theo tác vụ? [GitHub Wiki](https://github.com/tanvoid0/agent-monitor/wiki) là sổ tay thực hành về sử dụng hằng ngày, vận hành theo nhóm, khắc phục sự cố, tự động hóa CLI/MCP và các quy trình triển khai. [Wiki tĩnh đã bản địa hóa](https://tanvoid0.github.io/agent-monitor/wiki/) vẫn là phần giới thiệu sản phẩm và kiến trúc bằng tiếng Anh, Việt, Trung, Hàn và Tây Ban Nha; các hợp đồng kỹ thuật chính xác vẫn nằm trong [`docs/`](./docs/README.md).
 
 ---
 
@@ -108,6 +108,7 @@ Tài liệu đã bản địa hóa: [`README.md`](./README.md) · [`README-CN.md
 - [Chế độ triển khai](#chế-độ-triển-khai)
 - [Cấu trúc dự án](#cấu-trúc-dự-án)
 - [Khắc phục sự cố](#khắc-phục-sự-cố)
+- [Lời cảm ơn](#lời-cảm-ơn)
 - [Giấy phép](#giấy-phép)
 
 ---
@@ -306,7 +307,7 @@ Thanh bên cung cấp quyền truy cập nhanh vào cả mười trang — Trang
 
 Bảng điều khiển cung cấp một bộ tính năng toàn diện để giám sát và phân tích các phiên và Agent Claude Code & Codex của bạn:
 
-> **Phiên Cursor (chỉ mang tính thông tin):** CCAM nhập mọi transcript agent nằm trong `~/.claude` — trên máy này và trên các máy từ xa đã đồng bộ. **Cursor** cũng được tính tương tự: Cursor tình cờ lưu phiên agent ở cùng các đường dẫn với Claude Code & Codex. CCAM không phân biệt ứng dụng nào ghi file.
+> **Phiên Cursor (chỉ mang tính thông tin):** AgentMonitor nhập mọi transcript agent nằm trong `~/.claude` — trên máy này và trên các máy từ xa đã đồng bộ. **Cursor** cũng được tính tương tự: Cursor tình cờ lưu phiên agent ở cùng các đường dẫn với Claude Code & Codex. AgentMonitor không phân biệt ứng dụng nào ghi file.
 
 | Tính năng                            | Sự miêu tả                                                                                                                                                                                                                                                                  |
 |------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -321,7 +322,7 @@ Bảng điều khiển cung cấp một bộ tính năng toàn diện để giá
 | **Điều hướng theo tham chiếu**             | Mọi phiên, agent, dự án, công cụ, loại sự kiện và mô hình mà dashboard hiển thị đều là một **chip thực thể** (`components/entity/EntityRef.tsx`) liên kết tới trang chủ của nó và mang một **menu ngữ cảnh nhấp chuột phải / nhấn giữ** — *Mở phiên*, *Mở agent*, *Mở hội thoại*, *Hiện trong Hoạt động*, *Phiên trong dự án*, *Hiện trên bảng*, *Mở thư mục*, *Sao chép ID*, v.v. — được phản chiếu bởi một **nút ⋯** trên mọi hàng và thẻ (`components/ui/Clickable.tsx`) dành cho người dùng chuột và thứ tự Tab. Chip và menu được dựng từ một bảng href có kiểu duy nhất (`client/src/lib/routes.ts`), nên mỗi trang đều có thể truy cập bằng URL: `/activity?session_id=&agent_id=&tool_name=&event_type=&status=&q=&from=&to=` (danh sách phân tách bằng dấu phẩy), `/sessions?status=&cwd=&cwd=&q=` (`cwd` lặp lại), `/sessions/:id?tab=agents#agent-<id>`, `?tab=timeline&event=<id>`, `?tab=conversation&transcript=<id\|main>`, `?tool_name=` / `?agent_id=` (mồi bộ lọc dùng một lần), `/kanban?project=<cwd>&density=cards\|rows`, `/workflows?session=&run=`, `/plan/:slug?task=`, `/run?session=&cwd=`. Đích của deep link được mở rộng, cuộn vào tầm nhìn, viền sáng và nhận tiêu điểm. Thẻ và hàng có hai biến thể `card` / `row`, và `Cmd/Ctrl`+nhấp hoặc nhấp chuột giữa vào bất kỳ mục nào sẽ mở tab mới. |
 | **Chỉ một phím tắt**             | `Cmd/Ctrl+K` là tổ hợp duy nhất mà dashboard chiếm dụng, và nó vẫn hoạt động ngay cả khi con trỏ đang ở trong một ô nhập liệu. Một bản trước từng có cả lớp phím tắt đầy đủ — chuỗi điều hướng bắt đầu bằng `g`, phím theo trang, bảng tra cứu `?`, lớp gợi ý khi giữ phím bổ trợ — và nó đã bị loại bỏ có chủ đích: chuỗi phím là một chế độ ẩn kèm bộ đếm giờ, nhấn `g` trông như không có gì xảy ra; và khi bảng lệnh đã tới được mọi trang bằng tìm kiếm mờ thì hai cơ chế điều hướng chỉ làm phân tán trí nhớ cơ bắp. Tabby vẫn giữ `Cmd/Ctrl+B` vốn có |
 | **Cập nhật trực tiếp**                   | Đẩy WebSocket -- không bỏ phiếu, cập nhật giao diện người dùng tức thì                                                                                                                                                                                                                             |
-| **Tự động khám phá**                 | Phiên và tác nhân được tạo tự động từ tín hiệu của nhà cung cấp. Claude Code tạo thẻ **Đang chờ** ngay tại `SessionStart`. Codex trước tiên hiển thị một thẻ **Đang chờ** cục bộ chỉ tồn tại trong bộ nhớ ngay khi tiến trình TUI tương tác khởi động, kể cả trước khi Codex cấp ID phiên ổn định. Hook, hàng live-thread hoặc rollout sau đó tạo phiên bền vững và thay thế thẻ tạm thời đó. Nếu người dùng chọn một luồng hiện có trong bộ chọn Resume của Codex, CCAM đọc rollout hoặc writer lock mà chính PID Codex đó đã mở và chuyển ngay sang phiên bền vững được tiếp tục trước tin nhắn mới đầu tiên. Thẻ trước định danh không bao giờ được ghi vào SQLite, lịch sử, phân tích, giá, workflow, cảnh báo hay thông báo hoàn tất, và biến mất khi tiến trình thoát. |
+| **Tự động khám phá**                 | Phiên và tác nhân được tạo tự động từ tín hiệu của nhà cung cấp. Claude Code tạo thẻ **Đang chờ** ngay tại `SessionStart`. Codex trước tiên hiển thị một thẻ **Đang chờ** cục bộ chỉ tồn tại trong bộ nhớ ngay khi tiến trình TUI tương tác khởi động, kể cả trước khi Codex cấp ID phiên ổn định. Hook, hàng live-thread hoặc rollout sau đó tạo phiên bền vững và thay thế thẻ tạm thời đó. Nếu người dùng chọn một luồng hiện có trong bộ chọn Resume của Codex, AgentMonitor đọc rollout hoặc writer lock mà chính PID Codex đó đã mở và chuyển ngay sang phiên bền vững được tiếp tục trước tin nhắn mới đầu tiên. Thẻ trước định danh không bao giờ được ghi vào SQLite, lịch sử, phân tích, giá, workflow, cảnh báo hay thông báo hoàn tất, và biến mất khi tiến trình thoát. |
 | **Nhập lịch sử**                 | Import History theo nhà cung cấp nhập transcript Claude Code từ `~/.claude/` và rollout JSONL Codex từ `~/.codex/sessions`. Mỗi tab có đường dẫn mặc định, hướng dẫn, quét thư mục và tải lên riêng; cả hai dùng lại logic ingest thời gian thực, giữ đúng token/chi phí/tool và bảo đảm bất biến. Rollout Codex từ bên ngoài được snapshot vào bộ nhớ dashboard để hội thoại vẫn mở được sau khi archive hoặc thư mục nguồn bị xóa. |
 | **Phân cấp Subagent**             | Cây tác nhân cha-con có thể thu gọn trên Bảng điều khiển và Chi tiết phiên. Các Agent có các Subagent hiển thị các chữ V mở rộng/thu gọn; tác nhân lá hiển thị một chỉ báo dấu chấm. Tự động mở rộng khi các tác nhân phụ đang hoạt động                                                                           |
 | **Agent nền**              | Theo dõi chính xác các tác nhân phụ có nền mà không cần hoàn thành sớm                                                                                                                                                                                                         |
@@ -338,14 +339,14 @@ Bảng điều khiển cung cấp một bộ tính năng toàn diện để giá
 | **Phiên đăng ký/Phiên tiếp tục**   | Tự động kích hoạt lại các phiên khi có sự kiện mới, xử lý chính xác các phiên `/resume` và phiên mồ côi. Quét định kỳ (mỗi ¼ của `DASHBOARD_STALE_MINUTES`, kẹp giữa 60s–5 phút) đánh dấu các phiên bị bỏ qua vượt qua khả năng phát hiện dựa trên sự kiện                                                                     |
 | **Phát hiện phiên có sẵn** | Các phiên đã chạy khi máy chủ khởi động được nhập dưới dạng "hoạt động" (dựa trên sửa đổi tệp JSONL gần đây). Các sự kiện dừng cũng kích hoạt lại các phiên đã hoàn thành/bị bỏ rơi đã nhập, do đó, móc đầu tiên từ phiên đang diễn ra luôn hiển thị trên bảng điều khiển     |
 | **Đồng bộ dự án liên tục**        | Việc tự động nhập `~/.claude/projects` khi khởi động chỉ chạy một lần (được kiểm soát bằng marker), nên một thư mục dự án được tạo **sau** lần khởi chạy đầu tiên — mà các phiên của nó không bao giờ đi qua hook (ví dụ hook chỉ-trên-host bị tắt) — sẽ vẫn vô hình cho đến khi quét lại thủ công. Một tiến trình đồng bộ nền (`startSessionSync`) lấp khoảng trống đó qua ba kích hoạt cùng chia sẻ một mtime cache + một lần quét gộp duy nhất: một lần quét **ngay lập tức** khi khởi động, một **`fs.watch`** có debounce kích hoạt ngay khoảnh khắc một tệp phiên/thư mục dự án mới xuất hiện (đệ quy trên macOS/Windows; thư mục gốc + các thư mục con trực tiếp trên Linux để tránh rủi ro recursive-watcher ở userland), và một **lần poll định kỳ** (`DASHBOARD_SESSION_SYNC_MS`, mặc định 30 giây). Mỗi lần quét chỉ parse lại các tệp có mtime tăng lên và phát `session_created`/`session_updated` (cùng agent chính) để UI làm mới trực tiếp; một phiên đã được nhập mà không thay đổi sẽ được bỏ qua không cần parse lại, nên chi phí khởi động lại giữ ở mức O(số tệp mới/đã thay đổi) |
-| **Nguồn dữ liệu từ xa**            | Thu thập Claude Code và Codex theo thời gian thực từ các máy khác qua SSH. Mỗi nguồn mirror độc lập `~/.claude/projects` và `~/.codex/sessions` (cùng `session_index.jsonl` nhẹ của Codex để giữ tiêu đề đã đổi tên) qua **scp**, hoặc `wsl.exe` + `tar` khi CLI chạy trong WSL. Các vùng dàn dựng riêng dùng bộ nhập chuẩn của từng provider và gắn phiên bằng `sessions.source`; một nguồn có thể chỉ có Claude, chỉ Codex hoặc cả hai. Bộ thăm dò `DASHBOARD_REMOTE_SYNC_MS` (mặc định 15 giây) phát trạng thái và bộ đếm theo provider. Khi một provider không có, lỗi hoặc bị kẹt, chỉ các phiên cũ của provider đó đi vào quét stale; provider còn lại khỏe mạnh vẫn do mirror quản lý. Tùy chọn cấu hình riêng Home Claude từ xa và Home Codex từ xa trong **Settings → Remote Data Sources** hoặc qua `ccam remote-sources`; SSH vẫn dùng xác thực của máy chủ và không lưu secret. |
+| **Nguồn dữ liệu từ xa**            | Thu thập Claude Code và Codex theo thời gian thực từ các máy khác qua SSH. Mỗi nguồn mirror độc lập `~/.claude/projects` và `~/.codex/sessions` (cùng `session_index.jsonl` nhẹ của Codex để giữ tiêu đề đã đổi tên) qua **scp**, hoặc `wsl.exe` + `tar` khi CLI chạy trong WSL. Các vùng dàn dựng riêng dùng bộ nhập chuẩn của từng provider và gắn phiên bằng `sessions.source`; một nguồn có thể chỉ có Claude, chỉ Codex hoặc cả hai. Bộ thăm dò `DASHBOARD_REMOTE_SYNC_MS` (mặc định 15 giây) phát trạng thái và bộ đếm theo provider. Khi một provider không có, lỗi hoặc bị kẹt, chỉ các phiên cũ của provider đó đi vào quét stale; provider còn lại khỏe mạnh vẫn do mirror quản lý. Tùy chọn cấu hình riêng Home Claude từ xa và Home Codex từ xa trong **Settings → Remote Data Sources** hoặc qua `am remote-sources`; SSH vẫn dùng xác thực của máy chủ và không lưu secret. |
 | **Thu thập bằng remote push**      | Đường ingest dữ liệu phiên thứ ba, dành cho máy mà SSH không với tới: một laptop roaming sau NAT, một đường truyền gia đình bị CGNAT — nó **đẩy** dữ liệu phiên của chính mình lên thay vì để dashboard kéo về. `POST /api/hooks/ingest-batch` nhận mỗi lần một batch — các bucket token (mỗi mục là tổng hiện tại đầy đủ của bucket đó, như một lần parse lại transcript, không phải delta), tool event và thời lượng lượt — và là route duy nhất trong server được thiết kế để tiếp cận được từ internet công cộng. Vì vậy nó **bị tắt cho tới khi đặt `REMOTE_PUSH_TOKEN`** (nếu không sẽ trả về `503 REMOTE_PUSH_NOT_CONFIGURED`), được bảo vệ bằng token riêng chứ không phải `DASHBOARD_HOOK_TOKEN` để việc siết chặt các route hook loopback không bao giờ mở kèm route này, và từ chối `?token=` để credential không lọt vào log truy cập của proxy. Các mục được khử trùng lặp theo `(session_id, event_type, uuid)` với cả hàng đã commit lẫn trong cùng batch, nên gửi lại là an toàn; mỗi batch giới hạn 1000 mục (`413 BATCH_TOO_LARGE`); và một `session_id` đã thuộc về phiên local hoặc phiên kéo qua SSH sẽ bị từ chối theo từng mục (`SESSION_LOCALLY_OWNED`) thay vì cho phép chiếm quyền — một phiên được đẩy lên chỉ có thể tạo phiên MỚI hoặc ghi thêm vào phiên do chính nó tạo. Lỗi một phần vẫn trả về `200` kèm `errors[]` theo từng mục, và broadcast chỉ phát sau khi transaction commit. |
 | **Thiết kế đáp ứng**              | Bố cục thân thiện với thiết bị di động với lưới xếp chồng, bảng có thể cuộn và thanh bên có thể thu gọn                                                                                                                                                                                      |
 | **Bản địa hóa giao diện người dùng**                | Chuyển đổi ngôn ngữ tích hợp với bản sao giao diện người dùng được dịch và nhãn trợ năng cho tiếng Anh (`en`), tiếng Trung (`zh`), tiếng Việt (`vi`) và tiếng Hàn (`ko`) và tiếng Tây Ban Nha (`es`). Phạm vi đa ngôn ngữ trải dài hết toàn bộ tooltip ở trang Workflows: cách tính của các thẻ thống kê và các diễn giải theo bucket giá trị, popover "Cái gì / Cách đọc / Vì sao" cho mỗi biểu đồ, mọi tooltip hover trên đồ thị (orchestration, tool flow, pipeline, model delegation, concurrency), bảng chi tiết Workflow Patterns với mô tả và gợi ý, popover thông tin Settings → Định giá mô hình, khung CLAUDE_HOME và toàn bộ luồng Import History                                                                                                                                                                       |
 | **Dữ liệu hạt giống**                      | Tập lệnh hạt giống tích hợp cho các bản demo và phát triển                                                                                                                                                                                                                               |
 | **Dòng trạng thái**                     | Dòng trạng thái CLI được mã hóa màu hiển thị mô hình, cách sử dụng ngữ cảnh, nhánh git, mã thông báo                                                                                                                                                                                                  |
 | **Định dạng tên mô hình**          | Tên mô hình thân thiện trong toàn bộ giao diện: các định danh thô như `claude-opus-4-7-20260101` hoặc `claude-opus-4-7[1m]` hiển thị dạng "Claude Opus 4.7" hoặc "Claude Opus 4.7 (1M)". Hỗ trợ các họ Claude, GPT và Gemini với tự động nối phiên bản bằng dấu chấm, loại bỏ hậu tố ngày/latest, xóa tiền tố nhà cung cấp và định dạng thẻ cửa sổ ngữ cảnh. Trang Cài đặt giữ nguyên tên thô để cấu hình quy tắc giá |
-| **Thị trường plugin Claude + Codex** | Một cây nguồn gồm 14 plugin cung cấp manifest cho Claude Code và Codex, hai catalog marketplace, 66 skill đóng gói, 18 subagent Claude, 34 lệnh Claude và metadata OpenAI. CLI skills.sh phát hiện tổng cộng 77 skill trong repo qua `npx skills add hoangsonww/Claude-Code-Agent-Monitor --list`. Có thể cài bằng `claude plugin marketplace add`, `codex plugin marketplace add` hoặc `npx skills add` |
+| **Thị trường plugin Claude + Codex** | Một cây nguồn gồm 14 plugin cung cấp manifest cho Claude Code và Codex, hai catalog marketplace, 66 skill đóng gói, 18 subagent Claude, 34 lệnh Claude và metadata OpenAI. CLI skills.sh phát hiện tổng cộng 76 skill trong repo qua `npx skills add tanvoid0/agent-monitor --list`. Có thể cài bằng `claude plugin marketplace add`, `codex plugin marketplace add` hoặc `npx skills add` |
 | **Chạy Claude**                    | Khởi chạy tiến trình con `claude` ngay trong dashboard với UI streaming kiểu chat. Hai chế độ: **Hội thoại** (đa lượt — stdin mở liên tục, các lượt tiếp theo được đẩy qua stdin dạng stream-json) và **Một lần** (headless, một prompt → một phản hồi). Chế độ hội thoại còn hỗ trợ **tiếp tục bất kỳ phiên nào đã có** qua `claude --resume <id>` — chọn từ toàn bộ lịch sử phiên với picker tìm kiếm. Bộ chuyển đổi run đang chạy ở header cho phép bạn để run chạy nền, khởi động run mới và gắn lại sau. Việc gắn lại là bền vững: client đối chiếu envelope log trong bộ nhớ của spawner (`?envelopes=1`) với file JSONL transcript trên đĩa của session và ưu tiên bên có nhiều thông điệp user/assistant hơn, nên rời một run đã resume rồi quay lại vẫn thấy nguyên vẹn lịch sử trước đó (spawner chỉ thấy các lượt sau khi spawn; file transcript có cả lịch sử trước + hiện tại). Dropdown model (Opus 4.7 / 1M / Sonnet 4.6 / Haiku 4.5 / tuỳ chỉnh), picker permission-mode với cảnh báo `bypassPermissions` rõ ràng, trường **mức độ suy nghĩ** (low / medium / high — ánh xạ tới `--effort`), autocomplete cwd điền sẵn **thư mục home** của người dùng — vị trí spawn trung lập, không kế thừa ngữ cảnh dự án `.claude` của chính repo dashboard (agents, skills, rules, `CLAUDE.md`, `.mcp.json`); lùi về cwd của dashboard nếu không có gợi ý home, và nhóm home đứng đầu danh sách gợi ý (home → dashboard → gần đây). Render từng ký tự thực sự nhờ `--include-partial-messages`, cộng với **lớp làm mượt kiểu máy chữ** ở client dùng `requestAnimationFrame` để nhỏ giọt từng `text_delta` / `thinking_delta` — kể cả các phản hồi ngắn (claude gom toàn bộ vào 1-2 chunk) cũng hiện ra như đang gõ. Code merge giữ nguyên cờ `_streaming` và mảng `content` tích luỹ từ delta khi envelope `assistant` canonical đến giữa stream, nên thinking block không bị mất khi hoàn tất. Mỗi envelope WebSocket được dispatch qua `flushSync` để batching tự động của React không gộp nhiều deltas thành một render. **Tương thích TUI (Tier 1)**: **banner giới hạn** thu gọn thành pill (không bao giờ biến mất) giải thích những gì stream-json làm được và không làm được; **trình soạn prompt với autocomplete lệnh slash** dùng chấm điểm theo bậc (tên chính xác → bắt đầu bằng → ranh giới từ → chứa → subsequence → mô tả chứa) liệt kê lệnh user / project / plugin (mở rộng theo template ở client trước khi gửi) và hiển thị các lệnh CLI built-in như `/clear`, `/model`, `/config` kèm nhãn "chỉ CLI — không chạy ở đây"; **tham chiếu file `@`** với fuzzy-search có debounce trên cwd của run (bỏ qua `node_modules`, `.git`, `dist`, `build`, …); **đồng hồ context window / token** trực tiếp hiển thị token input + output + cache-read và chi phí — khi streaming live tính từ `stream_event` / `result.usage`, khi nạp từ transcript trên resume / view / gắn-lại cũng đọc từ block `usage` của assistant đã hoàn tất (input / output / cache-read / cache-creation), nên không bị kẹt ở 0/200k; **header trạng thái** hiển thị model, effort, permission mode, cwd, session ID, số envelope và thời gian chạy. Dropdown autocomplete mở lên trên, không đè picker cwd phía dưới. Chip Live / Offline cạnh tiêu đề. Same-origin guard trên route ngăn chặn drive-by spawn từ trình duyệt. Concurrency thực tế không giới hạn (mức trần mặc định 10000, ngang với terminal TUI — chỉ để chặn fork-bomb từ client lỗi; đặt `RUN_MAX_CONCURRENT` nếu muốn giới hạn thật). Modal hợp nhất runs đang chạy / lịch sử cung cấp hai nút nhảy nhanh: **Resume** trên dòng hội thoại cũ lập tức spawn `claude --resume <id>` và nạp sẵn transcript vào chat view (không cần gõ lại prompt — tiến trình idle trên stdin cho đến khi bạn gửi follow-up); **View** trên dòng one-shot cũ nạp transcript đã ghi vào ngay run viewer ở chế độ chỉ-đọc (không spawn — cùng panel, không có Stop / ô gửi). Phiên được spawn kích hoạt cùng các hook như mọi tiến trình `claude`, nên tự động xuất hiện trong Sessions / Analytics / Kanban / Workflows — và Sessions / SessionDetail hiển thị huy hiệu / banner xanh **▶ Run** liên kết về trang Run cho mọi phiên đang được điều khiển từ đó |
 | **Tabby** | Chú mèo SVG dễ thương được ghim ở góc dưới bên phải trên mọi trang, lắng nghe luồng phiên WebSocket thời gian thực và phản ứng theo đó. **Linh vật biết phản ứng**: 8 tâm trạng dựa trên luồng phiên thời gian thực — idle, watching, happy, worried, stuck, thinking, sleeping và disconnected; mắt mèo dõi theo con trỏ, mỗi tâm trạng có hoạt ảnh riêng. **Lời thoại bong bóng** bật lên khi có sự kiện đáng chú ý (phiên bắt đầu/kết thúc, có lỗi, lần chạy hoàn tất), được throttle và có thể tắt tiếng. Nhấp vào chú mèo hoặc nhấn **⌘B / Ctrl+B** để mở **bảng điều khiển** (Esc để đóng): dòng trạng thái thời gian thực (N đang chạy · M bị lỗi · trạng thái kết nối), các hành động nhanh (nhảy tới Run Claude / Activity / Sessions / các phiên bị lỗi, tắt tiếng, xóa cảnh báo) và một ô **Ask**. Ô Ask trả lời cục bộ các câu hỏi trạng thái đơn giản; những câu hỏi khác được chuyển sang trang **Run Claude** sẵn có (`/run?prompt=...`) để khởi chạy một phiên Claude Code thật sự — **không cần backend mới, không cần API key**. Được xây dựng hoàn toàn trên luồng WebSocket sẵn có, thân thiện với trợ năng (bàn phím, `aria-live`, tôn trọng `prefers-reduced-motion`), bật/tắt trong Settings. Mã nguồn tại `client/src/components/Tabby/` |
 | **Tín hiệu âm thanh** | Phản hồi âm thanh tinh tế cho hoạt động trực tiếp, **bật sẵn theo mặc định** và có thể tắt hoàn toàn. Mọi tín hiệu đều được **tổng hợp ngay trong trình duyệt bằng Web Audio API** — bộ dao động cộng với envelope gain, nên **không có tệp âm thanh nào phải tải về và không thêm phụ thuộc mới**. Bảy tín hiệu bao trùm vòng đời phiên: quãng năm đi lên khi một phiên bắt đầu, hợp âm trưởng giải quyết khi một phiên phản hồi xong, quãng ba thứ đi xuống nhẹ nhàng khi có lỗi, một tiếng gảy ngắn khi subagent được tạo, tiếng chuông lệch tần cho thông báo của Claude Code, hai nốt lên/xuống khi kết nối trực tiếp trở lại hoặc mất, và một tiếng tích gần như không nghe thấy khi nhấn nút và liên kết. Tín hiệu được **giới hạn tần suất** (thời gian chờ cho từng tín hiệu cộng với ngân sách bùng nổ toàn cục), đi qua bộ lọc thông thấp để nằm phía sau công việc của bạn, và giữ im lặng cho đến lần tương tác đầu tiên của bạn với trang (chính sách autoplay của trình duyệt). **Settings → Sound** cung cấp công tắc tổng, thanh trượt âm lượng và công tắc riêng cho từng tín hiệu kèm nghe thử tức thì; tùy chọn được lưu trong `localStorage` dưới khóa `agent-monitor-sound` (bản địa hóa en/zh/vi/ko/es). Mã nguồn tại `client/src/lib/sound.ts` và `client/src/hooks/useSoundCues.ts` |
@@ -372,8 +373,8 @@ Bảng điều khiển cung cấp một bộ tính năng toàn diện để giá
 ### 1. Cài đặt
 
 ```bash
-git clone https://github.com/hoangsonww/Claude-Code-Agent-Monitor.git
-cd Claude-Code-Agent-Monitor
+git clone https://github.com/tanvoid0/agent-monitor.git
+cd agent-monitor
 npm run setup
 ```
 
@@ -423,12 +424,12 @@ npm run build && npm start
 npm run mcp:start              # stdio (default — for MCP host integration)
 npm run mcp:start:http         # HTTP + SSE server on port 8819
 npm run mcp:start:repl         # interactive CLI with tab completion
-ccam mcp stdio                 # launcher ổn định dùng bởi plugin đóng gói
+am mcp stdio                 # launcher ổn định dùng bởi plugin đóng gói
 ```
 
 Đối với chế độ stdio, hãy định cấu hình máy chủ MCP của bạn (Claude Code / Claude Desktop / các máy khách MCP khác):
 
-- lệnh: `ccam`
+- lệnh: `am`
 - lập luận: `["mcp", "stdio"]`
 
 Đối với chế độ HTTP, hãy trỏ các máy khách MCP từ xa tới `http://127.0.0.1:8819/mcp` (HTTP có thể phát trực tuyến) hoặc `http://127.0.0.1:8819/sse` (SSE kế thừa).
@@ -465,16 +466,16 @@ npm run docker:full:up
 Các cổng host mặc định chỉ bind loopback: dashboard `4820`, MCP `8819`, Nginx `8080`, Prometheus `9090`, Grafana `3000`. Claude/Codex home được mount read-only; named volume giữ SQLite và config do dashboard sở hữu. Nginx proxy UI, REST có auth và WebSocket, nhưng chặn hooks, metrics và MCP ở edge theo mặc định.
 
 > [!IMPORTANT]
-> Cài hooks trên host. Với remote hook, đặt `CCAM_DASHBOARD_URL=https://...` và `CCAM_HOOK_TOKEN`; URL không phải loopback bắt buộc HTTPS. Xem [DEPLOYMENT.md](DEPLOYMENT.md).
+> Cài hooks trên host. Với remote hook, đặt `AM_DASHBOARD_URL=https://...` và `AM_HOOK_TOKEN`; URL không phải loopback bắt buộc HTTPS. Xem [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ### Thay thế: Ứng dụng máy tính để bàn (macOS & Windows)
 
 Nếu bạn không muốn giữ một cửa sổ terminal mở, hãy cài đặt **ứng dụng máy tính để bàn gốc** tùy chọn. Nó nhúng máy chủ ngay trong tiến trình, thêm biểu tượng tray ở menu-bar / khu vực thông báo và hỗ trợ tự khởi động lúc đăng nhập (macOS Login Items / Windows startup).
 
-Cách nhanh nhất là **tải trình cài dựng sẵn** từ [bản GitHub Release mới nhất](https://github.com/hoangsonww/Claude-Code-Agent-Monitor/releases/latest) (CI tự động phát hành một `vX.Y.Z` mỗi khi `package.json` được nâng phiên bản trên `master`):
+Cách nhanh nhất là **tải trình cài dựng sẵn** từ [bản GitHub Release mới nhất](https://github.com/tanvoid0/agent-monitor/releases/latest) (CI tự động phát hành một `vX.Y.Z` mỗi khi `package.json` được nâng phiên bản trên `master`):
 
-- **macOS** — tải `ClaudeCodeMonitor-<version>-arm64.dmg` (Apple Silicon) hoặc `-x64.dmg` (Intel) rồi kéo **Claude Code Monitor.app** vào `/Applications`.
-- **Windows** — tải `ClaudeCodeMonitor-Setup-<version>-x64.exe` (trình cài) hoặc `ClaudeCodeMonitor-<version>-x64-portable.exe` (không cần cài) rồi chạy.
+- **macOS** — tải `AgentMonitor-<version>-arm64.dmg` (Apple Silicon) hoặc `-x64.dmg` (Intel) rồi kéo **AgentMonitor.app** vào `/Applications`.
+- **Windows** — tải `AgentMonitor-Setup-<version>-x64.exe` (trình cài) hoặc `AgentMonitor-<version>-x64-portable.exe` (không cần cài) rồi chạy.
 
 Hoặc nếu bạn muốn tự dựng:
 
@@ -638,8 +639,8 @@ flowchart LR
 | `DASHBOARD_HOOK_TOKEN` / `_FILE` | _(unset)_ | Token riêng cho các route hook loopback (`/api/hooks/event`, `/api/hooks/codex`) khi chúng được expose ra ngoài loopback |
 | `REMOTE_PUSH_TOKEN` / `REMOTE_PUSH_TOKEN_FILE` | _(unset)_ | Token riêng bảo vệ `POST /api/hooks/ingest-batch` (route remote-push hướng ra internet công cộng, mặc định tắt). Độc lập một cách có chủ đích với `DASHBOARD_HOOK_TOKEN` ở trên — đặt token đó không được phép mở kèm route ghi được từ internet này |
 | `DASHBOARD_ENV_PATH` | repo `.env` | Đường dẫn dotenv có quyền ghi cho Settings |
-| `CCAM_DASHBOARD_URL` | local discovery | Remote hook destination; non-loopback bắt buộc HTTPS |
-| `CCAM_HOOK_TOKEN` / `_FILE` | _(unset)_ | Credential do hook handler gửi |
+| `AM_DASHBOARD_URL` | local discovery | Remote hook destination; non-loopback bắt buộc HTTPS |
+| `AM_HOOK_TOKEN` / `_FILE` | _(unset)_ | Credential do hook handler gửi |
 | `DASHBOARD_STALE_MINUTES` | `180` (3 giờ) | Số phút không hoạt động trước khi một phiên vẫn `active` (kể cả phiên đang **Đang chờ** người dùng — "Đang chờ" là lớp phủ UI trên một hàng `active`, không phải trạng thái lưu trữ) bị tự động đánh dấu **abandoned** và rời khỏi danh sách hoạt động. Được thực thi bởi watchdog 15 giây và lượt quét bảo trì định kỳ (chạy mỗi ¼ giá trị này, kẹp giữa 60s – 5 phút). Giảm giá trị (ví dụ `60`) để có idle timeout ngắn hơn |
 | `DASHBOARD_WORKING_IDLE_SECONDS` | `120` | Idle-working timeout để khôi phục một lượt bị hủy bằng `Esc` **trước khi có bất kỳ output nào** (việc này không để lại dấu nào trong transcript). Khi Agent chính đã ở `working` mà không có tool nào đang chạy và cả sự kiện hook lẫn transcript đều không tiến triển trong khoảng thời gian này, watchdog chuyển phiên sang **Đang chờ**. Giảm giá trị để khôi phục nhanh hơn, đổi lại đôi khi có lần lật cờ sai trên các lượt suy nghĩ im lặng kéo dài (sẽ tự phục hồi) |
 | `DASHBOARD_LIVENESS_PROBE` | `1` (bật) | Đặt `0` để tắt **cơ chế thu dọn phiên đã chết** của watchdog (probe dựa trên `ps`/`lsof` hoàn tất các phiên local `active` của Claude Code hoặc Codex khi tiến trình CLI tương ứng không còn tồn tại — khôi phục một `SessionEnd` bị mất khi dashboard không chạy). Các phiên được chuyển tiếp từ **máy khác** (household hooks) báo cáo `cwd` không phải POSIX và được cơ chế thu dọn tự động bỏ qua, nên một triển khai hỗn hợp cục bộ + chuyển tiếp không còn cần tắt tùy chọn này; chỉ tắt nó cho cấu hình thuần từ xa nơi tiến trình cục bộ không chứng minh được gì. Tự động tắt trên Windows và trong container |
@@ -657,76 +658,80 @@ flowchart LR
 
 ---
 
-## CLI `ccam`
+## CLI `am`
 
-Toàn bộ bề mặt tính năng của dashboard cũng dùng được từ terminal qua CLI **`ccam`** không phụ thuộc thư viện ngoài (`bin/ccam.js`), được liên kết tự động bởi `npm run setup` (qua `npm link` kiểu fail-soft). CLI tự tìm server đang chạy qua `~/.claude/.agent-dashboard.json` (cùng sổ đăng ký mà hook handler dùng; ghi đè bằng `CLAUDE_DASHBOARD_PORT`/`DASHBOARD_PORT`, mặc định `http://127.0.0.1:4820`).
+> **Nâng cấp từ v2.x (CCAM)?** Dự án được đổi tên thành **AgentMonitor** ở v3.0.0. `ccam` vẫn hoạt động như bí danh của `am`; các biến môi trường `CCAM_*` cũ được sao chép sang `AM_*` tương ứng khi khởi động (giá trị đặt dưới tên mới được ưu tiên); tệp đăng ký máy chủ đang chạy chuyển từ `~/.claude/.agent-dashboard.json` sang `~/.claude/.agentmonitor.json` (được ghi lại ở lần khởi động tiếp theo); và marketplace/ID plugin đổi từ `ccam-*@claude-code-agent-monitor-plugins` thành `am-*@agentmonitor-plugins`, nên hãy cài lại các plugin bạn dùng.
+
+Toàn bộ bề mặt tính năng của dashboard cũng dùng được từ terminal qua CLI **`am`** không phụ thuộc thư viện ngoài (`bin/am.js`), được liên kết tự động bởi `npm run setup` (qua `npm link` kiểu fail-soft). CLI tự tìm server đang chạy qua `~/.claude/.agentmonitor.json` (cùng sổ đăng ký mà hook handler dùng; ghi đè bằng `CLAUDE_DASHBOARD_PORT`/`DASHBOARD_PORT`, mặc định `http://127.0.0.1:4820`).
 
 ```bash
 # Máy chủ
-ccam status                       # chỉ báo ● đang chạy / ○ chưa chạy
-ccam start [--port N]             # khởi động server chạy nền (detached)
-ccam stop                         # dừng server chạy nền một cách nhẹ nhàng
-ccam repl                         # shell tương tác (cũng có: shell, i)
+am status                       # chỉ báo ● đang chạy / ○ chưa chạy
+am start [--port N]             # khởi động server chạy nền (detached)
+am stop                         # dừng server chạy nền một cách nhẹ nhàng
+am repl                         # shell tương tác (cũng có: shell, i)
 
 # Giám sát
-ccam health                       # dashboard có đang chạy không?
-ccam stats                        # tổng số, sự kiện hôm nay, phân bố trạng thái
-ccam kanban                       # phiên + agent nhóm theo cột trạng thái
-ccam tail [--session <id>]        # luồng sự kiện trực tiếp trong terminal (Ctrl+C để dừng)
+am health                       # dashboard có đang chạy không?
+am stats                        # tổng số, sự kiện hôm nay, phân bố trạng thái
+am kanban                       # phiên + agent nhóm theo cột trạng thái
+am tail [--session <id>]        # luồng sự kiện trực tiếp trong terminal (Ctrl+C để dừng)
 
 # Dữ liệu
-ccam sessions [--status s] [--q text] [--limit n]
-ccam session <id>                 # chi tiết: cây agent, chi phí, sự kiện gần nhất
-ccam agents   [--status s] [--session id]
-ccam events   [--session id] [--limit n]
+am sessions [--status s] [--q text] [--limit n]
+am session <id>                 # chi tiết: cây agent, chi phí, sự kiện gần nhất
+am agents   [--status s] [--session id]
+am events   [--session id] [--limit n]
 
 # Phân tích
-ccam analytics                    # tổng token, công cụ hàng đầu, loại agent
-ccam workflows [--session id]     # thống kê workflow-intelligence và các mẫu
-ccam runs [--session id]          # các lần chạy Workflow động
-ccam cost [--session <id>]        # tổng chi phí ước tính theo model
+am analytics                    # tổng token, công cụ hàng đầu, loại agent
+am workflows [--session id]     # thống kê workflow-intelligence và các mẫu
+am runs [--session id]          # các lần chạy Workflow động
+am cost [--session <id>]        # tổng chi phí ước tính theo model
                                   # (--session giới hạn ở một phiên; hiển thị phụ phí công cụ máy chủ;
                                   #  cảnh báo model có mức dùng nhưng chưa có quy tắc định giá)
 
 # Cảnh báo & webhook
-ccam alerts [--unacked]           # luồng cảnh báo đã kích hoạt
-ccam alerts ack <id> | ack-all    # xác nhận cảnh báo
-ccam rules                        # danh sách quy tắc cảnh báo
-ccam webhooks                     # danh sách đích webhook
-ccam webhooks test <id>           # gửi cảnh báo thử tổng hợp
+am alerts [--unacked]           # luồng cảnh báo đã kích hoạt
+am alerts ack <id> | ack-all    # xác nhận cảnh báo
+am rules                        # danh sách quy tắc cảnh báo
+am webhooks                     # danh sách đích webhook
+am webhooks test <id>           # gửi cảnh báo thử tổng hợp
 
 # Giá
-ccam pricing                      # danh sách quy tắc định giá (gồm cột fast-mode & intro)
-ccam pricing set <pattern> --input N --output N [--cache-read N --cache-write N]
+am pricing                      # danh sách quy tắc định giá (gồm cột fast-mode & intro)
+am pricing set <pattern> --input N --output N [--cache-read N --cache-write N]
                  [--cache-write-1h N] [--fast-input N --fast-output N]
                  [--intro-input N --intro-output N … --intro-until YYYY-MM-DD]
-ccam pricing delete <pattern>
-ccam pricing reset
+am pricing delete <pattern>
+am pricing reset
 
 # Nhập
-ccam import rescan                # quét lại ~/.claude/projects
-ccam import path <dir>            # nhập mọi .jsonl dưới một thư mục
+am import rescan                # quét lại ~/.claude/projects
+am import path <dir>            # nhập mọi .jsonl dưới một thư mục
 
 # Quản trị
-ccam doctor                       # chẩn đoán kết nối, hook và cơ sở dữ liệu
-ccam info                         # JSON thông tin hệ thống thô
-ccam export [file.json]           # xuất toàn bộ dữ liệu dạng JSON
-ccam import-data <file.json>      # khôi phục bản xuất (idempotent, không phá hủy)
-ccam cleanup --hours N --days M   # bỏ phiên treo / dọn phiên cũ
-ccam reinstall-hooks              # cài lại hook Claude Code
-ccam update-check                 # bản checkout có chậm hơn upstream? (in lệnh cập nhật)
-ccam clear-data --yes             # xóa TOÀN BỘ dữ liệu (bắt buộc --yes)
-ccam open                         # mở dashboard trong trình duyệt
-ccam version                      # in phiên bản CLI (cũng có --version / -v)
+am doctor                       # chẩn đoán kết nối, hook và cơ sở dữ liệu
+am info                         # JSON thông tin hệ thống thô
+am export [file.json]           # xuất toàn bộ dữ liệu dạng JSON
+am import-data <file.json>      # khôi phục bản xuất (idempotent, không phá hủy)
+am cleanup --hours N --days M   # bỏ phiên treo / dọn phiên cũ
+am reinstall-hooks              # cài lại hook Claude Code
+am update-check                 # bản checkout có chậm hơn upstream? (in lệnh cập nhật)
+am clear-data --yes             # xóa TOÀN BỘ dữ liệu (bắt buộc --yes)
+am open                         # mở dashboard trong trình duyệt
+am version                      # in phiên bản CLI (cũng có --version / -v)
 ```
 
-Các lệnh dựa trên API cần server đang chạy — khi chưa chạy, **các lệnh chỉ-đọc tự động chuyển sang đọc trực tiếp `data/dashboard.db`** (kèm banner `⚠ Offline mode` rõ ràng, và các phiên `active` đã chết trong DB được hiệu chỉnh khi hiển thị bằng chính probe kiểm tra tiến trình mà watchdog của server sử dụng), còn các lệnh không thể chạy đúng nếu thiếu server (`tail` trực tiếp, analytics/tính chi phí, các thao tác ghi) in chỉ báo `○ Dashboard server is NOT running` cùng lý do cụ thể và lệnh khởi động; `ccam start` đưa server production lên chạy nền. Các lệnh đọc luôn an toàn; lệnh phá hủy duy nhất (`clear-data`) từ chối chạy nếu thiếu `--yes` tường minh. Đầu ra là một giao diện terminal đầy đủ — bảng kẻ khung với cột số căn phải, biểu tượng trạng thái (`● active`, `○ waiting`, `✔ completed`, `✖ error`), biểu đồ thanh inline cho stats/analytics/cost, và cây agent `├─`/`└─` thực thụ — với màu ANSI tự bật trên TTY, tắt khi pipe, và điều khiển được qua `--no-color` / `NO_COLOR` / `FORCE_COLOR`. Để theo dõi liên tục, **`ccam repl`** (bí danh `shell` / `i`) mở một shell tương tác nơi bạn gõ lệnh mà không cần tiền tố `ccam` — kèm biểu ngữ chào CCAM, tự hoàn thành bằng Tab, lịch sử phím mũi tên được lưu lại, một dấu nhắc hiển thị trạng thái server trực tiếp (`● host` khi bật / `○ offline` khi tắt), menu `help` / `help <cmd>` phân nhóm, và một built-in `watch [giây] <lệnh>` tự làm mới bất kỳ lệnh nào (ví dụ `watch 5 kanban`); mỗi dòng chạy như một tiến trình con biệt lập, nên việc từ chối khi offline hay một `tail` đang chặn không bao giờ làm sập shell. Nếu `ccam` chưa có trên PATH, chạy `npm link` một lần từ thư mục gốc của repo. Tài liệu đầy đủ — cờ, thứ tự phát hiện server, REPL, mô hình an toàn, mã thoát — tại [docs/CLI.md](./docs/CLI.md).
+Các lệnh dựa trên API cần server đang chạy — khi chưa chạy, **các lệnh chỉ-đọc tự động chuyển sang đọc trực tiếp `data/dashboard.db`** (kèm banner `⚠ Offline mode` rõ ràng, và các phiên `active` đã chết trong DB được hiệu chỉnh khi hiển thị bằng chính probe kiểm tra tiến trình mà watchdog của server sử dụng), còn các lệnh không thể chạy đúng nếu thiếu server (`tail` trực tiếp, analytics/tính chi phí, các thao tác ghi) in chỉ báo `○ Dashboard server is NOT running` cùng lý do cụ thể và lệnh khởi động; `am start` đưa server production lên chạy nền. Các lệnh đọc luôn an toàn; lệnh phá hủy duy nhất (`clear-data`) từ chối chạy nếu thiếu `--yes` tường minh. Đầu ra là một giao diện terminal đầy đủ — bảng kẻ khung với cột số căn phải, biểu tượng trạng thái (`● active`, `○ waiting`, `✔ completed`, `✖ error`), biểu đồ thanh inline cho stats/analytics/cost, và cây agent `├─`/`└─` thực thụ — với màu ANSI tự bật trên TTY, tắt khi pipe, và điều khiển được qua `--no-color` / `NO_COLOR` / `FORCE_COLOR`. Để theo dõi liên tục, **`am repl`** (bí danh `shell` / `i`) mở một shell tương tác nơi bạn gõ lệnh mà không cần tiền tố `am` — kèm biểu ngữ chào AgentMonitor, tự hoàn thành bằng Tab, lịch sử phím mũi tên được lưu lại, một dấu nhắc hiển thị trạng thái server trực tiếp (`● host` khi bật / `○ offline` khi tắt), menu `help` / `help <cmd>` phân nhóm, và một built-in `watch [giây] <lệnh>` tự làm mới bất kỳ lệnh nào (ví dụ `watch 5 kanban`); mỗi dòng chạy như một tiến trình con biệt lập, nên việc từ chối khi offline hay một `tail` đang chặn không bao giờ làm sập shell. Nếu `am` chưa có trên PATH, chạy `npm link` một lần từ thư mục gốc của repo. Tài liệu đầy đủ — cờ, thứ tự phát hiện server, REPL, mô hình an toàn, mã thoát — tại [docs/CLI.md](./docs/CLI.md).
 
 ## Tập lệnh npm
 
 | Yêu cầu                 | Sự miêu tả                                                |
 | ----------------------- | ---------------------------------------------------------- |
-| `npm run setup`         | Cài phụ thuộc root/client/extension/MCP, build MCP và link `ccam` |
+| `npm run setup`         | Cài phụ thuộc root/client/extension/MCP, build MCP và link `am` |
+| `npm run upgrade`       | Cài lại từ checkout hiện tại theo từng bước: gỡ link CLI toàn cục cũ, `npm run setup`, `npm run build`, cài lại hook (`-- --codex` / `-- --both` để chọn CLI), `-- --desktop` build lại cả trình cài đặt Windows, in phiên bản cũ → mới |
+| `npm run update:pull-setup` | `git pull --ff-only` rồi `npm run upgrade` |
 | `npm run dev`           | Khởi động đồng thời máy chủ (chế độ xem) + máy khách (Vite HMR) |
 | `npm run dev:server`    | Khởi động Express bằng trình theo dõi chống dội và khởi động lại an toàn |
 | `npm run dev:client`    | Chỉ khởi động máy chủ Vite dev                             |
@@ -748,8 +753,8 @@ Các lệnh dựa trên API cần server đang chạy — khi chưa chạy, **c�
 | `npm run mcp:dev:http`  | Chạy máy chủ MCP ở chế độ dev (`tsx`, HTTP + SSE)            |
 | `npm run mcp:dev:repl`  | Chạy máy chủ MCP ở chế độ dev (`tsx`, REPL tương tác)      |
 | `npm run mcp:typecheck` | Kiểm tra kiểu nguồn MCP mà không phát ra đầu ra bản dựng        |
-| `npm run mcp:docker:build` | Xây dựng hình ảnh vùng chứa MCP bằng Docker (`agent-dashboard-mcp:local`) |
-| `npm run mcp:podman:build` | Xây dựng hình ảnh vùng chứa MCP bằng Podman (`localhost/agent-dashboard-mcp:local`) |
+| `npm run mcp:docker:build` | Xây dựng hình ảnh vùng chứa MCP bằng Docker (`agentmonitor-mcp:local`) |
+| `npm run mcp:podman:build` | Xây dựng hình ảnh vùng chứa MCP bằng Podman (`localhost/agentmonitor-mcp:local`) |
 | `npm run desktop:install` | Cài đặt Electron + electron-builder vào workspace `desktop/` (dựng lại `better-sqlite3` cho ABI của Electron); tiền kiểm bản dựng gốc `better-sqlite3` và in hướng dẫn thiết lập cụ thể (kèm phương án không cần bộ công cụ C++) khi thất bại |
 | `npm run desktop:dev`   | Build TypeScript rồi khởi chạy ứng dụng máy tính để bàn Electron |
 | `npm run desktop:build` | Biên dịch tiến trình chính của ứng dụng máy tính để bàn thành `desktop/out/` |
@@ -771,7 +776,7 @@ Các lệnh dựa trên API cần server đang chạy — khi chưa chạy, **c�
 | `npm run docker:down` | Dừng dashboard container |
 | `npm run docker:full:up` | Dashboard + MCP có auth + Nginx + Prometheus + Grafana |
 | `npm run docker:full:down` | Dừng full container stack |
-| `npm run deploy:validate` | Rà soát Docker, Compose, Nginx, Helm, Kustomize, Terraform và one-writer invariant. Kết quả chỉ mang tính tham khảo (thoát 0); đặt `CCAM_DEPLOY_VALIDATE_STRICT=1` để biến thành cổng chặn |
+| `npm run deploy:validate` | Rà soát Docker, Compose, Nginx, Helm, Kustomize, Terraform và one-writer invariant. Kết quả chỉ mang tính tham khảo (thoát 0); đặt `AM_DEPLOY_VALIDATE_STRICT=1` để biến thành cổng chặn |
 
 ---
 
@@ -827,7 +832,6 @@ graph TD
   - `debug-live-issue`
   - `update-project-docs`
   - `file-headers`
-  - `push-to-forked-pr`
   - `i18n-parity`
 - Chất phụ:
   - `backend-reviewer`
@@ -1050,7 +1054,7 @@ Chi tiết đầy đủ: [mcp/README.md](./mcp/README.md)
 
 ## Lớp kế hoạch
 
-Lớp kế hoạch (plan layer) khớp nối `PROGRESS.md` của một dự án (cột mốc → bước → làn → hộp việc) với chính các session, agent và event của CCAM cho `cwd` của dự án đó, để mỗi hộp việc trên bảng hiển thị agent đang thực hiện nó, nó đã chạy gì, thất bại ở đâu, và tốn bao nhiêu — tất cả được tính theo yêu cầu từ dữ liệu CCAM đã thu thập sẵn, không cần một bộ theo dõi riêng để giữ đồng bộ. Việc phát hiện là tự động: bất kỳ dự án nào có `PROGRESS.md` dưới một `cwd` mà CCAM đã thấy session trong 7 ngày gần nhất đều được tự động nhận diện và theo dõi thay đổi, không cần bước đăng ký.
+Lớp kế hoạch (plan layer) khớp nối `PROGRESS.md` của một dự án (cột mốc → bước → làn → hộp việc) với chính các session, agent và event của AgentMonitor cho `cwd` của dự án đó, để mỗi hộp việc trên bảng hiển thị agent đang thực hiện nó, nó đã chạy gì, thất bại ở đâu, và tốn bao nhiêu — tất cả được tính theo yêu cầu từ dữ liệu AgentMonitor đã thu thập sẵn, không cần một bộ theo dõi riêng để giữ đồng bộ. Việc phát hiện là tự động: bất kỳ dự án nào có `PROGRESS.md` dưới một `cwd` mà AgentMonitor đã thấy session trong 7 ngày gần nhất đều được tự động nhận diện và theo dõi thay đổi, không cần bước đăng ký.
 
 <p align="center">
   <img src="images/plan.png" alt="Lớp kế hoạch — bảng xây dựng" width="100%">
@@ -1118,7 +1122,7 @@ Tài liệu API hiện đã **đầy đủ**: mọi route phụ trợ đều đ�
 
 ### Số liệu Prometheus & Grafana
 
-`GET /api/metrics` cung cấp các bộ đếm trực tiếp của dashboard — phiên/agent theo trạng thái, tổng số sự kiện và token, số client thời gian thực đang kết nối, các nguồn từ xa đã cấu hình, thời gian hoạt động/bộ nhớ của tiến trình, và phiên bản build — theo định dạng text-exposition của Prometheus, nên CCAM có thể được scrape vào observability stack của riêng bạn. Một stack Prometheus + Grafana sẵn dùng với **bốn dashboard tự cấp hình** (mặc định: **CCAM — Overview**) nằm trong [`monitoring/`](./monitoring/README.md).
+`GET /api/metrics` cung cấp các bộ đếm trực tiếp của dashboard — phiên/agent theo trạng thái, tổng số sự kiện và token, số client thời gian thực đang kết nối, các nguồn từ xa đã cấu hình, thời gian hoạt động/bộ nhớ của tiến trình, và phiên bản build — theo định dạng text-exposition của Prometheus, nên AgentMonitor có thể được scrape vào observability stack của riêng bạn. Một stack Prometheus + Grafana sẵn dùng với **bốn dashboard tự cấp hình** (mặc định: **AgentMonitor — Overview**) nằm trong [`monitoring/`](./monitoring/README.md).
 
 **npm (không Docker, không Homebrew):**
 
@@ -1136,21 +1140,21 @@ npm run monitoring:docker:up
 ```
 
 <p align="center">
-  <img src="images/grafana.png" alt="Grafana CCAM — Overview dashboard with live session, event, and token metrics" width="100%">
+  <img src="images/grafana.png" alt="Grafana AgentMonitor — Overview dashboard with live session, event, and token metrics" width="100%">
   <br>
-  <em>📊 <strong>Grafana · CCAM — Overview</strong> — bảng điều khiển mặc định (bốn board tự cấp hình): ảnh chụp fleet, tổng tích lũy từ DB, biểu đồ phân tích và tốc độ — tất cả từ scrape <code>/api/metrics</code> trực tiếp</em>
+  <em>📊 <strong>Grafana · AgentMonitor — Overview</strong> — bảng điều khiển mặc định (bốn board tự cấp hình): ảnh chụp fleet, tổng tích lũy từ DB, biểu đồ phân tích và tốc độ — tất cả từ scrape <code>/api/metrics</code> trực tiếp</em>
 </p>
 
 <p align="center">
-  <img src="images/prometheus-console.png" alt="Prometheus CCAM console with metric cards and session tables" width="100%">
+  <img src="images/prometheus-console.png" alt="Prometheus AgentMonitor console with metric cards and session tables" width="100%">
   <br>
-  <em>🔥 <strong>Prometheus · CCAM console</strong> — trang landing dựng sẵn tại <code>/consoles/index.html</code> truy vấn Prometheus trực tiếp cho trạng thái scrape, tổng phiên, sự kiện, token và liên kết Graph</em>
+  <em>🔥 <strong>Prometheus · AgentMonitor console</strong> — trang landing dựng sẵn tại <code>/consoles/index.html</code> truy vấn Prometheus trực tiếp cho trạng thái scrape, tổng phiên, sự kiện, token và liên kết Graph</em>
 </p>
 
 <p align="center">
-  <img src="images/prometheus-query.png" alt="Prometheus Graph UI with CCAM PromQL query" width="100%">
+  <img src="images/prometheus-query.png" alt="Prometheus Graph UI with AgentMonitor PromQL query" width="100%">
   <br>
-  <em>📈 <strong>Prometheus · Graph</strong> — chạy PromQL trên metric CCAM đã scrape (ví dụ <code>sum(ccam_sessions)</code>, <code>ccam_events_total</code>) với liên kết khởi đầu từ console CCAM và <a href="./monitoring/README.md">monitoring/README.md</a></em>
+  <em>📈 <strong>Prometheus · Graph</strong> — chạy PromQL trên metric AgentMonitor đã scrape (ví dụ <code>sum(am_sessions)</code>, <code>am_events_total</code>) với liên kết khởi đầu từ console AgentMonitor và <a href="./monitoring/README.md">monitoring/README.md</a></em>
 </p>
 
 Xem [docs/API.md → Metrics](./docs/API.md#metrics) để biết danh sách chỉ số đầy đủ cùng chi tiết scrape/xác thực.
@@ -1329,10 +1333,10 @@ bao giờ xóa chi phí lịch sử.
 
 **An toàn.** Giải nén archive kiểm tra từng mục chống path-traversal
 (đường dẫn tuyệt đối và đoạn `..` bị từ chối). Giới hạn kích thước giải
-nén có thể cấu hình (`CCAM_IMPORT_MAX_EXTRACT_BYTES`, mặc định 4 GB)
+nén có thể cấu hình (`AM_IMPORT_MAX_EXTRACT_BYTES`, mặc định 4 GB)
 chặn các zip/tar/gzip-bomb. Kích thước tải lên bị giới hạn theo từng
-tệp (`CCAM_IMPORT_MAX_BYTES`, mặc định 1 GB) và theo yêu cầu
-(`CCAM_IMPORT_MAX_FILES`, mặc định 2000). Mỗi yêu cầu có thư mục tạm
+tệp (`AM_IMPORT_MAX_BYTES`, mặc định 1 GB) và theo yêu cầu
+(`AM_IMPORT_MAX_FILES`, mặc định 2000). Mỗi yêu cầu có thư mục tạm
 riêng và được dọn dẹp trong `finally`, kể cả khi multer từ chối toàn bộ
 tệp ngay từ đầu.
 
@@ -1481,7 +1485,7 @@ Cả hai endpoint trả về cùng một payload:
 {
   "git_repo": true,
   "update_available": true,
-  "repo_root": "/Users/you/Claude-Code-Agent-Monitor",
+  "repo_root": "/Users/you/agent-monitor",
   "remote_ref": "upstream/master",
   "canonical_remote": "upstream",
   "current_branch": "master",
@@ -1491,7 +1495,7 @@ Cả hai endpoint trả về cùng một payload:
   "local_sha": "abc1234...",
   "remote_sha": "def5678...",
   "commits_behind": 3,
-  "manual_command": "cd \"/...\" && git fetch upstream && git merge --ff-only upstream/master && npm run setup",
+  "manual_command": "cd \"/...\" && git fetch upstream && git merge --ff-only upstream/master && npm run upgrade",
   "situation_note": "You're on 'master' tracking 'origin/master'. This command fast-forwards your branch from upstream/master (the canonical default).",
   "message": "3 commit(s) on upstream/master not in your checkout."
 }
@@ -1527,13 +1531,13 @@ Bấm vào nhãn **Live** / **Disconnected** ở chân thanh bên để mở m�
 Bảng điều khiển đi kèm một **ứng dụng máy tính để bàn gốc** tùy chọn mà bạn cài đặt một lần rồi quên đi — một `.app` macOS (phân phối dưới dạng `.dmg`) và một `.exe` Windows (một trình cài NSIS cùng một bản portable không cần cài). Mọi thứ bạn thấy trong trình duyệt tại `localhost:4820` đều nằm bên trong cửa sổ này, cộng thêm vòng đời gốc của hệ điều hành: biểu tượng tray, trình đơn ứng dụng, tích hợp tự khởi động và một nút thoát duy nhất dọn dẹp máy chủ gọn gàng.
 
 <p align="center">
-  <img src="images/macos.png" alt="Claude Code Monitor chạy như một ứng dụng máy tính để bàn gốc" width="100%">
+  <img src="images/macos.png" alt="AgentMonitor chạy như một ứng dụng máy tính để bàn gốc" width="100%">
   <br>
   <em>🍎🪟 <strong>Ứng dụng máy tính để bàn</strong> — vỏ gốc với biểu tượng tray ở menu-bar / khu vực thông báo, Open-at-Login và khoá single-instance. Cùng một bảng điều khiển, chạy trong một cửa sổ hệ điều hành thật (hình minh họa là macOS).</em>
 </p>
 
 <p align="center">
-  <img src="images/windows_app.png" alt="Claude Code Monitor chạy như một ứng dụng máy tính để bàn gốc trên Windows, hiển thị Activity Feed với thanh trình đơn cửa sổ Windows và bảng Tabby" width="100%">
+  <img src="images/windows_app.png" alt="AgentMonitor chạy như một ứng dụng máy tính để bàn gốc trên Windows, hiển thị Activity Feed với thanh trình đơn cửa sổ Windows và bảng Tabby" width="100%">
   <br>
   <em>🪟 Cùng một bảng điều khiển dưới dạng ứng dụng Windows gốc — biểu tượng tray ở khu vực thông báo, trình đơn cửa sổ gốc và Open-at-Login.</em>
 </p>
@@ -1547,7 +1551,7 @@ Workspace `desktop/` là **một workspace ngang hàng** với `client/`, `serve
 
 ```mermaid
 flowchart TD
-    subgraph repo["Claude-Code-Agent-Monitor (repo root)"]
+    subgraph repo["agent-monitor (repo root)"]
         server["server/<br/>Express API - SQLite - WebSocket"]
         client["client/<br/>React + Vite SPA"]
         scripts["scripts/<br/>hook installer/handler, import, seed"]
@@ -1582,21 +1586,21 @@ PWA giúp cài đặt bảng điều khiển trong các trình duyệt nền Chr
 
 **Cách A — tải trình cài dựng sẵn (khuyến nghị):**
 
-Tải từ [**Releases → latest**](https://github.com/hoangsonww/Claude-Code-Agent-Monitor/releases/latest) (công khai, không cần đăng nhập GitHub). Mỗi khi bản cập nhật `version` trong `package.json` được đẩy lên `master`, CI tự động phát hành một `vX.Y.Z` mới, nên liên kết này luôn trỏ đến bản build hiện tại:
+Tải từ [**Releases → latest**](https://github.com/tanvoid0/agent-monitor/releases/latest) (công khai, không cần đăng nhập GitHub). Mỗi khi bản cập nhật `version` trong `package.json` được đẩy lên `master`, CI tự động phát hành một `vX.Y.Z` mới, nên liên kết này luôn trỏ đến bản build hiện tại:
 
 | Nền tảng | Tệp asset | Ghi chú |
 | --- | --- | --- |
-| macOS (Apple Silicon) | `ClaudeCodeMonitor-<ver>-arm64.dmg` | kéo vào `/Applications` |
-| macOS (Intel) | `ClaudeCodeMonitor-<ver>-x64.dmg` | kéo vào `/Applications` |
-| Windows (trình cài) | `ClaudeCodeMonitor-Setup-<ver>-x64.exe` | cài theo từng người dùng, không cần quyền admin |
-| Windows (portable) | `ClaudeCodeMonitor-<ver>-x64-portable.exe` | chạy mà không cần cài |
+| macOS (Apple Silicon) | `AgentMonitor-<ver>-arm64.dmg` | kéo vào `/Applications` |
+| macOS (Intel) | `AgentMonitor-<ver>-x64.dmg` | kéo vào `/Applications` |
+| Windows (trình cài) | `AgentMonitor-Setup-<ver>-x64.exe` | cài theo từng người dùng, không cần quyền admin |
+| Windows (portable) | `AgentMonitor-<ver>-x64-portable.exe` | chạy mà không cần cài |
 
-Nếu cần **bản build theo từng commit**, dùng artifact CI (cần đăng nhập, lưu giữ 14 ngày): `ClaudeCodeMonitor-dmg` từ job `🍎 macOS Desktop (DMG)` và `ClaudeCodeMonitor-win` từ job `🪟 Windows Desktop (EXE)`.
+Nếu cần **bản build theo từng commit**, dùng artifact CI (cần đăng nhập, lưu giữ 14 ngày): `AgentMonitor-dmg` từ job `🍎 macOS Desktop (DMG)` và `AgentMonitor-win` từ job `🪟 Windows Desktop (EXE)`.
 
 Cài đặt:
 
-- **macOS** — mở (mount) tệp `.dmg`, rồi kéo `Claude Code Monitor.app` vào thư mục `Applications`. macOS có thể hiện cảnh báo Gatekeeper trong lần chạy đầu tiên — xem mục [Gatekeeper / SmartScreen](#gatekeeper--smartscreen-lần-chạy-đầu-tiên) bên dưới.
-- **Windows** — chạy `ClaudeCodeMonitor-Setup-<ver>-x64.exe`. Nó cài **theo từng người dùng** vào `%LOCALAPPDATA%\Programs\Claude Code Monitor` (không cần nâng quyền admin) và cho bạn chọn thư mục cài; hoặc chạy `*-portable.exe` để khởi động mà không cần cài. Windows **SmartScreen** có thể hiện cảnh báo trong lần chạy đầu tiên — xem bên dưới.
+- **macOS** — mở (mount) tệp `.dmg`, rồi kéo `AgentMonitor.app` vào thư mục `Applications`. macOS có thể hiện cảnh báo Gatekeeper trong lần chạy đầu tiên — xem mục [Gatekeeper / SmartScreen](#gatekeeper--smartscreen-lần-chạy-đầu-tiên) bên dưới.
+- **Windows** — chạy `AgentMonitor-Setup-<ver>-x64.exe`. Nó cài **theo từng người dùng** vào `%LOCALAPPDATA%\Programs\AgentMonitor` (không cần nâng quyền admin) và cho bạn chọn thư mục cài; hoặc chạy `*-portable.exe` để khởi động mà không cần cài. Windows **SmartScreen** có thể hiện cảnh báo trong lần chạy đầu tiên — xem bên dưới.
 
 <p align="center">
   <img src="images/setup_win_wizard.png" alt="Trình cài NSIS bước 1 — Choose Installation Options, chọn cài theo từng người dùng (Only for me) hay cho mọi người dùng" width="100%">
@@ -1623,12 +1627,12 @@ Cài đặt:
 npm run setup                # cài phụ thuộc root + client + vscode-extension
 npm run build                # build ứng dụng React
 npm run desktop:install      # cài Electron + electron-builder vào desktop/ (tiền kiểm phụ thuộc gốc; in hướng dẫn thiết lập khi thất bại)
-npm run desktop:dmg:arm64    # macOS: tạo desktop/release/ClaudeCodeMonitor-<ver>-arm64.dmg (nhanh)
+npm run desktop:dmg:arm64    # macOS: tạo desktop/release/AgentMonitor-<ver>-arm64.dmg (nhanh)
 npm run desktop:win          # Windows: tạo trình cài NSIS .exe (chạy trên Windows)
 ```
 
 > [!QUAN TRỌNG]
-> **DMG dựng trên macOS, `.exe` Windows dựng trên Windows** — electron-builder đóng gói theo hệ điều hành chủ. Bản dựng `npm run desktop:dmg` của macOS **cố tình chậm** (đóng gói hai lần — mỗi kiến trúc một lần — rồi xuất ra **cả hai** DMG theo kiến trúc `ClaudeCodeMonitor-<ver>-arm64.dmg` và `ClaudeCodeMonitor-<ver>-x64.dmg`, không có bước hợp nhất); khi xây dựng cho **chính máy Mac của bạn**, hãy dùng `npm run desktop:dmg:arm64` (Apple Silicon) hoặc `npm run desktop:dmg:x64` (Intel) — chỉ một kiến trúc, hoàn tất trong khoảng một phút. Trên Windows, `npm run desktop:install` tải `better-sqlite3` dưới dạng nhị phân Electron dựng sẵn, nên trường hợp thông thường không cần bộ công cụ Visual Studio C++. Nếu việc dựng có thất bại (không có nhị phân dựng sẵn, hoặc thiếu bộ công cụ C++), `desktop:install` in ra đúng cách khắc phục theo từng hệ điều hành cùng một phương án không cần bộ công cụ rồi báo lỗi rõ ràng thay vì để lại bản cài hỏng. CI đã dựng sẵn cả DMG macOS lẫn `.exe` Windows và tải lên dưới dạng artifact `ClaudeCodeMonitor-dmg` / `ClaudeCodeMonitor-win`, nên bạn hiếm khi cần tự dựng. DMG macOS khoảng ~80 MB (~250 MB khi giải nén trên đĩa) và trình cài Windows tương đương.
+> **DMG dựng trên macOS, `.exe` Windows dựng trên Windows** — electron-builder đóng gói theo hệ điều hành chủ. Bản dựng `npm run desktop:dmg` của macOS **cố tình chậm** (đóng gói hai lần — mỗi kiến trúc một lần — rồi xuất ra **cả hai** DMG theo kiến trúc `AgentMonitor-<ver>-arm64.dmg` và `AgentMonitor-<ver>-x64.dmg`, không có bước hợp nhất); khi xây dựng cho **chính máy Mac của bạn**, hãy dùng `npm run desktop:dmg:arm64` (Apple Silicon) hoặc `npm run desktop:dmg:x64` (Intel) — chỉ một kiến trúc, hoàn tất trong khoảng một phút. Trên Windows, `npm run desktop:install` tải `better-sqlite3` dưới dạng nhị phân Electron dựng sẵn, nên trường hợp thông thường không cần bộ công cụ Visual Studio C++. Nếu việc dựng có thất bại (không có nhị phân dựng sẵn, hoặc thiếu bộ công cụ C++), `desktop:install` in ra đúng cách khắc phục theo từng hệ điều hành cùng một phương án không cần bộ công cụ rồi báo lỗi rõ ràng thay vì để lại bản cài hỏng. CI đã dựng sẵn cả DMG macOS lẫn `.exe` Windows và tải lên dưới dạng artifact `AgentMonitor-dmg` / `AgentMonitor-win`, nên bạn hiếm khi cần tự dựng. DMG macOS khoảng ~80 MB (~250 MB khi giải nén trên đĩa) và trình cài Windows tương đương.
 
 ### Điều gì xảy ra khi bạn khởi chạy ứng dụng
 
@@ -1662,13 +1666,13 @@ flowchart TD
 ### Biểu tượng tray, trình đơn và tự khởi động
 
 - **Biểu tượng tray** — bề mặt trạng thái luôn-bật (menu-bar trên macOS / khu vực thông báo trên Windows). Trình đơn ngữ cảnh gồm: *Open Dashboard, Open in Browser, Restart Server, Show Logs, Open at Login (chuyển đổi), Quit*. Trình đơn được dựng lại mỗi lần mở nên nhãn cổng và ô đánh dấu *Open at Login* luôn cập nhật. macOS dùng glyph template được tô màu; Windows dùng `icon.ico` màu (một template đen sẽ biến mất trên thanh tác vụ tối). (Mục **File ▸ Open Dashboard** (`⌘1`) trong **trình đơn ứng dụng** gốc **chỉ có trên macOS**: macOS vẫn giữ thanh menu toàn cục sau khi cửa sổ ẩn đi nên mục đó có thể mở lại cửa sổ — còn trên Windows/Linux trình đơn gắn liền với cửa sổ và phím tắt menu không thể kích hoạt khi cửa sổ đang ẩn, nên hãy mở lại từ *Open Dashboard* của tray, vốn luôn **đưa cửa sổ lên trước** một cách đáng tin cậy kể cả khi cửa sổ đã thu nhỏ hay bị các cửa sổ khác che khuất.)
-- **Biểu tượng cửa sổ và thanh tác vụ** — `BrowserWindow` được gắn với logo ứng dụng màu (`icon.ico` trên Windows, `icon.png` ở nơi khác), nên thanh tiêu đề / thanh tác vụ hiển thị đúng biểu tượng Claude Code Monitor — kể cả khi chạy `npm run desktop:dev` chưa đóng gói cũng không còn hiện biểu tượng Electron chung chung nữa.
+- **Biểu tượng cửa sổ và thanh tác vụ** — `BrowserWindow` được gắn với logo ứng dụng màu (`icon.ico` trên Windows, `icon.png` ở nơi khác), nên thanh tiêu đề / thanh tác vụ hiển thị đúng biểu tượng AgentMonitor — kể cả khi chạy `npm run desktop:dev` chưa đóng gói cũng không còn hiện biểu tượng Electron chung chung nữa.
 - **Đóng cửa sổ thì ẩn đi** — máy chủ vẫn chạy, biểu tượng tray vẫn còn. Nhấp tray để đưa cửa sổ trở lại.
 - **Thoát (⌘Q / Ctrl+Q, hoặc tray → Quit)** — tắt máy chủ nhúng một cách gọn gàng, đóng SQLite sạch sẽ (checkpoint WAL) rồi thoát.
 - **Khóa một-phiên-bản** — khởi chạy lần hai chỉ đưa cửa sổ hiện có lên trước, không có máy chủ thứ hai, không xung đột cổng. (Áp dụng trên mọi nền tảng.)
 - **Tự khởi động lúc đăng nhập** — bật/tắt *Open at Login* trong trình đơn tray. Trên macOS nó đăng ký qua API `SMAppService`, nên mục này xuất hiện trong **System Settings → General → Login Items**; trên Windows nó ghi một mục `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` theo từng người dùng, thấy được trong **Task Manager → Startup**. Khi ứng dụng được khởi chạy lúc đăng nhập, nó bắt đầu ở chế độ **chỉ-tray** — không có cửa sổ nhảy ra trước mặt.
-- **Nhật ký** nằm tại `~/Library/Logs/Claude Code Monitor/desktop.log` (macOS) hoặc `%APPDATA%\Claude Code Monitor\logs\desktop.log` (Windows) (dùng *Show Logs* trong trình đơn để mở).
-- **Dữ liệu của bạn** (cơ sở dữ liệu SQLite và khóa VAPID) nằm trong thư mục dữ liệu ứng dụng theo từng người dùng, **bên ngoài** gói ứng dụng / thư mục cài — `~/Library/Application Support/Claude Code Monitor/data/` trên macOS, `%APPDATA%\Claude Code Monitor\data\` trên Windows — nên dữ liệu **sống sót qua các lần cài lại và cập nhật ứng dụng**. Một gói đã đóng gói là chỉ-đọc, nên ghi cơ sở dữ liệu bên trong sẽ phá vỡ History Import và việc lưu sự kiện; lưu trong thư mục dữ liệu ứng dụng khắc phục điều này và nghĩa là lịch sử đã nhập của bạn không bị ảnh hưởng khi thay thế hoặc nâng cấp ứng dụng. (Trình gỡ cài NSIS của Windows mặc định giữ lại dữ liệu này.)
+- **Nhật ký** nằm tại `~/Library/Logs/AgentMonitor/desktop.log` (macOS) hoặc `%APPDATA%\AgentMonitor\logs\desktop.log` (Windows) (dùng *Show Logs* trong trình đơn để mở).
+- **Dữ liệu của bạn** (cơ sở dữ liệu SQLite và khóa VAPID) nằm trong thư mục dữ liệu ứng dụng theo từng người dùng, **bên ngoài** gói ứng dụng / thư mục cài — `~/Library/Application Support/AgentMonitor/data/` trên macOS, `%APPDATA%\AgentMonitor\data\` trên Windows — nên dữ liệu **sống sót qua các lần cài lại và cập nhật ứng dụng**. Một gói đã đóng gói là chỉ-đọc, nên ghi cơ sở dữ liệu bên trong sẽ phá vỡ History Import và việc lưu sự kiện; lưu trong thư mục dữ liệu ứng dụng khắc phục điều này và nghĩa là lịch sử đã nhập của bạn không bị ảnh hưởng khi thay thế hoặc nâng cấp ứng dụng. (Trình gỡ cài NSIS của Windows mặc định giữ lại dữ liệu này.)
 - **CLI `claude`** — trên macOS, ứng dụng khôi phục `PATH` của login-shell lúc khởi động, nên tính năng "Run Claude" hoạt động dù một ứng dụng macOS khởi chạy từ Finder/Dock vốn chỉ thừa hưởng `PATH` tối thiểu của launchd. (Trên Windows, `PATH` người dùng được thừa hưởng đã bao gồm nó.)
 
 ### Module gốc `better-sqlite3`
@@ -1735,7 +1739,7 @@ flowchart TD
 ```
 
 - Xây dựng cho **chính máy Mac của bạn** → dùng `desktop:dmg:arm64` (Apple Silicon) hoặc `desktop:dmg:x64` (Intel). Chỉ một kiến trúc, hoàn tất trong khoảng một phút.
-- Xây dựng **artifact phát hành cho mọi người** → dùng `desktop:dmg` (cả hai kiến trúc) và chờ lâu hơn. CI đã dựng cả hai DMG theo kiến trúc và tải lên dưới dạng artifact `ClaudeCodeMonitor-dmg` nên bạn hiếm khi cần tự dựng.
+- Xây dựng **artifact phát hành cho mọi người** → dùng `desktop:dmg` (cả hai kiến trúc) và chờ lâu hơn. CI đã dựng cả hai DMG theo kiến trúc và tải lên dưới dạng artifact `AgentMonitor-dmg` nên bạn hiếm khi cần tự dựng.
 
 ### Ký mã và công chứng
 
@@ -1750,7 +1754,7 @@ DMG macOS được **ký ad-hoc theo mặc định** (`CSC_IDENTITY_AUTO_DISCOVE
 **macOS** — một DMG ký ad-hoc sẽ kích hoạt cảnh báo Gatekeeper trong lần mở đầu tiên (*"Apple could not verify…"*). Cách giải quyết một dòng:
 
 ```bash
-xattr -cr "/Applications/Claude Code Monitor.app"
+xattr -cr "/Applications/AgentMonitor.app"
 ```
 
 Hoặc mở  → *System Settings → Privacy & Security*, cuộn tới ứng dụng bị chặn và nhấp *Open Anyway*.
@@ -1759,7 +1763,7 @@ Hoặc mở  → *System Settings → Privacy & Security*, cuộn tới ứng d�
 
 ### Tích hợp liên tục (CI)
 
-`.github/workflows/ci.yml` có hai job desktop được **lọc theo đường dẫn** (một job `changes` dùng `dorny/paths-filter` phát hiện thay đổi trong `desktop/**`; các job này cũng chạy trên mọi `push`, hoặc khi PR gắn nhãn `desktop`): job `🍎 macOS Desktop (DMG)` chạy trên `macos-latest` dựng cả hai DMG theo kiến trúc rồi tải lên dưới dạng artifact `ClaudeCodeMonitor-dmg` (hai DMG một-kiến-trúc); job `🪟 Windows Desktop (EXE)` chạy trên `windows-latest` dựng rồi tải lên dưới dạng artifact `ClaudeCodeMonitor-win` (trình cài NSIS + bản portable). Khi đẩy bản nâng phiên bản lên `master`, job `release` đính kèm **cả** DMG macOS lẫn `.exe` Windows vào bản GitHub Release `vX.Y.Z` đã phát hành. Biểu tượng Windows (`desktop/assets/icon.ico`) được commit vào kho mã (tạo lại từ `icon.png` bằng `npm run build:win-icon`, dùng PowerShell + .NET, không cần công cụ phụ).
+`.github/workflows/ci.yml` có hai job desktop được **lọc theo đường dẫn** (một job `changes` dùng `dorny/paths-filter` phát hiện thay đổi trong `desktop/**`; các job này cũng chạy trên mọi `push`, hoặc khi PR gắn nhãn `desktop`): job `🍎 macOS Desktop (DMG)` chạy trên `macos-latest` dựng cả hai DMG theo kiến trúc rồi tải lên dưới dạng artifact `AgentMonitor-dmg` (hai DMG một-kiến-trúc); job `🪟 Windows Desktop (EXE)` chạy trên `windows-latest` dựng rồi tải lên dưới dạng artifact `AgentMonitor-win` (trình cài NSIS + bản portable). Khi đẩy bản nâng phiên bản lên `master`, job `release` đính kèm **cả** DMG macOS lẫn `.exe` Windows vào bản GitHub Release `vX.Y.Z` đã phát hành. Biểu tượng Windows (`desktop/assets/icon.ico`) được commit vào kho mã (tạo lại từ `icon.png` bằng `npm run build:win-icon`, dùng PowerShell + .NET, không cần công cụ phụ).
 
 ### Thay đổi duy nhất ngoài `desktop/`
 
@@ -1772,7 +1776,7 @@ Thay đổi duy nhất ngoài workspace `desktop/` là một **tái cấu trúc 
 
 ## Tiện ích mở rộng VS Code
 
-**Claude Code Agent Monitor** hiện đã có sẵn dưới dạng tiện ích mở rộng VS Code chính thức, cho phép bạn giám sát các tác nhân AI của mình mà không cần rời khỏi trình chỉnh sửa.
+**AgentMonitor** hiện đã có sẵn dưới dạng tiện ích mở rộng VS Code chính thức, cho phép bạn giám sát các tác nhân AI của mình mà không cần rời khỏi trình chỉnh sửa.
 
 <p align="center">
   <img src="vscode-extension/vscode.png" alt="VS Code Extension Screenshot" width="100%">
@@ -1794,7 +1798,7 @@ Thay đổi duy nhất ngoài workspace `desktop/` là một **tái cấu trúc 
 Để biết cấu hình chi tiết cho nhà phát triển, hãy xem các thư mục [.vscode](./.vscode) và [vscode-extension](./vscode-extension).
 
 > [!TIP]
-> Extension on VS Code Marketplace: [Claude Code Agent Monitor](https://marketplace.visualstudio.com/items?itemName=hoangsonw.claude-code-agent-monitor)
+> Extension on VS Code Marketplace: [AgentMonitor](https://marketplace.visualstudio.com/items?itemName=hoangsonw.agentmonitor)
 
 ---
 
@@ -1871,23 +1875,23 @@ erDiagram
 
 ## Thị trường plugin
 
-CCAM cung cấp 14 plugin dùng chung cho Claude Code và Codex, với 66 skill đóng gói, 18 subagent Claude, 34 lệnh Claude, 3 công cụ CLI, 3 cấu hình hook và 2 plugin có MCP. CLI skills.sh phát hiện 77 skill trong toàn bộ repo. Xem `docs/PLUGINS.md` để biết catalog, lệnh cài đặt, cơ chế skills.sh và quy trình xác thực.
+AgentMonitor cung cấp 14 plugin dùng chung cho Claude Code và Codex, với 66 skill đóng gói, 18 subagent Claude, 34 lệnh Claude, 3 công cụ CLI, 3 cấu hình hook và 2 plugin có MCP. CLI skills.sh phát hiện 76 skill trong toàn bộ repo. Xem `docs/PLUGINS.md` để biết catalog, lệnh cài đặt, cơ chế skills.sh và quy trình xác thực.
 
 ### Thêm thị trường
 
 ```bash
-claude plugin marketplace add hoangsonww/Claude-Code-Agent-Monitor
-codex plugin marketplace add hoangsonww/Claude-Code-Agent-Monitor
+claude plugin marketplace add tanvoid0/agent-monitor
+codex plugin marketplace add tanvoid0/agent-monitor
 ```
 
 ### Cài đặt skill bằng skills.sh
 
 ```bash
-# Liệt kê toàn bộ 77 skill mà không cài đặt
-npx skills add hoangsonww/Claude-Code-Agent-Monitor --list
+# Liệt kê toàn bộ 76 skill mà không cài đặt
+npx skills add tanvoid0/agent-monitor --list
 
 # Cài một skill cho Claude Code và Codex trong dự án hiện tại
-npx skills add hoangsonww/Claude-Code-Agent-Monitor \
+npx skills add tanvoid0/agent-monitor \
   --skill mcp-server \
   --agent claude-code \
   --agent codex \
@@ -1899,7 +1903,7 @@ npx skills update --project --yes
 npx skills remove mcp-server --yes
 
 # Thêm --global để cài ở phạm vi người dùng, rồi quản lý phạm vi đó
-npx skills add hoangsonww/Claude-Code-Agent-Monitor \
+npx skills add tanvoid0/agent-monitor \
   --skill mcp-server \
   --agent claude-code \
   --agent codex \
@@ -1910,42 +1914,42 @@ npx skills update --global --yes
 npx skills remove --global mcp-server --yes
 ```
 
-Bản cài theo dự án sử dụng `.agents/skills/` cùng các liên kết dành riêng cho từng agent. Skill Claude Code toàn cục mặc định nằm trong `~/.claude/skills/`, hoặc trong thư mục `skills/` của `CLAUDE_CONFIG_DIR` khi biến này được đặt. Skill Codex toàn cục mặc định nằm trong `~/.codex/skills/`, hoặc trong thư mục `skills/` của `CODEX_HOME` khi biến này được đặt. Bản cài nhiều agent có thể khử trùng lặp qua một kho dùng chung rồi tạo liên kết đến các thư mục đích đó. CLI skills.sh phát hiện 77 skill trong repo, gồm 66 skill plugin và các skill bảo trì repo.
+Bản cài theo dự án sử dụng `.agents/skills/` cùng các liên kết dành riêng cho từng agent. Skill Claude Code toàn cục mặc định nằm trong `~/.claude/skills/`, hoặc trong thư mục `skills/` của `CLAUDE_CONFIG_DIR` khi biến này được đặt. Skill Codex toàn cục mặc định nằm trong `~/.codex/skills/`, hoặc trong thư mục `skills/` của `CODEX_HOME` khi biến này được đặt. Bản cài nhiều agent có thể khử trùng lặp qua một kho dùng chung rồi tạo liên kết đến các thư mục đích đó. CLI skills.sh phát hiện 76 skill trong repo, gồm 66 skill plugin và các skill bảo trì repo.
 
 ### Các plugin có sẵn
 
 | Trình cắm | Lệnh cài đặt | Kỹ năng |
 |--------|----------------|--------|
-| **phân tích ccam** | `claude plugin install ccam-analytics@claude-code-agent-monitor-plugins` | `session-report`, `cost-breakdown`, `usage-trends`, `productivity-score` |
-| **lan can chi phí ccam** | `claude plugin install ccam-cost-guard@claude-code-agent-monitor-plugins` | `budget-set`, `spend-forecast`, `cost-alert`, `model-savings`, `daily-budget-check` |
-| **năng suất ccam** | `claude plugin install ccam-productivity@claude-code-agent-monitor-plugins` | `daily-standup`, `weekly-report`, `sprint-summary`, `workflow-optimizer` |
-| **ccam-devtools** | `claude plugin install ccam-devtools@claude-code-agent-monitor-plugins` | `session-debug`, `hook-diagnostics`, `data-export`, `health-check` |
-| **thông tin chi tiết về ccam** | `claude plugin install ccam-insights@claude-code-agent-monitor-plugins` | `pattern-detect`, `anomaly-alert`, `optimization-suggest`, `session-compare` |
-| **phiên ccam** | `claude plugin install ccam-sessions@claude-code-agent-monitor-plugins` | `session-search`, `session-timeline`, `transcript-replay`, `cwd-rollup`, `session-cleanup` |
-| **quy trình làm việc ccam** | `claude plugin install ccam-workflows@claude-code-agent-monitor-plugins` | `dag-map`, `delegation-audit`, `concurrency-report`, `error-propagation`, `fleet-runs` |
-| **chất lượng ccam** | `claude plugin install ccam-quality@claude-code-agent-monitor-plugins` | `error-scan`, `api-error-report`, `hook-failure-audit`, `slo-check`, `regression-alert` |
-| **cấu hình ccam** | `claude plugin install ccam-config@claude-code-agent-monitor-plugins` | `config-audit`, `memory-review`, `skill-inventory`, `mcp-audit`, `hook-inventory` |
-| **bảng điều khiển ccam** | `claude plugin install ccam-dashboard@claude-code-agent-monitor-plugins` | `dashboard-status`, `quick-stats` + máy chủ MCP |
-| **ccam-runner** | `claude plugin install ccam-runner@claude-code-agent-monitor-plugins` | `run-agent`, `run-history` |
-| **ccam-integrations** | `claude plugin install ccam-integrations@claude-code-agent-monitor-plugins` | `alert-management`, `webhook-management`, `remote-collection` |
-| **ccam-platform** | `claude plugin install ccam-platform@claude-code-agent-monitor-plugins` | `config-explorer`, `history-portability`, `hook-setup`, `mcp-server` |
-| **ccam-reports** | `claude plugin install ccam-reports@claude-code-agent-monitor-plugins` | `executive-report`, `cost-report`, `reliability-report`, `workflow-report` |
+| **phân tích am** | `claude plugin install am-analytics@agentmonitor-plugins` | `session-report`, `cost-breakdown`, `usage-trends`, `productivity-score` |
+| **lan can chi phí am** | `claude plugin install am-cost-guard@agentmonitor-plugins` | `budget-set`, `spend-forecast`, `cost-alert`, `model-savings`, `daily-budget-check` |
+| **năng suất am** | `claude plugin install am-productivity@agentmonitor-plugins` | `daily-standup`, `weekly-report`, `sprint-summary`, `workflow-optimizer` |
+| **am-devtools** | `claude plugin install am-devtools@agentmonitor-plugins` | `session-debug`, `hook-diagnostics`, `data-export`, `health-check` |
+| **thông tin chi tiết về am** | `claude plugin install am-insights@agentmonitor-plugins` | `pattern-detect`, `anomaly-alert`, `optimization-suggest`, `session-compare` |
+| **phiên am** | `claude plugin install am-sessions@agentmonitor-plugins` | `session-search`, `session-timeline`, `transcript-replay`, `cwd-rollup`, `session-cleanup` |
+| **quy trình làm việc am** | `claude plugin install am-workflows@agentmonitor-plugins` | `dag-map`, `delegation-audit`, `concurrency-report`, `error-propagation`, `fleet-runs` |
+| **chất lượng am** | `claude plugin install am-quality@agentmonitor-plugins` | `error-scan`, `api-error-report`, `hook-failure-audit`, `slo-check`, `regression-alert` |
+| **cấu hình am** | `claude plugin install am-config@agentmonitor-plugins` | `config-audit`, `memory-review`, `skill-inventory`, `mcp-audit`, `hook-inventory` |
+| **bảng điều khiển am** | `claude plugin install am-dashboard@agentmonitor-plugins` | `dashboard-status`, `quick-stats` + máy chủ MCP |
+| **am-runner** | `claude plugin install am-runner@agentmonitor-plugins` | `run-agent`, `run-history` |
+| **am-integrations** | `claude plugin install am-integrations@agentmonitor-plugins` | `alert-management`, `webhook-management`, `remote-collection` |
+| **am-platform** | `claude plugin install am-platform@agentmonitor-plugins` | `config-explorer`, `history-portability`, `hook-setup`, `mcp-server` |
+| **am-reports** | `claude plugin install am-reports@agentmonitor-plugins` | `executive-report`, `cost-report`, `reliability-report`, `workflow-report` |
 
 ### Bao gồm các công cụ CLI
 
-- `ccam-stats` — Bảng điều khiển thiết bị đầu cuối (phiên, chi phí, mã thông báo có đường cơ sở nén)
-- `ccam-doctor` — Chẩn đoán hệ thống (API, cơ sở dữ liệu, hook, làm mới dữ liệu)
-- `ccam-export` — Xuất dữ liệu (JSON, CSV) cho phiên, sự kiện, phân tích, chi phí
+- `am-stats` — Bảng điều khiển thiết bị đầu cuối (phiên, chi phí, mã thông báo có đường cơ sở nén)
+- `am-doctor` — Chẩn đoán hệ thống (API, cơ sở dữ liệu, hook, làm mới dữ liệu)
+- `am-export` — Xuất dữ liệu (JSON, CSV) cho phiên, sự kiện, phân tích, chi phí
 
 ### Cách sử dụng ví dụ
 
 ```bash
 # In Claude Code, after installing a plugin:
-/ccam-analytics:session-report latest
-/ccam-analytics:cost-breakdown this week
-/ccam-productivity:daily-standup today
-/ccam-insights:pattern-detect tools
-/ccam-dashboard:quick-stats
+/am-analytics:session-report latest
+/am-analytics:cost-breakdown this week
+/am-productivity:daily-standup today
+/am-insights:pattern-detect tools
+/am-dashboard:quick-stats
 ```
 
 📖 Giấy tờ đầy đủ: [tài liệu/plugin.md](docs/PLUGINS.md)
@@ -1957,14 +1961,14 @@ Bản cài theo dự án sử dụng `.agents/skills/` cùng các liên kết d�
 Tiện ích dòng trạng thái CLI độc lập dành cho Claude Code hiển thị tên mô hình, người dùng, thư mục làm việc, nhánh git, thanh sử dụng cửa sổ ngữ cảnh và số lượng mã thông báo -- tất cả đều được mã hóa màu bằng các chuỗi thoát ANSI.
 
 ```
-Sonnet 4.6 | nguyens6 | ~/agent-dashboard/client | main | ████████░░ 79% | 3↑ 2↓ 156586c
+Sonnet 4.6 | nguyens6 | ~/agentmonitor/client | main | ████████░░ 79% | 3↑ 2↓ 156586c
 ```
 
 | Phân đoạn     | Màu sắc                | Ví dụ             |
 | ----------- | -------------------- | ------------------- |
 | Người mẫu       | lục lam                 | `Sonnet 4.6`        |
 | người dùng        | Màu xanh lá                | `nguyens6`          |
-| CWD         | Màu vàng               | `~/agent-dashboard` |
+| CWD         | Màu vàng               | `~/agentmonitor` |
 | Nhánh Git  | Màu đỏ tươi              | `main`              |
 | Thanh ngữ cảnh | Xanh / Vàng / Đỏ | `████████░░ 79%`    |
 | Mã thông báo      | mờ                  | `3↑ 2↓ 156586c`     |
@@ -2124,7 +2128,7 @@ graph LR
 
 ### Triển khai đám mây
 
-`deployments/` chạy trên mọi Kubernetes tương thích, gồm EKS, GKE, AKS, OKE và cụm tự quản lý. CCAM dùng SQLite, vì vậy mọi manifest được hỗ trợ đều bắt buộc **chính xác một dashboard writer đang hoạt động trên mỗi persistent volume** với Recreate. HPA, active-active, nhiều replica, blue-green và canary không được hỗ trợ khi SQLite vẫn là persistence backend.
+`deployments/` chạy trên mọi Kubernetes tương thích, gồm EKS, GKE, AKS, OKE và cụm tự quản lý. AgentMonitor dùng SQLite, vì vậy mọi manifest được hỗ trợ đều bắt buộc **chính xác một dashboard writer đang hoạt động trên mỗi persistent volume** với Recreate. HPA, active-active, nhiều replica, blue-green và canary không được hỗ trợ khi SQLite vẫn là persistence backend.
 
 - **Helm:** schema chặn nhiều replica/HPA, hỗ trợ image digest, retained PVC, Ingress hoặc Gateway API, external Secret, NetworkPolicy, MCP và ServiceMonitor tùy chọn.
 - **Kustomize:** Restricted PSS base, overlay dev/staging/production, component MCP, monitoring, Gateway API và CSI snapshot.
@@ -2141,7 +2145,7 @@ helm upgrade --install agent-monitor deployments/helm/agent-monitor \
   --namespace agent-monitor-production --create-namespace \
   --values deployments/helm/agent-monitor/values-production.yaml \
   --set image.registry= \
-  --set image.repository=${REGISTRY}/claude-code-agent-monitor \
+  --set image.repository=${REGISTRY}/agentmonitor \
   --set image.tag=${IMAGE_TAG} \
   --atomic --wait --timeout 10m
 ```
@@ -2154,7 +2158,7 @@ helm upgrade --install agent-monitor deployments/helm/agent-monitor \
 ## Cấu trúc dự án
 
 ```
-agent-dashboard/
+agentmonitor/
 |-- CLAUDE.md                   # Claude Code project memory and working agreements
 |-- AGENTS.md                   # Codex project instructions
 |-- package.json                # Root scripts (dashboard + MCP helpers) + server dependencies
@@ -2167,17 +2171,17 @@ agent-dashboard/
 |-- .agents/plugins/
 |   +-- marketplace.json        # Manifest marketplace Codex (14 plugin)
 |-- plugins/
-|   |-- ccam-analytics/         # Analytics: session reports, cost breakdown, usage trends, productivity score
+|   |-- am-analytics/         # Analytics: session reports, cost breakdown, usage trends, productivity score
 |   |   |-- .claude-plugin/plugin.json
 |   |   |-- skills/ (4)         # session-report, cost-breakdown, usage-trends, productivity-score
 |   |   |-- agents/             # analytics-advisor (Sonnet model)
 |   |   |-- hooks/hooks.json    # Stop + SubagentStop event logging
-|   |   +-- bin/ccam-stats      # Terminal dashboard CLI
-|   |-- ccam-productivity/      # Productivity: standups, reports, sprints, workflow optimizer
-|   |-- ccam-devtools/          # DevTools: debug, diagnostics, export, health checks
-|   |   +-- bin/                # ccam-doctor + ccam-export CLIs
-|   |-- ccam-insights/          # Insights: patterns, anomalies, optimization, comparison
-|   +-- ccam-dashboard/         # Dashboard connector: status, quick stats, MCP integration
+|   |   +-- bin/am-stats      # Terminal dashboard CLI
+|   |-- am-productivity/      # Productivity: standups, reports, sprints, workflow optimizer
+|   |-- am-devtools/          # DevTools: debug, diagnostics, export, health checks
+|   |   +-- bin/                # am-doctor + am-export CLIs
+|   |-- am-insights/          # Insights: patterns, anomalies, optimization, comparison
+|   +-- am-dashboard/         # Dashboard connector: status, quick stats, MCP integration
 |       +-- .mcp.json           # MCP server configuration
 |-- server/
 |   |-- index.js                 # Express app, HTTP server, static serving
@@ -2317,10 +2321,18 @@ agent-dashboard/
 | WebSocket bị ngắt kết nối            | Máy khách tự động kết nối lại sau mỗi 2 giây. Kiểm tra xem cổng 4820 có bị tường lửa chặn không                                                                    |
 | Dữ liệu cũ sau khi khởi động lại          | Cơ sở dữ liệu vẫn tồn tại trong suốt quá trình khởi động lại. Chạy `npm run seed` để có dữ liệu demo mới hoặc xóa `data/dashboard.db` để đặt lại                                            |
 | Công cụ MCP không kết nối được         | Xác nhận API bảng điều khiển đã hoạt động trên `MCP_DASHBOARD_BASE_URL` và xây dựng lại/khởi động MCP (`npm run mcp:build`, `npm run mcp:start`)                                         |
-| Lần chạy đầu macOS hiện "Apple could not verify…" | DMG được ký ad-hoc theo mặc định. Chạy `xattr -cr "/Applications/Claude Code Monitor.app"`, hoặc nhấp *Open Anyway* trong *System Settings → Privacy & Security* |
+| Lần chạy đầu macOS hiện "Apple could not verify…" | DMG được ký ad-hoc theo mặc định. Chạy `xattr -cr "/Applications/AgentMonitor.app"`, hoặc nhấp *Open Anyway* trong *System Settings → Privacy & Security* |
 | Lần chạy đầu Windows hiện "Windows protected your PC" (SmartScreen) | Trình cài không ký theo mặc định. Nhấp **More info → Run anyway** để khởi chạy |
 | "Run Claude" báo `claude` không có trong PATH | (macOS) Một ứng dụng macOS khởi chạy từ Finder/Dock chỉ thừa hưởng `PATH` tối thiểu của launchd. Lỗi này đã được sửa — ứng dụng khôi phục `PATH` của login-shell lúc khởi động. Nếu vẫn còn, hãy chắc chắn `claude` là một tệp thực thi thật (không phải alias/hàm shell) và nằm trên `PATH` của shell. Trên Windows, `PATH` người dùng được thừa hưởng đã bao gồm nó |
-| Lịch sử đã nhập biến mất sau khi cài lại/cập nhật ứng dụng máy tính để bàn | Các bản dựng cũ lưu cơ sở dữ liệu bên trong gói ứng dụng có thể bị thay thế. Lỗi này đã được sửa — dữ liệu nay nằm tại `~/Library/Application Support/Claude Code Monitor/data/` (macOS) hoặc `%APPDATA%\Claude Code Monitor\data\` (Windows), bên ngoài gói và sống sót qua các lần cài lại. Sau khi nâng cấp từ bản dựng trước khi sửa lỗi, hãy chạy lại **Import History → Rescan** một lần |
+| Lịch sử đã nhập biến mất sau khi cài lại/cập nhật ứng dụng máy tính để bàn | Các bản dựng cũ lưu cơ sở dữ liệu bên trong gói ứng dụng có thể bị thay thế. Lỗi này đã được sửa — dữ liệu nay nằm tại `~/Library/Application Support/AgentMonitor/data/` (macOS) hoặc `%APPDATA%\AgentMonitor\data\` (Windows), bên ngoài gói và sống sót qua các lần cài lại. Sau khi nâng cấp từ bản dựng trước khi sửa lỗi, hãy chạy lại **Import History → Rescan** một lần |
+
+---
+
+## Lời cảm ơn
+
+AgentMonitor khởi đầu là một fork của [Claude-Code-Agent-Monitor](https://github.com/hoangsonww/Claude-Code-Agent-Monitor) do [Son Nguyen](https://github.com/hoangsonww) phát triển. Cảm ơn anh vì dashboard gốc, pipeline hook và kỷ luật tài liệu mà dự án này vẫn tuân theo — thông báo bản quyền của anh vẫn được giữ trong [LICENSE](LICENSE).
+
+Liên kết fork đã được gỡ vào ngày 19-09-2026: mã nguồn đã khác biệt quá xa (đổi tên CLI, cây plugin, bộ UI kit, ingest workflow) để tiếp tục merge thay đổi từ upstream, nên AgentMonitor hiện được phát triển như một dự án độc lập tại [tanvoid0/agent-monitor](https://github.com/tanvoid0/agent-monitor).
 
 ---
 

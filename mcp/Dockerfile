@@ -1,9 +1,9 @@
 # syntax=docker/dockerfile:1.7
-# Multi-stage OCI image for CCAM's MCP server. The repository root is the build
-# context so the local agent-dashboard dependency resolves, while the runtime
+# Multi-stage OCI image for AgentMonitor's MCP server. The repository root is the build
+# context so the local agentmonitor dependency resolves, while the runtime
 # contains only production dependencies and compiled output under a non-root
 # user.
-# @author Son Nguyen <hoangson091104@gmail.com>
+# @author Tanveer Hoque <tanvoid0@gmail.com>
 
 ARG NODE_IMAGE=node:24.19.0-alpine3.24@sha256:d32cdf619f63fe0471182d08996dd516c6275bb5fd31ae06e55a570bd9e1ad43
 

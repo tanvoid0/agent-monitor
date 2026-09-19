@@ -2,7 +2,7 @@
  * @file Imports historical Codex rollout transcripts through the live ingestor,
  * preserving token accounting, tools, lifecycle state, native titles, and a
  * durable snapshot for external folders and browser uploads.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const fs = require("fs");

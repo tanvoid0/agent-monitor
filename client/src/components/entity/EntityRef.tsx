@@ -6,7 +6,7 @@
  * built-in right-click / long-press menu from `entityMenu`. A transient
  * session (pre-identity Codex process) renders a plain span with no link and
  * no menu.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import type { MouseEvent, ReactNode } from "react";

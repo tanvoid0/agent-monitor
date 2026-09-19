@@ -11,7 +11,7 @@
  *      (re-import skips existing sessions, never duplicates), and merges cleanly
  *      when consolidating another machine's sessions into an existing DB.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { describe, it, before, after } = require("node:test");

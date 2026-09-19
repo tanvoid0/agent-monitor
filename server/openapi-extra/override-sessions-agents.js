@@ -30,7 +30,7 @@
  *   - GET   /api/agents/{id}                     (getAgent)
  *   - PATCH /api/agents/{id}                     (updateAgent)
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const tags = [];
@@ -46,7 +46,7 @@ const exampleSession = {
   id: "b7f3a2c1-4e5d-4a8b-9c2f-1d6e8a0b3c4d",
   name: "Refactor pricing route + add cost endpoint",
   status: "active",
-  cwd: "/Users/son/WebstormProjects/Claude-Code-Agent-Monitor",
+  cwd: "/Users/son/WebstormProjects/agent-monitor",
   model: "claude-opus-4-20250514",
   started_at: "2026-06-25T14:02:11.004Z",
   ended_at: null,
@@ -98,7 +98,7 @@ const exampleCompletedSession = {
   id: "1a2b3c4d-5e6f-4071-8293-a4b5c6d7e8f9",
   name: "Fix flaky transcript pagination test",
   status: "completed",
-  cwd: "/Users/son/WebstormProjects/Claude-Code-Agent-Monitor",
+  cwd: "/Users/son/WebstormProjects/agent-monitor",
   model: "claude-sonnet-4-20250514",
   started_at: "2026-06-24T09:12:00.000Z",
   ended_at: "2026-06-24T09:48:32.501Z",
@@ -260,7 +260,7 @@ const paths = {
             example: {
               id: "b7f3a2c1-4e5d-4a8b-9c2f-1d6e8a0b3c4d",
               name: "Refactor pricing route + add cost endpoint",
-              cwd: "/Users/son/WebstormProjects/Claude-Code-Agent-Monitor",
+              cwd: "/Users/son/WebstormProjects/agent-monitor",
               model: "claude-opus-4-20250514",
               metadata: { source: "hook", git_branch: "feat/spend-budgets" },
             },

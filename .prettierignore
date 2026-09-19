@@ -29,3 +29,4 @@ monitoring/.bin/
 
 # Git worktrees hold full checkouts, including vendored files
 .worktrees/
+.claude/worktrees/

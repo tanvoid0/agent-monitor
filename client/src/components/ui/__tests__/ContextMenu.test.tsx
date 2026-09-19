@@ -5,7 +5,7 @@
  * closes without leaking to an enclosing window listener, a nested touch
  * trigger opens exactly one menu, Enter on a link item navigates) and
  * MenuButton (kebab opens a dropdown menu).
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect, vi } from "vitest";

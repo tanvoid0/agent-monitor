@@ -1,8 +1,9 @@
 {
-  "name": "agent-dashboard",
-  "version": "2.3.0",
+  "name": "agentmonitor",
+  "version": "3.0.0",
   "bin": {
-    "ccam": "bin/ccam.js"
+    "am": "bin/am.js",
+    "ccam": "bin/am.js"
   },
   "description": "Real-time dashboard for tracking Claude Code agent activity",
   "private": true,
@@ -17,17 +18,17 @@
     "README.md",
     "LICENSE"
   ],
-  "author": "Son Nguyen",
-  "funding": "https://github.com/sponsors/hoangsonww",
+  "author": "Tanveer Hoque",
+  "funding": "https://github.com/sponsors/tanvoid0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hoangsonww/Claude-Code-Agent-Monitor.git"
+    "url": "git+https://github.com/tanvoid0/agent-monitor.git"
   },
   "bugs": {
-    "url": "https://github.com/hoangsonww/Claude-Code-Agent-Monitor/issues"
+    "url": "https://github.com/tanvoid0/agent-monitor/issues"
   },
   "license": "MIT",
-  "homepage": "https://github.com/hoangsonww/Claude-Code-Agent-Monitor#readme",
+  "homepage": "https://github.com/tanvoid0/agent-monitor#readme",
   "keywords": [
     "claude",
     "claude-code",
@@ -61,7 +62,8 @@
     "build": "cd client && npm run build",
     "start": "node server/index.js",
     "setup": "npm ci && npm --prefix client ci && npm --prefix vscode-extension ci && npm run mcp:install && npm run mcp:build && npm run link-cli",
-    "update:pull-setup": "git pull --ff-only && npm run setup",
+    "upgrade": "node scripts/upgrade.js",
+    "update:pull-setup": "node scripts/upgrade.js --pull",
     "mcp:install": "npm --prefix mcp ci",
     "mcp:build": "npm --prefix mcp run build",
     "mcp:start": "npm --prefix mcp run start",
@@ -73,8 +75,8 @@
     "mcp:typecheck": "npm --prefix mcp run typecheck",
     "extensions:sync": "node scripts/sync-agent-extensions.js",
     "extensions:validate": "node scripts/validate-agent-extensions.js",
-    "mcp:docker:build": "docker build -f mcp/Dockerfile -t agent-dashboard-mcp:local .",
-    "mcp:podman:build": "podman build -f mcp/Dockerfile -t localhost/agent-dashboard-mcp:local .",
+    "mcp:docker:build": "docker build -f mcp/Dockerfile -t agentmonitor-mcp:local .",
+    "mcp:podman:build": "podman build -f mcp/Dockerfile -t localhost/agentmonitor-mcp:local .",
     "desktop:install": "cd desktop && node scripts/install.js",
     "desktop:dev": "npm run build && cd desktop && npm run dev",
     "desktop:build": "cd desktop && npm run build",
@@ -100,7 +102,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "openapi:yaml": "node scripts/generate-openapi-yaml.js",
-    "link-cli": "npm link || node -e \"console.warn('ccam CLI not linked globally (no permission?). Link manually with: npm link')\"",
+    "link-cli": "npm link || node -e \"console.warn('am CLI not linked globally (no permission?). Link manually with: npm link')\"",
     "monitoring:install": "npm install --prefix monitoring",
     "monitoring:setup": "npm run monitoring:install",
     "monitoring:up": "npm --prefix monitoring run start",

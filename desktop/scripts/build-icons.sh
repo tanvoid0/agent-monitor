@@ -7,8 +7,8 @@
 #   * iconutil : .iconset directory → .icns
 #
 # This script is idempotent. Run from desktop/ or from anywhere.
-# Author: Son Nguyen <hoangson091104@gmail.com>
-# @author Son Nguyen <hoangson091104@gmail.com>
+# Author: Tanveer Hoque <tanvoid0@gmail.com>
+# @author Tanveer Hoque <tanvoid0@gmail.com>
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

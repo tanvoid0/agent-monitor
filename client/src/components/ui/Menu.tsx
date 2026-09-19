@@ -5,7 +5,7 @@
  * them with whichever Radix parts it is handed (ContextMenu.* or
  * DropdownMenu.*). Link items slot a react-router `<Link>` so modified clicks
  * open a new tab natively.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import type { ComponentType, ReactNode } from "react";

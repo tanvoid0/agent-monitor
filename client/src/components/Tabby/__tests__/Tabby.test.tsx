@@ -1,7 +1,7 @@
 /**
  * @file Tabby.test.tsx
  * @description Render tests for the Tabby companion component — mounting, mood rendering, the hover greeting state, the ⌘B panel toggle, and accessibility attributes.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
@@ -105,7 +105,7 @@ describe("Tabby widget", () => {
   });
 
   it("respects the enabled preference", () => {
-    localStorage.setItem("agent-dashboard-tabby-enabled", "false");
+    localStorage.setItem("agentmonitor-tabby-enabled", "false");
     renderTabby();
     expect(screen.queryByRole("button", { name: /open tabby companion/i })).not.toBeInTheDocument();
   });
@@ -133,7 +133,7 @@ describe("Tabby widget", () => {
     // The synthetic click that follows a drag must be swallowed.
     fireEvent.click(btn);
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    const saved = JSON.parse(localStorage.getItem("agent-dashboard-tabby-pos") || "{}");
+    const saved = JSON.parse(localStorage.getItem("agentmonitor-tabby-pos") || "{}");
     expect(saved.side).toBe("left");
     expect(typeof saved.y).toBe("number");
   });
@@ -149,11 +149,11 @@ describe("Tabby widget", () => {
     fireEvent.click(btn);
     expect(screen.getByRole("dialog", { name: /tabby companion/i })).toBeInTheDocument();
     // No position was persisted because no real drag happened.
-    expect(localStorage.getItem("agent-dashboard-tabby-pos")).toBeNull();
+    expect(localStorage.getItem("agentmonitor-tabby-pos")).toBeNull();
   });
 
   it("restores a persisted left-edge position on mount", () => {
-    localStorage.setItem("agent-dashboard-tabby-pos", JSON.stringify({ side: "left", y: 0.2 }));
+    localStorage.setItem("agentmonitor-tabby-pos", JSON.stringify({ side: "left", y: 0.2 }));
     renderTabby();
     const btn = screen.getByRole("button", { name: /open tabby companion/i }) as HTMLElement;
     // Left-docked → inline left equals the edge margin (16px).

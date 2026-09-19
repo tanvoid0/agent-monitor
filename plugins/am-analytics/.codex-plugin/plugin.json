@@ -1,0 +1,36 @@
+{
+  "name": "am-analytics",
+  "version": "3.0.0",
+  "description": "Deep analytics and monitoring for Claude Code sessions — cost tracking, token usage breakdowns, usage trends, and productivity scoring powered by Agent Monitor.",
+  "author": {
+    "name": "Tanveer Hoque",
+    "email": "tanvoid0@gmail.com",
+    "url": "https://github.com/tanvoid0"
+  },
+  "homepage": "https://github.com/tanvoid0/agent-monitor",
+  "repository": "https://github.com/tanvoid0/agent-monitor",
+  "license": "MIT",
+  "keywords": [
+    "analytics",
+    "monitoring",
+    "cost-tracking",
+    "token-usage",
+    "productivity",
+    "claude-code"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "AgentMonitor Analytics",
+    "shortDescription": "Deep analytics and monitoring for Claude Code sessions — cost tracking, token usage...",
+    "longDescription": "Deep analytics and monitoring for Claude Code sessions — cost tracking, token usage breakdowns, usage trends, and productivity scoring powered by Agent Monitor.",
+    "developerName": "Tanveer Hoque",
+    "category": "Productivity",
+    "capabilities": ["Read"],
+    "websiteURL": "https://github.com/tanvoid0/agent-monitor",
+    "defaultPrompt": [
+      "Use AgentMonitor Analytics to inspect the local AgentMonitor dashboard.",
+      "Use AgentMonitor Analytics to analyze recent agent activity."
+    ],
+    "brandColor": "#6366F1"
+  }
+}

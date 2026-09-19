@@ -1,6 +1,6 @@
 /**
  * @file Tests for the Dashboard API endpoints, covering session and agent management, event recording, stats aggregation, and hook event processing. Uses Node's built-in test runner and assertions to validate API behavior and edge cases.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { describe, it, before, after } = require("node:test");
@@ -194,7 +194,7 @@ describe("OpenAPI / Swagger", () => {
     assert.equal(res.body.info.version, pkg.version);
     assert.equal(res.body.info.license.name, pkg.license);
     assert.equal(res.body["x-issues-url"], pkg.bugs.url);
-    assert.match(res.body.info.contact.url, /github\.com\/hoangsonww\/Claude-Code-Agent-Monitor/);
+    assert.match(res.body.info.contact.url, /github\.com\/tanvoid0\/agent-monitor/);
 
     for (const pathName of EXPECTED_API_PATHS) {
       assert.ok(res.body.paths[pathName], `Expected path ${pathName} to be documented`);

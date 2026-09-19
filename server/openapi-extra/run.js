@@ -10,7 +10,7 @@
  * `Run`. The shared error envelope `ErrorResponse` (`{ error: { code, message } }`)
  * is defined in the base spec and only referenced here — never redefined.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const tags = [
@@ -947,7 +947,7 @@ const paths = {
                 items: [
                   {
                     kind: "dashboard",
-                    path: "/Users/dev/Claude-Code-Agent-Monitor",
+                    path: "/Users/dev/agent-monitor",
                     label: "Dashboard server",
                   },
                   { kind: "home", path: "/Users/dev", label: "Home" },

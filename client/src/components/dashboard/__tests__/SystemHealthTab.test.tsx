@@ -3,7 +3,7 @@
  * @description Renders the Dashboard Health tab against mocked `settings.info`
  * and `workflows.get` payloads and checks each of the nine panels comes up with
  * its data, so the panel/row/stat/bar atoms keep composing correctly.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect, vi } from "vitest";

@@ -3,7 +3,7 @@
  * the exposition format (HELP/TYPE headers, content-type, no NaN samples), that
  * the enumerated status gauges are always present (so a series never drops out
  * at zero), and that the numbers track real data seeded through the hook API.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { describe, it, before, after } = require("node:test");
@@ -89,22 +89,22 @@ describe("GET /api/metrics", () => {
 
     // Core families present with HELP + TYPE headers.
     for (const name of [
-      "ccam_up",
-      "ccam_build_info",
-      "ccam_process_uptime_seconds",
-      "ccam_process_resident_memory_bytes",
-      "ccam_sessions",
-      "ccam_agents",
-      "ccam_events_total",
-      "ccam_websocket_clients",
-      "ccam_remote_sources",
-      "ccam_tokens_total",
+      "am_up",
+      "am_build_info",
+      "am_process_uptime_seconds",
+      "am_process_resident_memory_bytes",
+      "am_sessions",
+      "am_agents",
+      "am_events_total",
+      "am_websocket_clients",
+      "am_remote_sources",
+      "am_tokens_total",
     ]) {
       assert.ok(res.body.includes(`# HELP ${name} `), `HELP for ${name}`);
       assert.ok(res.body.includes(`# TYPE ${name} `), `TYPE for ${name}`);
     }
 
-    assert.equal(sampleValue(res.body, "ccam_up"), 1);
+    assert.equal(sampleValue(res.body, "am_up"), 1);
     // No sample line may carry a NaN/undefined value.
     for (const line of res.body.split("\n")) {
       if (!line || line.startsWith("#")) continue;
@@ -117,29 +117,29 @@ describe("GET /api/metrics", () => {
     const res = await request("GET", "/api/metrics");
     for (const status of ["active", "completed", "error", "abandoned"]) {
       assert.notEqual(
-        sampleValue(res.body, "ccam_sessions", `status="${status}"`),
+        sampleValue(res.body, "am_sessions", `status="${status}"`),
         null,
-        `ccam_sessions status=${status} present`
+        `am_sessions status=${status} present`
       );
     }
     for (const status of ["working", "waiting", "completed", "error"]) {
       assert.notEqual(
-        sampleValue(res.body, "ccam_agents", `status="${status}"`),
+        sampleValue(res.body, "am_agents", `status="${status}"`),
         null,
-        `ccam_agents status=${status} present`
+        `am_agents status=${status} present`
       );
     }
   });
 
   it("reflects real data seeded through the hook API", async () => {
-    const before = sampleValue(await scrapeText(), "ccam_sessions", 'status="active"') || 0;
+    const before = sampleValue(await scrapeText(), "am_sessions", 'status="active"') || 0;
 
     await request("POST", "/api/hooks/event", {
       hook_type: "SessionStart",
       data: { session_id: "metrics-sess-1", cwd: "/tmp/metrics" },
     });
 
-    const after = sampleValue(await scrapeText(), "ccam_sessions", 'status="active"');
+    const after = sampleValue(await scrapeText(), "am_sessions", 'status="active"');
     assert.equal(after, before + 1, "a new active session bumps the gauge by 1");
   });
 

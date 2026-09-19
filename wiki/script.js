@@ -1,6 +1,6 @@
 /**
  * @file JS functionality for wiki page index.html at root
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 /* ─── Mermaid initialisation ────────────────────────────────────────────── */
@@ -156,7 +156,7 @@ mermaid.initialize({
   // Single floating tooltip appended to <body> so it's not clipped by
   // the sidebar's overflow:hidden.
   const tip = document.createElement("div");
-  tip.className = "ccam-side-tip";
+  tip.className = "am-side-tip";
   tip.setAttribute("role", "tooltip");
   document.body.appendChild(tip);
 
@@ -1012,7 +1012,7 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Workflow Analytics": "工作流分析",
       "Workflow Graphs": "工作流图",
       "Workflow Runs": "工作流运行",
-      "ccam CLI": "ccam CLI",
+      "am CLI": "am CLI",
       Metrics: "指标",
       "How It Works": "工作原理",
       "Data Scope": "数据范围",
@@ -1251,7 +1251,7 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Workflow Analytics": "Phân tích quy trình",
       "Workflow Graphs": "Đồ thị quy trình",
       "Workflow Runs": "Lần chạy quy trình",
-      "ccam CLI": "ccam CLI",
+      "am CLI": "am CLI",
       Metrics: "Chỉ số",
       "How It Works": "Cách hoạt động",
       "Data Scope": "Phạm vi dữ liệu",
@@ -1461,7 +1461,7 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Workflow Analytics": "워크플로 분석",
       "Workflow Graphs": "워크플로 그래프",
       "Workflow Runs": "워크플로 실행",
-      "ccam CLI": "ccam CLI",
+      "am CLI": "am CLI",
       Metrics: "지표",
       "How It Works": "작동 방식",
       "Data Scope": "데이터 범위",
@@ -1705,7 +1705,7 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Workflow Analytics": "Análisis de flujo de trabajo",
       "Workflow Graphs": "Gráficos de flujo de trabajo",
       "Workflow Runs": "Ejecuciones de flujos de trabajo",
-      "ccam CLI": "CLI de ccam",
+      "am CLI": "CLI de am",
       Metrics: "Métricas",
       "How It Works": "Cómo funciona",
       "Data Scope": "Alcance de datos",
@@ -1790,13 +1790,12 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       es: "Seleccionar idioma",
     },
     Language: { zh: "语言", vi: "Ngôn ngữ", ko: "언어", es: "Idioma" },
-    "Claude Code Agent Monitor dashboard showing live agent cards, stats, and recent activity feed":
-      {
-        zh: "Claude Code Agent Monitor 仪表盘，显示实时 Agent 卡片、统计数据和最近活动流",
-        vi: "Bảng điều khiển Claude Code Agent Monitor hiển thị thẻ Agent trực tiếp, số liệu và luồng hoạt động gần đây",
-        ko: "실시간 Agent 카드, 통계, 최근 활동 피드를 보여 주는 Claude Code Agent Monitor 대시보드",
-        es: "Panel de Claude Code Agent Monitor con tarjetas de Agent en tiempo real, estadísticas y actividad reciente",
-      },
+    "AgentMonitor dashboard showing live agent cards, stats, and recent activity feed": {
+      zh: "AgentMonitor 仪表盘，显示实时 Agent 卡片、统计数据和最近活动流",
+      vi: "Bảng điều khiển AgentMonitor hiển thị thẻ Agent trực tiếp, số liệu và luồng hoạt động gần đây",
+      ko: "실시간 Agent 카드, 통계, 최근 활동 피드를 보여 주는 AgentMonitor 대시보드",
+      es: "Panel de AgentMonitor con tarjetas de Agent en tiempo real, estadísticas y actividad reciente",
+    },
     "Previous features": {
       zh: "上一组功能",
       vi: "Tính năng trước",
@@ -1965,23 +1964,23 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       ko: "ReDoc API 참조",
       es: "Referencia de API de ReDoc",
     },
-    "Grafana CCAM — Overview dashboard": {
-      zh: "Grafana CCAM — 概览仪表盘",
-      vi: "Grafana CCAM — bảng điều khiển tổng quan",
-      ko: "Grafana CCAM — 개요 대시보드",
-      es: "Grafana CCAM — panel de resumen",
+    "Grafana AgentMonitor — Overview dashboard": {
+      zh: "Grafana AgentMonitor — 概览仪表盘",
+      vi: "Grafana AgentMonitor — bảng điều khiển tổng quan",
+      ko: "Grafana AgentMonitor — 개요 대시보드",
+      es: "Grafana AgentMonitor — panel de resumen",
     },
-    "Prometheus CCAM console": {
-      zh: "Prometheus CCAM 控制台",
-      vi: "Bảng điều khiển Prometheus CCAM",
-      ko: "Prometheus CCAM 콘솔",
-      es: "Consola de Prometheus CCAM",
+    "Prometheus AgentMonitor console": {
+      zh: "Prometheus AgentMonitor 控制台",
+      vi: "Bảng điều khiển Prometheus AgentMonitor",
+      ko: "Prometheus AgentMonitor 콘솔",
+      es: "Consola de Prometheus AgentMonitor",
     },
-    "Prometheus Graph with CCAM PromQL": {
-      zh: "使用 CCAM PromQL 的 Prometheus Graph",
-      vi: "Prometheus Graph với CCAM PromQL",
-      ko: "CCAM PromQL을 사용하는 Prometheus Graph",
-      es: "Prometheus Graph con CCAM PromQL",
+    "Prometheus Graph with AgentMonitor PromQL": {
+      zh: "使用 AgentMonitor PromQL 的 Prometheus Graph",
+      vi: "Prometheus Graph với AgentMonitor PromQL",
+      ko: "AgentMonitor PromQL을 사용하는 Prometheus Graph",
+      es: "Prometheus Graph con AgentMonitor PromQL",
     },
     "Interactive Swagger UI rendering the dashboard's OpenAPI 3.0 spec, with collapsible endpoint groups, request/response schemas, and try-it-out controls":
       {
@@ -2030,18 +2029,18 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       ko: "실시간 상태, 분석, 탐색을 보여 주는 VS Code 확장 사이드바",
       es: "Barra lateral de la extensión de VS Code con estado, análisis y navegación en tiempo real",
     },
-    "Claude Code Monitor running as a native desktop app": {
-      zh: "作为原生桌面应用运行的 Claude Code Monitor",
-      vi: "Claude Code Monitor chạy dưới dạng ứng dụng desktop gốc",
-      ko: "네이티브 데스크톱 앱으로 실행되는 Claude Code Monitor",
-      es: "Claude Code Monitor ejecutándose como aplicación de escritorio nativa",
+    "AgentMonitor running as a native desktop app": {
+      zh: "作为原生桌面应用运行的 AgentMonitor",
+      vi: "AgentMonitor chạy dưới dạng ứng dụng desktop gốc",
+      ko: "네이티브 데스크톱 앱으로 실행되는 AgentMonitor",
+      es: "AgentMonitor ejecutándose como aplicación de escritorio nativa",
     },
-    "Claude Code Monitor running as a native desktop app on Windows, showing the Activity Feed, native Windows window menu, and Tabby companion":
+    "AgentMonitor running as a native desktop app on Windows, showing the Activity Feed, native Windows window menu, and Tabby companion":
       {
-        zh: "在 Windows 上作为原生桌面应用运行的 Claude Code Monitor，显示活动流、原生窗口菜单和 Tabby 伴侣",
-        vi: "Claude Code Monitor chạy như ứng dụng Windows gốc, hiển thị luồng hoạt động, menu cửa sổ và bạn đồng hành Tabby",
-        ko: "Windows 네이티브 데스크톱 앱으로 실행되며 활동 피드, Windows 창 메뉴, Tabby 동반자를 보여 주는 Claude Code Monitor",
-        es: "Claude Code Monitor como aplicación nativa de Windows, con actividad, menú de ventana y compañero Tabby",
+        zh: "在 Windows 上作为原生桌面应用运行的 AgentMonitor，显示活动流、原生窗口菜单和 Tabby 伴侣",
+        vi: "AgentMonitor chạy như ứng dụng Windows gốc, hiển thị luồng hoạt động, menu cửa sổ và bạn đồng hành Tabby",
+        ko: "Windows 네이티브 데스크톱 앱으로 실행되며 활동 피드, Windows 창 메뉴, Tabby 동반자를 보여 주는 AgentMonitor",
+        es: "AgentMonitor como aplicación nativa de Windows, con actividad, menú de ventana y compañero Tabby",
       },
     "Windows NSIS installer step 1 — Choose Installation Options": {
       zh: "Windows NSIS 安装程序第 1 步 — 选择安装选项",
@@ -2097,23 +2096,23 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       ko: "처리량 스파크라인, 주요 이벤트 유형, 최근 활동이 있는 연결 상세 모달",
       es: "Modal de conexión con minigráfico de rendimiento, principales eventos y actividad reciente",
     },
-    "Grafana CCAM — Overview dashboard with live fleet metrics": {
-      zh: "Grafana CCAM — 带实时集群指标的概览仪表盘",
-      vi: "Grafana CCAM — bảng điều khiển tổng quan với số liệu fleet trực tiếp",
-      ko: "Grafana CCAM — 실시간 플릿 메트릭이 있는 개요 대시보드",
-      es: "Grafana CCAM — panel de resumen con métricas de flota en tiempo real",
+    "Grafana AgentMonitor — Overview dashboard with live fleet metrics": {
+      zh: "Grafana AgentMonitor — 带实时集群指标的概览仪表盘",
+      vi: "Grafana AgentMonitor — bảng điều khiển tổng quan với số liệu fleet trực tiếp",
+      ko: "Grafana AgentMonitor — 실시간 플릿 메트릭이 있는 개요 대시보드",
+      es: "Grafana AgentMonitor — panel de resumen con métricas de flota en tiempo real",
     },
-    "Prometheus CCAM console landing page": {
-      zh: "Prometheus CCAM 控制台首页",
-      vi: "Trang đầu bảng điều khiển Prometheus CCAM",
-      ko: "Prometheus CCAM 콘솔 시작 페이지",
-      es: "Página de inicio de la consola Prometheus CCAM",
+    "Prometheus AgentMonitor console landing page": {
+      zh: "Prometheus AgentMonitor 控制台首页",
+      vi: "Trang đầu bảng điều khiển Prometheus AgentMonitor",
+      ko: "Prometheus AgentMonitor 콘솔 시작 페이지",
+      es: "Página de inicio de la consola Prometheus AgentMonitor",
     },
-    "Prometheus Graph UI running CCAM PromQL": {
-      zh: "运行 CCAM PromQL 的 Prometheus Graph UI",
-      vi: "Giao diện Prometheus Graph chạy CCAM PromQL",
-      ko: "CCAM PromQL을 실행하는 Prometheus Graph UI",
-      es: "Interfaz Prometheus Graph ejecutando CCAM PromQL",
+    "Prometheus Graph UI running AgentMonitor PromQL": {
+      zh: "运行 AgentMonitor PromQL 的 Prometheus Graph UI",
+      vi: "Giao diện Prometheus Graph chạy AgentMonitor PromQL",
+      ko: "AgentMonitor PromQL을 실행하는 Prometheus Graph UI",
+      es: "Interfaz Prometheus Graph ejecutando AgentMonitor PromQL",
     },
     "Tabby Companion": {
       zh: "Tabby 伴侣",
@@ -2135,61 +2134,59 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
   );
   const META = {
     en: {
-      title: "Claude Code Agent Monitor - Project Wiki",
+      title: "AgentMonitor - Project Wiki",
       description:
-        "Comprehensive technical wiki for Claude Code Agent Monitor — real-time local monitoring with MCP server integration plus Claude Code and Codex extension scaffolding.",
-      socialTitle: "Claude Code Agent Monitor - Project Wiki",
+        "Comprehensive technical wiki for AgentMonitor — real-time local monitoring with MCP server integration plus Claude Code and Codex extension scaffolding.",
+      socialTitle: "AgentMonitor - Project Wiki",
       socialDescription:
-        "Comprehensive technical wiki for Claude Code Agent Monitor — real-time local monitoring with MCP server integration plus Claude Code and Codex extension scaffolding.",
+        "Comprehensive technical wiki for AgentMonitor — real-time local monitoring with MCP server integration plus Claude Code and Codex extension scaffolding.",
       twitterDescription:
         "Real-time local monitoring for Claude Code agent activity with MCP integration, extension scaffolding, analytics, and WebSocket push.",
-      socialImageAlt: "Claude Code Agent Monitor — real-time Claude Code monitoring platform",
+      socialImageAlt: "AgentMonitor — real-time Claude Code monitoring platform",
     },
     zh: {
-      title: "Claude Code Agent Monitor - 项目维基",
+      title: "AgentMonitor - 项目维基",
       description:
-        "Claude Code Agent Monitor 综合技术维基：本地实时监控、MCP Server 集成，以及 Claude Code 和 Codex 扩展脚手架。",
-      socialTitle: "Claude Code Agent Monitor - 项目维基",
+        "AgentMonitor 综合技术维基：本地实时监控、MCP Server 集成，以及 Claude Code 和 Codex 扩展脚手架。",
+      socialTitle: "AgentMonitor - 项目维基",
       socialDescription:
-        "Claude Code Agent Monitor 综合技术维基：本地实时监控、MCP Server 集成，以及 Claude Code 和 Codex 扩展脚手架。",
+        "AgentMonitor 综合技术维基：本地实时监控、MCP Server 集成，以及 Claude Code 和 Codex 扩展脚手架。",
       twitterDescription:
         "面向 Claude Code Agent 活动的本地实时监控，集成 MCP、扩展脚手架、分析和 WebSocket 推送。",
-      socialImageAlt: "Claude Code Agent Monitor — Claude Code 实时监控平台",
+      socialImageAlt: "AgentMonitor — Claude Code 实时监控平台",
     },
     vi: {
-      title: "Claude Code Agent Monitor - Wiki dự án",
+      title: "AgentMonitor - Wiki dự án",
       description:
-        "Wiki kỹ thuật toàn diện cho Claude Code Agent Monitor — giám sát cục bộ theo thời gian thực, tích hợp MCP Server và bộ khung tiện ích Claude Code cùng Codex.",
-      socialTitle: "Claude Code Agent Monitor - Wiki dự án",
+        "Wiki kỹ thuật toàn diện cho AgentMonitor — giám sát cục bộ theo thời gian thực, tích hợp MCP Server và bộ khung tiện ích Claude Code cùng Codex.",
+      socialTitle: "AgentMonitor - Wiki dự án",
       socialDescription:
-        "Wiki kỹ thuật toàn diện cho Claude Code Agent Monitor — giám sát cục bộ theo thời gian thực, tích hợp MCP Server và bộ khung tiện ích Claude Code cùng Codex.",
+        "Wiki kỹ thuật toàn diện cho AgentMonitor — giám sát cục bộ theo thời gian thực, tích hợp MCP Server và bộ khung tiện ích Claude Code cùng Codex.",
       twitterDescription:
         "Giám sát cục bộ theo thời gian thực cho hoạt động Agent Claude Code, với MCP, tiện ích mở rộng, phân tích và WebSocket.",
-      socialImageAlt:
-        "Claude Code Agent Monitor — nền tảng giám sát Claude Code theo thời gian thực",
+      socialImageAlt: "AgentMonitor — nền tảng giám sát Claude Code theo thời gian thực",
     },
     ko: {
-      title: "Claude Code Agent Monitor - 프로젝트 위키",
+      title: "AgentMonitor - 프로젝트 위키",
       description:
-        "Claude Code Agent Monitor 종합 기술 위키 — 실시간 로컬 모니터링, MCP Server 통합, Claude Code 및 Codex 확장 스캐폴딩.",
-      socialTitle: "Claude Code Agent Monitor - 프로젝트 위키",
+        "AgentMonitor 종합 기술 위키 — 실시간 로컬 모니터링, MCP Server 통합, Claude Code 및 Codex 확장 스캐폴딩.",
+      socialTitle: "AgentMonitor - 프로젝트 위키",
       socialDescription:
-        "Claude Code Agent Monitor 종합 기술 위키 — 실시간 로컬 모니터링, MCP Server 통합, Claude Code 및 Codex 확장 스캐폴딩.",
+        "AgentMonitor 종합 기술 위키 — 실시간 로컬 모니터링, MCP Server 통합, Claude Code 및 Codex 확장 스캐폴딩.",
       twitterDescription:
         "MCP 통합, 확장 스캐폴딩, 분석, WebSocket 푸시를 갖춘 Claude Code Agent 활동 실시간 로컬 모니터링.",
-      socialImageAlt: "Claude Code Agent Monitor — 실시간 Claude Code 모니터링 플랫폼",
+      socialImageAlt: "AgentMonitor — 실시간 Claude Code 모니터링 플랫폼",
     },
     es: {
-      title: "Claude Code Agent Monitor - Wiki del proyecto",
+      title: "AgentMonitor - Wiki del proyecto",
       description:
-        "Wiki técnica completa para Claude Code Agent Monitor: monitorización local en tiempo real con integración de servidor MCP y andamiaje de extensiones para Claude Code y Codex.",
-      socialTitle: "Claude Code Agent Monitor - Wiki del proyecto",
+        "Wiki técnica completa para AgentMonitor: monitorización local en tiempo real con integración de servidor MCP y andamiaje de extensiones para Claude Code y Codex.",
+      socialTitle: "AgentMonitor - Wiki del proyecto",
       socialDescription:
-        "Wiki técnica completa para Claude Code Agent Monitor: monitorización local en tiempo real con integración de servidor MCP y andamiaje de extensiones para Claude Code y Codex.",
+        "Wiki técnica completa para AgentMonitor: monitorización local en tiempo real con integración de servidor MCP y andamiaje de extensiones para Claude Code y Codex.",
       twitterDescription:
         "Monitorización local en tiempo real de la actividad del agente Claude Code con integración MCP, andamiaje de extensiones, análisis y envío por WebSocket.",
-      socialImageAlt:
-        "Claude Code Agent Monitor — plataforma de monitorización de Claude Code en tiempo real",
+      socialImageAlt: "AgentMonitor — plataforma de monitorización de Claude Code en tiempo real",
     },
   };
   const trH = (lang, en) => (lang === "en" ? en : (H[lang] && H[lang][norm(en)]) || en);

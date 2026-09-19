@@ -13,7 +13,7 @@
  * Focus moves to Cancel on open (safer default), Tab cycles within the dialog,
  * Escape cancels, and focus restores to the previously focused element on close.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { useEffect, useId, useRef } from "react";

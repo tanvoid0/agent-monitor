@@ -3,7 +3,7 @@
  * @description Styled Radix DropdownMenu wrappers plus `MenuButton`, the
  * kebab (⋯) trigger that opens a `MenuItem[]` aligned to its end. Radix
  * supplies `aria-haspopup` / `aria-expanded` on the trigger.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { forwardRef, type ComponentPropsWithoutRef } from "react";

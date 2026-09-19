@@ -8,7 +8,7 @@
  * chrome for a fact the user already knows, and a hint that never appears leaves
  * the palette undiscoverable, which is the bug this exists to fix. A storage
  * failure must therefore fall toward *showing* it.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
@@ -36,7 +36,7 @@ describe("paletteDiscovery", () => {
   it("records discovery and persists it", () => {
     markPaletteDiscovered();
     expect(hasDiscoveredPalette()).toBe(true);
-    expect(localStorage.getItem("ccam-palette-discovered")).toBe("1");
+    expect(localStorage.getItem("am-palette-discovered")).toBe("1");
   });
 
   it("notifies subscribers once, on the transition only", () => {

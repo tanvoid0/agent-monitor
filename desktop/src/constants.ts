@@ -5,12 +5,12 @@
  * documented default dashboard port, and the embedded server health probe in
  * `server-host.ts`.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/desktop/src/constants.ts`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/desktop/src/constants.ts`
  * **Purpose:** Dashboard module consumed by the React client, MCP tools, or desktop shell depending on deployment mode.
  *
  * ## Design constraints
@@ -84,7 +84,7 @@
  * ----------------------------------------------------------------------------- */
 
 /** Human-readable product name shown in window title and About menu. */
-export const APP_NAME = "Claude Code Monitor";
+export const APP_NAME = "AgentMonitor";
 
 /**
  * Application identifier. Must match `appId` in electron-builder.yml: on Windows
@@ -93,7 +93,7 @@ export const APP_NAME = "Claude Code Monitor";
  * of appearing as a generic "electron.app" toast — and so taskbar windows group
  * under one icon. Ignored on macOS/Linux.
  */
-export const APP_ID = "com.hoangsonww.ccam.desktop";
+export const APP_ID = "tanvoid0.agentmonitor.desktop";
 
 /**
  * Preferred dashboard port — matches the project's documented default. Also

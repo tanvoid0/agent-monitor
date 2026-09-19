@@ -5,7 +5,7 @@
  * (ages and transcripts move without a row changing). A 250 ms poll over the
  * cheap version string, the v2 stream loop; nothing runs while no websocket
  * client is connected.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const ws = require("../websocket");

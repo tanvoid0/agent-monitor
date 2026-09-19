@@ -11,7 +11,7 @@
  * exactly that installation: an existing DB file with a non-JSON `data` row
  * already present, created BEFORE server/db.js (and its migrations/index
  * creation) ever runs against it.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { describe, it, before, after } = require("node:test");

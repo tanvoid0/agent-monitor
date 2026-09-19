@@ -3,7 +3,7 @@
  * @description P4 — the board checkbox flips optimistically on click, then
  * reverts (and surfaces an error banner) when `POST tick` rejects, as it
  * would on a 4xx.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";

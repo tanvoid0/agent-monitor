@@ -12,10 +12,10 @@
  * webviews, and a launcher must never fail to open because a nicety could not be
  * persisted.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
-const STORAGE_KEY = "ccam-palette-recent";
+const STORAGE_KEY = "am-palette-recent";
 
 /** Kept short on purpose: a "Recent" group longer than this is just a second list. */
 export const RECENT_LIMIT = 5;

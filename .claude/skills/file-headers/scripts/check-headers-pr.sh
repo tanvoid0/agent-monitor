@@ -7,13 +7,13 @@
 #   check-headers-pr.sh [<base-sha> <head-sha>]
 #
 # When omitted, compares the current branch against origin/master (or master).
-# @author Son Nguyen <hoangson091104@gmail.com>
+# @author Tanveer Hoque <tanvoid0@gmail.com>
 
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
-AUTHOR_MARK="@author Son Nguyen"
-AUTHOR_EMAIL="hoangson091104@gmail.com"
+AUTHOR_MARK="@author Tanveer Hoque"
+AUTHOR_EMAIL="tanvoid0@gmail.com"
 
 usage() {
   cat <<'EOF'
@@ -86,16 +86,16 @@ header_hint_for() {
   local f="$1"
   case "$f" in
     *.py)
-      echo '  expected: module docstring with @author Son Nguyen <hoangson091104@gmail.com>'
+      echo '  expected: module docstring with @author Tanveer Hoque <tanvoid0@gmail.com>'
       ;;
     *.sh)
-      echo '  expected: # block after shebang with @author Son Nguyen <hoangson091104@gmail.com>'
+      echo '  expected: # block after shebang with @author Tanveer Hoque <tanvoid0@gmail.com>'
       ;;
     *.css)
-      echo '  expected: /** @file ... @author Son Nguyen <hoangson091104@gmail.com> */'
+      echo '  expected: /** @file ... @author Tanveer Hoque <tanvoid0@gmail.com> */'
       ;;
     *)
-      echo '  expected: /** @file ... @author Son Nguyen <hoangson091104@gmail.com> */'
+      echo '  expected: /** @file ... @author Tanveer Hoque <tanvoid0@gmail.com> */'
       ;;
   esac
 }

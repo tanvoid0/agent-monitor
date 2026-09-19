@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * @file Stops the npm-managed Prometheus + Grafana stack started by start.js.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 const { stopPid, PROMETHEUS_PID, GRAFANA_PID } = require("./lib");
 

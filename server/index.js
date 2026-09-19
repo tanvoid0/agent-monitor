@@ -1,7 +1,7 @@
 /**
  * @file Sets up the Express server, API routes, WebSocket, production client,
  * and non-blocking Claude/Codex transcript synchronizers and maintenance jobs.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 if (!process.env.NODE_ENV) process.env.NODE_ENV = "production";
@@ -31,6 +31,8 @@ if (!process.env.NODE_ENV) process.env.NODE_ENV = "production";
     }
   }
 })();
+
+require("./lib/legacy-env");
 
 const express = require("express");
 const cors = require("cors");
@@ -128,7 +130,7 @@ function createApp() {
     "/api/docs",
     swaggerUi.serve,
     swaggerUi.setup(openApiSpec, {
-      customSiteTitle: "Agent Dashboard API Docs",
+      customSiteTitle: "AgentMonitor API Docs",
       customfavIcon: "/favicon.svg",
     })
   );
@@ -148,7 +150,7 @@ function createApp() {
         renderRedocHtml(
           "/api/openapi.json",
           "/api/redoc/redoc.standalone.js",
-          "Agent Dashboard API Reference",
+          "AgentMonitor API Reference",
           "/favicon.svg"
         )
       );
@@ -240,7 +242,7 @@ function startServer(app, port) {
       }
       const mode = isProduction ? "production" : "development";
       const shown = boundLoopback ? "localhost" : host;
-      console.log(`Agent Dashboard server running on http://${shown}:${port} (${mode})`);
+      console.log(`AgentMonitor server running on http://${shown}:${port} (${mode})`);
       if (!boundLoopback) {
         console.warn(
           `⚠️  Dashboard bound to ${host} — reachable from the network. ` +
@@ -1232,7 +1234,7 @@ if (require.main === module) {
   probeDashboardHealth(PORT).then((alreadyRunning) => {
     if (alreadyRunning && !isWatchMode) {
       console.log(
-        `Agent Dashboard is already running on http://localhost:${PORT} — not starting a ` +
+        `AgentMonitor is already running on http://localhost:${PORT} — not starting a ` +
           `second instance. Open that URL, or stop the other dashboard first.`
       );
       process.exit(0);

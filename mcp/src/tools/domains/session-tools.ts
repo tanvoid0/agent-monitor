@@ -1,12 +1,12 @@
 /**
  * @file session-tools.ts
  * @description Defines and registers tools for managing sessions in the dashboard, including listing sessions with optional filters, retrieving session details, creating new sessions, and updating existing sessions. Each tool includes input validation using Zod schemas and interacts with the dashboard API to perform the necessary operations. The tools also check for mutation permissions before allowing changes to session data, ensuring that the application configuration is respected.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/mcp/src/tools/domains/session-tools.ts`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/mcp/src/tools/domains/session-tools.ts`
  * **Purpose:** Dashboard module consumed by the React client, MCP tools, or desktop shell depending on deployment mode.
  *
  * ## Design constraints

@@ -1,6 +1,6 @@
 # `desktop/` — Native macOS App (Electron)
 
-The **desktop workspace** ships the Claude Code Agent Monitor dashboard as a
+The **desktop workspace** ships the AgentMonitor dashboard as a
 native macOS `.app` (distributed as a `.dmg`). It is an Electron shell that
 **embeds the existing Express server in-process** and renders the already-built
 React client in a `BrowserWindow`.
@@ -57,8 +57,8 @@ npm run desktop:dmg:arm64    # Apple Silicon only — fast, for your own machine
 npm run desktop:dmg:x64      # Intel only — fast
 
 # Build a Windows .exe (run on Windows x64):
-npm run desktop:win          # NSIS installer → release/ClaudeCodeMonitor-Setup-<ver>-x64.exe
-npm run desktop:win:portable # no-install portable → release/ClaudeCodeMonitor-<ver>-x64-portable.exe
+npm run desktop:win          # NSIS installer → release/AgentMonitor-Setup-<ver>-x64.exe
+npm run desktop:win:portable # no-install portable → release/AgentMonitor-<ver>-x64-portable.exe
 ```
 
 > ⚠️ `desktop:dmg` is slower because it builds the app **twice** — once per
@@ -99,7 +99,7 @@ consumes the rest of the repo as plain files.
 
 ```mermaid
 flowchart TD
-    subgraph repo["Claude-Code-Agent-Monitor (repo root)"]
+    subgraph repo["agent-monitor (repo root)"]
         server["server/<br/>Express API · SQLite · WebSocket"]
         client["client/<br/>React + Vite SPA"]
         scripts["scripts/<br/>hook installer/handler, import, seed"]
@@ -220,7 +220,7 @@ a port, boots the server, and returns a `ServerHandle`.
 
 ```mermaid
 flowchart TD
-    start["startEmbeddedServer()"] --> forced{"CCAM_DESKTOP_BIND_PORT set?"}
+    start["startEmbeddedServer()"] --> forced{"AM_DESKTOP_BIND_PORT set?"}
     forced -->|yes| bind["bind exactly that port<br/>(no adoption, no fallback)"]
     forced -->|no| adopt{"healthy server<br/>already on :4820?"}
     adopt -->|yes| reuse["adopt it<br/>ownedByUs = false"]
@@ -266,7 +266,7 @@ interface ServerHandle {
 
 **Hook port discovery** — because the embedded server may bind a fallback port
 (4821+) when 4820 is taken, the Claude Code hook handler must not assume 4820.
-On startup the server writes its live port to `~/.claude/.agent-dashboard.json`
+On startup the server writes its live port to `~/.claude/.agentmonitor.json`
 (`server/lib/server-info.js`); `scripts/hook-handler.js` reads that file to
 target the running server. Without this, hook events would be POSTed to 4820 —
 nothing would receive them and the dashboard would stay empty.
@@ -494,13 +494,13 @@ Compiled output lands in `desktop/out/` (git-ignored); packaged artifacts in
 
 ## Packaged app layout
 
-`electron-builder` produces `Claude Code Monitor.app`. The Electron main
+`electron-builder` produces `AgentMonitor.app`. The Electron main
 process code is packed into `app.asar`; the rest of the repo is shipped as
 **`extraResources`** (plain files under `Resources/app/`):
 
 ```mermaid
 flowchart TD
-    app["Claude Code Monitor.app"]
+    app["AgentMonitor.app"]
     app --> contents["Contents/"]
     contents --> macos["MacOS/ — Electron binary"]
     contents --> res["Resources/"]
@@ -620,7 +620,7 @@ the bottleneck; packaging two architectures back-to-back is.
   instead of two.
 - Building the **release artifacts for everyone** → use `desktop:dmg` (builds
   both arches) and expect it to take about twice as long. CI runs `desktop:dmg`
-  and uploads both DMGs as the `ClaudeCodeMonitor-dmg` artifact, so you rarely
+  and uploads both DMGs as the `AgentMonitor-dmg` artifact, so you rarely
   need to build them locally.
 - Each DMG is **~80 MB / ~250 MB on disk** — the standard Electron tax.
 
@@ -662,7 +662,7 @@ flowchart TD
 
 An ad-hoc DMG triggers a Gatekeeper warning on first launch. The one-line
 workaround is in [`../DESKTOP.md`](../DESKTOP.md):
-`xattr -cr "/Applications/Claude Code Monitor.app"`.
+`xattr -cr "/Applications/AgentMonitor.app"`.
 
 ---
 
@@ -680,7 +680,7 @@ flowchart LR
     j1 --> j2["tsc build"]
     j2 --> j3["smoke test"]
     j3 --> j4["build both per-arch DMGs<br/>(retry on flaky hdiutil detach)"]
-    j4 --> j5["upload ClaudeCodeMonitor-dmg artifact"]
+    j4 --> j5["upload AgentMonitor-dmg artifact"]
     j5 --> rel["release job (master only)<br/>publish vX.Y.Z if new"]
 
     style job fill:#1f6feb,stroke:#1158c7,color:#fff
@@ -694,7 +694,7 @@ flowchart LR
   `hdiutil detach`, which is intermittently flaky on GitHub macOS runners. The
   step disables Spotlight indexing and retries the build up to 3 times,
   force-detaching any stale volume between attempts.
-- The built DMG is uploaded as the **`ClaudeCodeMonitor-dmg`** artifact
+- The built DMG is uploaded as the **`AgentMonitor-dmg`** artifact
   (downloadable from the workflow run).
 - On `master`, a follow-on **`release`** job reads the version from
   `package.json` and publishes `vX.Y.Z` as a GitHub Release with the DMG
@@ -717,7 +717,7 @@ sequenceDiagram
     participant S as embedded server
 
     T->>T: pick a unique high port
-    T->>E: spawn with CCAM_DESKTOP_BIND_PORT=<port>
+    T->>E: spawn with AM_DESKTOP_BIND_PORT=<port>
     E->>S: startEmbeddedServer() — bind exactly <port>
     loop until healthy or 60s
         T->>S: GET /api/health
@@ -727,7 +727,7 @@ sequenceDiagram
     T->>E: SIGTERM
 ```
 
-`CCAM_DESKTOP_BIND_PORT` forces the server onto an exact port (no adoption, no
+`AM_DESKTOP_BIND_PORT` forces the server onto an exact port (no adoption, no
 fallback) so the test can be certain it probed *this* process and not an
 unrelated server on `:4820`.
 
@@ -737,9 +737,9 @@ unrelated server on `:4820`.
 
 | Variable | Used by | Effect |
 |---|---|---|
-| `CCAM_DESKTOP_BIND_PORT` | `server-host.ts` | Bind exactly this port — disables adoption and fallback. Used by the smoke test. |
-| `CCAM_DESKTOP_NO_ADOPT` | `server-host.ts` | `=1` → never adopt an existing `:4820` server; always start our own. |
-| `CCAM_DESKTOP_VERBOSE` | `logger.ts` | Mirror `info`/`warn` log lines to stdout (errors always go to stderr). |
+| `AM_DESKTOP_BIND_PORT` | `server-host.ts` | Bind exactly this port — disables adoption and fallback. Used by the smoke test. |
+| `AM_DESKTOP_NO_ADOPT` | `server-host.ts` | `=1` → never adopt an existing `:4820` server; always start our own. |
+| `AM_DESKTOP_VERBOSE` | `logger.ts` | Mirror `info`/`warn` log lines to stdout (errors always go to stderr). |
 | `DASHBOARD_DATA_DIR` | `server-host.ts` → server | Set automatically to `app.getPath('userData')/data` so the SQLite database and VAPID keys live in the per-user Application Support directory, never inside the (possibly read-only) `.app` bundle. |
 | `CSC_IDENTITY_AUTO_DISCOVERY` | electron-builder | Set to `false` by the `package` script — forces ad-hoc signing. |
 | `CSC_LINK` / `CSC_KEY_PASSWORD` | electron-builder | Explicit Developer ID `.p12` for real signing. |
@@ -752,7 +752,7 @@ else in [`../SETUP.md`](../SETUP.md) applies).
 > **Writable state never lives in the `.app` bundle.** A packaged, code-signed,
 > or app-translocated bundle is read-only; a database written there would break
 > History Import and event persistence. `server-host.ts` points
-> `DASHBOARD_DATA_DIR` at `~/Library/Application Support/Claude Code Monitor/data/`,
+> `DASHBOARD_DATA_DIR` at `~/Library/Application Support/AgentMonitor/data/`,
 > which is also why your imported history survives an app reinstall or update.
 
 ---
@@ -763,7 +763,7 @@ The Electron main process has no console when launched from Finder, so
 `logger.ts` writes to a per-user file:
 
 ```
-~/Library/Logs/Claude Code Monitor/desktop.log
+~/Library/Logs/AgentMonitor/desktop.log
 ```
 
 Reach it from the tray menu → **Show Logs**.
@@ -775,11 +775,11 @@ Reach it from the tray menu → **Show Logs**.
 | DMG build seems slow | Not hung — `desktop:dmg` packages two architectures back-to-back. See [Build performance](#build-performance--read-this). Use `dmg:arm64` / `dmg:x64` for a single arch. |
 | `hdiutil detach … exit code 1` in CI | Flaky GitHub runner; the CI step already retries with Spotlight disabled. Re-run the job if it still fails. |
 | Dashboard window is blank | The embedded server failed `/api/health` within 30 s — check `desktop.log`. |
-| Gatekeeper blocks the app | Ad-hoc DMG. `xattr -cr "/Applications/Claude Code Monitor.app"`. |
+| Gatekeeper blocks the app | Ad-hoc DMG. `xattr -cr "/Applications/AgentMonitor.app"`. |
 | Hooks not firing | The app installs hooks on first owned-server boot; start a **new** Claude Code session afterwards. Verify entries in `~/.claude/settings.json`. |
 | "Run Claude" says `claude` isn't on your PATH | `shell-path.ts` recovers the login-shell PATH at startup. If `claude` is a shell _alias_ or _function_ (not a real binary), it cannot be spawned — install the `claude` CLI as an executable. Check `desktop.log` for the `user PATH resolved` line. |
 | `desktop:dev` / `desktop:test` fail with `ERR_DLOPEN_FAILED` | A prior DMG build left `better-sqlite3` built for the other CPU arch. `prebuild.js` auto-heals this on the next build; if needed, run `npm run desktop:install`. |
-| Imported history disappeared after reinstall | Fixed — the database now lives in `~/Library/Application Support/Claude Code Monitor/data/`, outside the bundle. A one-time gap exists only across the upgrade from a build that predated this fix; re-run **Import History → Rescan**. |
+| Imported history disappeared after reinstall | Fixed — the database now lives in `~/Library/Application Support/AgentMonitor/data/`, outside the bundle. A one-time gap exists only across the upgrade from a build that predated this fix; re-run **Import History → Rescan**. |
 
 ---
 
@@ -797,7 +797,7 @@ By design, changes outside `desktop/` are kept to a minimum:
   desktop dashboard started empty; moving it into `startBackgroundServices()`
   fixes that.) The server also publishes its live port on startup.
 - **`server/lib/server-info.js`** *(new)* — multi-server discovery file at
-  `~/.claude/.agent-dashboard.json`. Every running dashboard appends its
+  `~/.claude/.agentmonitor.json`. Every running dashboard appends its
   `{port, pid, startedAt}` entry on startup, removes it on clean shutdown,
   and stale entries are pruned by a `process.kill(pid, 0)` liveness check on
   read. Exposes `writeServerInfo`, `removeServerInfo`,

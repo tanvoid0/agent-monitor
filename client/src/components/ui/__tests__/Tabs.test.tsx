@@ -3,7 +3,7 @@
  * @description Tests for the Tabs wrappers (tablist/tab/tabpanel roles, arrow
  * keys change the value, count badge) and SegmentedControl (radiogroup with
  * aria-checked, never empties on re-select).
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect, vi } from "vitest";

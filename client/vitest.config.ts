@@ -1,7 +1,7 @@
 /**
  * @file vitest.config.ts
  * @description Vitest configuration for the client test suite — jsdom environment, React plugin, test globals, and the same build-time `__APP_VERSION__` injection as vite.config.ts so version-dependent components render identically under test.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { readFileSync } from "node:fs";

@@ -21,12 +21,12 @@
  * the "already in the desired state" case, so callers can invoke them freely (e.g. on every
  * app load, or on a settings toggle) without tracking prior state themselves.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/client/src/lib/push.ts`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/client/src/lib/push.ts`
  * **Purpose:** Dashboard module consumed by the React client, MCP tools, or desktop shell depending on deployment mode.
  *
  * ## Design constraints

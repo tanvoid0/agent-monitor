@@ -6,7 +6,7 @@
  * it does not exercise the BrowserWindow (which requires a display) so it
  * runs on headless CI without xvfb. The window itself is covered by manual
  * QA in the PR description.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, before, after } from "node:test";
@@ -67,7 +67,7 @@ function probeHealth(port) {
 let electronProc;
 // Pick a unique high port for each test run so we never accidentally probe an
 // unrelated server (e.g. the user's own `npm start` on 4820). The env var
-// `CCAM_DESKTOP_BIND_PORT` tells the desktop process to bind exactly this port,
+// `AM_DESKTOP_BIND_PORT` tells the desktop process to bind exactly this port,
 // skipping the "adopt an existing healthy server" code path.
 const TEST_PORT = 50000 + Math.floor(Math.random() * 5000);
 
@@ -113,8 +113,8 @@ describe("desktop smoke", () => {
         // the server boots cleanly.
         ELECTRON_DISABLE_GPU: "1",
         ELECTRON_ENABLE_LOGGING: "1",
-        CCAM_DESKTOP_VERBOSE: "1",
-        CCAM_DESKTOP_BIND_PORT: String(TEST_PORT),
+        AM_DESKTOP_VERBOSE: "1",
+        AM_DESKTOP_BIND_PORT: String(TEST_PORT),
       },
       stdio: ["ignore", "pipe", "pipe"],
     });
@@ -140,7 +140,7 @@ describe("desktop smoke", () => {
     assert.equal(
       port,
       TEST_PORT,
-      `desktop process should have bound CCAM_DESKTOP_BIND_PORT=${TEST_PORT}`
+      `desktop process should have bound AM_DESKTOP_BIND_PORT=${TEST_PORT}`
     );
     assert.ok(
       electronProc && !electronProc.killed && electronProc.exitCode === null,

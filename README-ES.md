@@ -73,7 +73,7 @@ Un panel profesional para rastrear y visualizar sus sesiones de agente Claude Co
 > Consulta también [README.md](./README.md) (English), [README-CN.md](./README-CN.md) (中文), [README-VN.md](./README-VN.md) (Tiếng Việt) y [README-KO.md](./README-KO.md) (한국어). Este es el README en español.
 
 > [!NOTE]
-> ¿Necesitas ayuda orientada a tareas? La [Wiki de GitHub](https://github.com/hoangsonww/Claude-Code-Agent-Monitor/wiki) es el manual práctico para el uso diario, las operaciones de equipo, la solución de problemas, la automatización con CLI/MCP y las recetas de despliegue. La [Wiki estática localizada](https://hoangsonww.github.io/Claude-Code-Agent-Monitor/wiki/) sigue siendo el recorrido del producto y la arquitectura en inglés, vietnamita, chino, coreano y español; los contratos técnicos exactos permanecen en [`docs/`](./docs/README.md).
+> ¿Necesitas ayuda orientada a tareas? La [Wiki de GitHub](https://github.com/tanvoid0/agent-monitor/wiki) es el manual práctico para el uso diario, las operaciones de equipo, la solución de problemas, la automatización con CLI/MCP y las recetas de despliegue. La [Wiki estática localizada](https://tanvoid0.github.io/agent-monitor/wiki/) sigue siendo el recorrido del producto y la arquitectura en inglés, vietnamita, chino, coreano y español; los contratos técnicos exactos permanecen en [`docs/`](./docs/README.md).
 
 ---
 
@@ -108,6 +108,7 @@ Un panel profesional para rastrear y visualizar sus sesiones de agente Claude Co
 - [Estructura del proyecto](#estructura-del-proyecto)
 - [Solución de problemas](#solución-de-problemas)
 - [Contribuyendo](#contribuyendo)
+- [Agradecimientos](#agradecimientos)
 - [Licencia](#licencia)
 
 ---
@@ -306,7 +307,7 @@ La barra lateral proporciona acceso rápido a las diez páginas: el Panel de con
 
 El panel de control ofrece un conjunto completo de funciones para monitorear y analizar sus sesiones y agentes de Claude Code:
 
-> **Sesiones del cursor también (informativas):** CCAM ingiere cualquier transcripción del agente que caiga bajo `~/.claude` - en esta máquina y en los remotos sincronizados. El uso del **Cursor** se cuenta de la misma manera: el **Cursor** por casualidad almacena sus sesiones del agente en esos archivos junto con el Código Claude. CCAM no distingue qué aplicación escribió un archivo.
+> **Sesiones del cursor también (informativas):** AgentMonitor ingiere cualquier transcripción del agente que caiga bajo `~/.claude` - en esta máquina y en los remotos sincronizados. El uso del **Cursor** se cuenta de la misma manera: el **Cursor** por casualidad almacena sus sesiones del agente en esos archivos junto con el Código Claude. AgentMonitor no distingue qué aplicación escribió un archivo.
 
 | Característica                            | Descripción                                                                                                                                                                                                                                                                  |
 |------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -321,7 +322,7 @@ El panel de control ofrece un conjunto completo de funciones para monitorear y a
 | **Navegar por referencia**             | Cada sesión, agente, proyecto, herramienta, tipo de evento y modelo que muestra el panel es un **chip de entidad** (`components/entity/EntityRef.tsx`) que enlaza a su página de origen y lleva un **menú contextual de clic derecho / pulsación larga** — *Abrir sesión*, *Abrir agente*, *Abrir conversación*, *Mostrar en Actividad*, *Sesiones del proyecto*, *Mostrar en el tablero*, *Revelar carpeta*, *Copiar ID*, etc. — reflejado por un **botón ⋯** en cada fila y tarjeta (`components/ui/Clickable.tsx`) para los usuarios de ratón y el orden de tabulación. Los chips y menús se construyen a partir de una única tabla de href tipada (`client/src/lib/routes.ts`), así que cada página es direccionable por URL: `/activity?session_id=&agent_id=&tool_name=&event_type=&status=&q=&from=&to=` (listas separadas por comas), `/sessions?status=&cwd=&cwd=&q=` (`cwd` repetido), `/sessions/:id?tab=agents#agent-<id>`, `?tab=timeline&event=<id>`, `?tab=conversation&transcript=<id\|main>`, `?tool_name=` / `?agent_id=` (semillas de filtro de un solo uso), `/kanban?project=<cwd>&density=cards\|rows`, `/workflows?session=&run=`, `/plan/:slug?task=`, `/run?session=&cwd=`. Los destinos de los enlaces profundos se expanden, se desplazan a la vista, se resaltan con un anillo y reciben el foco. Las tarjetas y filas vienen en variantes `card` / `row`, y `Cmd/Ctrl`+clic o clic central en cualquiera de ellas abre una pestaña nueva. |
 | **Un solo atajo**             | `Cmd/Ctrl+K` es la única combinación que reclama el panel, y funciona incluso con el foco dentro de un campo. Una versión anterior incluía toda una capa de atajos —secuencias de navegación con prefijo `g`, teclas de página, una hoja de referencia `?`, una capa de pistas al mantener pulsado el modificador— y se eliminó a propósito: una secuencia es un modo oculto con temporizador, pulsar `g` parecía no hacer nada, y dos mecanismos de navegación dispersan la memoria muscular cuando la paleta ya llega a cada página con búsqueda difusa. Tabby conserva su histórico `Cmd/Ctrl+B` |
 | **Actualizaciones en vivo** | WebSocket push -- sin consultas, actualizaciones instantáneas de la interfaz de usuario                                                                                                                                                                                                                             |
-| **Auto-Descubrimiento** | Las sesiones y los agentes se crean automáticamente a partir de señales del proveedor. Claude Code crea una tarjeta **Esperando** inmediata en `SessionStart`. Codex muestra primero una tarjeta **Esperando** local y solo en memoria al iniciar su TUI interactiva, incluso antes de tener un ID estable. Después, un hook, una fila live-thread o un rollout crea la sesión duradera. Si el usuario selecciona un hilo existente en el selector Resume de Codex, CCAM lee el rollout o writer lock abierto por ese PID exacto y cambia a la sesión duradera reanudada antes del primer mensaje nuevo. La tarjeta temporal nunca se escribe en SQLite, historial, analítica, precios, workflows, alertas ni notificaciones de finalización. |
+| **Auto-Descubrimiento** | Las sesiones y los agentes se crean automáticamente a partir de señales del proveedor. Claude Code crea una tarjeta **Esperando** inmediata en `SessionStart`. Codex muestra primero una tarjeta **Esperando** local y solo en memoria al iniciar su TUI interactiva, incluso antes de tener un ID estable. Después, un hook, una fila live-thread o un rollout crea la sesión duradera. Si el usuario selecciona un hilo existente en el selector Resume de Codex, AgentMonitor lee el rollout o writer lock abierto por ese PID exacto y cambia a la sesión duradera reanudada antes del primer mensaje nuevo. La tarjeta temporal nunca se escribe en SQLite, historial, analítica, precios, workflows, alertas ni notificaciones de finalización. |
 | **Importación de historial** | Importa sesiones de `~/.claude/` al iniciar la sesión. Extracción JSONL mejorada: errores de API (cuota/tarifa/solicitud_invalida), duraciones de turno, punto de entrada (cli/sdk-ts), modos de permiso, conteos de bloqueos de pensamiento, extras de uso (servicio_tier, velocidad, inferencia_geo), errores de resultados de herramientas y archivos JSONL de subagentes (`subagents/agent-*.jsonl` con `.meta.json`). Reabastece sesiones existentes al volver a importar. Los archivos JSONL recientes (< 10 min) se importan como "activos" |
 | **Hierarquía de subagentes** | Árbol de agentes padre-hijo colapsible en el Panel de control y en los Detalles de la sesión. Los agentes con subagentes muestran flechas de expansión/colapso; los agentes hojas muestran un indicador de punto. Se expande automáticamente cuando los subagentes están activos                                                                           |
 | **Agentes de fondo** | Rastrea correctamente a los subagentes con antecedentes sin completar prematuramente                                                                                                                                                                                                         |
@@ -330,7 +331,7 @@ El panel de control ofrece un conjunto completo de funciones para monitorear y a
 | **Cache de transcripciones** | Extracción en tiempo real de transcripciones JSONL: tokens, compactaciones, errores de API (entradas `isApiErrorMessage` almacenadas como eventos `APIError`), duraciones de turno (almacenadas como eventos `TurnDuration`), conteos de bloques de pensamiento y extras de uso (service_tier, velocidad, inference_geo). Las matrices crecientes por entrada se acaban en la cola en `TRANSCRIPT_CACHE_MAX_ARRAY_LEN` (por defecto `1000`, configurable) tanto durante la parseación como al finalizar, por lo que incluso una sesión que se ejecuta durante días no puede crecer una sola entrada de caché sin límites. Cada entrada solo almacena `{mtimeMs, size, bytesRead, result}`, por lo que no hay una copia de sombra de los mismos datos tanto en el nivel superior como dentro de `result`. Los metadatos de la sesión se enriquecen con estos campos en tiempo real |
 | **Notificaciones**                  | Pipe de Web Push completo (VAPID) para una entrega fiable. Llegue incluso cuando la pestaña esté en segundo plano o el navegador esté cerrado. Configurado explícitamente para el soporte de audio de macOS. Intercambios configurables por evento con gestión de suscripciones |
 | **Alertas**                         | Motor de alertas basado en reglas — configurado completamente en **Configuración → Alertas y notificaciones**, un centro de control de **Reglas / Canales / Actividad** con pestañas (sin página separada). Define reglas de alerta con cuatro tipos de condiciones: **patrón de eventos** (correspondencia con el tipo de evento / nombre de la herramienta / texto de resumen, opcionalmente requiriendo N eventos coincidentes dentro de una ventana de tiempo, por ejemplo, "más de 5 errores en 2 minutos"), **inactividad** (sesión activa sin eventos durante N minutos), **agente atascado** (agente sentado en `trabajando`/`esperando` sin actividad durante N minutos) y **umbral de tokens** (total de tokens de la sesión que superan un límite). Las reglas basadas en eventos evalúan el lado del servidor en cada ingestión de gancho (después de la transacción de ingestión, la alerta nunca puede ralentizar o fallar la entrega del gancho); las reglas basadas en el tiempo se ejecutan en un escaneo de 60 s. Las alertas lanzadas se persisten en `alert_events` con **deduplicación de tiempo de espera** por regla + por sesión (por defecto 300 s), se transmiten como mensajes WebSocket `alert_triggered` y aparecen en el feed en vivo de la pestaña **Actividad** con confirmación / confirmación-todo, un filtro solo para no confirmados y enlaces "Ver sesión" por alerta. El soporte de reglas permite habilitar/deshabilitar el alternar y cascadenar su historial al eliminarlo. Las alertas lanzadas también se extienden a **objetivos webhook universales** configurados en la pestaña **Canales**: **14 proveedores de primera clase** más un punto final genérico: **Slack**, **Discord**, **Microsoft Teams**, **Google Chat**, **Mattermost**, **Rocket.Chat** (carga útil de chat nativa); **Telegram** (API de bots), **PagerDuty** (API de eventos v2), **Opsgenie** (API de alertas + autenticación GenieKey), **Splunk On-Call** (VictorOps REST); y **Zapier**, **Make**, **n8n**, **Pipedream** o cualquier punto final **genérico** (envelope JSON limpio con firma opcional **HMAC-SHA256** y encabezados personalizados). Cada proveedor se describe por un registro del lado del servidor que declara su formateador de carga útil, cómo se resuelve su URL (algunos la derivan de las credenciales, por ejemplo Telegram del token del bot, Opsgenie de la región, y otros lo establecen por defecto), y qué campos de credenciales renderiza la interfaz de usuario. Los objetivos admiten el alcance opcional por regla, una sonda "Enviar prueba" sincrónica y un registro de entrega grabado. La entrega se ejecuta separada del camino de alerta con un tiempo de espera de solicitud y un retry/backoff limitado, por lo que nunca puede ralentizar o bloquear el monitoreo; las URL de destino, los secretos y los campos de credenciales se almacenan en el lado del servidor y nunca se devuelven por la API (ocultados/redactados en cada respuesta) |
-| **Notificador de actualización** | El servidor ejecuta periódicamente un `git fetch` no bloqueante y compara la salida local con `origin/master`/`origin/main`/`origin/HEAD`. Cuando el origen está por delante, la interfaz de usuario muestra un modal con el comando exacto `git pull && npm run setup` y un botón **Copiar** con un solo clic; la barra lateral obtiene un botón persistente "Comprueba actualizaciones" con un distintivo en vivo. El panel nunca se actualiza ni se reinicia por sí mismo, ya que el usuario ejecuta el comando en un terminal, por lo que el mecanismo no puede interrumpir las sesiones de desarrollo, la supervisión de pm2/systemd/Docker ni dejar procesos huérfanos |
+| **Notificador de actualización** | El servidor ejecuta periódicamente un `git fetch` no bloqueante y compara la salida local con `origin/master`/`origin/main`/`origin/HEAD`. Cuando el origen está por delante, la interfaz de usuario muestra un modal con el comando exacto `git pull && npm run upgrade` y un botón **Copiar** con un solo clic; la barra lateral obtiene un botón persistente "Comprueba actualizaciones" con un distintivo en vivo. El panel nunca se actualiza ni se reinicia por sí mismo, ya que el usuario ejecuta el comando en un terminal, por lo que el mecanismo no puede interrumpir las sesiones de desarrollo, la supervisión de pm2/systemd/Docker ni dejar procesos huérfanos |
 | **Configuración**                       | Información del sistema, estado del gancho, gestión de precios del modelo, preferencias de notificación, exportación **y restauración** de datos (el modo **Restaurar copia de seguridad** del panel de Historial de Importación acepta una exportación `.json` de hasta 25 MiB y la reimporta de forma idempotente sin sobrescribir filas existentes, por lo que puede consolidar el historial de varias máquinas en un solo panel de control), limpieza de sesiones. La sección de Precios del Modelo expone una ventana emergente de información (el icono `i` junto al título) que explica cómo funciona la búsqueda de reglas (el patrón que coincida primero gana), la sintaxis de carácter wildcard `%` al estilo SQL con ejemplos concretos (`claude-opus-4-7%`, `claude-%-haiku`, ids exactos), y que los precios deben actualizarse manualmente cuando Anthropic publique nuevas tarifas: las sesiones ya almacenadas mantienen el precio aplicado en el momento de la ingestión. El editor de cada regla también lleva un bloque **Tarifas introductorias** plegable (un límite promocional de `AAAA-MM-DD` + precios introductorios por categoría); dejar la fecha vacía significa que no hay promoción, y una fecha vacía borra cualquier tarifa introductoria almacenada. La caja CLAUDE_HOME y el panel de historial de importaciones están completamente impulsados por i18n en en/vi/zh |
 | **Ejecutar agente + Configuración de agentes** | `/run` comienza con una elección entre Claude Code y Codex, y mantiene el selector del proveedor junto al estado En vivo. Claude conserva los modos Conversación y stream-json; Codex usa el protocolo local `app-server` de la CLI para un hilo interactivo real, políticas nativas de aprobación/sandbox, reanudar, detener, salida en vivo y reconexión. Los modelos de Codex proceden directamente de la CLI con sesión iniciada, por lo que los nuevos lanzamientos no requieren una actualización del panel; Claude muestra sus alias duraderos más modelos observados localmente porque su CLI no tiene un comando de lista de modelos. `/cc-config` combina el explorador editable existente de Claude Code con un espacio de trabajo de Codex para valores predeterminados, caché de modelos, perfiles, MCP, proyectos, habilidades, reglas, hooks, complementos instalados y archivos de instrucciones. Sus vistas previas normales ocultan secretos; el editor local explícito admite `config.toml`, `hooks.json`, reglas, habilidades e instrucciones de usuario con guardados atómicos y copias de seguridad obligatorias con marca de tiempo, mientras advierte que no puede validar la sintaxis. Los comandos de perfil de Codex y las rutas de artefactos gestionados se copian con un clic, y las tarjetas de complementos usan el registro de complementos instalados de Codex en lugar de mostrar carpetas de caché. Ambos exploradores se actualizan mediante su vigilante de sistema de archivos específico del proveedor. |
 | **Configuración del agente Codex** | La mitad de Codex de Configuración de agentes lee el catálogo completo de modelos de la cuenta local sin el límite genérico de vista previa que podría mostrar erróneamente cero modelos, e incluye siempre las anulaciones base/de perfil. Crea directamente superposiciones estándar de Codex `<name>.config.toml` en la aplicación; cada tarjeta copia con un clic su comando exacto `codex --profile <name>` y abre un editor protegido. Las rutas de vista previa se canonizan antes de comprobar su contención. El editor rechaza componentes de ruta con enlaces simbólicos bajo la raíz confiable, verifica que el padre canónico siga dentro del ámbito permitido y se niega a guardar contenido de vista previa que incluya `[redacted]`. Los perfiles, hooks, reglas, habilidades e instrucciones comparten acciones al estilo Claude de **Ver fuente / Copiar ruta / Editar / Eliminar**. Cada eliminación permitida se confirma y se respalda primero (una habilidad conserva todo su directorio); `config.toml` es permanentemente solo editable. |
@@ -341,13 +342,13 @@ El panel de control ofrece un conjunto completo de funciones para monitorear y a
 | **Detección de sesiones preexistentes** | Las sesiones que ya están en ejecución cuando se inicia el servidor se importan como "activas" (basadas en la modificación reciente del archivo JSONL). Los eventos de detención también reactivan las sesiones completadas/abandonadas importadas, por lo que el primer gancho de una sesión en progreso siempre la muestra en el panel de control |
 | **Sincronización continua del proyecto** | La importación automática de inicio de sesión de `~/.claude/projects` es única (con puerta de marcador), por lo que una carpeta de proyecto creada **después** del primer lanzamiento, cuyas sesiones nunca pasan por los ganchos (por ejemplo, los ganchos solo para el host desactivados), permanecería invisible hasta una escanear manual. Una sincronización de fondo (`startSessionSync`) cierra esa brecha a través de tres desencadenantes que comparten una caché de mtime + un escaneo único coalescido: un escaneo **immediato** al inicio, un **`fs.watch`** amortiguado que dispara en el instante en que aparece un nuevo archivo de sesión/carpeta de proyecto (recursivo en macOS/Windows; raíz + hijos inmediatos en Linux para evitar el peligro del observador recursivo en el sistema de usuario) y una **petición periódica** (`DASHBOARD_SESSION_SYNC_MS`, por defecto 30 s). Cada escaneo solo reparse los archivos cuyos mtime ha avanzado y transmite `session_created`/`session_updated` (además del agente principal), por lo que la interfaz de usuario se actualiza en vivo; una sesión sin cambios ya en la base de datos se omite sin reparse, por lo que el costo de reiniciar se mantiene O(nuevos/archivos cambiados) |
 | **Ingesta por remote push** | La tercera vía de ingesta de datos de sesión, para la máquina a la que SSH no llega: un portátil itinerante tras NAT, una conexión doméstica con CGNAT — que **envía** sus propios datos de sesión en lugar de que el panel los extraiga. `POST /api/hooks/ingest-batch` acepta un lote por envío — buckets de tokens (cada entrada es el total actual completo de ese bucket, como volver a parsear la transcripción, no un delta), eventos de herramienta y duraciones de turno — y es la única ruta del servidor pensada para ser accesible desde la internet pública. Por eso está **deshabilitada hasta configurar `REMOTE_PUSH_TOKEN`** (si no, responde `503 REMOTE_PUSH_NOT_CONFIGURED`), la protege su propio token y no `DASHBOARD_HOOK_TOKEN`, de modo que endurecer las rutas de hook de loopback nunca abre esta de paso, y rechaza `?token=` para que la credencial no acabe en un registro de acceso del proxy. Los elementos se deduplican por `(session_id, event_type, uuid)` tanto frente a las filas ya confirmadas como dentro del mismo lote, así que reenviar es seguro; el lote se limita a 1000 elementos (`413 BATCH_TOO_LARGE`); y un `session_id` que ya pertenezca a una sesión local o extraída por SSH se rechaza elemento a elemento (`SESSION_LOCALLY_OWNED`) en vez de permitir el secuestro — una sesión enviada solo puede crear una sesión NUEVA o añadir a una que ella misma creó. Los fallos parciales siguen devolviendo `200` con `errors[]` por elemento, y la difusión se emite después de que la transacción se confirme. |
-| **Fuentes de datos remotas** | Recolección en vivo de Claude Code y Codex desde otras máquinas por SSH. Cada fuente refleja de forma independiente `~/.claude/projects` y `~/.codex/sessions` (más `session_index.jsonl` de Codex para conservar títulos renombrados) mediante **scp**, o `wsl.exe` + `tar` para CLIs dentro de WSL. Las etapas aisladas usan los importadores normales de cada proveedor y etiquetan las sesiones con `sessions.source`; una fuente puede ser solo Claude, solo Codex o ambas. El sondeo de `DASHBOARD_REMOTE_SYNC_MS` (15 s por defecto) publica estados y contadores por proveedor. Si un proveedor no está disponible, falla o queda atascado, solo sus sesiones antiguas entran al barrido stale; un proveedor hermano sano sigue siendo propiedad de su espejo. Configure de forma opcional Inicio remoto de Claude e Inicio remoto de Codex independientes en **Configuración → Fuentes de datos remotas** o con `ccam remote-sources`; SSH conserva sus propias credenciales y no se guardan secretos. |
+| **Fuentes de datos remotas** | Recolección en vivo de Claude Code y Codex desde otras máquinas por SSH. Cada fuente refleja de forma independiente `~/.claude/projects` y `~/.codex/sessions` (más `session_index.jsonl` de Codex para conservar títulos renombrados) mediante **scp**, o `wsl.exe` + `tar` para CLIs dentro de WSL. Las etapas aisladas usan los importadores normales de cada proveedor y etiquetan las sesiones con `sessions.source`; una fuente puede ser solo Claude, solo Codex o ambas. El sondeo de `DASHBOARD_REMOTE_SYNC_MS` (15 s por defecto) publica estados y contadores por proveedor. Si un proveedor no está disponible, falla o queda atascado, solo sus sesiones antiguas entran al barrido stale; un proveedor hermano sano sigue siendo propiedad de su espejo. Configure de forma opcional Inicio remoto de Claude e Inicio remoto de Codex independientes en **Configuración → Fuentes de datos remotas** o con `am remote-sources`; SSH conserva sus propias credenciales y no se guardan secretos. |
 | **Diseño Responsivo** | Diseños compatibles con dispositivos móviles con cuadrículas apilables, tablas desplazables y barra lateral plegable                                                                                                                                                                                      |
 | **Localización de la interfaz de usuario** | Cambio de idioma integrado con copia de la interfaz de usuario traducida y etiquetas de accesibilidad para inglés (`en`), chino (`zh`), vietnamita (`vi`), coreano (`ko`) y español (`es`). La cobertura ahora se extiende de extremo a extremo a través de las miniaturas de la herramienta Workflows: cálculos de tarjetas estadísticas e interpretaciones de contenedores de valores, pestañas emergentes "¿Qué / Cómo leer / Por qué" por gráfico, miniatura de la herramienta de desplazamiento sobre cada gráfico (orquestación, flujo de herramientas, tubería, delegación de modelos, concurrencia), las narrativas y sugerencias del panel de detalles de los patrones de flujo de trabajo, la pestaña de información de Configuración → Precios del modelo, el panel CLAUDE_HOME y todo el flujo de historial de importación                                                                                                                                                                       |
 | **Datos de semilla**                      | Script de semilla incorporado para demostraciones y desarrollo                                                                                                                                                                                                                               |
 | **Línea de estado**                     | Línea de estado CLI codificada por color que muestra el modelo, el uso del contexto, la rama de git, los tokens por dirección y el costo de la sesión (USD)                                                                                                                                                            |
 | **Formato de nombres de modelos** | Nombres de modelos fáciles de entender para el usuario en toda la interfaz de usuario: identificadores brutos como `claude-opus-4-7-20260101` o `claude-opus-4-7[1m]` se muestran como "Claude Opus 4.7" o "Claude Opus 4.7 (1M)". Maneja las familias Claude, GPT y Gemini con uniones automáticas de puntos de versión, eliminación de sufijos de fecha/último, eliminación de prefijos del proveedor y formato de etiquetas de ventana de contexto. La página de configuración conserva los nombres brutos para la configuración de reglas de precios |
-| **Mercado de plugins Claude + Codex** | Un árbol compartido de 14 plugins incluye manifests de Claude Code y Codex, dos catálogos, 66 habilidades empaquetadas, 18 subagentes de Claude, 34 comandos de Claude y metadatos OpenAI. La CLI de skills.sh descubre 77 habilidades del repositorio con `npx skills add hoangsonww/Claude-Code-Agent-Monitor --list`. Se instala con `claude plugin marketplace add`, `codex plugin marketplace add` o `npx skills add` |
+| **Mercado de plugins Claude + Codex** | Un árbol compartido de 14 plugins incluye manifests de Claude Code y Codex, dos catálogos, 66 habilidades empaquetadas, 18 subagentes de Claude, 34 comandos de Claude y metadatos OpenAI. La CLI de skills.sh descubre 76 habilidades del repositorio con `npx skills add tanvoid0/agent-monitor --list`. Se instala con `claude plugin marketplace add`, `codex plugin marketplace add` o `npx skills add` |
 | **Ejecutar Claude**                     | Crear subprocesos `claude` directamente desde el panel de control con una interfaz de usuario de streaming de estilo chat. Dos modos: **Conversación** (multi-turnos — la entrada estándar se mantiene abierta, los turnos de seguimiento se envían como paquetes stream-json) y **Una vez** (sin cabeza, solo un mensaje de inicio → solo una respuesta). El modo de conversación también admite **reanudar cualquier sesión existente** a través de `claude --resume <id>` - elige entre tu historial completo de sesiones con un selector de búsqueda. El modo de historial / ejecuciones activas unificado también ofrece dos botones de salto de configuración cero: **Resumen** en cualquier fila de conversación anterior genera `claude --resume <id>` inmediatamente y siembra el chat con la transcripción anterior para que llegues a la vista en vivo con el contexto completo (no es necesario volver a escribir un mensaje de inicio de sesión, el id de generación se queda en espera en stdin hasta que envíes un seguimiento); **Ver** en cualquier fila de una sola ejecución anterior carga la transcripción capturada directamente en el visualizador de ejecuciones como de solo lectura (sin generación, mismo panel, sin controles de Detener/seguimiento). El interruptor de carreras activas en el encabezado le permite dejar una carrera en segundo plano, iniciar otra y volver a adjuntarla más tarde. Re-attach es duradero: el cliente reconcilia el registro de sobrecargas en memoria del generador (`?envelopes=1`) con la transcripción JSONL en disco de la sesión y prefiere la que tenga más mensajes de usuario/asistente, por lo que navegar lejos de una ejecución suspendida y volver mantiene visible todo el historial anterior (el generador solo ve las vueltas posteriores a la generación; el archivo de transcripción tiene anterior + actual). Desplegable de modelos (Opus 4.7 / 1M / Sonnet 4.6 / Haiku 4.5 / personalizado), seleccionador de modo de permiso con advertencia explícita de `bypassPermissions`, campo de **efecto de pensamiento** (bajo / medio / alto - conectado a `--effort`), prelleno automático de cwd prellenado con el **directorio de inicio** del usuario - una ubicación de creación neutral que no hereda el propio contexto de proyecto `.claude` del repositorio del panel de control (agentes, habilidades, reglas, `CLAUDE.md`, `.mcp.json`); se vuelve a conectar al cwd del panel de control si no hay sugerencia de inicio disponible, con el inicio listado primero en los grupos de sugerencias (inicio → panel de control → recientes). Transmisión real de personajes por personaje a través de `--include-partial-messages`, además de una **capa de suavización de máquina de escribir** del lado del cliente que gotea cada `text_delta` / `thinking_delta` a través de `requestAnimationFrame`, por lo que incluso las respuestas cortas (donde claude empaqueta toda la respuesta en uno o dos trozos) parecen escribirse. El código de fusión mantiene intacto el indicador `_streaming` y la matriz `content` acumulada en delta cuando llega el sobre `assistant` canónico de claude a mitad del flujo, por lo que los bloques de pensamiento no se pierden al finalizar. La emisión de WebSocket envuelve cada sobre en `flushSync` para que el agrupamiento automático de React no colapse los picos de deltas en una sola renderización. **Paridad TUI (Nivel 1):** un **banner de limitaciones plegable** que se minimiza a una píldora delgada (nunca desaparece) explicando lo que el modo stream-json puede y no puede hacer frente al TUI terminal; un **editor de comandos con autocompletado de comandos con guiones** con puntuación por niveles (nombre exacto → comienza con → límite de palabra → contiene → subsecuencia → contiene descripción) que enumera los comandos de usuario / proyecto / plugin (ejecutados desde el lado del cliente a través de la expansión de plantillas antes del envío) y muestra comandos de CLI integrados como `/clear`, `/model`, `/config` con un distintivo "Solo CLI, no se ejecutará desde aquí"; **referencias de archivos `@`** con búsqueda borrosa amortiguada en todo el directorio de trabajo de la ejecución (omitiendo `node_modules`, `.git`, `dist`, `build`, etc.); una **ventana de contexto en vivo / medidor de tokens** que muestra tokens de entrada + salida + lectura de caché y costo de ejecución, calculados a partir de `stream_event` y `result.usage` sobres durante la transmisión en vivo y de los bloques de `uso` del asistente finalizados (entrada / salida / lectura de caché / creación de caché) cuando se inician desde una transcripción en reiniciar / ver / volver a adjuntar, para que el medidor se llene inmediatamente en lugar de quedarse en 0/200k. La barra de progreso pasa de índigo → ámbar → rojo al 80 % / 95 % del límite de contexto del modelo; un **encabezado de estado** con el modelo activo, el esfuerzo, el modo de permiso, el directorio actual, el ID de la sesión, el número de sobres y el tiempo transcurrido. Los menús desplegables de autocompletado se abren hacia arriba para que no colisionen con el selector cwd de abajo. Indicador de en vivo / sin conexión junto al título. La guardia de origen común en la ruta evita que el navegador genere ataques de tráfico cruzado. La concurrencia no está efectivamente limitada por defecto (techo de cordura de 10000 para evitar que las pistolas de pie fork-bomb causen problemas en el cliente; la TUI terminal no tiene límite y nosotros tampoco). Establezca `RUN_MAX_CONCURRENT` si desea un techo real. Las sesiones generadas disparan los mismos ganchos que cualquier proceso `claude`, por lo que aparecen automáticamente en Sesiones / Análisis / Kanban / Flujos de trabajo, y las superficies Sesiones / Detalle de sesión muestran un distintivo / banner verde **▶ Ejecutar** que vuelve a enlazar con la página Ejecutar para cualquier sesión que se esté ejecutando actualmente desde allí |
 | **Explorador de Configuración de Claude** | Un inspector de 12 pestañas en `/cc-config` para todo lo que Claude Code sabe sobre: habilidades, subagentes, comandos de guión, estilos de salida, complementos (con el conteo de contribuciones por complemento + autor/licencia/Página de inicio de `plugin.json`), mercados (con el conteo de complementos leído de cada `marketplace.json`), servidores MCP, ganchos (con la lista de scripts `~/.claude/hooks/`), configuraciones (un resumen de **Configuración actual** a un vistazo de las opciones que controlan los controles `/config` — modelo, verbose, tema, estilo de salida, esfuerzo, compactación automática, notificaciones, ... — resueltas en los ámbitos de usuario/proyecto/proyecto local con opciones no establecidas mostradas como predeterminadas, además de la vista estructurada de clave-valor por archivo + interruptor JSON bruto, redacción de clave secreta), memoria (los archivos `CLAUDE.md` del usuario + proyecto **más** el almacenamiento de memoria basado en archivos por proyecto — cada `*.md` inferior a `~/.claude/projects/<slug>/memory/`, es decir, un índice `MEMORY.md` más un archivo por hecho recordado, a menudo más de 100; agrupados por proyecto en secciones colapsables que dividen los archivos de índice de los archivos por hecho, con una caja de búsqueda y enlaces de índice `MEMORY.md` interactivos que saltan a — desplazar hacia arriba + resaltar — el archivo de hecho correspondiente), atajos de teclado (agrupados por contexto con chips `<kbd>`) y línea de estado (configuración + contenido del script). Para superficies de archivos de texto de bajo riesgo (habilidades / agentes / comandos / estilos de salida / memoria, incluidos los archivos de memoria automática por proyecto), la página admite **crear / editar / eliminar con copias de seguridad con hora y fecha obligatorias** escritas atómicamente fuera de los directorios que Claude Code escanea, además de una modalidad de Copias de seguridad con comandos de restauración `mv` construidos automáticamente. Los plugins, MCP, ganchos en la configuración y los archivos `settings.json` permanecen de solo lectura con banners explicativos + comandos CLI copiables para que el usuario sepa el comando exacto que debe ejecutar él mismo. **Actualizaciones en vivo**: un `cc-watcher` que se ejecuta en el servidor utiliza `fs.watch` en `~/.claude/` (recursivo donde la plataforma lo admite) además de `~/.claude.json`, retrasado a 500 ms, para transmitir un mensaje WebSocket `cc_config_changed` cada vez que cambian las configuraciones de Claude Code, ya sea a través de mutaciones del panel de control o herramientas externas (instalación de un complemento en la CLI, edición manual de `settings.json`, eliminación de una nueva habilidad). La página se suscribe y se vuelve a recuperar automáticamente; una píldora en vivo / sin conexión junto al título muestra el estado de WebSocket |
 | **Tabby**                          | Un compañero de gato flotante atado en la esquina inferior derecha de cada página. Construido enteramente sobre el existente WebSocket `eventBus` — **sin nuevo backend, sin clave API, sin nuevas dependencias**. Una mascota SVG reactiva con ojos que rastrean el cursor y **ocho estados de ánimo** derivados del flujo de la sesión en vivo (`idle`, `watching`, `happy`, `worried`, `stuck`, `thinking`, `sleeping`, `disconnected`), cada uno con su propia animación (golpe de cola, levantamiento de orejas, movimiento de cabeza, sacudida, brillo, zzz, alerta "!"). **Bolas de diálogo automáticas** publican chistes cortos, moderados y coalescidos sobre eventos notables (sesión iniciada/terminada, errores, ejecución completada) y se pueden silenciar. Haz clic en el gato o presiona **⌘B / Ctrl+B** (Esc cierra) para abrir un **panel** con una línea de estado en vivo (`N en vivo · M con errores · estado de conexión`), acciones rápidas (salta a Ejecutar Claude / Actividad / Sesiones / sesiones con errores, silenciar burbujas, eliminar alertas) y una casilla de **Pregunta**: las preguntas de estado simples ("¿qué está ejecutando?", "algunos errores", "estado") se responden localmente a partir de datos caché, mientras que cualquier otra pregunta se envía a la página de **Ejecutar Claude** (enlaces profundos a `/run?prompt=…`) para iniciar una sesión de Claude Code real. Accesible (operable con teclado, burbujas `aria-live`, respeta `prefers-reduced-motion`), degrada de forma segura a un estado tranquilo de `desconectado` si la conexión está rota, puede activarse o desactivarse en **Configuración** (localizado en en/zh/vi/ko/es). La implementación vive en `client/src/components/Tabby/` |
@@ -373,8 +374,8 @@ El panel de control ofrece un conjunto completo de funciones para monitorear y a
 ### 1. instalar
 
 ```bash
-git clone https://github.com/hoangsonww/Claude-Code-Agent-Monitor.git
-cd Claude-Code-Agent-Monitor
+git clone https://github.com/tanvoid0/agent-monitor.git
+cd agent-monitor
 npm run setup
 ```
 
@@ -422,12 +423,12 @@ npm run build && npm start
 npm run mcp:start              # stdio (default — for MCP host integration)
 npm run mcp:start:http         # HTTP + SSE server on port 8819
 npm run mcp:start:repl         # interactive CLI with tab completion
-ccam mcp stdio                 # lanzador estable usado por los plugins incluidos
+am mcp stdio                 # lanzador estable usado por los plugins incluidos
 ```
 
 Para el modo stdio, configure su host MCP (Claude Code / Claude Desktop / otros clientes MCP):
 
-- comando: `ccam`
+- comando: `am`
 - argumentos: `["mcp", "stdio"]`
 
 Para el modo HTTP, dirija a los clientes MCP remotos a `http://127.0.0.1:8819/mcp` (HTTP transmisible por flujo) o `http://127.0.0.1:8819/sse` (SSE heredado).
@@ -446,10 +447,10 @@ Crea 8 sesiones de muestra, 23 agentes y 106 eventos para que puedas explorar la
 
 Si prefieres no mantener un terminal abierto, instala la aplicación de escritorio **opcional nativa**. Incorpora el servidor en el proceso, agrega un icono de barra de menú / área de notificaciones ( bandeja) y admite el inicio automático al iniciar sesión (elementos de inicio de sesión de macOS / inicio de sesión de Windows).
 
-El camino más rápido es **descargar un instalador precompilado** desde la [última versión de GitHub](https://github.com/hoangsonww/Claude-Code-Agent-Monitor/releases/latest) (CI publica automáticamente una `vX.Y.Z` cada vez que `package.json` se actualiza en `master`):
+El camino más rápido es **descargar un instalador precompilado** desde la [última versión de GitHub](https://github.com/tanvoid0/agent-monitor/releases/latest) (CI publica automáticamente una `vX.Y.Z` cada vez que `package.json` se actualiza en `master`):
 
-- **macOS** — agarra `ClaudeCodeMonitor-<version>-arm64.dmg` (Apple Silicon) o `-x64.dmg` (Intel) y arrastra **Claude Code Monitor.app** a `/Applications`.
-- **Windows** — obtenga `ClaudeCodeMonitor-Setup-<version>-x64.exe` (instalador) o `ClaudeCodeMonitor-<version>-x64-portable.exe` (sin instalar) y ejecútelo.
+- **macOS** — agarra `AgentMonitor-<version>-arm64.dmg` (Apple Silicon) o `-x64.dmg` (Intel) y arrastra **AgentMonitor.app** a `/Applications`.
+- **Windows** — obtenga `AgentMonitor-Setup-<version>-x64.exe` (instalador) o `AgentMonitor-<version>-x64-portable.exe` (sin instalar) y ejecútelo.
 
 Para construirlos tú mismo en su lugar:
 
@@ -483,7 +484,7 @@ npm run docker:full:up
 Los puertos del host solo se enlazan a loopback por defecto: Dashboard `4820`, MCP `8819`, Nginx `8080`, Prometheus `9090` y Grafana `3000`. Los homes de Claude/Codex se montan como solo lectura. Nginx bloquea hooks, métricas y MCP en el borde salvo que se habiliten explícitamente.
 
 > [!IMPORTANT]
-> Instale los hooks en el host. Los hooks remotos usan `CCAM_DASHBOARD_URL=https://...` y `CCAM_HOOK_TOKEN`; los destinos no-loopback exigen HTTPS. Consulte [DEPLOYMENT.md](DEPLOYMENT.md).
+> Instale los hooks en el host. Los hooks remotos usan `AM_DASHBOARD_URL=https://...` y `AM_HOOK_TOKEN`; los destinos no-loopback exigen HTTPS. Consulte [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ---
 
@@ -518,7 +519,7 @@ sequenceDiagram
 ### Ciclo de vida del gancho
 
 1. **Claude Code** dispara un gancho al inicio de la sesión, al uso de la herramienta, al final de la vuelta, al final de la finalización del subagente y al final de la sesión.
-2. **Hook Handler** (`scripts/hook-handler.js`) lee el evento JSON desde stdin, resuelve los paneles de control en vivo a través de `~/.claude/.agent-dashboard.json` (o `CLAUDE_DASHBOARD_PORT` si está configurado), y POSTa la misma carga útil a **un solo destino de ingestión por directorio de datos SQLite único** (el puerto más bajo gana cuando Docker y `npm run dev` comparten `~/.claude/agent-dashboard`, por lo que los eventos nunca se ingieren dos veces). Los servidores con bases de datos **diferentes** (por ejemplo, la aplicación de escritorio que utiliza su propia carpeta de Soporte de Aplicaciones junto con `npm run dev`) todavía reciben cada uno los ganchos. Falla silenciosamente con un tiempo de espera de red de seguridad de 5 s, por lo que nunca bloquea el Código Claude, y las promesas por destino nunca se rechazan, por lo que un único oyente muerto no puede hacer que los demás se mueran de hambre.
+2. **Hook Handler** (`scripts/hook-handler.js`) lee el evento JSON desde stdin, resuelve los paneles de control en vivo a través de `~/.claude/.agentmonitor.json` (o `CLAUDE_DASHBOARD_PORT` si está configurado), y POSTa la misma carga útil a **un solo destino de ingestión por directorio de datos SQLite único** (el puerto más bajo gana cuando Docker y `npm run dev` comparten `~/.claude/agentmonitor`, por lo que los eventos nunca se ingieren dos veces). Los servidores con bases de datos **diferentes** (por ejemplo, la aplicación de escritorio que utiliza su propia carpeta de Soporte de Aplicaciones junto con `npm run dev`) todavía reciben cada uno los ganchos. Falla silenciosamente con un tiempo de espera de red de seguridad de 5 s, por lo que nunca bloquea el Código Claude, y las promesas por destino nunca se rechazan, por lo que un único oyente muerto no puede hacer que los demás se mueran de hambre.
 3. **Servidor** procesa el evento dentro de una transacción SQLite:
 - Crea automáticamente sesiones y agentes principales en el primer contacto
 - Detecta las llamadas de la herramienta `Agent` para rastrear la creación de subagentes
@@ -660,76 +661,79 @@ Para los clones de git, el servidor `git fetch` periódicamente `origin` y compa
 
 ---
 
-## CLI `ccam`
+## CLI `am`
 
-La superficie completa de funciones del panel de control también está disponible desde cualquier terminal a través de la CLI **`ccam`** sin dependencias (`bin/ccam.js`). Se vincula automáticamente por `npm run setup` (a través de `npm link`), después de lo cual `ccam <command>` funciona desde cualquier directorio. Descubre el panel de control en ejecución a través de `~/.claude/.agent-dashboard.json` (el mismo registro de servidor en vivo que utiliza el gestor de ganchos), con las sobrepasadas de las variables de entorno `CLAUDE_DASHBOARD_PORT` / `DASHBOARD_PORT`, cayendo en `http://127.0.0.1:4820`.
+> **¿Actualizas desde v2.x (CCAM)?** El proyecto pasó a llamarse **AgentMonitor** en v3.0.0. `ccam` sigue funcionando como alias de `am`; las variables de entorno `CCAM_*` heredadas se copian a sus sucesoras `AM_*` al arrancar (el valor definido con el nombre nuevo tiene prioridad); el registro del servidor en vivo pasó de `~/.claude/.agent-dashboard.json` a `~/.claude/.agentmonitor.json` (se reescribe en el siguiente arranque); y el marketplace/ID de plugins cambió de `ccam-*@claude-code-agent-monitor-plugins` a `am-*@agentmonitor-plugins`, así que reinstala los plugins que uses.
+
+La superficie completa de funciones del panel de control también está disponible desde cualquier terminal a través de la CLI **`am`** sin dependencias (`bin/am.js`). Se vincula automáticamente por `npm run setup` (a través de `npm link`), después de lo cual `am <command>` funciona desde cualquier directorio. Descubre el panel de control en ejecución a través de `~/.claude/.agentmonitor.json` (el mismo registro de servidor en vivo que utiliza el gestor de ganchos), con las sobrepasadas de las variables de entorno `CLAUDE_DASHBOARD_PORT` / `DASHBOARD_PORT`, cayendo en `http://127.0.0.1:4820`.
 
 ```bash
 # Server
-ccam status                       # ● running / ○ not running indicator
-ccam start [--port N]             # start the server in the background (detached)
-ccam repl                         # interactive shell (also: shell, i)
+am status                       # ● running / ○ not running indicator
+am start [--port N]             # start the server in the background (detached)
+am repl                         # interactive shell (also: shell, i)
 
 # Monitoring
-ccam health                       # is the dashboard up?
-ccam stats                        # totals, today's events, status distributions
-ccam kanban                       # sessions + agents grouped by status columns
-ccam tail [--session <id>]        # live event feed in the terminal (Ctrl+C stops)
+am health                       # is the dashboard up?
+am stats                        # totals, today's events, status distributions
+am kanban                       # sessions + agents grouped by status columns
+am tail [--session <id>]        # live event feed in the terminal (Ctrl+C stops)
 
 # Data
-ccam sessions [--status s] [--q text] [--limit n]
-ccam session <id>                 # detail: agent tree, cost, recent events
-ccam agents   [--status s] [--session id]
-ccam events   [--session id] [--limit n]
+am sessions [--status s] [--q text] [--limit n]
+am session <id>                 # detail: agent tree, cost, recent events
+am agents   [--status s] [--session id]
+am events   [--session id] [--limit n]
 
 # Insights
-ccam analytics                    # token totals, top tools, agent types
-ccam workflows [--session id]     # workflow intelligence stats and patterns
-ccam runs [--session id]          # dynamic Workflow-tool runs
-ccam cost [--session <id>]        # total estimated cost with per-model breakdown
+am analytics                    # token totals, top tools, agent types
+am workflows [--session id]     # workflow intelligence stats and patterns
+am runs [--session id]          # dynamic Workflow-tool runs
+am cost [--session <id>]        # total estimated cost with per-model breakdown
                                   # (--session scopes to one; shows tool surcharges;
                                   #  warns about models with usage but no pricing rule)
 
 # Alerts & webhooks
-ccam alerts [--unacked]           # fired-alert feed
-ccam alerts ack <id> | ack-all    # acknowledge alerts
-ccam rules                        # list alert rules
-ccam webhooks                     # list webhook targets
-ccam webhooks test <id>           # send a synthetic test alert
+am alerts [--unacked]           # fired-alert feed
+am alerts ack <id> | ack-all    # acknowledge alerts
+am rules                        # list alert rules
+am webhooks                     # list webhook targets
+am webhooks test <id>           # send a synthetic test alert
 
 # Pricing
-ccam pricing                      # list model pricing rules (incl. fast-mode & intro columns)
-ccam pricing set <pattern> --input N --output N [--cache-read N --cache-write N]
+am pricing                      # list model pricing rules (incl. fast-mode & intro columns)
+am pricing set <pattern> --input N --output N [--cache-read N --cache-write N]
                  [--cache-write-1h N] [--fast-input N --fast-output N]
                  [--intro-input N --intro-output N … --intro-until YYYY-MM-DD]
-ccam pricing delete <pattern>
-ccam pricing reset
+am pricing delete <pattern>
+am pricing reset
 
 # Import
-ccam import rescan                # re-scan ~/.claude/projects
-ccam import path <dir>            # import every .jsonl under a directory
+am import rescan                # re-scan ~/.claude/projects
+am import path <dir>            # import every .jsonl under a directory
 
 # Administration
-ccam doctor                       # connectivity, hooks, and database diagnosis
-ccam info                         # raw system info JSON
-ccam export [file.json]           # full JSON data export
-ccam import-data <file.json>      # restore an export (idempotent, non-destructive)
-ccam cleanup --hours N --days M   # abandon stale / purge old sessions
-ccam reinstall-hooks              # reinstall Claude Code hooks
-ccam update-check                 # is the checkout behind upstream? (prints the update command)
-ccam clear-data --yes             # delete ALL data (requires --yes)
-ccam open                         # open the dashboard in your browser
-ccam version                      # print the CLI version (also --version / -v)
+am doctor                       # connectivity, hooks, and database diagnosis
+am info                         # raw system info JSON
+am export [file.json]           # full JSON data export
+am import-data <file.json>      # restore an export (idempotent, non-destructive)
+am cleanup --hours N --days M   # abandon stale / purge old sessions
+am reinstall-hooks              # reinstall Claude Code hooks
+am update-check                 # is the checkout behind upstream? (prints the update command)
+am clear-data --yes             # delete ALL data (requires --yes)
+am open                         # open the dashboard in your browser
+am version                      # print the CLI version (also --version / -v)
 ```
 
-Los comandos respaldados por API necesitan que el servidor esté en ejecución, cuando no lo está, **los comandos de solo lectura recurren a la lectura directa de `data/dashboard.db`** (con un banner explícito de `⚠ Modo sin conexión`, y las sesiones `activas` almacenadas pero inactivas corregidas por el mismo proceso de detección de actividad que utiliza el rastreador del servidor), mientras que los comandos que no pueden ejecutarse correctamente sin el servidor (`tail` en vivo, análisis/matemáticas de costos, mutaciones) imprimen el indicador `○ El servidor del panel de control NO está en ejecución` con la razón específica y los comandos de inicio; `ccam start` inicia un servidor de producción en segundo plano. Los comandos de lectura siempre son seguros; el único comando destructivo (`clear-data`) se niega a ejecutarse sin un explícito `--yes`. La salida es una interfaz de usuario completa del terminal: tablas dibujadas en cuadrados con columnas numéricas alineadas a la derecha, iconos de estado (`● activo`, `○ esperando`, `✔ completado`, `✖ error`), gráficos de barras en línea para estadísticas/análisis/costes y árboles de agentes reales `├─`/`└─`: con los colores ANSI habilitados automáticamente en un TTY, desactivados cuando se canalizan y controlables a través de `--no-color` / `NO_COLOR` / `FORCE_COLOR`. Para una sesión de monitoreo en vivo, **`ccam repl`** (alias `shell` / `i`) abre un shell interactivo donde escribes comandos sin el prefijo `ccam` — con un banner de bienvenida CCAM, completado de pestañas, historial persistente de teclas de flecha, una solicitud de estado del servidor en vivo (`● host` arriba / `○ offline` abajo), un menú `help` / `help <cmd>` agrupado y un `watch [secs] <cmd>` incorporado que actualiza automáticamente cualquier comando (por ejemplo, `watch 5 kanban`); cada línea se ejecuta como un proceso hijo aislado, por lo que una negativa fuera de línea o un `tail` bloqueante nunca derriba el shell. Si `ccam` no está en tu PATH (por ejemplo, Se necesitan permisos elevados para `npm link`, ejecute `npm link` una vez desde la raíz del repositorio. Referencia completa: banderas, orden de descubrimiento, el REPL, modelo de seguridad, scripts/códigos de salida, resolución de problemas, en [docs/CLI.md](./docs/CLI.md).
+Los comandos respaldados por API necesitan que el servidor esté en ejecución, cuando no lo está, **los comandos de solo lectura recurren a la lectura directa de `data/dashboard.db`** (con un banner explícito de `⚠ Modo sin conexión`, y las sesiones `activas` almacenadas pero inactivas corregidas por el mismo proceso de detección de actividad que utiliza el rastreador del servidor), mientras que los comandos que no pueden ejecutarse correctamente sin el servidor (`tail` en vivo, análisis/matemáticas de costos, mutaciones) imprimen el indicador `○ El servidor del panel de control NO está en ejecución` con la razón específica y los comandos de inicio; `am start` inicia un servidor de producción en segundo plano. Los comandos de lectura siempre son seguros; el único comando destructivo (`clear-data`) se niega a ejecutarse sin un explícito `--yes`. La salida es una interfaz de usuario completa del terminal: tablas dibujadas en cuadrados con columnas numéricas alineadas a la derecha, iconos de estado (`● activo`, `○ esperando`, `✔ completado`, `✖ error`), gráficos de barras en línea para estadísticas/análisis/costes y árboles de agentes reales `├─`/`└─`: con los colores ANSI habilitados automáticamente en un TTY, desactivados cuando se canalizan y controlables a través de `--no-color` / `NO_COLOR` / `FORCE_COLOR`. Para una sesión de monitoreo en vivo, **`am repl`** (alias `shell` / `i`) abre un shell interactivo donde escribes comandos sin el prefijo `am` — con un banner de bienvenida AgentMonitor, completado de pestañas, historial persistente de teclas de flecha, una solicitud de estado del servidor en vivo (`● host` arriba / `○ offline` abajo), un menú `help` / `help <cmd>` agrupado y un `watch [secs] <cmd>` incorporado que actualiza automáticamente cualquier comando (por ejemplo, `watch 5 kanban`); cada línea se ejecuta como un proceso hijo aislado, por lo que una negativa fuera de línea o un `tail` bloqueante nunca derriba el shell. Si `am` no está en tu PATH (por ejemplo, Se necesitan permisos elevados para `npm link`, ejecute `npm link` una vez desde la raíz del repositorio. Referencia completa: banderas, orden de descubrimiento, el REPL, modelo de seguridad, scripts/códigos de salida, resolución de problemas, en [docs/CLI.md](./docs/CLI.md).
 
 ## Scripts npm
 
 | Comando                 | Descripción                                                |
 | ----------------------- | ---------------------------------------------------------- |
-| `npm run setup`         | Instalar dependencias de root, cliente, extensión y MCP, compilar MCP y enlazar `ccam` |
-| `npm run update:pull-setup` | `git pull --ff-only` luego `npm run setup` (actualización manual) |
+| `npm run setup`         | Instalar dependencias de root, cliente, extensión y MCP, compilar MCP y enlazar `am` |
+| `npm run upgrade`       | Reinstala desde el checkout actual, paso a paso: quita el enlace global anterior de la CLI, `npm run setup`, `npm run build`, reinstala los hooks (`-- --codex` / `-- --both` para elegir CLIs), `-- --desktop` también reconstruye el instalador de Windows, e imprime versión anterior → nueva |
+| `npm run update:pull-setup` | `git pull --ff-only` luego `npm run upgrade` |
 | `npm run dev`           | Iniciar el servidor (modo de observación) + el cliente (Vite HMR) de forma concurrente |
 | `npm run dev:server` | Inicia Express con un supervisor de código con antirrebote y reinicio ordenado |
 | `npm run dev:client` | Iniciar solo el servidor de desarrollo Vite                             |
@@ -754,8 +758,8 @@ Los comandos respaldados por API necesitan que el servidor esté en ejecución, 
 | `npm run mcp:dev:http` | Ejecutar el servidor MCP en modo de desarrollo (`tsx`, HTTP + SSE) |
 | `npm run mcp:dev:repl` | Ejecutar el servidor MCP en modo de desarrollo (`tsx`, REPL interactivo) |
 | `npm run mcp:typecheck` | Verificar el tipo de la fuente MCP sin emitir la salida de la compilación |
-| `npm run mcp:docker:build` | Construir la imagen del contenedor MCP con Docker (`agent-dashboard-mcp:local`) |
-| `npm run mcp:podman:build` | Construir la imagen del contenedor MCP con Podman (`localhost/agent-dashboard-mcp:local`) |
+| `npm run mcp:docker:build` | Construir la imagen del contenedor MCP con Docker (`agentmonitor-mcp:local`) |
+| `npm run mcp:podman:build` | Construir la imagen del contenedor MCP con Podman (`localhost/agentmonitor-mcp:local`) |
 | `npm run desktop:install` | Instala Electron + electron-builder en el espacio de trabajo `desktop/` (reconstruye `better-sqlite3` para la ABI de Electron); realiza pruebas preliminares de la construcción nativa de `better-sqlite3` e imprime ayuda de configuración factible (incluyendo una alternativa sin cadena de herramientas) en caso de fallo |
 | `npm run desktop:dev` | Construye y lanza la aplicación Electron para escritorio para iteraciones locales |
 | `npm run desktop:build` | Compila las fuentes TypeScript del escritorio en `desktop/out/`      |
@@ -833,7 +837,6 @@ graph TD
   - `debug-live-issue`
   - `update-project-docs`
   - `file-headers`
-  - `push-to-forked-pr`
   - `i18n-parity`
 - Subagentes:
   - `backend-reviewer`
@@ -990,7 +993,7 @@ Detalles completos: [mcp/README.md](./mcp/README.md)
 
 ## Capa de planificación
 
-La capa de planificación une el `PROGRESS.md` de un proyecto (hitos → pasos → carriles → casillas) con las propias sesiones, agentes y eventos de CCAM para el `cwd` de ese proyecto, de modo que cada casilla del tablero muestra el agente que la está trabajando en vivo, qué ejecutó, qué falló y cuánto costó — calculado bajo demanda a partir de datos que CCAM ya estaba recopilando, sin necesidad de mantener sincronizado un rastreador aparte. El descubrimiento es automático: cualquier proyecto con un `PROGRESS.md` bajo un `cwd` en el que CCAM haya visto una sesión en los últimos 7 días se detecta y se vigila en busca de cambios, sin ningún paso de registro.
+La capa de planificación une el `PROGRESS.md` de un proyecto (hitos → pasos → carriles → casillas) con las propias sesiones, agentes y eventos de AgentMonitor para el `cwd` de ese proyecto, de modo que cada casilla del tablero muestra el agente que la está trabajando en vivo, qué ejecutó, qué falló y cuánto costó — calculado bajo demanda a partir de datos que AgentMonitor ya estaba recopilando, sin necesidad de mantener sincronizado un rastreador aparte. El descubrimiento es automático: cualquier proyecto con un `PROGRESS.md` bajo un `cwd` en el que AgentMonitor haya visto una sesión en los últimos 7 días se detecta y se vigila en busca de cambios, sin ningún paso de registro.
 
 <p align="center">
   <img src="images/plan.png" alt="Capa de planificación — tablero de construcción" width="100%">
@@ -1057,7 +1060,7 @@ npm run openapi:yaml
 
 ### Métricas de Prometheus y Grafana
 
-`GET /api/metrics` expone los contadores en vivo del panel de control: sesiones/agentes por estado, totales de eventos y tokens, clientes conectados en tiempo real, fuentes remotas configuradas, tiempo de actividad del proceso/memoria y versión de la compilación, en el formato de exposición de texto de Prometheus, para que CCAM pueda ser raspado en su propia pila de observabilidad. Una pila Prometheus + Grafana lista para usar con **cuatro paneles de control auto-provisionados** (página de inicio predeterminada: **CCAM - Visión general**) se encuentra en [`monitoring/`](./monitoring/README.md).
+`GET /api/metrics` expone los contadores en vivo del panel de control: sesiones/agentes por estado, totales de eventos y tokens, clientes conectados en tiempo real, fuentes remotas configuradas, tiempo de actividad del proceso/memoria y versión de la compilación, en el formato de exposición de texto de Prometheus, para que AgentMonitor pueda ser raspado en su propia pila de observabilidad. Una pila Prometheus + Grafana lista para usar con **cuatro paneles de control auto-provisionados** (página de inicio predeterminada: **AgentMonitor - Visión general**) se encuentra en [`monitoring/`](./monitoring/README.md).
 
 **npm (sin Docker - macOS, Linux o Windows):**
 
@@ -1083,21 +1086,21 @@ npm run monitoring:verify
 ```
 
 <p align="center">
-<img src="images/grafana.png" alt="Grafana CCAM — Panel de control general con sesión en vivo, métricas de eventos y tokens" width="100%">
+<img src="images/grafana.png" alt="Grafana AgentMonitor — Panel de control general con sesión en vivo, métricas de eventos y tokens" width="100%">
 <br>
-<em>📊 <strong>Grafana · CCAM — Descripción general</strong> — panel de control principal predeterminado (cuatro tableros provistos automáticamente): instantánea de la flota, totales de la base de datos, gráficos de desglose y tarifas — todo desde raspados en vivo de <code>/api/metrics</code></em>
+<em>📊 <strong>Grafana · AgentMonitor — Descripción general</strong> — panel de control principal predeterminado (cuatro tableros provistos automáticamente): instantánea de la flota, totales de la base de datos, gráficos de desglose y tarifas — todo desde raspados en vivo de <code>/api/metrics</code></em>
 </p>
 
 <p align="center">
-<img src="images/prometheus-console.png" alt="Consola Prometheus CCAM con tarjetas métricas y tablas de sesiones" width="100%">
+<img src="images/prometheus-console.png" alt="Consola Prometheus AgentMonitor con tarjetas métricas y tablas de sesiones" width="100%">
 <br>
-<em>🔥 <strong>Prometheus · Consola CCAM</strong> — página de inicio preconstruida en <code>/consoles/index.html</code> que consulta directamente a Prometheus para obtener la salud de la escraping, los totales de sesiones, los eventos, los tokens y los enlaces de gráfico para profundizar</em>
+<em>🔥 <strong>Prometheus · Consola AgentMonitor</strong> — página de inicio preconstruida en <code>/consoles/index.html</code> que consulta directamente a Prometheus para obtener la salud de la escraping, los totales de sesiones, los eventos, los tokens y los enlaces de gráfico para profundizar</em>
 </p>
 
 <p align="center">
-<img src="images/prometheus-query.png" alt="Interfaz de usuario gráfica de Prometheus con consulta CCAM PromQL" width="100%">
+<img src="images/prometheus-query.png" alt="Interfaz de usuario gráfica de Prometheus con consulta AgentMonitor PromQL" width="100%">
 <br>
-<em>📈 <strong>Prometheus · Gráfico</strong> — ejecute PromQL contra métricas CCAM raspadas (por ejemplo, <code>sum(ccam_sessions)</code>, <code>ccam_events_total</code>, <code>rate(ccam_tokens_total[5m])</code>) con enlaces de inicio desde la consola CCAM y <a href="./monitoring/README.md">monitoring/README.md</a></em>
+<em>📈 <strong>Prometheus · Gráfico</strong> — ejecute PromQL contra métricas AgentMonitor raspadas (por ejemplo, <code>sum(am_sessions)</code>, <code>am_events_total</code>, <code>rate(am_tokens_total[5m])</code>) con enlaces de inicio desde la consola AgentMonitor y <a href="./monitoring/README.md">monitoring/README.md</a></em>
 </p>
 
 Consulte [docs/API.md → Metricas](./docs/API.md#metrics) para obtener la lista completa de métricas y los detalles de scraping/autenticación.
@@ -1296,7 +1299,7 @@ Las líneas de base de compactación preservan los totales de tokens previos a l
 El importador nunca cuenta el uso o el costo dos veces.
 
 Un cuarto modo: **Restaurar copia de seguridad**, importa una exportación completa del panel de control.
-`.json` (producido por el botón **Exportar datos**, `ccam export`, o
+`.json` (producido por el botón **Exportar datos**, `am export`, o
 `GET /api/settings/export`) en lugar de transcripciones brutas de Claude. Esto es
 La contraparte de ida y vuelta de Exportación: restaura cada tabla (sesiones,
 Agentes, eventos, uso de tokens, flujos de trabajo, ejecuciones de panel de control, reglas de alerta,
@@ -1304,7 +1307,7 @@ model_pricing) y es idempotente + no destructivo, una sesión ya
 El presente se omite por completo, por lo que puedes **consolidar varios de forma segura
 Máquinas** en un panel de control sin duplicar ni sobrescribir
 Cualquier cosa. Apoyado por `server/lib/data-transfer.js` y
-`POST /api/settings/import` (también `ccam import-data <file>`).
+`POST /api/settings/import` (también `am import-data <file>`).
 
 ```mermaid
 flowchart LR
@@ -1383,10 +1386,10 @@ Construir un transitorio ilimitado antes de la finalización.
 
 **Seguridad.** La extracción de archivos valida cada entrada contra el camino
 Travesía (se rechazan los caminos absolutos y los segmentos `..`). A
-Tapón de extracción configurable (`CCAM_IMPORT_MAX_EXTRACT_BYTES`, predeterminado
+Tapón de extracción configurable (`AM_IMPORT_MAX_EXTRACT_BYTES`, predeterminado
 4 GB) detiene las bombas zip/tar/gzip. El tamaño de carga se limita por archivo
-(`CCAM_IMPORT_MAX_BYTES`, por defecto 1 GB) y por solicitud
-(`CCAM_IMPORT_MAX_FILES`, por defecto 2000). Todos los directorios de ensayo son
+(`AM_IMPORT_MAX_BYTES`, por defecto 1 GB) y por solicitud
+(`AM_IMPORT_MAX_FILES`, por defecto 2000). Todos los directorios de ensayo son
 Por solicitud y recuperado en `finalmente`, incluyendo cuando multer rechaza
 Todos los archivos en primer plano.
 
@@ -1552,7 +1555,7 @@ Ambos extremos devuelven la misma forma de carga útil:
 {
   "git_repo": true,
   "update_available": true,
-  "repo_root": "/Users/you/Claude-Code-Agent-Monitor",
+  "repo_root": "/Users/you/agent-monitor",
   "remote_ref": "upstream/master",
   "canonical_remote": "upstream",
   "current_branch": "master",
@@ -1562,7 +1565,7 @@ Ambos extremos devuelven la misma forma de carga útil:
   "local_sha": "abc1234...",
   "remote_sha": "def5678...",
   "commits_behind": 3,
-  "manual_command": "cd \"/...\" && git fetch upstream && git merge --ff-only upstream/master && npm run setup",
+  "manual_command": "cd \"/...\" && git fetch upstream && git merge --ff-only upstream/master && npm run upgrade",
   "situation_note": "You're on 'master' tracking 'origin/master'. This command fast-forwards your branch from upstream/master (the canonical default).",
   "message": "3 commit(s) on upstream/master not in your checkout."
 }
@@ -1702,7 +1705,7 @@ El **Monitor de Agentes del Código Claude** está disponible como una extensió
 Para la configuración detallada del desarrollador, consulte los directorios [.vscode](./.vscode) y [vscode-extension](./vscode-extension).
 
 > [¡CONSEJO!]
-> Extensión en el mercado de VS Code: [Claude Code Agent Monitor](https://marketplace.visualstudio.com/items?itemName=hoangsonw.claude-code-agent-monitor)
+> Extensión en el mercado de VS Code: [AgentMonitor](https://marketplace.visualstudio.com/items?itemName=hoangsonw.agentmonitor)
 
 ---
 
@@ -1711,13 +1714,13 @@ Para la configuración detallada del desarrollador, consulte los directorios [.v
 El panel de control también se envía como una **aplicación de escritorio nativa opcional** que instales una vez y olvidas - un `.app` de macOS (distribuido como un `.dmg`) y un `.exe` de Windows (un instalador NSIS más una construcción portátil sin instalación). Vive en el espacio de trabajo `desktop/`, un hermano de `client/`, `server/`, `mcp/` y `vscode-extension/`, y está construido con **Electron 35**.
 
 <p align="center">
-<img src="images/macos.png" alt="Claude Code Monitor ejecutándose como una aplicación de escritorio nativa" width="100%">
+<img src="images/macos.png" alt="AgentMonitor ejecutándose como una aplicación de escritorio nativa" width="100%">
 <br>
 <em>🍎🪟 <strong>Aplicación para escritorio</strong> — shell nativo con una barra de menú / icono de área de notificaciones ( bandeja), Abre al iniciar sesión y un bloqueo de instancia única. El mismo panel de control, en una ventana real del sistema operativo (macOS mostrado).</em>
 </p>
 
 <p align="center">
-<img src="images/windows_app.png" alt="Claude Code Monitor ejecutándose como una aplicación de escritorio nativa de Windows, mostrando el Feed de Actividad con la barra de menú de la ventana de Windows y el panel Tabby" width="100%">
+<img src="images/windows_app.png" alt="AgentMonitor ejecutándose como una aplicación de escritorio nativa de Windows, mostrando el Feed de Actividad con la barra de menú de la ventana de Windows y el panel Tabby" width="100%">
 <br>
 <em>🪟 El mismo panel de control que una aplicación nativa de Windows: icono de la zona de notificaciones ( bandeja), menú de ventana nativo y Abrir al iniciar sesión.</em>
 </p>
@@ -1730,7 +1733,7 @@ A diferencia de ejecutar el panel de control desde un terminal, la aplicación d
 
 ```mermaid
 flowchart LR
-    subgraph electron["Claude Code Monitor.app — one Electron process"]
+    subgraph electron["AgentMonitor.app — one Electron process"]
         main["Electron Main Process<br/>Node 22 / Electron 35"]
         host["server-host.ts<br/>port discovery · adoption · ABI patch"]
         express["server/index.js<br/>Express API · SQLite · WebSocket"]
@@ -1765,27 +1768,27 @@ Al iniciar la aplicación:
 ### Características
 
 - **Ícono de bandeja** — superficie de estado siempre activa (barra de menú de macOS / área de notificaciones de Windows). Haga clic con el botón izquierdo para alternar la ventana del panel de control; haga clic con el botón derecho para abrir un menú contextual con **Abrir panel de control**, **Abrir en el navegador**, **Reiniciar servidor**, **Mostrar registros**, **Abrir al iniciar sesión** (alternar) y **Salir**. macOS utiliza un glifo de plantilla con tono; Windows utiliza el icono `icon.ico` coloreado (una plantilla negra desaparecería en la barra de tareas oscura).
-- **Icono de ventana y barra de tareas**: el `BrowserWindow` está conectado al logotipo de la aplicación de color (`icon.ico` en Windows, `icon.png` en otro lugar), por lo que la barra de título / barra de tareas muestra el verdadero icono de Claude Code Monitor: incluso una ejecución de `npm run desktop:dev` sin descomprimir ya no muestra el icono genérico de Electron.
+- **Icono de ventana y barra de tareas**: el `BrowserWindow` está conectado al logotipo de la aplicación de color (`icon.ico` en Windows, `icon.png` en otro lugar), por lo que la barra de título / barra de tareas muestra el verdadero icono de AgentMonitor: incluso una ejecución de `npm run desktop:dev` sin descomprimir ya no muestra el icono genérico de Electron.
 - **Menú de aplicación nativo** — menú estándar de "Acerca de" / "Archivo" / "Editar" / "Ver" / "Ventana" / "Ayuda" con atajos de `⌘` / `Ctrl`. El elemento **Archivo → Abrir Panel de control** (`⌘1`) es **solo para macOS**: macOS mantiene una barra de menú global después de que la ventana se oculte, por lo que puede volver a abrir la ventana: en Windows/Linux el menú está adjunto a la ventana y no se puede ejecutar mientras está oculto, por lo que vuelva a abrir desde el menú **Abrir Panel de control** de la bandeja (que eleva la ventana de forma fiable incluso cuando está minimizada o detrás de otras ventanas).
 - **Inicio automático al iniciar sesión** — alterna **Abrir al iniciar sesión** desde la bandeja o el menú de la aplicación. En macOS se registra a través de la moderna API `SMAppService`, por lo que la entrada aparece en **Configuración del sistema → General → Elementos de inicio de sesión**; en Windows escribe una entrada `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` por usuario, visible en **Gestor de tareas → Inicio**.
 - **El cierre de la ventana oculta, el servidor sigue funcionando**: cerrar la ventana solo la oculta; el servidor y la bandeja permanecen abiertos. Haga clic en la bandeja para volver a mostrar la ventana.
 - **Bloqueo de una sola instancia**: el doble lanzamiento simplemente centra la ventana existente; no hay segundo servidor, no hay colisión de puertos. (Se aplica en todas las plataformas).
-- **Los datos sobreviven a las reinstalaciones y actualizaciones**: la base de datos SQLite y las claves VAPID se encuentran en el directorio de datos de la aplicación por usuario **fuera del paquete de la aplicación / directorio de instalación**: `~/Biblioteca/Soporte de Aplicaciones/Claude Code Monitor/data/` en macOS, `%APPDATA%\Claude Code Monitor\data\` en Windows. Un paquete empaquetado es de solo lectura, por lo que escribir la base de datos dentro de él rompería la Importación de Historial y la persistencia de eventos; mantenerla en datos de la aplicación soluciona eso y significa que su historial importado no se ve afectado cuando reemplaza o actualiza la aplicación. (El desinstalador NSIS de Windows guarda estos datos por defecto).
+- **Los datos sobreviven a las reinstalaciones y actualizaciones**: la base de datos SQLite y las claves VAPID se encuentran en el directorio de datos de la aplicación por usuario **fuera del paquete de la aplicación / directorio de instalación**: `~/Biblioteca/Soporte de Aplicaciones/AgentMonitor/data/` en macOS, `%APPDATA%\AgentMonitor\data\` en Windows. Un paquete empaquetado es de solo lectura, por lo que escribir la base de datos dentro de él rompería la Importación de Historial y la persistencia de eventos; mantenerla en datos de la aplicación soluciona eso y significa que su historial importado no se ve afectado cuando reemplaza o actualiza la aplicación. (El desinstalador NSIS de Windows guarda estos datos por defecto).
 - **`claude` CLI en PATH** — en macOS la aplicación recupera su `PATH` de inicio de sesión en el arranque, por lo que la función **Ejecutar Claude** funciona incluso si una aplicación lanzada desde Finder/Dock de otro modo solo heredaría el `PATH` mínimo de launchd. (En Windows el `PATH` de usuario heredado ya lo incluye).
-- **Registros**: el proceso principal escribe en `~/Biblioteca/Registros/Claude Code Monitor/desktop.log` (macOS) o `%APPDATA%\Claude Code Monitor\logs\desktop.log` (Windows); accédalo desde el menú **Mostrar registros** del panel.
+- **Registros**: el proceso principal escribe en `~/Biblioteca/Registros/AgentMonitor/desktop.log` (macOS) o `%APPDATA%\AgentMonitor\logs\desktop.log` (Windows); accédalo desde el menú **Mostrar registros** del panel.
 
 ### Entiéndelo
 
-**Opción A - descargar un instalador preconstruido (recomendado).** Desde **[Versiones → última](https://github.com/hoangsonww/Claude-Code-Agent-Monitor/releases/latest)** (público, sin inicio de sesión en GitHub). CI publica automáticamente una nueva versión `vX.Y.Z` cada vez que la versión en `package.json` se actualiza en `master`, por lo que este enlace siempre sirve para la construcción actual:
+**Opción A - descargar un instalador preconstruido (recomendado).** Desde **[Versiones → última](https://github.com/tanvoid0/agent-monitor/releases/latest)** (público, sin inicio de sesión en GitHub). CI publica automáticamente una nueva versión `vX.Y.Z` cada vez que la versión en `package.json` se actualiza en `master`, por lo que este enlace siempre sirve para la construcción actual:
 
 | Plataforma | Activo | Notas |
 | --- | --- | --- |
-| macOS (Apple Silicon) | `ClaudeCodeMonitor-<ver>-arm64.dmg` | arrastrar a `/Applications` |
-| macOS (Intel) | `ClaudeCodeMonitor-<ver>-x64.dmg` | arrastrar a `/Applications` |
-| Windows (instalador) | `ClaudeCodeMonitor-Setup-<ver>-x64.exe` | instalación por usuario, sin administrador |
-| Windows (portátil) | `ClaudeCodeMonitor-<ver>-x64-portable.exe` | ejecutar sin instalar |
+| macOS (Apple Silicon) | `AgentMonitor-<ver>-arm64.dmg` | arrastrar a `/Applications` |
+| macOS (Intel) | `AgentMonitor-<ver>-x64.dmg` | arrastrar a `/Applications` |
+| Windows (instalador) | `AgentMonitor-Setup-<ver>-x64.exe` | instalación por usuario, sin administrador |
+| Windows (portátil) | `AgentMonitor-<ver>-x64-portable.exe` | ejecutar sin instalar |
 
-Las construcciones frescas por compromiso también existen como artefactos CI (se requiere inicio de sesión, retención de 14 días): `ClaudeCodeMonitor-dmg` del trabajo `🍎 macOS Desktop (DMG)` y `ClaudeCodeMonitor-win` del trabajo `🪟 Windows Desktop (EXE)`, útiles para probar `master` antes de la próxima etiqueta de lanzamiento.
+Las construcciones frescas por compromiso también existen como artefactos CI (se requiere inicio de sesión, retención de 14 días): `AgentMonitor-dmg` del trabajo `🍎 macOS Desktop (DMG)` y `AgentMonitor-win` del trabajo `🪟 Windows Desktop (EXE)`, útiles para probar `master` antes de la próxima etiqueta de lanzamiento.
 
 **Opción B: construíselo tú mismo.** Desde la raíz del repositorio:
 
@@ -1793,8 +1796,8 @@ Las construcciones frescas por compromiso también existen como artefactos CI (s
 npm run setup                # install root + client deps, build client, install hooks
 npm run build                # build the React client (client/dist)
 npm run desktop:install      # install Electron + electron-builder into desktop/ (preflights native deps; prints setup help on failure)
-npm run desktop:dmg:arm64    # macOS:   fast single-arch DMG → desktop/release/ClaudeCodeMonitor-<ver>-arm64.dmg
-npm run desktop:win          # Windows: NSIS installer → desktop/release/ClaudeCodeMonitor-Setup-<ver>-x64.exe
+npm run desktop:dmg:arm64    # macOS:   fast single-arch DMG → desktop/release/AgentMonitor-<ver>-arm64.dmg
+npm run desktop:win          # Windows: NSIS installer → desktop/release/AgentMonitor-Setup-<ver>-x64.exe
 ```
 
 > [!NOTA]
@@ -1805,11 +1808,11 @@ npm run desktop:win          # Windows: NSIS installer → desktop/release/Claud
 **macOS:**
 
 1. Haga doble clic en el `.dmg` para montarlo.
-2. Arrastra **Claude Code Monitor.app** a tu carpeta `/Applications`.
+2. Arrastra **AgentMonitor.app** a tu carpeta `/Applications`.
 3. El DMG está **firmado ad hoc** por defecto, por lo que macOS Gatekeeper advierte en la primera vez que se inicia (*"Apple no pudo verificar..."*). Borra el atributo de cuarentena:
 
    ```bash
-   xattr -cr "/Applications/Claude Code Monitor.app"
+   xattr -cr "/Applications/AgentMonitor.app"
    ```
 
 O abra **Configuración del sistema → Privacidad y seguridad** y haga clic en **Abrir de todos modos**.
@@ -1818,7 +1821,7 @@ O abra **Configuración del sistema → Privacidad y seguridad** y haga clic en 
 
 **Ventanas:**
 
-1. Ejecute `ClaudeCodeMonitor-Setup-<ver>-x64.exe`. Instala **por usuario** en `%LOCALAPPDATA%\Programas\Claude Code Monitor` (sin elevación de administrador) y le permite elegir el directorio de instalación; o ejecute `*-portable.exe` para iniciar sin instalar.
+1. Ejecute `AgentMonitor-Setup-<ver>-x64.exe`. Instala **por usuario** en `%LOCALAPPDATA%\Programas\AgentMonitor` (sin elevación de administrador) y le permite elegir el directorio de instalación; o ejecute `*-portable.exe` para iniciar sin instalar.
 2. El instalador está **sin firmar** por defecto, por lo que Windows **SmartScreen** puede mostrar *"Windows protegido su PC"* en la primera vez que se inicie, haga clic en **Más información → Ejecutar de todos modos**.
 3. Lanzar desde el menú Inicio / atajo del escritorio. Aparece el icono de la zona de notificaciones ( bandeja) y se abre la ventana del panel de control.
 
@@ -1868,7 +1871,7 @@ El DMG de macOS está **firmado ad hoc** por defecto, por lo que cualquiera pued
 - **`better-sqlite3`** es el único módulo nativo en el árbol de dependencias, y un módulo nativo debe compilarse contra la ABI exacta del Nodo A en la que se ejecuta. El espacio de trabajo `desktop/` envía su **propia copia** de `better-sqlite3` reconstruida para la ABI de Electron y utiliza un redireccionamiento `require` local al proceso para apuntar a `server/db.js`; la copia de la raíz del repositorio se mantiene construida para el Nodo del sistema (por lo que `npm run test:server` sigue funcionando).
 - **La construcción de un DMG reconstruye `better-sqlite3` para la arquitectura de destino**, lo que puede dejar la copia del escritorio construida para la otra arquitectura de CPU y romper `npm run desktop:dev` / `npm run desktop:test` con `ERR_DLOPEN_FAILED`. El paso de `prebuild` del escritorio ahora **auto-curará** el módulo nativo para la máquina local en la próxima construcción, por lo que los flujos de desarrollo y prueba de humo siguen funcionando después de una construcción de DMG específica de la arquitectura. El paso de `prebuild` también **falla rápidamente con ayuda de configuración** cuando el binario nativo de `better-sqlite3` falta por completo, convirtiendo un fallo de tiempo de ejecución en un error de tiempo de construcción que se puede copiar y pegar.
 - El **único cambio fuera de `desktop/`** es una refactorización que preserva el comportamiento de `server/index.js`: su post-listen bootstrap (programador de actualización, `cc-watcher`, reconciliación de ejecución huérfana) se extrajo en un `startBackgroundServices()` exportado para que el servidor incorporado ejecute exactamente lo que ejecuta `node server/index.js`. El camino independiente de `node server/index.js` no ha cambiado funcionalmente; `client/`, `scripts/`, `mcp/` y `vscode-extension/` no han sido tocados.
-- Dos trabajos de CI de escritorio filtrados por ruta construyen, prueban con humo y empaquetan la aplicación: **`🍎 macOS Desktop (DMG)`** en `macos-latest` (carga el artefacto `ClaudeCodeMonitor-dmg` — dos DMG de arquitectura única) y **`🪟 Windows Desktop (EXE)`** en `windows-latest` (carga el artefacto `ClaudeCodeMonitor-win` — instalador NSIS + portátil). En una actualización de versión a `master`, el trabajo de `release` adjunta **ambos** los DMG de macOS y los `.exe` de Windows a la publicación de la versión `vX.Y.Z` de GitHub. El icono de Windows (`desktop/assets/icon.ico`) se compromete al repositorio (regénéralo desde `icon.png` con `npm run build:win-icon`, PowerShell + .NET, sin herramientas adicionales).
+- Dos trabajos de CI de escritorio filtrados por ruta construyen, prueban con humo y empaquetan la aplicación: **`🍎 macOS Desktop (DMG)`** en `macos-latest` (carga el artefacto `AgentMonitor-dmg` — dos DMG de arquitectura única) y **`🪟 Windows Desktop (EXE)`** en `windows-latest` (carga el artefacto `AgentMonitor-win` — instalador NSIS + portátil). En una actualización de versión a `master`, el trabajo de `release` adjunta **ambos** los DMG de macOS y los `.exe` de Windows a la publicación de la versión `vX.Y.Z` de GitHub. El icono de Windows (`desktop/assets/icon.ico`) se compromete al repositorio (regénéralo desde `icon.png` con `npm run build:win-icon`, PowerShell + .NET, sin herramientas adicionales).
 
 Para la guía completa del usuario (descargar, instalar, Gatekeeper / SmartScreen, menú de bandeja, inicio automático), consulte [`DESKTOP.md`](./DESKTOP.md); para la referencia del contribuyente / arquitectura (modelo de proceso, ciclo de vida de arranque, descubrimiento de puertos, pipeline de construcción, con diagramas de Mermaid), consulte [`desktop/README.md`](./desktop/README.md).
 
@@ -1947,23 +1950,23 @@ erDiagram
 
 ## Mercado de complementos
 
-CCAM incluye 14 plugins compartidos por Claude Code y Codex, 66 habilidades empaquetadas, 18 subagentes de Claude, 34 comandos de Claude, 3 herramientas CLI, 3 configuraciones de hooks y 2 plugins con MCP. La CLI de skills.sh descubre 77 habilidades en todo el repositorio. Consulta `docs/PLUGINS.md` para el catálogo, la instalación y la validación.
+AgentMonitor incluye 14 plugins compartidos por Claude Code y Codex, 66 habilidades empaquetadas, 18 subagentes de Claude, 34 comandos de Claude, 3 herramientas CLI, 3 configuraciones de hooks y 2 plugins con MCP. La CLI de skills.sh descubre 76 habilidades en todo el repositorio. Consulta `docs/PLUGINS.md` para el catálogo, la instalación y la validación.
 
 ### Agregar el mercado
 
 ```bash
-claude plugin marketplace add hoangsonww/Claude-Code-Agent-Monitor
-codex plugin marketplace add hoangsonww/Claude-Code-Agent-Monitor
+claude plugin marketplace add tanvoid0/agent-monitor
+codex plugin marketplace add tanvoid0/agent-monitor
 ```
 
 ### Instalar habilidades con skills.sh
 
 ```bash
-# Enumerar las 77 habilidades sin instalarlas
-npx skills add hoangsonww/Claude-Code-Agent-Monitor --list
+# Enumerar las 76 habilidades sin instalarlas
+npx skills add tanvoid0/agent-monitor --list
 
 # Instalar una habilidad para Claude Code y Codex en el proyecto actual
-npx skills add hoangsonww/Claude-Code-Agent-Monitor \
+npx skills add tanvoid0/agent-monitor \
   --skill mcp-server \
   --agent claude-code \
   --agent codex \
@@ -1975,7 +1978,7 @@ npx skills update --project --yes
 npx skills remove mcp-server --yes
 
 # Añadir --global para instalar a nivel de usuario y administrar ese ámbito
-npx skills add hoangsonww/Claude-Code-Agent-Monitor \
+npx skills add tanvoid0/agent-monitor \
   --skill mcp-server \
   --agent claude-code \
   --agent codex \
@@ -1986,42 +1989,42 @@ npx skills update --global --yes
 npx skills remove --global mcp-server --yes
 ```
 
-Las instalaciones de proyecto usan `.agents/skills/` y enlaces específicos de cada agente. Las habilidades globales de Claude Code se instalan de forma predeterminada en `~/.claude/skills/`, o en el subdirectorio `skills/` de `CLAUDE_CONFIG_DIR` cuando se define. Las habilidades globales de Codex se instalan de forma predeterminada en `~/.codex/skills/`, o en el subdirectorio `skills/` de `CODEX_HOME` cuando se define. Las instalaciones para varios agentes pueden deduplicar archivos en un almacén compartido y enlazar esos destinos. La CLI de skills.sh descubre 77 habilidades del repositorio, incluidas 66 habilidades de plugins y las habilidades de mantenimiento del repositorio.
+Las instalaciones de proyecto usan `.agents/skills/` y enlaces específicos de cada agente. Las habilidades globales de Claude Code se instalan de forma predeterminada en `~/.claude/skills/`, o en el subdirectorio `skills/` de `CLAUDE_CONFIG_DIR` cuando se define. Las habilidades globales de Codex se instalan de forma predeterminada en `~/.codex/skills/`, o en el subdirectorio `skills/` de `CODEX_HOME` cuando se define. Las instalaciones para varios agentes pueden deduplicar archivos en un almacén compartido y enlazar esos destinos. La CLI de skills.sh descubre 76 habilidades del repositorio, incluidas 66 habilidades de plugins y las habilidades de mantenimiento del repositorio.
 
 ### Plugins disponibles
 
 | Plugin | Comando de instalación | Habilidades |
 |--------|----------------|--------|
-| **ccam-analytics** | `claude plugin install ccam-analytics@claude-code-agent-monitor-plugins` | `reporte de sesión`, `desglose de costos`, `tendencias de uso`, `puntuación de productividad` |
-| **ccam-cost-guard** | `claude plugin install ccam-cost-guard@claude-code-agent-monitor-plugins` | `budget-set`, `spend-forecast`, `cost-alert`, `model-savings`, `daily-budget-check` |
-| **ccam-productividad** | `claude plugin install ccam-productivity@claude-code-agent-monitor-plugins` | `daily-standup`, `weekly-report`, `sprint-summary`, `workflow-optimizer` |
-| **ccam-devtools** | `claude plugin install ccam-devtools@claude-code-agent-monitor-plugins` | `session-debug`, `hook-diagnostics`, `data-export`, `health-check` |
-| **ccam-insights** | `claude plugin install ccam-insights@claude-code-agent-monitor-plugins` | `detectar patrones`, `alerta de anomalías`, `sugerencias de optimización`, `comparar sesiones` |
-| **ccam-sessions** | `claude plugin install ccam-sessions@claude-code-agent-monitor-plugins` | `session-search`, `session-timeline`, `transcript-replay`, `cwd-rollup`, `session-cleanup` |
-| **ccam-workflows** | `claude plugin install ccam-workflows@claude-code-agent-monitor-plugins` | `dag-map`, `delegation-audit`, `concurrency-report`, `error-propagation`, `fleet-runs` |
-| **calidad ccam** | `claude plugin install ccam-quality@claude-code-agent-monitor-plugins` | `escaneo de errores`, `reporte de errores de API`, `auditoría de fallos de gancho`, `verificación slo`, `alerta de regresión` |
-| **ccam-config** | `claude plugin install ccam-config@claude-code-agent-monitor-plugins` | `config-audit`, `memory-review`, `skill-inventory`, `mcp-audit`, `hook-inventory` |
-| **ccam-dashboard** | `claude plugin install ccam-dashboard@claude-code-agent-monitor-plugins` | `dashboard-status`, `quick-stats` + servidor MCP |
-| **ccam-runner** | `claude plugin install ccam-runner@claude-code-agent-monitor-plugins` | `run-agent`, `run-history` |
-| **ccam-integrations** | `claude plugin install ccam-integrations@claude-code-agent-monitor-plugins` | `alert-management`, `webhook-management`, `remote-collection` |
-| **ccam-platform** | `claude plugin install ccam-platform@claude-code-agent-monitor-plugins` | `config-explorer`, `history-portability`, `hook-setup`, `mcp-server` |
-| **ccam-reports** | `claude plugin install ccam-reports@claude-code-agent-monitor-plugins` | `executive-report`, `cost-report`, `reliability-report`, `workflow-report` |
+| **am-analytics** | `claude plugin install am-analytics@agentmonitor-plugins` | `reporte de sesión`, `desglose de costos`, `tendencias de uso`, `puntuación de productividad` |
+| **am-cost-guard** | `claude plugin install am-cost-guard@agentmonitor-plugins` | `budget-set`, `spend-forecast`, `cost-alert`, `model-savings`, `daily-budget-check` |
+| **am-productividad** | `claude plugin install am-productivity@agentmonitor-plugins` | `daily-standup`, `weekly-report`, `sprint-summary`, `workflow-optimizer` |
+| **am-devtools** | `claude plugin install am-devtools@agentmonitor-plugins` | `session-debug`, `hook-diagnostics`, `data-export`, `health-check` |
+| **am-insights** | `claude plugin install am-insights@agentmonitor-plugins` | `detectar patrones`, `alerta de anomalías`, `sugerencias de optimización`, `comparar sesiones` |
+| **am-sessions** | `claude plugin install am-sessions@agentmonitor-plugins` | `session-search`, `session-timeline`, `transcript-replay`, `cwd-rollup`, `session-cleanup` |
+| **am-workflows** | `claude plugin install am-workflows@agentmonitor-plugins` | `dag-map`, `delegation-audit`, `concurrency-report`, `error-propagation`, `fleet-runs` |
+| **calidad am** | `claude plugin install am-quality@agentmonitor-plugins` | `escaneo de errores`, `reporte de errores de API`, `auditoría de fallos de gancho`, `verificación slo`, `alerta de regresión` |
+| **am-config** | `claude plugin install am-config@agentmonitor-plugins` | `config-audit`, `memory-review`, `skill-inventory`, `mcp-audit`, `hook-inventory` |
+| **am-dashboard** | `claude plugin install am-dashboard@agentmonitor-plugins` | `dashboard-status`, `quick-stats` + servidor MCP |
+| **am-runner** | `claude plugin install am-runner@agentmonitor-plugins` | `run-agent`, `run-history` |
+| **am-integrations** | `claude plugin install am-integrations@agentmonitor-plugins` | `alert-management`, `webhook-management`, `remote-collection` |
+| **am-platform** | `claude plugin install am-platform@agentmonitor-plugins` | `config-explorer`, `history-portability`, `hook-setup`, `mcp-server` |
+| **am-reports** | `claude plugin install am-reports@agentmonitor-plugins` | `executive-report`, `cost-report`, `reliability-report`, `workflow-report` |
 
 ### Herramientas CLI incluidas
 
-- `ccam-stats` — Panel de control terminal (sesiones, costos, tokens con bases de referencia de compactación)
-- `ccam-doctor` — Diagnóstico del sistema (API, base de datos, ganchos, frescura de los datos)
-- `ccam-export` — Exportación de datos (JSON, CSV) para sesiones, eventos, análisis, costos
+- `am-stats` — Panel de control terminal (sesiones, costos, tokens con bases de referencia de compactación)
+- `am-doctor` — Diagnóstico del sistema (API, base de datos, ganchos, frescura de los datos)
+- `am-export` — Exportación de datos (JSON, CSV) para sesiones, eventos, análisis, costos
 
 ### Ejemplo de uso
 
 ```bash
 # In Claude Code, after installing a plugin:
-/ccam-analytics:session-report latest
-/ccam-analytics:cost-breakdown this week
-/ccam-productivity:daily-standup today
-/ccam-insights:pattern-detect tools
-/ccam-dashboard:quick-stats
+/am-analytics:session-report latest
+/am-analytics:cost-breakdown this week
+/am-productivity:daily-standup today
+/am-insights:pattern-detect tools
+/am-dashboard:quick-stats
 ```
 
 > Una prueba del servidor (`server/__tests__/plugins-marketplace.test.js`) valida la bijectividad de la carpeta marketplace ↔ `plugins/` y el `plugin.json`, agentes, habilidades y comandos de cada plugin.
@@ -2035,14 +2038,14 @@ Las instalaciones de proyecto usan `.agents/skills/` y enlaces específicos de c
 Una utilidad independiente de línea de estado CLI para Claude Code que muestra el nombre del modelo, el usuario, el directorio de trabajo, la rama de git, la barra de uso de la ventana de contexto, el número de tokens por dirección y el costo de la sesión, todo ello codificado por colores con secuencias de escape ANSI.
 
 ```
-nguyens6@host ~/agent-dashboard/client | Sonnet 4.6 | main | ████████░░ 79% | 3↑ 2↓ 156586c | $0.4231
+nguyens6@host ~/agentmonitor/client | Sonnet 4.6 | main | ████████░░ 79% | 3↑ 2↓ 156586c | $0.4231
 ```
 
 | Segmento | Color                | Ejemplo                                                        |
 | ----------- | -------------------- | -------------------------------------------------------------- |
 | Modelo | Cian                 | `Soneto 4.6`                                                   |
 | Usuario | Verde                | `nguyens6`                                                     |
-| CWD         | Amarillo               | `~/agent-dashboard`                                            |
+| CWD         | Amarillo               | `~/agentmonitor`                                            |
 | Rama de Git | Magenta | `main`                                                         |
 | Barra de contexto | Verde / Amarillo / Rojo | `████████░░ 79%`                                               |
 | Tokens | Verde / Cian / Oscuro | `3↑ 2↓ 156586c` (verde `↑` entrando, cian `↓` saliendo, caché oscuro `c`) |
@@ -2212,7 +2215,7 @@ flowchart LR
 
 ### Implementación en la nube
 
-`deployments/` funciona en cualquier Kubernetes compatible, incluidos EKS, GKE, AKS, OKE y clústeres autogestionados. CCAM usa SQLite, por lo que todos los manifiestos admitidos fuerzan **exactamente un dashboard writer activo por persistent volume** con Recreate. HPA, active-active, múltiples réplicas, blue-green y canary no se admiten mientras SQLite sea el persistence backend.
+`deployments/` funciona en cualquier Kubernetes compatible, incluidos EKS, GKE, AKS, OKE y clústeres autogestionados. AgentMonitor usa SQLite, por lo que todos los manifiestos admitidos fuerzan **exactamente un dashboard writer activo por persistent volume** con Recreate. HPA, active-active, múltiples réplicas, blue-green y canary no se admiten mientras SQLite sea el persistence backend.
 
 - Helm rechaza réplicas múltiples/HPA y admite digest, PVC retenido, Ingress o Gateway API, Secret externo, NetworkPolicy, MCP y ServiceMonitor opcionales.
 - Kustomize proporciona Restricted PSS base, overlays y componentes MCP, monitoring, Gateway API y CSI snapshot.
@@ -2230,7 +2233,7 @@ Consulte [DEPLOYMENT.md](DEPLOYMENT.md) y [deployments/README.md](deployments/RE
 ## Estructura del proyecto
 
 ```
-agent-dashboard/
+agentmonitor/
 |-- CLAUDE.md                   # Claude Code project memory and working agreements
 |-- AGENTS.md                   # Codex project instructions
 |-- package.json                # Root scripts (dashboard + MCP helpers) + server dependencies
@@ -2243,22 +2246,22 @@ agent-dashboard/
 |-- .agents/plugins/
 |   +-- marketplace.json        # Manifest del mercado Codex (14 plugins)
 |-- plugins/
-|   |-- ccam-analytics/         # Analytics: session reports, cost breakdown, usage trends, productivity score
+|   |-- am-analytics/         # Analytics: session reports, cost breakdown, usage trends, productivity score
 |   |   |-- .claude-plugin/plugin.json
 |   |   |-- skills/ (4)         # session-report, cost-breakdown, usage-trends, productivity-score
 |   |   |-- agents/             # analytics-advisor (Sonnet model)
 |   |   |-- hooks/hooks.json    # Stop + SubagentStop event logging
-|   |   +-- bin/ccam-stats      # Terminal dashboard CLI
-|   |-- ccam-productivity/      # Productivity: standups, reports, sprints, workflow optimizer
-|   |-- ccam-devtools/          # DevTools: debug, diagnostics, export, health checks
-|   |   +-- bin/                # ccam-doctor + ccam-export CLIs
-|   |-- ccam-insights/          # Insights: patterns, anomalies, optimization, comparison
-|   |-- ccam-cost-guard/        # Cost guardrails: budgets, spend forecast, cost alerts, model savings
-|   |-- ccam-sessions/          # Session forensics: search, timeline, transcript replay, cwd rollup, cleanup
-|   |-- ccam-workflows/         # Workflow orchestration: DAG map, delegation audit, concurrency, fleet runs
-|   |-- ccam-quality/           # Reliability & SLOs: error scan, API-error report, hook-failure audit, SLO check
-|   |-- ccam-config/            # Config & memory governance: config audit, memory review, skill/MCP/hook inventory
-|   +-- ccam-dashboard/         # Dashboard connector: status, quick stats, MCP integration
+|   |   +-- bin/am-stats      # Terminal dashboard CLI
+|   |-- am-productivity/      # Productivity: standups, reports, sprints, workflow optimizer
+|   |-- am-devtools/          # DevTools: debug, diagnostics, export, health checks
+|   |   +-- bin/                # am-doctor + am-export CLIs
+|   |-- am-insights/          # Insights: patterns, anomalies, optimization, comparison
+|   |-- am-cost-guard/        # Cost guardrails: budgets, spend forecast, cost alerts, model savings
+|   |-- am-sessions/          # Session forensics: search, timeline, transcript replay, cwd rollup, cleanup
+|   |-- am-workflows/         # Workflow orchestration: DAG map, delegation audit, concurrency, fleet runs
+|   |-- am-quality/           # Reliability & SLOs: error scan, API-error report, hook-failure audit, SLO check
+|   |-- am-config/            # Config & memory governance: config audit, memory review, skill/MCP/hook inventory
+|   +-- am-dashboard/         # Dashboard connector: status, quick stats, MCP integration
 |       +-- .mcp.json           # MCP server configuration
 |-- server/
 |   |-- index.js                 # Express app, HTTP server, static serving
@@ -2358,7 +2361,7 @@ agent-dashboard/
 |   |   |-- tray.ts              # Menu-bar (tray) icon + context menu
 |   |   |-- menu.ts              # Native application menu (File ▸ Open Dashboard is macOS-only)
 |   |   |-- login-item.ts        # macOS Login Items auto-start toggle (SMAppService)
-|   |   |-- logger.ts            # File logger -> ~/Library/Logs/Claude Code Monitor/desktop.log
+|   |   |-- logger.ts            # File logger -> ~/Library/Logs/AgentMonitor/desktop.log
 |   |   |-- constants.ts         # App name, ports, timeouts, window size
 |   |   +-- preload.ts           # Intentionally empty (zero renderer privilege)
 |   |-- scripts/
@@ -2410,7 +2413,15 @@ agent-dashboard/
 
 Las contribuciones son bienvenidas, consulte [`.github/CONTRIBUTING.md`](.github/CONTRIBUTING.md) para la guía completa.
 
-Todos los colaboradores deben firmar el [Acuerdo de Licencia del Colaborador](https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/CLA.md). Esto se aplica automáticamente en cada solicitud de extracción por la Acción de GitHub `🖋️ Asistente de CLA`: la primera vez que abres una PR, un bot te pide que firmes comentando `He leído el Documento de CLA y por la presente firmo el CLA`. El control de estado del **Asistente de CLA** de la PR permanece en rojo hasta que lo hagas, y firmar una vez cubre todas las contribuciones futuras.
+Todos los colaboradores deben firmar el [Acuerdo de Licencia del Colaborador](https://github.com/tanvoid0/agent-monitor/blob/master/CLA.md). Esto se aplica automáticamente en cada solicitud de extracción por la Acción de GitHub `🖋️ Asistente de CLA`: la primera vez que abres una PR, un bot te pide que firmes comentando `He leído el Documento de CLA y por la presente firmo el CLA`. El control de estado del **Asistente de CLA** de la PR permanece en rojo hasta que lo hagas, y firmar una vez cubre todas las contribuciones futuras.
+
+---
+
+## Agradecimientos
+
+AgentMonitor comenzó como un fork de [Claude-Code-Agent-Monitor](https://github.com/hoangsonww/Claude-Code-Agent-Monitor) de [Son Nguyen](https://github.com/hoangsonww). Gracias por el dashboard original, el pipeline de hooks y la disciplina de documentación que este proyecto sigue manteniendo — su aviso de copyright permanece en [LICENSE](LICENSE).
+
+El enlace al fork se eliminó el 2026-09-19: el código había divergido demasiado (renombrado de la CLI, árbol de plugins, UI kit, ingesta de workflows) para seguir fusionando cambios del upstream, así que AgentMonitor se desarrolla ahora como proyecto independiente en [tanvoid0/agent-monitor](https://github.com/tanvoid0/agent-monitor).
 
 ---
 

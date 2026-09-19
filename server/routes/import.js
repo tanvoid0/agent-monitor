@@ -12,7 +12,7 @@
  *
  * Progress is broadcast over the existing websocket as `import.progress`.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { Router } = require("express");
@@ -44,10 +44,10 @@ const { findCodexTranscripts } = require("../lib/codex-ingest");
 // Upload limits — deliberately generous because transcripts can be large.
 // Configurable at runtime via env for deployments that need tighter bounds.
 const MAX_UPLOAD_BYTES = parseInt(
-  process.env.CCAM_IMPORT_MAX_BYTES || String(1024 * 1024 * 1024), // 1 GB default
+  process.env.AM_IMPORT_MAX_BYTES || String(1024 * 1024 * 1024), // 1 GB default
   10
 );
-const MAX_UPLOAD_FILES = parseInt(process.env.CCAM_IMPORT_MAX_FILES || "2000", 10);
+const MAX_UPLOAD_FILES = parseInt(process.env.AM_IMPORT_MAX_FILES || "2000", 10);
 
 /**
  * Lazily build a multer upload middleware. Kept lazy so the server still
@@ -68,8 +68,8 @@ function getUploader() {
   }
   const storage = multer.diskStorage({
     destination: (req, _file, cb) => {
-      if (!req._ccamUploadDir) req._ccamUploadDir = mkTempDir("ccam-upload-");
-      cb(null, req._ccamUploadDir);
+      if (!req._amUploadDir) req._amUploadDir = mkTempDir("am-upload-");
+      cb(null, req._amUploadDir);
     },
     filename: (_req, file, cb) => {
       // Preserve the original name for kind-detection later, but prefix with
@@ -91,8 +91,8 @@ function getUploader() {
       if (kind === "unknown") {
         // Track rejected filenames on the request so we can surface the count
         // in the response — users wonder why their upload "partially worked".
-        if (!req._ccamRejected) req._ccamRejected = [];
-        req._ccamRejected.push(file.originalname);
+        if (!req._amRejected) req._amRejected = [];
+        req._amRejected.push(file.originalname);
         cb(null, false);
       } else {
         cb(null, true);
@@ -389,8 +389,8 @@ router.post("/upload", uploadMiddleware, async (req, res) => {
   const importId = `upload-${Date.now()}`;
   const provider = requestedProvider(req);
   const files = Array.isArray(req.files) ? req.files : [];
-  const rejectedNames = Array.isArray(req._ccamRejected) ? req._ccamRejected : [];
-  const reqUploadDir = req._ccamUploadDir || null;
+  const rejectedNames = Array.isArray(req._amRejected) ? req._amRejected : [];
+  const reqUploadDir = req._amUploadDir || null;
   // Multer runs before provider validation. Reclaim its request directory even
   // when a manually constructed request supplies an unsupported provider.
   if (!provider) {
@@ -428,7 +428,7 @@ router.post("/upload", uploadMiddleware, async (req, res) => {
     });
   }
 
-  const workDir = mkTempDir("ccam-import-work-");
+  const workDir = mkTempDir("am-import-work-");
   let extractedCount = 0;
   let skippedEntries = 0;
 

@@ -1,6 +1,6 @@
 # Dev Container (optional)
 
-A ready-to-use, **opt-in** development environment for Claude Code Agent Monitor.
+A ready-to-use, **opt-in** development environment for AgentMonitor.
 It is used **only** when you explicitly choose it — it changes nothing about
 host-based development (`npm run dev` / `npm start` still work exactly as before).
 
@@ -62,7 +62,7 @@ The host hook handler POSTs to `http://localhost:4820`, which this container
 forwards — so a host-installed hook reaches the containerized dashboard.
 
 > Escape hatch: if you genuinely run Claude Code *inside* this same container,
-> set `CCAM_ALLOW_CONTAINER_HOOKS=1` before `npm run install-hooks`.
+> set `AM_ALLOW_CONTAINER_HOOKS=1` before `npm run install-hooks`.
 
 ## Not supported in the container
 

@@ -2,7 +2,7 @@
  * @file session-detail-tools.ts
  * @description MCP tools for session facets, computed detail statistics, and
  * provider-aware transcript discovery and cursor-paginated conversation reads.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { z } from "zod";

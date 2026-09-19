@@ -1,12 +1,12 @@
 /**
  * @file types.ts
  * @description Defines TypeScript types and interfaces for the agent dashboard application, including data structures for sessions, agents, events, statistics, analytics, model pricing, cost breakdowns, WebSocket messages, and workflow-related data. These types provide a clear contract for the shape of data used throughout the application and facilitate type safety when interacting with the backend API and managing state within the frontend components.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/client/src/lib/types.ts`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/client/src/lib/types.ts`
  * **Purpose:** Shared wire-format types for REST + WebSocket messages — keep in sync with `server/` serializers and OpenAPI.
  *
  * ## Design constraints
@@ -1329,7 +1329,7 @@ export interface UpdateStatusPayload {
    *  Drives whether the "Update available" call-to-action is shown. */
   update_available: boolean;
   /** Absolute path to the detected git repository root. Example:
-   *  `"/Users/dev/Claude-Code-Agent-Monitor"`. */
+   *  `"/Users/dev/agent-monitor"`. */
   repo_root?: string;
   /** Resolved ref compared against, e.g. "upstream/master" or "origin/main";
    *  null when no remote could be resolved (e.g. no remotes configured). */

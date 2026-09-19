@@ -59,12 +59,12 @@
  * imported from `./types`; the ones declared here are the client-only ones, e.g. the CC-config
  * explorer shapes, the Run-page process handles, and the import-result shape).
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/client/src/lib/api.ts`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/client/src/lib/api.ts`
  * **Purpose:** Central typed HTTP client for every REST route; attaches auth token, data-scope `sources` query params, and normalizes error payloads.
  *
  * ## Design constraints

@@ -12,7 +12,7 @@
  * shortest known ancestor cwd, worktree checkouts collapsed onto their repo)
  * and `projectColor` (a stable palette pick per group root, so the same group
  * reads the same colour on every card and every tab).
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { useTranslation } from "react-i18next";

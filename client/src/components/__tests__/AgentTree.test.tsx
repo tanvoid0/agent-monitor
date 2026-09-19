@@ -4,7 +4,7 @@
  * under their parent when expanded, the chevron and collapsed-count button both
  * report through `onToggle`, the collapsed button shows the full descendant
  * count, and every row exposes the `agent-<id>` deep-link wrapper.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect, vi } from "vitest";

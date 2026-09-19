@@ -4,7 +4,7 @@
  * titles and transcript-derived prompt context alongside standard agent
  * details, the EntityRef name link + agent context menu, and the one-line
  * `row` variant.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect, vi } from "vitest";

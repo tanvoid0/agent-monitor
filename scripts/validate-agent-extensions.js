@@ -3,7 +3,7 @@
  * extension ecosystem without mutating files. It checks marketplace bijection,
  * dual manifests, skill metadata, plugin components, MCP launch wiring, and
  * generated catalog drift.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 "use strict";
@@ -16,14 +16,14 @@ const { spawnSync } = require("node:child_process");
 const ROOT = path.resolve(__dirname, "..");
 const PLUGINS = path.join(ROOT, "plugins");
 const PROJECT_VERSION = json(path.join(ROOT, "package.json")).version;
-const NATIVE_SHARED_SKILLS = ["push-to-forked-pr", "repo-onboarding", "version-release"];
+const NATIVE_SHARED_SKILLS = ["repo-onboarding", "version-release"];
 const WRITE_CAPABLE = new Set([
-  "ccam-config",
-  "ccam-cost-guard",
-  "ccam-integrations",
-  "ccam-platform",
-  "ccam-runner",
-  "ccam-sessions",
+  "am-config",
+  "am-cost-guard",
+  "am-integrations",
+  "am-platform",
+  "am-runner",
+  "am-sessions",
 ]);
 
 function json(file) {
@@ -107,7 +107,7 @@ for (const name of pluginNames) {
   assert.equal(codex.skills, "./skills/");
   assert.ok(codex.interface.shortDescription.length <= 96);
   assert.doesNotMatch(codex.interface.shortDescription, /[\s,]$/);
-  if (name === "ccam-dashboard" || WRITE_CAPABLE.has(name)) {
+  if (name === "am-dashboard" || WRITE_CAPABLE.has(name)) {
     assert.deepEqual(codex.interface.capabilities, ["Read", "Write"]);
   }
   const codexEntry = codexMarketplace.plugins.find((entry) => entry.name === name);
@@ -132,10 +132,10 @@ for (const name of pluginNames) {
   }
 }
 
-for (const pluginName of ["ccam-dashboard", "ccam-platform"]) {
+for (const pluginName of ["am-dashboard", "am-platform"]) {
   const mcp = json(path.join(PLUGINS, pluginName, ".mcp.json"));
-  assert.equal(mcp.mcpServers["ccam-dashboard"].command, "ccam");
-  assert.deepEqual(mcp.mcpServers["ccam-dashboard"].args, ["mcp", "stdio"]);
+  assert.equal(mcp.mcpServers["am-dashboard"].command, "am");
+  assert.deepEqual(mcp.mcpServers["am-dashboard"].args, ["mcp", "stdio"]);
 }
 
 if (commandAvailable("claude")) {

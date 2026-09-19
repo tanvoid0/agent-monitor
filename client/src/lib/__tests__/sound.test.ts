@@ -6,7 +6,7 @@
  * `force` escape hatch used by the Settings preview controls. jsdom has no Web
  * Audio implementation, so a minimal `AudioContext` stub stands in and lets the
  * tests assert on the oscillators the engine schedules.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";

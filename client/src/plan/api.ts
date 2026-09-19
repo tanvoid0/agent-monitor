@@ -4,7 +4,7 @@
  * separate from `lib/api.ts` (out of Lane P's touches) but mirroring its
  * conventions: a relative base path, the shared dashboard auth token, and
  * non-2xx responses normalized into a thrown `Error`.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { dashboardToken } from "../lib/api";

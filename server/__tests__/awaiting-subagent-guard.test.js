@@ -15,7 +15,7 @@
  * This test lives in the fork's own suite so a future upstream merge that
  * silently reverts the guard fails loudly here (home-network monitor fork,
  * see decisions/).
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { describe, it, before, after } = require("node:test");

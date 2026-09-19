@@ -5,7 +5,7 @@
  * and settings file location. Supports a custom root via the CLAUDE_HOME
  * environment variable (e.g. ~/.codefuse/engine/cc/) so the dashboard can
  * track non-default Claude Code installations.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 const path = require("path");
 const os = require("os");
@@ -25,7 +25,7 @@ function getProjectsDir() {
  * SAME absolute path for every launch path (`npm start`, `npm run dev`, and the
  * macOS/Windows desktop app), so they all share ONE database instead of each
  * host keeping its own. Lives under the Claude home, next to the hook discovery
- * file (`~/.claude/.agent-dashboard.json`).
+ * file (`~/.claude/.agentmonitor.json`).
  *
  * An explicit `DASHBOARD_DATA_DIR` still wins — for tests, power users, or
  * anyone pinning a custom location. The earlier default was the repo-local
@@ -33,8 +33,26 @@ function getProjectsDir() {
  * never coincided with the web server's copy; see db.js for the one-time
  * migration that carries pre-existing databases into this location.
  */
+let legacyDataDirChecked = false;
 function getDataDir() {
-  return process.env.DASHBOARD_DATA_DIR || path.join(getClaudeHome(), "agent-dashboard");
+  if (process.env.DASHBOARD_DATA_DIR) return process.env.DASHBOARD_DATA_DIR;
+  const dir = path.join(getClaudeHome(), "agentmonitor");
+  if (!legacyDataDirChecked) {
+    legacyDataDirChecked = true;
+    // One-time rename of the pre-3.0 `agent-dashboard/` data dir (DB, VAPID
+    // keys, transcript snapshots) so the rebrand keeps every user's history.
+    // A rename never copies or deletes data; if it fails (e.g. an old server
+    // still holds the DB open) db.js falls back to copying just the database.
+    const legacy = path.join(getClaudeHome(), "agent-dashboard");
+    if (!fs.existsSync(dir) && fs.existsSync(legacy)) {
+      try {
+        fs.renameSync(legacy, dir);
+      } catch (err) {
+        console.warn("[data-dir] legacy data dir rename skipped:", err?.message || err);
+      }
+    }
+  }
+  return dir;
 }
 
 /**

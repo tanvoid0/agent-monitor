@@ -9,12 +9,12 @@
  * tints it for light/dark menu bars; Windows uses the colored `icon.ico`,
  * because a black template glyph would be invisible on the (usually dark)
  * Windows taskbar notification area.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/desktop/src/tray.ts`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/desktop/src/tray.ts`
  * **Purpose:** Dashboard module consumed by the React client, MCP tools, or desktop shell depending on deployment mode.
  *
  * ## Design constraints
@@ -221,7 +221,7 @@ export function createTray(actions: TrayActions): Tray {
       { type: "separator" },
       { label: `Version ${app.getVersion()}`, enabled: false },
       {
-        label: "Quit Claude Code Monitor",
+        label: "Quit AgentMonitor",
         accelerator: "CmdOrCtrl+Q",
         click: () => actions.requestQuit(),
       },

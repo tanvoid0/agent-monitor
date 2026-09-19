@@ -1,12 +1,12 @@
 /**
  * @file app-config.ts
  * @description Module for loading and validating application configuration from environment variables. This module defines the AppConfig interface representing the configuration structure, along with functions to parse and validate individual configuration values such as booleans, integers, log levels, dashboard URLs, and transport modes. The loadConfig function aggregates all configuration values into a single AppConfig object, applying defaults and validation as needed. The module ensures that the application is configured correctly before it starts, providing clear error messages for invalid configurations.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/mcp/src/config/app-config.ts`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/mcp/src/config/app-config.ts`
  * **Purpose:** Dashboard module consumed by the React client, MCP tools, or desktop shell depending on deployment mode.
  *
  * ## Design constraints
@@ -80,7 +80,7 @@ export type TransportMode = "stdio" | "http" | "repl";
  * field has a safe default so the server boots with no env vars set.
  */
 export interface AppConfig {
-  /** From `MCP_SERVER_NAME`, default `"agent-dashboard-mcp"`. */
+  /** From `MCP_SERVER_NAME`, default `"agentmonitor-mcp"`. */
   serverName: string;
   /** From `MCP_SERVER_VERSION`, default `"1.0.0"`. */
   serverVersion: string;
@@ -268,7 +268,7 @@ function parseTransport(value: string | undefined): TransportMode {
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   const dashboardBaseUrl = parseDashboardUrl(env.MCP_DASHBOARD_BASE_URL);
   return {
-    serverName: env.MCP_SERVER_NAME?.trim() || "agent-dashboard-mcp",
+    serverName: env.MCP_SERVER_NAME?.trim() || "agentmonitor-mcp",
     serverVersion: env.MCP_SERVER_VERSION?.trim() || "1.0.0",
     dashboardBaseUrl,
     dashboardApiToken: parseDashboardToken(env, dashboardBaseUrl),

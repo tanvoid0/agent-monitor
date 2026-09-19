@@ -8,7 +8,7 @@
  * fs.watch per file with a 2 s stat poll as the fallback, the pattern of
  * server/lib/cc-watcher.js. Everything here is best-effort and never throws
  * into a request.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const fs = require("fs");

@@ -1,6 +1,6 @@
 /**
  * @file Central OpenAPI 3.0 specification for the dashboard HTTP API.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const pkg = require("../package.json");
@@ -47,13 +47,13 @@ function createOpenApiSpec() {
   const spec = {
     openapi: "3.0.3",
     info: {
-      title: "Agent Dashboard for Claude Code API",
+      title: "AgentMonitor for Claude Code API",
       version: pkg.version || "1.0.0",
       description:
         "HTTP API for real-time Claude Code session monitoring, agent lifecycle tracking, analytics, pricing, hooks ingestion, and workflow intelligence.",
       contact: {
-        name: "Son Nguyen",
-        email: "hoangson091104@gmail.com",
+        name: "Tanveer Hoque",
+        email: "tanvoid0@gmail.com",
         ...(repositoryUrl ? { url: repositoryUrl } : {}),
       },
       license: {
@@ -484,7 +484,7 @@ function createOpenApiSpec() {
             version: {
               type: "string",
               description: "Dashboard release version from package.json",
-              example: "2.3.0",
+              example: "3.0.0",
             },
             timestamp: { type: "string", format: "date-time" },
           },
@@ -1510,8 +1510,8 @@ function createOpenApiSpec() {
             format: {
               type: "string",
               description:
-                'Bundle format marker (always "ccam-export" for exports from this version).',
-              example: "ccam-export",
+                'Bundle format marker (always "am-export" for exports from this version).',
+              example: "am-export",
             },
             version: { type: "integer", description: "Bundle schema version.", example: 2 },
             exported_at: { type: "string", format: "date-time" },
@@ -2217,12 +2217,12 @@ function createOpenApiSpec() {
                 "text/plain": {
                   schema: { type: "string" },
                   example:
-                    "# HELP ccam_up 1 when the dashboard API is serving this scrape.\n" +
-                    "# TYPE ccam_up gauge\n" +
-                    "ccam_up 1\n" +
-                    "# HELP ccam_sessions Number of sessions by lifecycle status.\n" +
-                    "# TYPE ccam_sessions gauge\n" +
-                    'ccam_sessions{status="active"} 3\n',
+                    "# HELP am_up 1 when the dashboard API is serving this scrape.\n" +
+                    "# TYPE am_up gauge\n" +
+                    "am_up 1\n" +
+                    "# HELP am_sessions Number of sessions by lifecycle status.\n" +
+                    "# TYPE am_sessions gauge\n" +
+                    'am_sessions{status="active"} 3\n',
                 },
               },
             },

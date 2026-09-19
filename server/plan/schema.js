@@ -4,7 +4,7 @@
  * the box-level start/done/blocked/note lines agents post. Created from one
  * call in server/db.js; every statement is IF NOT EXISTS so it is safe on
  * every start.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 function init(db) {

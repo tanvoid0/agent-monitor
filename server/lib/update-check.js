@@ -4,7 +4,7 @@
  * direct clone) after a non-destructive fetch. Branch- and fork-aware:
  * picks the right remote, recognises feature-branch checkouts, and shapes
  * manual_command so it actually closes the gap for the user's situation.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const fs = require("fs");
@@ -204,8 +204,8 @@ async function getUpdatesStatus(gitRoot = DEFAULT_ROOT, options = {}) {
 
   const updateAvailable = commitsBehind > 0;
   const isProd = process.env.NODE_ENV === "production";
-  const installSteps = ["npm run setup"];
-  if (isProd) installSteps.push("npm run build");
+  // `npm run upgrade` = setup + build + hook reinstall, printed step by step.
+  const installSteps = ["npm run upgrade"];
 
   // Branch-aware manual_command. Three situations:
   //   1. tracksCanonical: HEAD's tracked upstream IS the canonical ref. A

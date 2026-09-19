@@ -3,7 +3,7 @@
  * Claude plugin source of truth. It adds missing canonical skill names,
  * generates OpenAI skill UI metadata and Codex plugin manifests, and rebuilds
  * the Claude and Codex marketplace catalogs deterministically.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 "use strict";
@@ -15,38 +15,38 @@ const ROOT = path.resolve(__dirname, "..");
 const PLUGINS_DIR = path.join(ROOT, "plugins");
 const CLAUDE_MARKETPLACE = path.join(ROOT, ".claude-plugin", "marketplace.json");
 const CODEX_MARKETPLACE = path.join(ROOT, ".agents", "plugins", "marketplace.json");
-const REPOSITORY = "https://github.com/hoangsonww/Claude-Code-Agent-Monitor";
+const REPOSITORY = "https://github.com/tanvoid0/agent-monitor";
 const PLUGIN_VERSION = readJson(path.join(ROOT, "package.json")).version;
 const AUTHOR = {
-  name: "Son Nguyen",
-  email: "hoangson091104@gmail.com",
-  url: "https://github.com/hoangsonww",
+  name: "Tanveer Hoque",
+  email: "tanvoid0@gmail.com",
+  url: "https://github.com/tanvoid0",
 };
 
 const CATEGORY_BY_PLUGIN = {
-  "ccam-analytics": "Productivity",
-  "ccam-config": "Developer Tools",
-  "ccam-cost-guard": "Productivity",
-  "ccam-dashboard": "Developer Tools",
-  "ccam-devtools": "Developer Tools",
-  "ccam-insights": "Productivity",
-  "ccam-integrations": "Developer Tools",
-  "ccam-platform": "Developer Tools",
-  "ccam-productivity": "Productivity",
-  "ccam-quality": "Developer Tools",
-  "ccam-reports": "Productivity",
-  "ccam-runner": "Productivity",
-  "ccam-sessions": "Developer Tools",
-  "ccam-workflows": "Productivity",
+  "am-analytics": "Productivity",
+  "am-config": "Developer Tools",
+  "am-cost-guard": "Productivity",
+  "am-dashboard": "Developer Tools",
+  "am-devtools": "Developer Tools",
+  "am-insights": "Productivity",
+  "am-integrations": "Developer Tools",
+  "am-platform": "Developer Tools",
+  "am-productivity": "Productivity",
+  "am-quality": "Developer Tools",
+  "am-reports": "Productivity",
+  "am-runner": "Productivity",
+  "am-sessions": "Developer Tools",
+  "am-workflows": "Productivity",
 };
 
 const WRITE_CAPABLE = new Set([
-  "ccam-config",
-  "ccam-cost-guard",
-  "ccam-integrations",
-  "ccam-platform",
-  "ccam-runner",
-  "ccam-sessions",
+  "am-config",
+  "am-cost-guard",
+  "am-integrations",
+  "am-platform",
+  "am-runner",
+  "am-sessions",
 ]);
 
 function readJson(file) {
@@ -119,9 +119,11 @@ function listDirs(directory) {
 
 function titleCase(value) {
   return value
-    .replace(/^ccam-/, "CCAM ")
+    .replace(/^am-/, "AgentMonitor ")
     .split(/[-_ ]+/)
-    .map((word) => (word === "ccam" ? "CCAM" : `${word[0]?.toUpperCase() || ""}${word.slice(1)}`))
+    .map((word) =>
+      word === "am" ? "AgentMonitor" : `${word[0]?.toUpperCase() || ""}${word.slice(1)}`
+    )
     .join(" ");
 }
 
@@ -171,7 +173,7 @@ function writeSkillMetadata(skillDir, name, description) {
     "interface:",
     `  display_name: ${yamlQuote(titleCase(name))}`,
     `  short_description: ${yamlQuote(summary)}`,
-    `  default_prompt: ${yamlQuote(`Use $${name} to inspect CCAM data and complete this workflow safely.`)}`,
+    `  default_prompt: ${yamlQuote(`Use $${name} to inspect AgentMonitor data and complete this workflow safely.`)}`,
     "policy:",
     `  allow_implicit_invocation: ${allowImplicitInvocation}`,
     "",
@@ -220,11 +222,10 @@ function codexManifest(name, claudeManifest, pluginRoot) {
     longDescription: claudeManifest.description,
     developerName: AUTHOR.name,
     category,
-    capabilities:
-      WRITE_CAPABLE.has(name) || name === "ccam-dashboard" ? ["Read", "Write"] : ["Read"],
+    capabilities: WRITE_CAPABLE.has(name) || name === "am-dashboard" ? ["Read", "Write"] : ["Read"],
     websiteURL: REPOSITORY,
     defaultPrompt: [
-      `Use ${titleCase(name)} to inspect the local CCAM dashboard.`,
+      `Use ${titleCase(name)} to inspect the local AgentMonitor dashboard.`,
       `Use ${titleCase(name)} to analyze recent agent activity.`,
     ],
     brandColor: "#6366F1",
@@ -296,7 +297,7 @@ async function sync() {
       name,
       source: `./plugins/${name}`,
       description: claudeManifest.description,
-      tags: original?.tags || claudeManifest.keywords?.slice(0, 6) || ["ccam"],
+      tags: original?.tags || claudeManifest.keywords?.slice(0, 6) || ["am"],
     });
     codexEntries.push({
       name,
@@ -308,13 +309,13 @@ async function sync() {
 
   await writeJson(CLAUDE_MARKETPLACE, {
     name: originalMarketplace.name,
-    description: `Official Claude Code plugin marketplace for CCAM with ${totals.plugins} plugins, ${totals.skills} skills, ${totals.agents} agents, ${totals.commands} commands, and comprehensive local dashboard operations.`,
+    description: `Official Claude Code plugin marketplace for AgentMonitor with ${totals.plugins} plugins, ${totals.skills} skills, ${totals.agents} agents, ${totals.commands} commands, and comprehensive local dashboard operations.`,
     owner: originalMarketplace.owner,
     plugins: claudeEntries,
   });
   await writeJson(CODEX_MARKETPLACE, {
-    name: "claude-code-agent-monitor-plugins",
-    interface: { displayName: "Claude Code Agent Monitor" },
+    name: "agentmonitor-plugins",
+    interface: { displayName: "AgentMonitor" },
     plugins: codexEntries,
   });
 

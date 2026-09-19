@@ -1,11 +1,11 @@
 /**
  * @file Native application menu (the macOS top-bar menu).
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/desktop/src/menu.ts`
+ * **Path:** `/Users/davidnguyen/WebstormProjects/agent-monitor/desktop/src/menu.ts`
  * **Purpose:** Dashboard module consumed by the React client, MCP tools, or desktop shell depending on deployment mode.
  *
  * ## Design constraints
@@ -208,15 +208,12 @@ export function installApplicationMenu(actions: MenuActions): Menu {
       submenu: [
         {
           label: "Project on GitHub",
-          click: () =>
-            void shell.openExternal("https://github.com/hoangsonww/Claude-Code-Agent-Monitor"),
+          click: () => void shell.openExternal("https://github.com/tanvoid0/agent-monitor"),
         },
         {
           label: "Report an Issue",
           click: () =>
-            void shell.openExternal(
-              "https://github.com/hoangsonww/Claude-Code-Agent-Monitor/issues/new/choose"
-            ),
+            void shell.openExternal("https://github.com/tanvoid0/agent-monitor/issues/new/choose"),
         },
         {
           label: `${APP_NAME} v${app.getVersion()}`,

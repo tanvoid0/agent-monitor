@@ -1,11 +1,11 @@
 # Deployment infrastructure
 
-This directory contains the supported production deployment surface for CCAM.
+This directory contains the supported production deployment surface for AgentMonitor.
 The complete operator guide is [`../DEPLOYMENT.md`](../DEPLOYMENT.md).
 
 ## Supported topology
 
-CCAM uses SQLite and supports **one active dashboard writer per persistent
+AgentMonitor uses SQLite and supports **one active dashboard writer per persistent
 volume**. The deployment assets enforce one replica and a Recreate strategy.
 HPA, active-active replicas, blue-green, and canary deployments are intentionally
 not shipped while SQLite remains the persistence backend.
@@ -59,7 +59,7 @@ helm upgrade --install agent-monitor deployments/helm/agent-monitor \
   --create-namespace \
   --values deployments/helm/agent-monitor/values-production.yaml \
   --set image.registry= \
-  --set image.repository=${REGISTRY}/claude-code-agent-monitor \
+  --set image.repository=${REGISTRY}/agentmonitor \
   --set image.tag=${IMAGE_TAG} \
   --atomic --wait --timeout 10m
 ```
@@ -71,7 +71,7 @@ helm upgrade --install agent-monitor deployments/helm/agent-monitor \
   --namespace agent-monitor-production --output ./backups
 
 ./deployments/scripts/deploy.sh --env production --method helm \
-  --registry "${REGISTRY}" --image claude-code-agent-monitor \
+  --registry "${REGISTRY}" --image agentmonitor \
   --tag "${IMAGE_TAG}" --skip-build
 
 ./deployments/scripts/rollback.sh --env production --method helm \

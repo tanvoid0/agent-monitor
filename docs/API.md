@@ -1,6 +1,6 @@
 # API Reference
 
-Complete REST API and WebSocket documentation for Agent Dashboard.
+Complete REST API and WebSocket documentation for AgentMonitor.
 
 ---
 
@@ -31,7 +31,7 @@ Complete REST API and WebSocket documentation for Agent Dashboard.
 
 ## Overview
 
-The Agent Dashboard API provides programmatic access to Claude Code session monitoring data.
+The AgentMonitor API provides programmatic access to Claude Code session monitoring data.
 
 ```mermaid
 graph LR
@@ -72,7 +72,7 @@ Authentication is **off by default** (the loopback bind is the trust boundary). 
 
 These paths stay exempt even when a token is configured: `/api/health`, `/api/openapi.json`, `/api/docs`, and `/api/hooks` (local Claude Code and Codex hook ingestion, plus the optional `DASHBOARD_HOOK_TOKEN` when set). Requests that fail the check get `401` with error code `EUNAUTHORIZED`. The one exception inside that namespace is [`POST /api/hooks/ingest-batch`](#remote-push-ingestion), which carries its own mandatory `REMOTE_PUSH_TOKEN` and is disabled until it is configured.
 
-`GET /api/settings/info` includes `server.version` (the running dashboard release). Pair with `ccam version` or the Settings About panel to confirm client and server builds match after deploy.
+`GET /api/settings/info` includes `server.version` (the running dashboard release). Pair with `am version` or the Settings About panel to confirm client and server builds match after deploy.
 
 ```mermaid
 sequenceDiagram
@@ -695,16 +695,16 @@ Response `Content-Type: text/plain; version=0.0.4; charset=utf-8`.
 
 | Metric | Type | Labels | Meaning |
 | --- | --- | --- | --- |
-| `ccam_up` | gauge | — | `1` when the API served the scrape |
-| `ccam_build_info` | gauge | `version` | Always `1`; dashboard version rides on the label |
-| `ccam_process_uptime_seconds` | gauge | — | Server process uptime |
-| `ccam_process_resident_memory_bytes` | gauge | — | Server process RSS |
-| `ccam_sessions` | gauge | `status` (`active`/`completed`/`error`/`abandoned`) | Sessions by status |
-| `ccam_agents` | gauge | `status` (`working`/`waiting`/`completed`/`error`) | Agents by status |
-| `ccam_events_total` | counter | — | Total events recorded |
-| `ccam_websocket_clients` | gauge | — | Connected realtime clients |
-| `ccam_remote_sources` | gauge | `enabled` (`true`/`false`) | Configured Remote Data Sources |
-| `ccam_tokens_total` | counter | `kind` (`input`/`output`/`cache_read`/`cache_write`) | Cumulative token usage |
+| `am_up` | gauge | — | `1` when the API served the scrape |
+| `am_build_info` | gauge | `version` | Always `1`; dashboard version rides on the label |
+| `am_process_uptime_seconds` | gauge | — | Server process uptime |
+| `am_process_resident_memory_bytes` | gauge | — | Server process RSS |
+| `am_sessions` | gauge | `status` (`active`/`completed`/`error`/`abandoned`) | Sessions by status |
+| `am_agents` | gauge | `status` (`working`/`waiting`/`completed`/`error`) | Agents by status |
+| `am_events_total` | counter | — | Total events recorded |
+| `am_websocket_clients` | gauge | — | Connected realtime clients |
+| `am_remote_sources` | gauge | `enabled` (`true`/`false`) | Configured Remote Data Sources |
+| `am_tokens_total` | counter | `kind` (`input`/`output`/`cache_read`/`cache_write`) | Cumulative token usage |
 
 Status series are always emitted (even at `0`) so a series never disappears from the exposition. The endpoint is mounted under `/api`, so it sits behind the same two guards as every other route: the **Host-header (DNS-rebinding) guard** and the optional **`DASHBOARD_TOKEN`** guard. A scraper that reaches the server as anything other than loopback (e.g. Prometheus in Docker hitting `host.docker.internal`) must be allowlisted with `DASHBOARD_ALLOWED_HOSTS`, or the scrape returns `403 EBADHOST`; if a token is set, the scrape must also send it.
 
@@ -712,7 +712,7 @@ Example scrape config (start the server with `DASHBOARD_ALLOWED_HOSTS=host.docke
 
 ```yaml
 scrape_configs:
-  - job_name: ccam
+  - job_name: am
     metrics_path: /api/metrics
     static_configs:
       - targets: ["host.docker.internal:4820"]
@@ -720,7 +720,7 @@ scrape_configs:
     #   credentials: "<DASHBOARD_TOKEN>"
 ```
 
-A ready-to-run Prometheus + Grafana stack (four auto-provisioned dashboards; default home **CCAM — Overview**) lives in [`monitoring/`](../monitoring/README.md). **npm path (no Docker):** `npm run monitoring:install` then `npm run monitoring:up` (binaries are pulled via the monitoring package's `postinstall` — there is no official `grafana`/`prometheus` server package on npm). **Docker path:** `npm run monitoring:docker:up` or `npm run docker:full:up` (set `DASHBOARD_ALLOWED_HOSTS=host.docker.internal` on the dashboard when Prometheus runs in a container). Pre-built Prometheus console: `http://localhost:9090/consoles/index.html`.
+A ready-to-run Prometheus + Grafana stack (four auto-provisioned dashboards; default home **AgentMonitor — Overview**) lives in [`monitoring/`](../monitoring/README.md). **npm path (no Docker):** `npm run monitoring:install` then `npm run monitoring:up` (binaries are pulled via the monitoring package's `postinstall` — there is no official `grafana`/`prometheus` server package on npm). **Docker path:** `npm run monitoring:docker:up` or `npm run docker:full:up` (set `DASHBOARD_ALLOWED_HOSTS=host.docker.internal` on the dashboard when Prometheus runs in a container). Pre-built Prometheus console: `http://localhost:9090/consoles/index.html`.
 
 ---
 
@@ -1082,7 +1082,7 @@ POST /api/remote-sources
 | `remote_codex_home` | string | No | Remote Codex home (defaults to remote `~/.codex`) |
 | `enabled` | boolean | No | Whether the source is eligible for syncs (default `true`) |
 
-> **Cursor (informational):** Sessions imported from `~/.claude` include **Cursor** agent usage on that machine too — Cursor happens to use the same paths as Claude Code. CCAM does not tag which app created a session.
+> **Cursor (informational):** Sessions imported from `~/.claude` include **Cursor** agent usage on that machine too — Cursor happens to use the same paths as Claude Code. AgentMonitor does not tag which app created a session.
 
 Returns `{ "source": RemoteSource }` with HTTP **201**.
 
@@ -1419,7 +1419,7 @@ Spawned `claude` processes fire the dashboard's hooks like any other CLI session
 const ws = new WebSocket('ws://localhost:4820/ws');
 
 ws.onopen = () => {
-  console.log('Connected to Agent Dashboard');
+  console.log('Connected to AgentMonitor');
 };
 
 ws.onmessage = (event) => {
@@ -1877,7 +1877,7 @@ await fetch('http://localhost:4820/api/pricing/my-custom-model', {
 
 ## Summary
 
-The Agent Dashboard API provides:
+The AgentMonitor API provides:
 
 - ✅ **RESTful endpoints** for querying sessions, agents, tools, pricing
 - ✅ **WebSocket streaming** for real-time updates

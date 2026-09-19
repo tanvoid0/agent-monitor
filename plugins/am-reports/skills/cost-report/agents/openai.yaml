@@ -1,0 +1,6 @@
+interface:
+  display_name: "Cost Report"
+  short_description: "Produce a scoped AgentMonitor cost and token report by..."
+  default_prompt: "Use $cost-report to inspect AgentMonitor data and complete this workflow safely."
+policy:
+  allow_implicit_invocation: true

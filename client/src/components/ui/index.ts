@@ -3,7 +3,7 @@
  * @description Barrel for the domain-agnostic UI kit atoms (buttons, badges,
  * tabs, menus, Clickable, headers). Types are re-exported with `export type`
  * because the client compiles with `isolatedModules`.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 export { Button } from "./Button";

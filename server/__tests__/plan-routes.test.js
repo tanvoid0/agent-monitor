@@ -5,7 +5,7 @@
  * log round trips, export's three files, the websocket pusher's debounce and
  * 5 s tick, and a live scenario driven through the hook route — a `Lane X —`
  * subagent whose box turns `doing` with the right agent.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { describe, it, before, after } = require("node:test");
@@ -257,7 +257,7 @@ describe("POST tick / log / export", () => {
     assert.equal(last.agent, "af01d6844fb0e1968");
     assert.ok(model.agents[last.agent], "events key into model.agents the way the v2 page does");
     assert.equal((await post("/api/plans/ledgerflow/export", { dir: "relative" })).status, 400);
-    const elsewhere = path.resolve(path.sep, "ccam-export-elsewhere");
+    const elsewhere = path.resolve(path.sep, "am-export-elsewhere");
     assert.equal((await post("/api/plans/ledgerflow/export", { dir: elsewhere })).status, 400);
     assert.equal(fs.existsSync(elsewhere), false);
     // the project itself is allowed

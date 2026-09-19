@@ -4,7 +4,7 @@
  * agent-count deep link, remote-source and Run badges, the trailing kebab
  * carrying the session's entity menu, and the transient Codex startup row
  * rendering without links or a menu.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, expect, it } from "vitest";

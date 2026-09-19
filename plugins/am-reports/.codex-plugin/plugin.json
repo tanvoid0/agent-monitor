@@ -1,0 +1,29 @@
+{
+  "name": "am-reports",
+  "version": "3.0.0",
+  "description": "Generate stakeholder-ready AgentMonitor reports from local session, cost, reliability, and workflow data with explicit scope, evidence, and export-friendly Markdown.",
+  "author": {
+    "name": "Tanveer Hoque",
+    "email": "tanvoid0@gmail.com",
+    "url": "https://github.com/tanvoid0"
+  },
+  "homepage": "https://github.com/tanvoid0/agent-monitor",
+  "repository": "https://github.com/tanvoid0/agent-monitor",
+  "license": "MIT",
+  "keywords": ["reports", "executive-summary", "cost", "reliability", "workflows", "am"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "AgentMonitor Reports",
+    "shortDescription": "Generate stakeholder-ready AgentMonitor reports from local session, cost, reliability, and...",
+    "longDescription": "Generate stakeholder-ready AgentMonitor reports from local session, cost, reliability, and workflow data with explicit scope, evidence, and export-friendly Markdown.",
+    "developerName": "Tanveer Hoque",
+    "category": "Productivity",
+    "capabilities": ["Read"],
+    "websiteURL": "https://github.com/tanvoid0/agent-monitor",
+    "defaultPrompt": [
+      "Use AgentMonitor Reports to inspect the local AgentMonitor dashboard.",
+      "Use AgentMonitor Reports to analyze recent agent activity."
+    ],
+    "brandColor": "#6366F1"
+  }
+}

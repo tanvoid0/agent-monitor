@@ -9,7 +9,7 @@
  * MCP image's `file:..` link, and the published tarball all install without a
  * client checkout, and must not fail here. Skipped entirely under
  * `npm install --ignore-scripts` (run `cd client && npm install` manually then).
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 const { spawnSync } = require("child_process");

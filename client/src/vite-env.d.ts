@@ -4,7 +4,7 @@
  * Vite's client types (`import.meta.env`, static asset modules) and declares
  * compile-time globals injected by `define` in `vite.config.ts`.
  *
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 /// <reference types="vite/client" />

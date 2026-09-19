@@ -4,7 +4,7 @@
  * per kind, project label/sub-path split, and the menu items `entityMenu`
  * builds (order, conditional items, copy targets, lazy folder reveal with
  * success/failure toasts).
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";

@@ -5,7 +5,7 @@
  * enclosing modal's window listener does not also close. `ContextMenuFor`
  * is the one-liner: wrap any element with a `MenuItem[]`. `menuContentClass`
  * and `stopEscape` are shared here with DropdownMenu's Content wrapper.
- * @author Son Nguyen <hoangson091104@gmail.com>
+ * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
 import {
