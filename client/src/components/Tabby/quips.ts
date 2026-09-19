@@ -108,6 +108,12 @@ const QUIPS: Record<QuipKey, string[]> = {
     "run complete - that's a wrap 😸",
     "all done with that run 💜",
   ],
+  permission: [
+    "Claude wants to run something - your call 🔑",
+    "a tool call needs your okay 👀",
+    "permission check! tap to review 🐾",
+    "waiting on a yes or no from you ✋",
+  ],
   // Moods (steady-state flavor, used by the panel / idle bubbles)
   disconnected: [
     "lost the connection… 😴",

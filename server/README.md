@@ -952,6 +952,18 @@ Server broadcasts JSON messages to all connected clients:
   "type": "remote_data.updated",
   "data": { "sourceId": "...", "source": "...", "label": "...?", "counters": { "imported": 0, "skipped": 0 }, "last_sync_at": "...?" }
 }
+
+// Claude Code permission prompt parked by the PermissionRequest http hook — answer via POST /api/permissions/:id/decision
+{
+  "type": "permission_request",
+  "data": { "id": "...", "session_id": "...", "cwd": "...", "tool_name": "Bash", "tool_input": { ... }, "permission_mode": "default", "permission_suggestions": [ ... ], "received_at": "...", "expires_at": "..." }
+}
+
+// Parked prompt gone: outcome is allow | deny | deferred | timeout | cancelled
+{
+  "type": "permission_resolved",
+  "data": { "id": "...", "outcome": "allow" }
+}
 ```
 
 ### Broadcasting Logic
@@ -997,11 +1009,12 @@ sequenceDiagram
 
 ### Hook Endpoints
 
-All hook traffic is sent to one endpoint:
+All observational hook traffic is sent to one endpoint; the permission relay has its own:
 
 | Method | Endpoint | Notes |
 |--------|----------|-------|
 | `POST` | `/api/hooks/event` | Body includes `hook_type` and `data`; server routes behavior by hook type |
+| `POST` | `/api/hooks/permission-request` | Claude Code `PermissionRequest` **http hook** (no handler script). Response is **held** until the UI answers via `POST /api/permissions/:id/decision` or `DASHBOARD_PERMISSION_HOLD_MS` elapses (then `{}` = no decision → terminal prompt). Parked prompts are in-memory (`lib/permission-relay.js`) and listed by `GET /api/permissions` |
 
 Supported `hook_type` values include `PreToolUse`, `PostToolUse`, `Stop`, `SubagentStart`, `SubagentStop`, `Notification`, `SessionStart`, `SessionEnd`, and `UserPromptSubmit`. `SubagentStart` and the hooks fired inside a subagent carry `data.agent_id`, which binds the event to the agent row with that `claude_agent_id`.
 
@@ -1554,6 +1567,7 @@ DASHBOARD_TOKEN=                   # Optional bearer token; when set, /api/* and
 DASHBOARD_TOKEN_FILE=              # File-backed dashboard token for Docker/Kubernetes secrets
 DASHBOARD_HOOK_TOKEN=              # Independent token for the local hook routes (/api/hooks/event, /api/hooks/codex) when exposed beyond loopback
 DASHBOARD_HOOK_TOKEN_FILE=         # File-backed hook token
+DASHBOARD_PERMISSION_HOLD_MS=60000 # How long POST /api/hooks/permission-request waits for a dashboard Allow/Deny before falling through to the terminal prompt
 REMOTE_PUSH_TOKEN=                 # Separate token gating POST /api/hooks/ingest-batch (public-internet remote-push route). Unset = route disabled (503). Deliberately independent of DASHBOARD_HOOK_TOKEN above
 REMOTE_PUSH_TOKEN_FILE=            # File-backed remote-push token
 DASHBOARD_ALLOWED_HOSTS=           # Extra Host-header names to allow (comma-separated), e.g. for LAN access

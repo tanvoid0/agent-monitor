@@ -88,6 +88,9 @@ export const routes = {
 
   analytics: (q?: { tab?: AnalyticsTab }) => `/analytics${qs({ tab: q?.tab })}`,
 
+  /** Pending Claude Code permission prompts, answerable in context. */
+  permissions: () => "/permissions",
+
   plan: (slug?: string, q?: { task?: string }) =>
     `/plan${slug ? `/${encodeURIComponent(slug)}` : ""}${qs({ task: q?.task })}`,
 

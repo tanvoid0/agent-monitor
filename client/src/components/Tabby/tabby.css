@@ -450,6 +450,24 @@
   justify-content: center;
   border: 2px solid #0c0c14;
 }
+/* Pending permission prompts: amber, bottom-left so it never collides with
+   the red error count in the top-right. */
+.tabby-permission-dot {
+  position: absolute;
+  bottom: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: #f59e0b;
+  color: #1a1206;
+  font-size: 9px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #0c0c14;
+}
 .tabby-bubble {
   max-width: 16rem;
   background: #1a1a28;

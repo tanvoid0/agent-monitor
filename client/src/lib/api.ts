@@ -408,6 +408,8 @@ import type {
   WorkflowRun,
   WorkflowRunsResponse,
   WorkflowRunDetail,
+  PermissionRequest,
+  PermissionUpdate,
 } from "./types";
 
 import { activeProvidersParam, activeSourcesParam } from "./dataScope";
@@ -532,6 +534,30 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
  * per-method docs below focus on the specific route, params, and response shape.
  */
 export const api = {
+  // ───────────────────────── Permission relay ─────────────────────────
+  /** Claude Code permission prompts parked by the PermissionRequest http hook.
+   *  Maps to `server/routes/permissions.js`; pushes arrive as
+   *  `permission_request` / `permission_resolved` WebSocket messages. */
+  permissions: {
+    /** GET /api/permissions - prompts still waiting for an answer. */
+    list: () => request<{ pending: PermissionRequest[]; hold_ms: number }>("/permissions"),
+    /**
+     * POST /api/permissions/:id/decision - answer one prompt. `defer` sends no
+     * decision so Claude Code shows its terminal prompt immediately.
+     */
+    decide: (
+      id: string,
+      body: {
+        behavior: "allow" | "deny" | "defer";
+        message?: string;
+        updatedPermissions?: PermissionUpdate[];
+      }
+    ) =>
+      request<{ ok: true }>(`/permissions/${encodeURIComponent(id)}/decision`, {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+  },
   // ───────────────────────── Updates / self-update API ─────────────────────────
   /** Self-update status: whether this install is a git clone and, if so,
    *  whether the tracked upstream/origin remote is ahead. Backs the "update

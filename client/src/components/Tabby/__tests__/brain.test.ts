@@ -12,6 +12,7 @@ import {
   statusOf,
   clearErrors,
   seedSessions,
+  seedPermissions,
   HAPPY_MS,
   WORRIED_MS,
   STUCK_MS,
@@ -245,4 +246,47 @@ describe("clearErrors", () => {
 // Reference the imported constant so it is exercised and tsc-clean.
 it("WORRIED_MS is a positive window", () => {
   expect(WORRIED_MS).toBeGreaterThan(0);
+});
+
+describe("permission prompts", () => {
+  const T0 = 1_000_000;
+  const request = (id: string): WSMessage => ({
+    type: "permission_request",
+    data: { id, session_id: "s", tool_name: "Bash" } as never,
+    timestamp: "t",
+  });
+  const resolved = (id: string): WSMessage => ({
+    type: "permission_resolved",
+    data: { id, outcome: "allow" } as never,
+    timestamp: "t",
+  });
+
+  it("counts a held prompt and pulses once per new id", () => {
+    let s = initialTabbyState(T0);
+    let pulse;
+    ({ state: s, pulse } = reduceTabby(s, request("p1"), T0));
+    expect(pulse).toBe("permission");
+    expect(statusOf(s).permissionCount).toBe(1);
+    // The same id again (e.g. a re-broadcast) is not a second prompt.
+    ({ state: s, pulse } = reduceTabby(s, request("p1"), T0));
+    expect(pulse).toBeNull();
+    expect(statusOf(s).permissionCount).toBe(1);
+  });
+
+  it("drops a prompt when it resolves, silently", () => {
+    let s = initialTabbyState(T0);
+    ({ state: s } = reduceTabby(s, request("p1"), T0));
+    ({ state: s } = reduceTabby(s, request("p2"), T0));
+    const { state: next, pulse } = reduceTabby(s, resolved("p1"), T0);
+    expect(pulse).toBeNull();
+    expect(next.permissions).toEqual(["p2"]);
+    // Resolving an unknown id is a no-op.
+    expect(reduceTabby(next, resolved("zzz"), T0).state).toBe(next);
+  });
+
+  it("seeds from a REST snapshot, de-duplicated", () => {
+    const s = seedPermissions(initialTabbyState(T0), ["a", "b", "a"]);
+    expect(s.permissions).toEqual(["a", "b"]);
+    expect(statusOf(s).permissionCount).toBe(2);
+  });
 });

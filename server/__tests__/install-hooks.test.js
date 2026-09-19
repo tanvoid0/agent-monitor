@@ -107,6 +107,20 @@ describe("install-hooks host-only guard (#193)", () => {
     }
   });
 
+  it("installs PermissionRequest as an http hook pointing at the relay route", () => {
+    process.env.CCAM_FORCE_HOST = "1";
+    installHooks(true);
+    installHooks(true);
+    const settings = JSON.parse(fs.readFileSync(SETTINGS, "utf8"));
+    const entries = settings.hooks.PermissionRequest;
+    assert.equal(entries.length, 1, "must not duplicate the http entry on re-run");
+    const [hook] = entries[0].hooks;
+    assert.equal(hook.type, "http");
+    assert.match(hook.url, /^http:\/\/127\.0\.0\.1:\d+\/api\/hooks\/permission-request$/);
+    assert.ok(hook.timeout > 60, "hook timeout must outlast the relay hold window");
+    assert.equal(getClaudeHookStatus().hooks.PermissionRequest, true);
+  });
+
   it("writes on a host (not a container)", () => {
     process.env.AM_FORCE_HOST = "1";
     const ok = installHooks(true);

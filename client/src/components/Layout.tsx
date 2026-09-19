@@ -79,6 +79,7 @@ import { UpdateNotifier } from "./UpdateNotifier";
 import { CommandPalette } from "./CommandPalette";
 import { Tabby } from "./Tabby/Tabby";
 import { ActionToast } from "./ActionToast";
+import { PermissionRelay } from "./PermissionRelay";
 import { PaletteActionProvider, usePaletteAction } from "./PaletteActionProvider";
 
 /** Props for {@link Layout}. */
@@ -132,6 +133,7 @@ export function Layout({ wsConnected }: LayoutProps) {
         <UpdateNotifier />
         <CommandPalette />
         <ActionToast />
+        <PermissionRelay />
         <Tabby />
         <Sidebar wsConnected={wsConnected} collapsed={collapsed} onToggle={toggle} />
         <main

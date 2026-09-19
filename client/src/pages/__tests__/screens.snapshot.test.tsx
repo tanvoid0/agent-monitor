@@ -256,6 +256,10 @@ vi.mock("../../lib/api", async (importOriginal) => {
         }),
         run: r({ workflow: sampleWorkflowRun, agents: [], events: [] }),
       },
+      permissions: {
+        list: r({ pending: [], hold_ms: 60000 }),
+        decide: r({ ok: true }),
+      },
       pricing: {
         list: r({ pricing: [] }),
         listGpt: r({ pricing: [] }),

@@ -35,9 +35,6 @@
     "turnSummary_one": "{{count}} 轮",
     "turnSummary_other": "{{count}} 轮"
   },
-  "projects": {
-    "all": "全部项目"
-  },
   "project": {
     "open": "在文件管理器中打开文件夹",
     "opened": "已在文件管理器中打开 {{name}}",
@@ -56,6 +53,24 @@
       "completed": "会话已完全关闭，因为其 CLI 正常退出或被明确关闭。\n\n此会话中的所有 Agent 也都已完成。",
       "error": "会话以错误结束：不可恢复的故障或上游 API 错误终止了运行。",
       "abandoned": "会话在没有干净退出信号的情况下变得陈旧。超过 5 分钟没有活动后会被标记为已放弃（例如 /resume、网络中断或 CLI 被终止后）。与已完成不同：未观察到真实退出。"
+    }
+  },
+  "projectPanel": {
+    "title": "项目",
+    "all": "所有项目",
+    "search": "搜索项目…",
+    "noMatch": "没有匹配的项目",
+    "collapse": "折叠项目面板",
+    "expand": "展开项目面板",
+    "clear": "清除 {{count}} 个已选",
+    "active": "活跃会话",
+    "waiting": "等待中",
+    "unseen": "上次查看后已完成",
+    "sort": {
+      "label": "排序",
+      "name": "名称",
+      "recent": "最近活动",
+      "count": "会话数"
     }
   }
 }

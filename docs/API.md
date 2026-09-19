@@ -1409,6 +1409,52 @@ DELETE /api/run/:id                   Stop (SIGTERM → SIGKILL after 5 s)
 
 Spawned `claude` processes fire the dashboard's hooks like any other CLI session, so they show up in `/api/sessions`, the analytics, the Kanban board, and the Workflows page automatically — the Run page itself just owns the live streaming UX.
 
+### Permission Relay
+
+Lets the dashboard answer a Claude Code **permission prompt** in any hook-monitored session (terminal, desktop app, `claude -p`). The installer registers `PermissionRequest` as a Claude Code `http` hook; Claude Code POSTs the prompt here and **blocks until the response arrives**. See [HOOKS.md → PermissionRequest](HOOKS.md#9-permissionrequest-http-hook--the-one-that-talks-back) for the hook contract and fail-safe rules.
+
+```http
+POST /api/hooks/permission-request
+```
+
+Called by Claude Code, not by browsers. Body is the hook payload (`hook_event_name: "PermissionRequest"`, `session_id`, `cwd`, `permission_mode`, `tool_name`, `tool_input`, `permission_suggestions?`). Guarded by `DASHBOARD_HOOK_TOKEN` like the other `/api/hooks/*` routes. The response is held open until a decision is posted or `DASHBOARD_PERMISSION_HOLD_MS` (default 60000) elapses, then returns either the decision or `{}` (no decision → terminal prompt). `400` for anything that is not a `PermissionRequest` payload.
+
+```http
+GET /api/permissions
+```
+
+Prompts still waiting for an answer. Same-origin / loopback-Origin guarded like `/api/run`.
+
+```json
+{
+  "pending": [
+    {
+      "id": "9b6d8f0c-…",
+      "session_id": "abc123",
+      "cwd": "/home/user/my-project",
+      "tool_name": "Bash",
+      "tool_input": { "command": "rm -rf node_modules" },
+      "permission_mode": "default",
+      "permission_suggestions": [
+        { "type": "addRules", "rules": [{ "toolName": "Bash", "ruleContent": "rm -rf node_modules" }], "behavior": "allow", "destination": "localSettings" }
+      ],
+      "received_at": "2026-09-15T17:40:00.000Z",
+      "expires_at": "2026-09-15T17:41:00.000Z"
+    }
+  ],
+  "hold_ms": 60000
+}
+```
+
+```http
+POST /api/permissions/:id/decision
+Content-Type: application/json
+
+{ "behavior": "allow" | "deny" | "defer", "message"?: "…", "updatedPermissions"?: [ …PermissionUpdate ] }
+```
+
+Releases the held hook request. `allow` / `deny` answer on the user's behalf (`message` is relayed to Claude on deny; `updatedPermissions` — typically one of the request's `permission_suggestions` echoed back — is "Allow always"). `defer` returns no decision so Claude Code prompts in the terminal immediately. Returns `{ "ok": true }`; `404` once the prompt has already been answered, expired, or cancelled; `403` for cross-origin browser requests.
+
 ---
 
 ## WebSocket API
@@ -1638,6 +1684,15 @@ Broadcast when a remote data source changes sync state (during/after `POST /api/
 { "type": "remote_source.status", "data": { "id": "4d1f0e2a-7b9c-4c33-8a21-9e0f7b6d4c11", "status": "ok", "providers": { "claude": "unavailable", "codex": "ok" }, "last_sync_at": "2026-07-22T18:41:55.117Z" } }
 { "type": "remote_source.status", "data": { "id": "4d1f0e2a-7b9c-4c33-8a21-9e0f7b6d4c11", "status": "error", "error": "ssh exited with code 255" } }
 { "type": "remote_source.status", "data": { "id": "4d1f0e2a-7b9c-4c33-8a21-9e0f7b6d4c11", "status": "deleted" } }
+```
+
+#### permission_request / permission_resolved
+
+Broadcast by the permission relay (`server/lib/permission-relay.js`). `permission_request` carries the full parked prompt (same shape as an item of `GET /api/permissions`); `permission_resolved` fires once it is gone for any reason — `outcome` is `allow`, `deny`, `deferred`, `timeout`, or `cancelled` (the hook connection dropped).
+
+```json
+{ "type": "permission_request", "data": { "id": "9b6d…", "session_id": "abc123", "cwd": "/home/user/my-project", "tool_name": "Bash", "tool_input": { "command": "rm -rf node_modules" }, "permission_mode": "default", "permission_suggestions": [ { "type": "addRules", "rules": [ { "toolName": "Bash", "ruleContent": "rm -rf node_modules" } ], "behavior": "allow", "destination": "localSettings" } ], "received_at": "2026-09-15T17:40:00.000Z", "expires_at": "2026-09-15T17:41:00.000Z" } }
+{ "type": "permission_resolved", "data": { "id": "9b6d…", "outcome": "allow" } }
 ```
 
 ### Event Flow

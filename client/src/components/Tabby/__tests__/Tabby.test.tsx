@@ -6,17 +6,30 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render, screen, fireEvent, act, cleanup, within } from "@testing-library/react";
-import { MemoryRouter } from "react-router";
+import { MemoryRouter, useLocation } from "react-router";
 import { Tabby } from "../Tabby";
 import { eventBus } from "../../../lib/eventBus";
 import type { WSMessage, Session } from "../../../lib/types";
+
+/** Echoes the current location so navigation assertions can read it. */
+function LocationProbe() {
+  const location = useLocation();
+  return <div data-testid="location">{`${location.pathname}${location.search}`}</div>;
+}
 
 function renderTabby() {
   return render(
     <MemoryRouter>
       <Tabby />
+      <LocationProbe />
     </MemoryRouter>
   );
+}
+
+/** The stat chip carrying `label` — a button when clickable, a div when not. */
+function statChip(panel: HTMLElement, label: string): HTMLElement {
+  const text = within(panel).getByText(label);
+  return (text.closest("button") ?? text.closest("div"))!;
 }
 
 const sessionMsg = (id: string, status: Session["status"]): WSMessage => ({
@@ -100,8 +113,61 @@ describe("Tabby widget", () => {
     fireEvent.click(screen.getByRole("button", { name: /open tabby companion/i }));
     const panel = screen.getByRole("dialog", { name: /tabby companion/i });
     // The "live" stat chip shows value 2 next to its label.
-    const liveChip = within(panel).getByText("live").closest("div")!;
-    expect(within(liveChip).getByText("2")).toBeInTheDocument();
+    expect(within(statChip(panel, "live")).getByText("2")).toBeInTheDocument();
+  });
+
+  it("jumps to the matching Sessions filter from each stat chip", () => {
+    renderTabby();
+    act(() => {
+      eventBus.publish(sessionMsg("a", "active"));
+      eventBus.publish({
+        type: "session_updated",
+        data: { id: "b", status: "active", awaiting_input_since: "now" } as Session,
+        timestamp: "t",
+      });
+      eventBus.publish(sessionMsg("c", "error"));
+    });
+
+    const open = () => fireEvent.click(screen.getByRole("button", { name: /open tabby/i }));
+    const location = () => screen.getByTestId("location").textContent;
+
+    for (const [label, expected] of [
+      ["live", "/sessions?status=active"],
+      ["waiting", "/sessions?status=waiting"],
+      ["errored", "/sessions?status=error"],
+    ] as const) {
+      open();
+      const panel = screen.getByRole("dialog", { name: /tabby companion/i });
+      fireEvent.click(statChip(panel, label));
+      expect(location()).toBe(expected);
+      // Navigating closes the panel, matching the quick-action buttons.
+      expect(screen.queryByRole("dialog", { name: /tabby companion/i })).not.toBeInTheDocument();
+    }
+  });
+
+  it("shows an approvals badge and routes the chip to /permissions", () => {
+    renderTabby();
+    act(() => {
+      eventBus.publish({
+        type: "permission_request",
+        data: { id: "p1", session_id: "s", tool_name: "Bash" } as never,
+        timestamp: "t",
+      });
+    });
+    const btn = screen.getByRole("button", { name: /open tabby companion/i });
+    expect(within(btn).getByText("1")).toBeInTheDocument();
+
+    fireEvent.click(btn);
+    const panel = screen.getByRole("dialog", { name: /tabby companion/i });
+    fireEvent.click(statChip(panel, "approvals"));
+    expect(screen.getByTestId("location").textContent).toBe("/permissions");
+  });
+
+  it("leaves a zero-count stat chip inert", () => {
+    renderTabby();
+    fireEvent.click(screen.getByRole("button", { name: /open tabby companion/i }));
+    const panel = screen.getByRole("dialog", { name: /tabby companion/i });
+    expect(within(panel).getByText("errored").closest("button")).toBeNull();
   });
 
   it("respects the enabled preference", () => {

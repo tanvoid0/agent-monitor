@@ -190,6 +190,7 @@ client/
 │   │   │                   #   SegmentedControl, Menu/ContextMenu/DropdownMenu (MenuButton kebab), Clickable, PageHeader, SectionHeader
 │   │   ├── entity/         # EntityRef link-by-reference chip (session/agent/project/tool/eventType/model/event) + entityMenu item lists
 │   │   ├── dashboard/      # SystemHealthTab + its HealthPanel / KeyValueRow / MiniStat / RatioBar atoms
+│   │   ├── kanban/         # ProjectPanel — collapsible multi-select project filter (search, sort, live badges) + pure row helpers
 │   │   ├── AgentCard.tsx     # variant="card" | "row" (row → CompactRow)
 │   │   ├── SessionCard.tsx   # variant="card" | "row" (row → CompactRow)
 │   │   ├── CompactRow.tsx    # One-line row shared by AgentCard and SessionCard
@@ -223,6 +224,7 @@ client/
 │   │   ├── Plan.tsx (plan/)   # Plan layer board, ?task= deep link
 │   │   ├── Analytics.tsx
 │   │   ├── Workflows.tsx
+│   │   ├── Permissions.tsx     # /permissions — held prompts beside their session context
 │   │   ├── Settings.tsx
 │   │   └── NotFound.tsx
 │   │
@@ -467,6 +469,8 @@ Server broadcasts these event types over WebSocket:
 | `tool.executed` | Tool execution record | PostToolUse hook |
 | `notification.received` | Notification object | Notification hook |
 | `remote_source.status` | `{ id, status, error?, providers?, last_sync_at? }` (`status`: `idle`/`syncing`/`ok`/`error`/`deleted`; each provider can also be `unavailable`) | Remote Data Source sync poller + `/api/remote-sources` routes |
+| `permission_request` | `PermissionRequest` — `{ id, session_id, cwd, tool_name, tool_input, permission_mode, permission_suggestions, received_at, expires_at }` | A Claude Code permission prompt parked by the `PermissionRequest` http hook; rendered by `components/PermissionRelay.tsx` (mounted in `Layout`) with Allow / Allow always / Deny / Answer in terminal → `POST /api/permissions/:id/decision`. `tool_input` is shaped by `lib/permission-input.ts` (`summarisePermissionInput`) and drawn by `components/PermissionInputView.tsx` — code / path / url / text / diff / questions / json fields, labelled from `permissions.field.*`; unknown tools (including every `mcp__*`) fall through to a generic pass that still renders every key. The relay state hook is `hooks/usePermissionRelay.ts` and the card `components/PermissionCard.tsx`; `pages/SessionDetail.tsx` renders the session's own prompts inline (and, via `lib/pending-permission.ts`, a read-only reconstruction of a prompt the relay no longer holds), `pages/Permissions.tsx` lists them all with session context, and `components/Tabby/brain.ts` tracks the count |
+| `permission_resolved` | `{ id, outcome }` (`allow`/`deny`/`deferred`/`timeout`/`cancelled`) | Removes the card whatever ended the prompt |
 | `remote_data.updated` | `{ sourceId, source, label?, counters?, providers?, last_sync_at? }` | Emitted once per successful remote sync; provider-aware counters trigger stats/cost/session refetches. The server also broadcasts `session_created` / `session_updated` (and main-agent frames) for each mirrored session so Kanban/Sessions update immediately |
 
 ### EventBus Pattern
@@ -521,6 +525,7 @@ graph TB
     Feed["/activity"]
     Analytics["/analytics"]
     Workflows["/workflows"]
+    Permissions["/permissions"]
     CcConfig["/cc-config"]
     Run["/run"]
     Settings["/settings"]
@@ -809,7 +814,7 @@ interface AgentCardProps {
 
 The project chip both cards render under their header: a colour dot keyed to the project group, the group's folder name, the sub-path when the session ran below the group root (`repo · apps/web`), the full `cwd` as tooltip, and — for `source = 'local'` sessions only — a folder button that calls `POST /api/sessions/open-cwd` and confirms through `ActionToast`. The click is stopped before it reaches the card, so it never navigates.
 
-The same file exports the pure helpers the Kanban board's project tabs use, so tabs and badges agree on colours: `normalizeCwd` (one separator style, so Windows and POSIX cwds compare), `projectRoots(cwds)` (each known cwd → the shortest known ancestor cwd; `<repo>/.claude/worktrees/<x>` and `<repo>/.worktrees/<x>` fold onto `<repo>` even when no session ran there), `projectLabel(root)`, and `projectColor(root)` (a stable pick from a ten-colour palette). The board passes `?project=<group root>` through the URL — "All projects" is the absence of the parameter — and renders one tab per group with the count in the active view.
+The same file exports the pure helpers the Kanban board's project panel uses, so panel rows and badges agree on colours: `normalizeCwd` (one separator style, so Windows and POSIX cwds compare), `projectRoots(cwds)` (each known cwd → the shortest known ancestor cwd; `<repo>/.claude/worktrees/<x>` and `<repo>/.worktrees/<x>` fold onto `<repo>` even when no session ran there), `projectLabel(root)`, and `projectColor(root)` (a stable pick from a ten-colour palette). The board passes `?project=<root>[,<root>]` through the URL — "All projects" is the absence of the parameter — and `components/kanban/ProjectPanel.tsx` renders one row per group (search, name / recent / count sort, active · waiting · unseen-completed badges, collapsed state + sort in `localStorage`, "seen" stamps per root) from `buildProjectRows` over the sessions the page already holds.
 
 #### StatusBadge
 

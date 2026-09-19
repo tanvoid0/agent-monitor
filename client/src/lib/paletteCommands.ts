@@ -78,6 +78,7 @@ import {
   VolumeX,
   Webhook,
   Workflow,
+  ShieldAlert,
   type LucideIcon,
 } from "lucide-react";
 import type { DataScope, ProviderScope } from "./dataScope";
@@ -271,7 +272,7 @@ export const PAGE_ACTION_COMMANDS: {
   },
 ];
 
-/** The ten sidebar destinations. */
+/** The eleven sidebar destinations. */
 export const PAGE_COMMANDS: {
   to: string;
   icon: LucideIcon;
@@ -283,6 +284,7 @@ export const PAGE_COMMANDS: {
   { to: "/activity", icon: Activity, navKey: "nav:activityFeed" },
   { to: "/analytics", icon: BarChart3, navKey: "nav:analytics" },
   { to: "/workflows", icon: Workflow, navKey: "nav:workflows" },
+  { to: "/permissions", icon: ShieldAlert, navKey: "nav:permissions" },
   { to: "/plan", icon: SquareKanban, navKey: "nav:plan" },
   { to: "/cc-config", icon: Boxes, navKey: "nav:ccConfig" },
   { to: "/run", icon: Play, navKey: "nav:run" },

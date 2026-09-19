@@ -95,9 +95,38 @@ const HOOKS_WITH_MATCHER = ["PreToolUse", "PostToolUse", "Stop", "SubagentStop",
 // subagent's own agent_id — the only hook that lets the dashboard bind an
 // Agent-spawned row to the id later tool hooks report.
 const HOOKS_WITHOUT_MATCHER = ["SessionStart", "SessionEnd", "UserPromptSubmit", "SubagentStart"];
-const HOOK_TYPES = [...HOOKS_WITH_MATCHER, ...HOOKS_WITHOUT_MATCHER];
+// PermissionRequest is the one hook that talks *back*: installed as an `http`
+// hook so Claude Code blocks on the dashboard's answer (Allow/Deny from the
+// UI). Points at the conventional ingest port — a dashboard that is down is a
+// connection failure Claude Code ignores, so the terminal prompt still shows.
+const HOOKS_HTTP = ["PermissionRequest"];
+const HOOK_TYPES = [...HOOKS_WITH_MATCHER, ...HOOKS_WITHOUT_MATCHER, ...HOOKS_HTTP];
+const PERMISSION_RELAY_PATH = "/api/hooks/permission-request";
+
+function permissionRelayUrl() {
+  const port = parseInt(process.env.DASHBOARD_PORT || "4820", 10);
+  return `http://127.0.0.1:${port}${PERMISSION_RELAY_PATH}`;
+}
 
 function makeHookEntry(hookType) {
+  if (HOOKS_HTTP.includes(hookType)) {
+    const { HOLD_MS } = require("../server/lib/permission-relay");
+    return {
+      matcher: "*",
+      hooks: [
+        {
+          type: "http",
+          url: permissionRelayUrl(),
+          // Above the relay's hold window so Claude Code doesn't cancel first.
+          // Read from the *installer's* env: if the server runs with a longer
+          // DASHBOARD_PERMISSION_HOLD_MS than the shell that ran install-hooks,
+          // Claude Code cancels at this timeout — harmless (terminal prompt
+          // still appears), just a shorter effective hold.
+          timeout: Math.ceil(HOLD_MS / 1000) + 15,
+        },
+      ],
+    };
+  }
   const entry = {
     hooks: [
       {
@@ -116,7 +145,11 @@ function isOurEntry(entry) {
   // Matches old format (entry.command) and new format (entry.hooks[].command)
   if (entry.command && entry.command.includes("hook-handler.js")) return true;
   if (Array.isArray(entry.hooks)) {
-    return entry.hooks.some((h) => h.command && h.command.includes("hook-handler.js"));
+    return entry.hooks.some(
+      (h) =>
+        (h.command && h.command.includes("hook-handler.js")) ||
+        (h.type === "http" && typeof h.url === "string" && h.url.endsWith(PERMISSION_RELAY_PATH))
+    );
   }
   return false;
 }

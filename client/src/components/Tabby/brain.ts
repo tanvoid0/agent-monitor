@@ -140,7 +140,15 @@
  *
  * ----------------------------------------------------------------------------- */
 
-import type { WSMessage, Session, Agent, RunStatusPayload, DashboardEvent } from "../../lib/types";
+import type {
+  WSMessage,
+  Session,
+  Agent,
+  RunStatusPayload,
+  DashboardEvent,
+  PermissionRequest,
+  PermissionResolvedPayload,
+} from "../../lib/types";
 
 /** All moods Tabby can express, highest priority first (see `deriveMood`). */
 export type Mood =
@@ -165,6 +173,7 @@ export type TabbyPulse =
   | "waiting"
   | "error"
   | "run_done"
+  | "permission"
   | null;
 
 export interface TabbyStatus {
@@ -173,6 +182,8 @@ export interface TabbyStatus {
   /** Subset of liveCount currently blocked on user input. */
   waitingCount: number;
   errorCount: number;
+  /** Claude Code permission prompts the relay is holding for an answer. */
+  permissionCount: number;
   connected: boolean;
 }
 
@@ -189,6 +200,9 @@ export interface TabbyState {
   worriedUntil: number;
   /** True while an Ask request is in flight (panel). */
   thinking: boolean;
+  /** Ids of permission prompts the relay is holding; each is a real tool call
+   *  blocked on the user, so they count as "waiting on you" for the mascot. */
+  permissions: string[];
 }
 
 // Tunable timing constants (ms).
@@ -218,6 +232,7 @@ export function initialTabbyState(now: number): TabbyState {
     happyUntil: 0,
     worriedUntil: 0,
     thinking: false,
+    permissions: [],
   };
 }
 
@@ -231,7 +246,13 @@ export function statusOf(state: TabbyState): TabbyStatus {
       if (s === "waiting") waitingCount++;
     } else if (s === "error") errorCount++;
   }
-  return { liveCount, waitingCount, errorCount, connected: state.connected };
+  return {
+    liveCount,
+    waitingCount,
+    errorCount,
+    permissionCount: state.permissions.length,
+    connected: state.connected,
+  };
 }
 
 /**
@@ -372,6 +393,28 @@ export function reduceTabby(
       // Streaming output counts as activity but is not itself notable.
       return { state: { ...state, lastActivityAt: now }, pulse: null };
 
+    case "permission_request": {
+      const p = msg.data as PermissionRequest;
+      if (!p || !p.id || state.permissions.includes(p.id)) return { state, pulse: null };
+      return {
+        state: { ...state, permissions: [...state.permissions, p.id], lastActivityAt: now },
+        pulse: "permission",
+      };
+    }
+
+    case "permission_resolved": {
+      const { id } = msg.data as PermissionResolvedPayload;
+      if (!id || !state.permissions.includes(id)) return { state, pulse: null };
+      return {
+        state: {
+          ...state,
+          permissions: state.permissions.filter((x) => x !== id),
+          lastActivityAt: now,
+        },
+        pulse: null,
+      };
+    }
+
     default:
       return { state, pulse: null };
   }
@@ -397,6 +440,15 @@ export function seedSessions(
     // completed / abandoned: leave untracked.
   }
   return { ...state, sessions, lastActivityAt: now };
+}
+
+/**
+ * Hydrate the held-prompt list from a REST snapshot (GET /api/permissions),
+ * for the same reason as `seedSessions`: a freshly loaded page would
+ * otherwise only learn about prompts pushed *after* it mounted.
+ */
+export function seedPermissions(state: TabbyState, ids: ReadonlyArray<string>): TabbyState {
+  return { ...state, permissions: [...new Set(ids)] };
 }
 
 /** Drop all errored sessions from tracking (used by "clear alerts"). */

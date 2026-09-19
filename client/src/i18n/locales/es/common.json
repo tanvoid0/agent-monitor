@@ -239,6 +239,50 @@
     "ask": "Preguntar a Tabby",
     "send": "Enviar",
     "mute": "Silenciar burbujas",
-    "unmute": "Activar burbujas"
+    "unmute": "Activar burbujas",
+    "showLive": "Ver sesiones activas",
+    "showWaiting": "Ver sesiones que te esperan",
+    "showErrored": "Ver sesiones con error",
+    "approvals": "aprobaciones",
+    "showApprovals": "Revisar avisos de permiso pendientes"
+  },
+  "permissions": {
+    "title": "Solicitudes de permiso",
+    "wants": "Claude quiere ejecutar {{tool}}",
+    "expiresIn": "{{seconds}}s",
+    "allow": "Permitir",
+    "allowAlways": "Permitir siempre",
+    "deny": "Denegar",
+    "inTerminal": "Responder en la terminal",
+    "alwaysRule": "Siempre: {{rule}} → {{destination}}",
+    "terminalOnly": "El dashboard ya no retiene este aviso — pasó su ventana de espera, el dashboard estaba cerrado cuando saltó, o el hook PermissionRequest no está instalado — así que respóndelo en la terminal que ejecuta esta sesión.",
+    "field": {
+      "command": "Comando",
+      "description": "Descripción",
+      "file": "Archivo",
+      "content": "Contenido",
+      "url": "URL",
+      "prompt": "Indicación",
+      "pattern": "Patrón",
+      "path": "Ruta",
+      "query": "Consulta",
+      "agent": "Agente",
+      "emptyBefore": "(vacío)",
+      "emptyAfter": "(eliminado)"
+    },
+    "page": {
+      "subtitlePending_one": "{{count}} aviso espera tu respuesta — Claude Code está bloqueado hasta que decidas",
+      "subtitlePending_other": "{{count}} avisos esperan tu respuesta — cada sesión de Claude Code está bloqueada hasta que decidas",
+      "subtitleIdle": "Nada espera por ti — cada sesión de Claude Code tiene los permisos que necesita",
+      "emptyTitle": "No hay avisos de permiso pendientes",
+      "emptyBody": "Cuando una sesión de Claude Code monitorizada por hooks pide ejecutar una herramienta, el aviso se retiene aquí (y se muestra como tarjeta flotante) hasta que lo permitas, lo deniegues o lo devuelvas a la terminal. Si nadie responde, el aviso de la terminal aparece como siempre.",
+      "holdWindow": "Los avisos esperan aquí hasta {{seconds}} s antes de volver a la terminal",
+      "noSession": "Este aviso no traía id de sesión, así que no hay contexto de sesión que mostrar.",
+      "loadingSession": "Cargando sesión…",
+      "unknownSession": "El dashboard no tiene registro de esta sesión — puede que sus otros hooks no estén instalados.",
+      "lastPrompt": "Última indicación",
+      "recentTools": "Llamadas a herramientas recientes",
+      "openSession": "Abrir la línea de tiempo de la sesión"
+    }
   }
 }
