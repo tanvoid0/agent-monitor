@@ -203,6 +203,9 @@ function refresh(rawCwd, force = false, nowMs = Date.now()) {
 
 /** Discovery + stat poll over every known plan. `nowMs` is injectable for tests. */
 function scan(nowMs = Date.now()) {
+  // The poll timer is unref'd and never stopped on shutdown, so a tick can
+  // land after the DB is closed (graceful shutdown, test teardown).
+  if (!db.open) return;
   const since = new Date(nowMs - SEEN_MS).toISOString();
   const seen = new Set(q.all.all().map((p) => p.cwd));
   for (const { cwd } of q.recentCwds.all(since)) seen.add(path.resolve(cwd));

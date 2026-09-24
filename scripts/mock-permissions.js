@@ -37,7 +37,12 @@ async function fire(prompt, i) {
     cwd: process.cwd(),
     permission_mode: "default",
     permission_suggestions: [
-      { type: "addRules", rules: [{ toolName: prompt.tool_name }], behavior: "allow", destination: "session" },
+      {
+        type: "addRules",
+        rules: [{ toolName: prompt.tool_name }],
+        behavior: "allow",
+        destination: "session",
+      },
     ],
     ...prompt,
   };
@@ -56,7 +61,7 @@ async function fire(prompt, i) {
     `[${i}] ${prompt.tool_name.padEnd(8)} → ${outcome}` +
       (decision?.message ? ` — "${decision.message}"` : "") +
       (decision?.updatedPermissions ? ` +${decision.updatedPermissions.length} rule(s)` : "") +
-      ` (${Date.now() - t0}ms, HTTP ${res.status})`,
+      ` (${Date.now() - t0}ms, HTTP ${res.status})`
   );
 }
 

@@ -28,6 +28,8 @@ const { codexHomeChangeTriggersSweep } = require("../index");
 const { findCodexTranscripts } = require("../lib/codex-ingest");
 
 after(() => {
+  // Windows refuses to delete a SQLite file that is still open (EPERM).
+  require("../db").db.close();
   fs.rmSync(TMP_ROOT, { recursive: true, force: true });
 });
 

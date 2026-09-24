@@ -43,6 +43,15 @@ const path = require("node:path");
 const fs = require("node:fs");
 const { spawn } = require("node:child_process");
 
+// fetch() parses responses with undici's llhttp WASM, which V8 tiers up on a
+// background thread once it runs hot (a few requests). On Windows, a
+// `process.exit()` that lands while that tier-up posts back to the main loop
+// aborts Node with libuv's `!(handle->flags & UV_HANDLE_CLOSING)` assertion
+// (exit 0xC0000409) instead of the intended code — `am doctor` hit it on every
+// failed check. Baseline-compiled WASM is plenty for a one-shot CLI. Must run
+// before the first fetch compiles the module.
+require("node:v8").setFlagsFromString("--no-wasm-dynamic-tiering");
+
 // Resolve the repo root relative to this script's REAL location so the CLI
 // works both from a checkout (./bin/am.js) and through the global symlink
 // `npm link` creates (which points back into the checkout).
