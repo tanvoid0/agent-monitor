@@ -457,7 +457,7 @@ exports[`screen snapshots > Activity feed 1`] = `
       </details>
     </div>
     <div
-      class="mb-4"
+      class="mb-4 flex items-center justify-between gap-2"
     >
       <div
         class="card p-3 space-y-2"
@@ -655,6 +655,37 @@ exports[`screen snapshots > Activity feed 1`] = `
             </button>
           </div>
         </div>
+      </div>
+      <div
+        aria-label="Group by tool call"
+        class="inline-flex bg-surface-2 rounded-lg p-0.5 border border-border"
+        dir="ltr"
+        role="radiogroup"
+        style="outline: none;"
+        tabindex="0"
+      >
+        <button
+          aria-checked="true"
+          class="inline-flex items-center gap-1.5 rounded-md font-medium text-gray-400 hover:text-gray-200 transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:opacity-50 disabled:pointer-events-none data-[state=on]:bg-surface-4 data-[state=on]:text-gray-100 px-2 py-1 text-xs"
+          data-radix-collection-item=""
+          data-state="on"
+          role="radio"
+          tabindex="-1"
+          type="button"
+        >
+          Flat list
+        </button>
+        <button
+          aria-checked="false"
+          class="inline-flex items-center gap-1.5 rounded-md font-medium text-gray-400 hover:text-gray-200 transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:opacity-50 disabled:pointer-events-none data-[state=on]:bg-surface-4 data-[state=on]:text-gray-100 px-2 py-1 text-xs"
+          data-radix-collection-item=""
+          data-state="off"
+          role="radio"
+          tabindex="-1"
+          type="button"
+        >
+          Group by tool call
+        </button>
       </div>
     </div>
     <div
@@ -2896,13 +2927,13 @@ exports[`screen snapshots > Analytics 1`] = `
         tabindex="0"
       >
         <button
-          aria-controls="radix-_r_u_-content-cost"
+          aria-controls="radix-_r_10_-content-cost"
           aria-selected="true"
           class="inline-flex items-center gap-1.5 font-medium text-gray-400 hover:text-gray-200 transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:opacity-50 disabled:pointer-events-none py-1.5 rounded-md data-[state=active]:bg-surface-4 data-[state=active]:text-gray-100 text-xs px-4"
           data-orientation="horizontal"
           data-radix-collection-item=""
           data-state="active"
-          id="radix-_r_u_-trigger-cost"
+          id="radix-_r_10_-trigger-cost"
           role="tab"
           tabindex="-1"
           type="button"
@@ -2910,13 +2941,13 @@ exports[`screen snapshots > Analytics 1`] = `
           Cost Analytics
         </button>
         <button
-          aria-controls="radix-_r_u_-content-tokens"
+          aria-controls="radix-_r_10_-content-tokens"
           aria-selected="false"
           class="inline-flex items-center gap-1.5 font-medium text-gray-400 hover:text-gray-200 transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:opacity-50 disabled:pointer-events-none py-1.5 rounded-md data-[state=active]:bg-surface-4 data-[state=active]:text-gray-100 text-xs px-4"
           data-orientation="horizontal"
           data-radix-collection-item=""
           data-state="inactive"
-          id="radix-_r_u_-trigger-tokens"
+          id="radix-_r_10_-trigger-tokens"
           role="tab"
           tabindex="-1"
           type="button"
@@ -2924,13 +2955,13 @@ exports[`screen snapshots > Analytics 1`] = `
           Token Analytics
         </button>
         <button
-          aria-controls="radix-_r_u_-content-productivity"
+          aria-controls="radix-_r_10_-content-productivity"
           aria-selected="false"
           class="inline-flex items-center gap-1.5 font-medium text-gray-400 hover:text-gray-200 transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:opacity-50 disabled:pointer-events-none py-1.5 rounded-md data-[state=active]:bg-surface-4 data-[state=active]:text-gray-100 text-xs px-4"
           data-orientation="horizontal"
           data-radix-collection-item=""
           data-state="inactive"
-          id="radix-_r_u_-trigger-productivity"
+          id="radix-_r_10_-trigger-productivity"
           role="tab"
           tabindex="-1"
           type="button"
@@ -2938,13 +2969,13 @@ exports[`screen snapshots > Analytics 1`] = `
           Productivity Analytics
         </button>
         <button
-          aria-controls="radix-_r_u_-content-workflow"
+          aria-controls="radix-_r_10_-content-workflow"
           aria-selected="false"
           class="inline-flex items-center gap-1.5 font-medium text-gray-400 hover:text-gray-200 transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:opacity-50 disabled:pointer-events-none py-1.5 rounded-md data-[state=active]:bg-surface-4 data-[state=active]:text-gray-100 text-xs px-4"
           data-orientation="horizontal"
           data-radix-collection-item=""
           data-state="inactive"
-          id="radix-_r_u_-trigger-workflow"
+          id="radix-_r_10_-trigger-workflow"
           role="tab"
           tabindex="-1"
           type="button"
@@ -2953,21 +2984,21 @@ exports[`screen snapshots > Analytics 1`] = `
         </button>
       </div>
       <div
-        aria-labelledby="radix-_r_u_-trigger-tokens"
+        aria-labelledby="radix-_r_10_-trigger-tokens"
         class="outline-none"
         data-orientation="horizontal"
         data-state="inactive"
         hidden=""
-        id="radix-_r_u_-content-tokens"
+        id="radix-_r_10_-content-tokens"
         role="tabpanel"
         tabindex="0"
       />
       <div
-        aria-labelledby="radix-_r_u_-trigger-cost"
+        aria-labelledby="radix-_r_10_-trigger-cost"
         class="outline-none"
         data-orientation="horizontal"
         data-state="active"
-        id="radix-_r_u_-content-cost"
+        id="radix-_r_10_-content-cost"
         role="tabpanel"
         style=""
         tabindex="0"
@@ -3020,22 +3051,22 @@ exports[`screen snapshots > Analytics 1`] = `
         </div>
       </div>
       <div
-        aria-labelledby="radix-_r_u_-trigger-workflow"
+        aria-labelledby="radix-_r_10_-trigger-workflow"
         class="outline-none"
         data-orientation="horizontal"
         data-state="inactive"
         hidden=""
-        id="radix-_r_u_-content-workflow"
+        id="radix-_r_10_-content-workflow"
         role="tabpanel"
         tabindex="0"
       />
       <div
-        aria-labelledby="radix-_r_u_-trigger-productivity"
+        aria-labelledby="radix-_r_10_-trigger-productivity"
         class="outline-none"
         data-orientation="horizontal"
         data-state="inactive"
         hidden=""
-        id="radix-_r_u_-content-productivity"
+        id="radix-_r_10_-content-productivity"
         role="tabpanel"
         tabindex="0"
       />

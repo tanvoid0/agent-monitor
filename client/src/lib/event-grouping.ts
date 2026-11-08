@@ -4,9 +4,11 @@
  * `DashboardEvent` rows: a per-event status tag (`statusFromEventType`, shared
  * by every event surface, with `activityStatusFromEvent` layering the
  * Dashboard's error-summary heuristic on top), a
- * smart human-readable title (`buildEventTitle`), and agent/origin labels for
- * the muted "{project} › {session} › {agent}" prefix. (The historical
- * tool-call grouping view was removed; the timeline now renders flat only.)
+ * smart human-readable title (`buildEventTitle`), agent/origin labels for
+ * the muted "{project} › {session} › {agent}" prefix, and `groupEvents` for
+ * the opt-in "Group by tool call" view that collapses runs of consecutive
+ * same-type non-tool events (e.g. a `TurnDuration` flood) into one
+ * expandable row, shared by Session Detail's Timeline tab and Activity Feed.
  *
  * ## Event shape
  * Every helper here operates on a {@link DashboardEvent}. The fields that
@@ -63,6 +65,8 @@
  * - `./types`
  *
  * ## Public surface
+ * - `groupEvents` — exported API; see TSDoc on the symbol for behavior.
+ * - `EventGroup` — exported API; see TSDoc on the symbol for behavior.
  * - `statusFromEventType` — exported API; see TSDoc on the symbol for behavior.
  * - `activityStatusFromEvent` — exported API; see TSDoc on the symbol for behavior.
  * - `buildEventTitle` — exported API; see TSDoc on the symbol for behavior.
@@ -140,6 +144,52 @@
  * ----------------------------------------------------------------------------- */
 
 import type { DashboardEvent } from "./types";
+
+// ════════════════════════════════════════════════════════════════════════════
+// "Group by tool call" — run-collapse for metadata floods
+// ════════════════════════════════════════════════════════════════════════════
+
+/** One row of a grouped timeline: either a single event (a tool call always
+ *  stands alone) or a `run` of 2+ consecutive non-tool events that share an
+ *  `event_type` (e.g. a flood of `TurnDuration` rows between tool calls). */
+export type EventGroup =
+  | { isRun: false; event: DashboardEvent }
+  | { isRun: true; eventType: string; events: DashboardEvent[] };
+
+/** Collapses consecutive non-tool events of the same `event_type` into one
+ *  `run` group, so a flood of metadata events (e.g. thousands of
+ *  `TurnDuration` rows alongside a handful of real tool calls) doesn't drown
+ *  the timeline in a flat list (#99). A tool call — any event carrying a
+ *  `tool_name` — always renders on its own and breaks the current run, and so
+ *  does a change in `event_type`, so two adjacent-but-different floods never
+ *  merge into one run. A lone non-tool event (no neighbor of the same type)
+ *  stays a plain single-event row rather than a one-item "run".
+ * @param events Events in the order they should render (newest/oldest — this
+ *   only groups adjacent same-type runs, it never reorders).
+ * @returns The same events, grouped.
+ */
+export function groupEvents(events: DashboardEvent[]): EventGroup[] {
+  const groups: EventGroup[] = [];
+  let run: DashboardEvent[] = [];
+  const flushRun = () => {
+    if (run.length === 0) return;
+    if (run.length === 1) groups.push({ isRun: false, event: run[0] as DashboardEvent });
+    else
+      groups.push({ isRun: true, eventType: (run[0] as DashboardEvent).event_type, events: run });
+    run = [];
+  };
+  for (const event of events) {
+    if (event.tool_name) {
+      flushRun();
+      groups.push({ isRun: false, event });
+      continue;
+    }
+    if (run.length > 0 && (run[0] as DashboardEvent).event_type !== event.event_type) flushRun();
+    run.push(event);
+  }
+  flushRun();
+  return groups;
+}
 
 // ════════════════════════════════════════════════════════════════════════════
 // Status mapping

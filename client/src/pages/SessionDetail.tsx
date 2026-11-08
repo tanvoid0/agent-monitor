@@ -102,6 +102,7 @@ import {
   IconButton,
   PageHeader,
   SectionHeader,
+  SegmentedControl,
   Tabs,
   TabsContent,
   TabsList,
@@ -138,10 +139,12 @@ import {
 } from "../components/EventFilters";
 import type { EventFiltersValue } from "../components/EventFilters";
 import { EventFiltersInfo } from "../components/EventFiltersInfo";
+import { EventRunRow } from "../components/EventRunRow";
 import { Skeleton } from "../components/Skeleton";
 import {
   agentOriginLabel,
   buildOriginLabel,
+  groupEvents,
   projectFromCwd,
   projectFromEvent,
 } from "../lib/event-grouping";
@@ -265,6 +268,9 @@ export function SessionDetail() {
   const [transcriptNotFound, setTranscriptNotFound] = useState(false);
   const notFoundTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [expandedEvents, setExpandedEvents] = useState<Set<number>>(() => new Set());
+  // "Group by tool call" (#99): opt-in, defaults to the existing flat list so
+  // behavior is unchanged unless the user asks for it.
+  const [eventsGrouped, setEventsGrouped] = useState(false);
 
   function toggleEvent(id: number) {
     setExpandedEvents((prev) => {
@@ -1271,12 +1277,22 @@ export function SessionDetail() {
               <div className="mb-3">
                 <EventFiltersInfo />
               </div>
-              <div className="mb-3">
+              <div className="mb-3 flex items-center justify-between gap-2">
                 <EventFilters
                   value={filters}
                   onChange={setFilters}
                   hideSessionFilter
                   agentOptions={agents.map((a) => ({ id: a.id, label: a.name || a.id }))}
+                />
+                <SegmentedControl
+                  size="sm"
+                  value={eventsGrouped ? "grouped" : "flat"}
+                  onValueChange={(v) => setEventsGrouped(v === "grouped")}
+                  ariaLabel={t("common:eventFilters.grouped")}
+                  items={[
+                    { value: "flat", label: t("common:eventFilters.flat") },
+                    { value: "grouped", label: t("common:eventFilters.grouped") },
+                  ]}
                 />
               </div>
               {events.length === 0 ? (
@@ -1288,85 +1304,105 @@ export function SessionDetail() {
               ) : (
                 <div className="card overflow-hidden">
                   <div className="divide-y divide-border max-h-[600px] overflow-y-auto overflow-x-auto">
-                    {events.map((event, i) => {
-                      const key = event.id ?? i;
-                      const isOpen = event.id != null && expandedEvents.has(event.id);
-                      const toggle = () => event.id != null && toggleEvent(event.id);
-                      const menu =
-                        event.id != null
-                          ? entityMenu(
-                              {
-                                kind: "event",
-                                id: event.id,
-                                sessionId: session.id,
-                                toolName: event.tool_name,
-                                agentId: event.agent_id,
-                              },
-                              { t, copy: copyText }
-                            )
-                          : undefined;
-                      // Session is implicit on this page - project is still shown
-                      // so the row identifies the working directory when you share
-                      // / search. Events without their own cwd (e.g. TurnDuration)
-                      // fall back to the session's cwd so every row carries the
-                      // dir prefix.
-                      const project =
-                        projectByEventId.get(event.id) ?? projectFromCwd(session?.cwd) ?? null;
-                      const origin = buildOriginLabel(
-                        project,
-                        null,
-                        agentOriginLabel(event.agent_id, agentInfoById)
-                      );
-                      const originAgent = event.agent_id ? agentInfoById.get(event.agent_id) : null;
-                      return (
-                        <div key={key}>
-                          <EventRow
-                            event={event}
-                            sessionId={session.id}
-                            id={event.id != null ? `event-${event.id}` : undefined}
-                            tabIndex={-1}
-                            isOpen={isOpen}
-                            onToggle={toggle}
-                            menu={menu}
-                            className="flex items-center gap-4 px-5 py-3 pr-3 hover:bg-surface-4 transition-colors min-w-0"
-                            time={
-                              <span className="w-16 text-[11px] text-gray-600 font-mono flex-shrink-0">
-                                {timeAgo(event.created_at)}
-                              </span>
-                            }
-                            origin={
-                              origin && (
-                                <span className="text-gray-500 mr-1">
-                                  {event.agent_id ? (
-                                    <EntityRef
-                                      kind="agent"
-                                      id={event.agent_id}
-                                      sessionId={session.id}
-                                      type={originAgent?.type}
-                                      name={originAgent?.name}
-                                      mono={false}
-                                      className="text-gray-500"
-                                    >
-                                      {origin}
-                                    </EntityRef>
-                                  ) : (
-                                    origin
-                                  )}{" "}
-                                  ·
-                                </span>
+                    {(() => {
+                      // `renderEventRow` is shared by the flat list and each
+                      // run's expanded contents (#99) - same markup either way.
+                      const renderEventRow = (event: DashboardEvent, i: number) => {
+                        const key = event.id ?? i;
+                        const isOpen = event.id != null && expandedEvents.has(event.id);
+                        const toggle = () => event.id != null && toggleEvent(event.id);
+                        const menu =
+                          event.id != null
+                            ? entityMenu(
+                                {
+                                  kind: "event",
+                                  id: event.id,
+                                  sessionId: session.id,
+                                  toolName: event.tool_name,
+                                  agentId: event.agent_id,
+                                },
+                                { t, copy: copyText }
                               )
-                            }
-                          />
-                          {isOpen && (
-                            <EventDetail
+                            : undefined;
+                        // Session is implicit on this page - project is still shown
+                        // so the row identifies the working directory when you share
+                        // / search. Events without their own cwd (e.g. TurnDuration)
+                        // fall back to the session's cwd so every row carries the
+                        // dir prefix.
+                        const project =
+                          projectByEventId.get(event.id) ?? projectFromCwd(session?.cwd) ?? null;
+                        const origin = buildOriginLabel(
+                          project,
+                          null,
+                          agentOriginLabel(event.agent_id, agentInfoById)
+                        );
+                        const originAgent = event.agent_id
+                          ? agentInfoById.get(event.agent_id)
+                          : null;
+                        return (
+                          <div key={key}>
+                            <EventRow
                               event={event}
-                              agentInfoById={agentInfoById}
-                              sessionNameById={sessionNameById}
+                              sessionId={session.id}
+                              id={event.id != null ? `event-${event.id}` : undefined}
+                              tabIndex={-1}
+                              isOpen={isOpen}
+                              onToggle={toggle}
+                              menu={menu}
+                              className="flex items-center gap-4 px-5 py-3 pr-3 hover:bg-surface-4 transition-colors min-w-0"
+                              time={
+                                <span className="w-16 text-[11px] text-gray-600 font-mono flex-shrink-0">
+                                  {timeAgo(event.created_at)}
+                                </span>
+                              }
+                              origin={
+                                origin && (
+                                  <span className="text-gray-500 mr-1">
+                                    {event.agent_id ? (
+                                      <EntityRef
+                                        kind="agent"
+                                        id={event.agent_id}
+                                        sessionId={session.id}
+                                        type={originAgent?.type}
+                                        name={originAgent?.name}
+                                        mono={false}
+                                        className="text-gray-500"
+                                      >
+                                        {origin}
+                                      </EntityRef>
+                                    ) : (
+                                      origin
+                                    )}{" "}
+                                    ·
+                                  </span>
+                                )
+                              }
                             />
-                          )}
-                        </div>
+                            {isOpen && (
+                              <EventDetail
+                                event={event}
+                                agentInfoById={agentInfoById}
+                                sessionNameById={sessionNameById}
+                              />
+                            )}
+                          </div>
+                        );
+                      };
+
+                      if (!eventsGrouped) return events.map(renderEventRow);
+                      return groupEvents(events).map((group, i) =>
+                        group.isRun ? (
+                          <EventRunRow
+                            key={`run-${i}`}
+                            eventType={group.eventType}
+                            events={group.events}
+                            renderEvent={renderEventRow}
+                          />
+                        ) : (
+                          renderEventRow(group.event, i)
+                        )
                       );
-                    })}
+                    })()}
                   </div>
                 </div>
               )}

@@ -86,6 +86,7 @@ import { useDataScope } from "../lib/dataScope";
 import { EmptyState } from "../components/EmptyState";
 import { EventDetail } from "../components/EventDetail";
 import { EventRow } from "../components/EventRow";
+import { EventRunRow } from "../components/EventRunRow";
 import {
   EventFilters,
   EMPTY_FILTERS,
@@ -95,11 +96,11 @@ import {
 import type { EventFiltersValue } from "../components/EventFilters";
 import { EventFiltersInfo } from "../components/EventFiltersInfo";
 import { Skeleton } from "../components/Skeleton";
-import { Button, PageHeader } from "../components/ui";
+import { Button, PageHeader, SegmentedControl } from "../components/ui";
 import { EntityRef, entityMenu } from "../components/entity";
 import { copyText } from "../lib/clipboard";
 import { routes } from "../lib/routes";
-import { agentOriginLabel, agentTypeOf } from "../lib/event-grouping";
+import { agentOriginLabel, agentTypeOf, groupEvents } from "../lib/event-grouping";
 import type { AgentInfo } from "../lib/event-grouping";
 import { formatTime, formatDateShort, timeAgo } from "../lib/format";
 import type { DashboardEvent } from "../lib/types";
@@ -162,6 +163,9 @@ export function ActivityFeed() {
   const [loading, setLoading] = useState(true);
   const [bufferCount, setBufferCount] = useState(0);
   const [expandedEvents, setExpandedEvents] = useState<Set<number>>(() => new Set());
+  // "Group by tool call" (#99): opt-in, defaults to the existing flat list so
+  // behavior is unchanged unless the user asks for it.
+  const [eventsGrouped, setEventsGrouped] = useState(false);
   // session_id → session name. Populated from /api/sessions on mount so rows
   // can render a friendly session pill instead of a bare UUID.
   const [sessionNameById, setSessionNameById] = useState<Map<string, string>>(() => new Map());
@@ -409,7 +413,7 @@ export function ActivityFeed() {
         <EventFiltersInfo />
       </div>
 
-      <div className="mb-4">
+      <div className="mb-4 flex items-center justify-between gap-2">
         <EventFilters
           value={filters}
           onChange={setFilters}
@@ -417,6 +421,16 @@ export function ActivityFeed() {
             id,
             label,
           }))}
+        />
+        <SegmentedControl
+          size="sm"
+          value={eventsGrouped ? "grouped" : "flat"}
+          onValueChange={(v) => setEventsGrouped(v === "grouped")}
+          ariaLabel={t("common:eventFilters.grouped")}
+          items={[
+            { value: "flat", label: t("common:eventFilters.flat") },
+            { value: "grouped", label: t("common:eventFilters.grouped") },
+          ]}
         />
       </div>
 
@@ -445,116 +459,134 @@ export function ActivityFeed() {
                     </div>
                   ))
                 : null}
-              {events.map((event, i) => {
-                const isOpen = event.id != null && expandedEvents.has(event.id);
-                const sessionHref = routes.session(event.session_id, { event: event.id });
-                const cwd =
-                  cwdByEventId.get(event.id) ?? sessionCwdById.get(event.session_id) ?? null;
-                const agentLabel = agentOriginLabel(event.agent_id, agentInfoById);
-                const agentType = agentTypeOf(event.agent_id ?? "", agentInfoById);
-                const toggle = () => {
-                  if (event.id != null) toggleEvent(event.id);
-                };
-                return (
-                  <div key={event.id ?? i} className="animate-slide-up">
-                    <EventRow
-                      event={event}
-                      sessionId={event.session_id}
-                      isOpen={isOpen}
-                      onToggle={toggle}
-                      menu={entityMenu(
-                        {
-                          kind: "event",
-                          id: event.id,
-                          sessionId: event.session_id,
-                          toolName: event.tool_name,
-                          agentId: event.agent_id,
-                        },
-                        { t, copy: copyText }
-                      )}
-                      menuLabel={t("common:ui.openMenuFor", {
-                        name:
-                          agentLabel ?? sessionNameById.get(event.session_id) ?? event.session_id,
-                      })}
-                      time={
-                        <div className="w-16 flex-shrink-0 text-right font-mono leading-tight">
-                          <div className="text-[11px] text-gray-500">
-                            {formatTime(event.created_at)}
-                          </div>
-                          <div className="text-[9px] text-gray-600">
-                            {formatDateShort(event.created_at)}
-                          </div>
-                        </div>
-                      }
-                      origin={
-                        <span className="text-gray-500 mr-1">
-                          {cwd && (
-                            <>
-                              <EntityRef
-                                kind="project"
-                                cwd={cwd}
-                                mono={false}
-                                tabbable={false}
-                                className="text-gray-500"
-                              />
-                              {" › "}
-                            </>
-                          )}
-                          <EntityRef
-                            kind="session"
-                            id={event.session_id}
-                            name={sessionNameById.get(event.session_id)}
-                            cwd={cwd}
-                            mono={false}
-                            tabbable={false}
-                            className="text-gray-500"
-                          />
-                          {event.agent_id && agentLabel && (
-                            <>
-                              {" › "}
-                              <EntityRef
-                                kind="agent"
-                                id={event.agent_id}
-                                sessionId={event.session_id}
-                                type={agentType}
-                                mono={false}
-                                tabbable={false}
-                                className="text-gray-500"
-                              >
-                                {agentLabel}
-                              </EntityRef>
-                            </>
-                          )}
-                          {" ·"}
-                        </span>
-                      }
-                      toolTabbable={false}
-                      trailing={
-                        <>
-                          <span className="text-[11px] text-gray-600 flex-shrink-0 w-16 text-right">
-                            {timeAgo(event.created_at)}
-                          </span>
-                          <Link
-                            to={sessionHref}
-                            title={t("viewSession")}
-                            className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-md bg-surface-2 text-gray-400 hover:text-accent hover:bg-accent/10 border border-border hover:border-accent/30 transition-colors flex-shrink-0 font-medium"
-                          >
-                            {t("viewSession")}
-                            <ExternalLink className="w-3 h-3" />
-                          </Link>
-                        </>
-                      }
-                    />
-                    {isOpen && (
-                      <EventDetail
+              {(() => {
+                // `renderEventRow` is shared by the flat list and each run's
+                // expanded contents (#99) - same markup either way.
+                const renderEventRow = (event: DashboardEvent, i: number) => {
+                  const isOpen = event.id != null && expandedEvents.has(event.id);
+                  const sessionHref = routes.session(event.session_id, { event: event.id });
+                  const cwd =
+                    cwdByEventId.get(event.id) ?? sessionCwdById.get(event.session_id) ?? null;
+                  const agentLabel = agentOriginLabel(event.agent_id, agentInfoById);
+                  const agentType = agentTypeOf(event.agent_id ?? "", agentInfoById);
+                  const toggle = () => {
+                    if (event.id != null) toggleEvent(event.id);
+                  };
+                  return (
+                    <div key={event.id ?? i} className="animate-slide-up">
+                      <EventRow
                         event={event}
-                        agentInfoById={agentInfoById}
-                        sessionNameById={sessionNameById}
+                        sessionId={event.session_id}
+                        isOpen={isOpen}
+                        onToggle={toggle}
+                        menu={entityMenu(
+                          {
+                            kind: "event",
+                            id: event.id,
+                            sessionId: event.session_id,
+                            toolName: event.tool_name,
+                            agentId: event.agent_id,
+                          },
+                          { t, copy: copyText }
+                        )}
+                        menuLabel={t("common:ui.openMenuFor", {
+                          name:
+                            agentLabel ?? sessionNameById.get(event.session_id) ?? event.session_id,
+                        })}
+                        time={
+                          <div className="w-16 flex-shrink-0 text-right font-mono leading-tight">
+                            <div className="text-[11px] text-gray-500">
+                              {formatTime(event.created_at)}
+                            </div>
+                            <div className="text-[9px] text-gray-600">
+                              {formatDateShort(event.created_at)}
+                            </div>
+                          </div>
+                        }
+                        origin={
+                          <span className="text-gray-500 mr-1">
+                            {cwd && (
+                              <>
+                                <EntityRef
+                                  kind="project"
+                                  cwd={cwd}
+                                  mono={false}
+                                  tabbable={false}
+                                  className="text-gray-500"
+                                />
+                                {" › "}
+                              </>
+                            )}
+                            <EntityRef
+                              kind="session"
+                              id={event.session_id}
+                              name={sessionNameById.get(event.session_id)}
+                              cwd={cwd}
+                              mono={false}
+                              tabbable={false}
+                              className="text-gray-500"
+                            />
+                            {event.agent_id && agentLabel && (
+                              <>
+                                {" › "}
+                                <EntityRef
+                                  kind="agent"
+                                  id={event.agent_id}
+                                  sessionId={event.session_id}
+                                  type={agentType}
+                                  mono={false}
+                                  tabbable={false}
+                                  className="text-gray-500"
+                                >
+                                  {agentLabel}
+                                </EntityRef>
+                              </>
+                            )}
+                            {" ·"}
+                          </span>
+                        }
+                        toolTabbable={false}
+                        trailing={
+                          <>
+                            <span className="text-[11px] text-gray-600 flex-shrink-0 w-16 text-right">
+                              {timeAgo(event.created_at)}
+                            </span>
+                            <Link
+                              to={sessionHref}
+                              title={t("viewSession")}
+                              className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-md bg-surface-2 text-gray-400 hover:text-accent hover:bg-accent/10 border border-border hover:border-accent/30 transition-colors flex-shrink-0 font-medium"
+                            >
+                              {t("viewSession")}
+                              <ExternalLink className="w-3 h-3" />
+                            </Link>
+                          </>
+                        }
                       />
-                    )}
-                  </div>
+                      {isOpen && (
+                        <EventDetail
+                          event={event}
+                          agentInfoById={agentInfoById}
+                          sessionNameById={sessionNameById}
+                        />
+                      )}
+                    </div>
+                  );
+                };
+
+                if (!eventsGrouped) return events.map(renderEventRow);
+                return groupEvents(events).map((group, i) =>
+                  group.isRun ? (
+                    <EventRunRow
+                      key={`run-${i}`}
+                      eventType={group.eventType}
+                      events={group.events}
+                      renderEvent={renderEventRow}
+                    />
+                  ) : (
+                    renderEventRow(group.event, i)
+                  )
                 );
-              })}
+              })()}
             </div>
           </div>
           {total > 0 && (
