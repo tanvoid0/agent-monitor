@@ -82,6 +82,19 @@ describe("Tabby widget", () => {
     expect(within(panel).getByText(/live ·/i)).toBeInTheDocument();
   });
 
+  it("hands off an unrecognized question to Run prefilled but NOT auto-started (#112)", () => {
+    renderTabby();
+    fireEvent.click(screen.getByRole("button", { name: /open tabby companion/i }));
+    const panel = screen.getByRole("dialog", { name: /tabby companion/i });
+    const input = within(panel).getByLabelText(/ask tabby/i);
+    fireEvent.change(input, { target: { value: "please refactor the auth module" } });
+    fireEvent.submit(input.closest("form")!);
+
+    const location = screen.getByTestId("location").textContent ?? "";
+    expect(location).toMatch(/^\/run\?prompt=/);
+    expect(location).not.toContain("autostart");
+  });
+
   it("toggles open/closed with Cmd/Ctrl+B and closes with Esc", () => {
     renderTabby();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();

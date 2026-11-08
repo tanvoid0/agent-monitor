@@ -10,7 +10,8 @@
  *   of where the cat is docked.
  *
  *   The "do the job" path reuses the existing Run page: unmatched Ask queries
- *   deep-link to /run?prompt=…&autostart=1 - no new LLM backend.
+ *   deep-link to /run?prompt=… prefilled but NOT auto-started (#112) - no new
+ *   LLM backend, and no silent real agent run from what looks like an FAQ box.
  * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
@@ -204,10 +205,12 @@ export function Tabby() {
     (query: string): string | null => {
       const result = matchIntent(query, brain.status);
       if (result.kind === "answer") return result.text;
-      // Handoff: spawn a real claude via the existing Run page. `autostart=1`
-      // tells Run to fire the prompt automatically once it's prefilled, so the
-      // question is actually sent instead of just dropped into the composer.
-      navigate(`/run?prompt=${encodeURIComponent(result.prompt)}&autostart=1`);
+      // Handoff: an unrecognized question lands on the Run launcher with the
+      // prompt prefilled, NOT auto-started (#112) - this box looks like a
+      // lightweight FAQ, so silently kicking off a real `claude` process
+      // without the user explicitly pressing Start would be a surprise, not
+      // a convenience.
+      navigate(`/run?prompt=${encodeURIComponent(result.prompt)}`);
       setOpen(false);
       return null;
     },
