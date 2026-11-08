@@ -1,6 +1,7 @@
 {
   "title": "Dashboard update available",
   "lead": "A new version of the dashboard is available. To update, run the following command in your terminal:",
+  "leadError": "The dashboard couldn't check whether an update is available.",
   "commitsBehind": "{{count}} commit(s) behind {{ref}}",
   "copy": "Copy command",
   "commandLabel": "Terminal command to update the dashboard",

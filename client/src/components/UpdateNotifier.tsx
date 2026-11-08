@@ -14,6 +14,14 @@
  * commit re-opens the prompt. Settings can reset dismissal via the
  * `dashboard:reset-update-dismissal` window event.
  *
+ * ## Check-failure detail (#108)
+ * A fetch failure from an EXPLICIT check (the Sidebar badge, the command
+ * palette, or this modal's own "Check now") also opens this modal, with the
+ * server's `message`/`fetchError` text and the same retry button - giving
+ * the Sidebar's "Update check failed" badge a real destination instead of a
+ * silent background retry. The initial silent status read on mount never
+ * opens it this way, so an offline user isn't interrupted on every load.
+ *
  * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 /* =============================================================================
@@ -67,7 +75,7 @@
  *
  * ----------------------------------------------------------------------------- */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Download, X, Copy, Check, RefreshCw } from "lucide-react";
 import { api } from "../lib/api";
@@ -102,6 +110,15 @@ export function UpdateNotifier() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [checking, setChecking] = useState(false);
+  // Set only by an explicit check (see module doc) - never by the silent
+  // mount read - so a fetch failure the user actually asked about opens
+  // this modal (#108) without interrupting every offline page load.
+  const [explicitCheckFailed, setExplicitCheckFailed] = useState(false);
+  // The mount read below re-publishes its result on the bus (so Sidebar's
+  // badge, which only ever listens, learns the initial status) - this ref
+  // tells the WS subscriber below that the echo it's about to see is that
+  // self-published read, not a real incoming check broadcast.
+  const ownMountPublishRef = useRef(false);
 
   const syncFromPayload = useCallback((s: UpdateStatusPayload) => {
     setStatus(s);
@@ -115,6 +132,7 @@ export function UpdateNotifier() {
       .then((s) => {
         if (cancelled) return;
         syncFromPayload(s);
+        ownMountPublishRef.current = true;
         eventBus.publish({
           type: "update_status",
           data: s,
@@ -130,7 +148,16 @@ export function UpdateNotifier() {
   useEffect(() => {
     return eventBus.subscribe((msg: WSMessage) => {
       if (msg.type !== "update_status") return;
-      if (isUpdatePayload(msg.data)) syncFromPayload(msg.data);
+      if (!isUpdatePayload(msg.data)) return;
+      syncFromPayload(msg.data);
+      // Skip the mount effect's own echo (see ownMountPublishRef) - only a
+      // real incoming broadcast, from a check the user actually asked for,
+      // should open the modal on failure. See the module doc (#108).
+      if (ownMountPublishRef.current) {
+        ownMountPublishRef.current = false;
+        return;
+      }
+      setExplicitCheckFailed(Boolean(msg.data.fetch_error));
     });
   }, [syncFromPayload]);
 
@@ -140,11 +167,14 @@ export function UpdateNotifier() {
     return () => window.removeEventListener("dashboard:reset-update-dismissal", handler);
   }, []);
 
-  const show = Boolean(
+  const updateAvailableShown = Boolean(
     status?.update_available && status.remote_sha && dismissedSha !== status.remote_sha
   );
+  const checkFailedShown = explicitCheckFailed && !updateAvailableShown;
+  const show = updateAvailableShown || checkFailedShown;
 
   const dismiss = useCallback(() => {
+    setExplicitCheckFailed(false);
     if (!status?.remote_sha) return;
     try {
       localStorage.setItem(DISMISS_KEY, status.remote_sha);
@@ -182,6 +212,7 @@ export function UpdateNotifier() {
     try {
       const fresh = await api.updates.check();
       syncFromPayload(fresh);
+      setExplicitCheckFailed(Boolean(fresh.fetch_error));
     } catch (e) {
       setError(e instanceof Error ? e.message : t("checkError"));
     } finally {
@@ -216,11 +247,16 @@ export function UpdateNotifier() {
                 id="update-notifier-title"
                 className="text-sm font-semibold text-gray-100 truncate"
               >
-                {t("title")}
+                {/* checkFailedShown: no update is known, so the "Update
+                    available" framing (and its commits-behind line) would be
+                    misleading - the Sidebar badge's own wording applies (#108). */}
+                {checkFailedShown ? t("nav:checkFailed") : t("title")}
               </h2>
-              <p className="text-[11px] text-gray-500 mt-0.5 font-mono truncate">
-                {t("commitsBehind", { count: behind, ref: refLabel })}
-              </p>
+              {!checkFailedShown && (
+                <p className="text-[11px] text-gray-500 mt-0.5 font-mono truncate">
+                  {t("commitsBehind", { count: behind, ref: refLabel })}
+                </p>
+              )}
             </div>
           </div>
           <button
@@ -235,11 +271,16 @@ export function UpdateNotifier() {
 
         {/* Body */}
         <div className="px-5 py-4 space-y-3">
-          <p className="text-sm text-gray-300 leading-relaxed">{t("lead")}</p>
+          <p className="text-sm text-gray-300 leading-relaxed">
+            {checkFailedShown ? t("leadError") : t("lead")}
+          </p>
 
           {status.fetch_error ? (
             <div className="text-xs text-amber-300/90 bg-amber-500/5 border border-amber-500/20 rounded-lg px-3 py-2">
-              {t("fetchError")}
+              {/* `message` is the server's own plain-English line for this exact
+                  failure (e.g. "Could not reach origin; try again when
+                  online.") - prefer it over the generic translated fallback. */}
+              {status.message || t("fetchError")}
             </div>
           ) : null}
 

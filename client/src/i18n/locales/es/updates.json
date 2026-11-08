@@ -1,6 +1,7 @@
 {
   "title": "Actualización disponible",
   "lead": "Hay una nueva versión del panel disponible. Para actualizar, ejecuta el siguiente comando en tu terminal:",
+  "leadError": "El panel no pudo comprobar si hay una actualización disponible.",
   "commitsBehind": "{{count}} commit(s) detrás de {{ref}}",
   "copy": "Copiar comando",
   "commandLabel": "Comando de terminal para actualizar el panel",
