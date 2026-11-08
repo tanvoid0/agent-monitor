@@ -8,6 +8,8 @@
     "chooseDescription": "选择一个交互式本地 Agent。开始新运行前可以切换。",
     "choose": "选择",
     "cancel": "取消",
+    "notStartedTitle": "尚未选择代理",
+    "notStartedDesc": "选择一个代理以开始运行。",
     "beta": "测试版",
     "claude": {
       "label": "Claude Code",

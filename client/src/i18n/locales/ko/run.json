@@ -8,6 +8,8 @@
     "chooseDescription": "대화형 로컬 Agent를 선택하세요. 새 실행을 시작하기 전에는 변경할 수 있습니다.",
     "choose": "선택",
     "cancel": "취소",
+    "notStartedTitle": "선택된 에이전트 없음",
+    "notStartedDesc": "실행을 시작할 에이전트를 선택하세요.",
     "beta": "베타",
     "claude": {
       "label": "Claude Code",

@@ -8,6 +8,8 @@
     "chooseDescription": "Choose an interactive local agent. You can switch before starting a new run.",
     "choose": "Choose",
     "cancel": "Cancel",
+    "notStartedTitle": "No agent selected",
+    "notStartedDesc": "Pick an agent to start a run.",
     "beta": "BETA",
     "claude": {
       "label": "Claude Code",

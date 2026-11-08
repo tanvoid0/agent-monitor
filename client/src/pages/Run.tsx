@@ -80,7 +80,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { flushSync } from "react-dom";
-import { Link, useNavigate, useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
   Play,
@@ -143,7 +143,8 @@ import type {
 } from "../lib/types";
 import { MarkdownContent } from "../components/conversation/MarkdownContent";
 import { Select } from "../components/Select";
-import { PageHeader } from "../components/ui";
+import { EmptyState } from "../components/EmptyState";
+import { Button, PageHeader } from "../components/ui";
 import { EntityRef } from "../components/entity";
 import { formatModelName } from "../lib/format";
 
@@ -681,12 +682,16 @@ function useTypewriterEnvelopes(envelopes: Envelope[]): Envelope[] {
 
 export function Run() {
   const { t } = useTranslation("run");
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const wsConnected = useSyncExternalStore(eventBus.onConnection, () => eventBus.connected);
   // The choice dialog is intentionally shown on every page mount. The header
   // remains a fast switcher once a provider is selected for this visit.
   const [provider, setProvider] = useState<RunProvider | null>(null);
+  // Cancel used to navigate away (#103) - there's nothing else to show
+  // without a provider, so it looked like the only way to "close" the
+  // dialog was leaving the page. This just hides it instead, behind a
+  // calm empty state with a button that reopens it.
+  const [chooserDismissed, setChooserDismissed] = useState(false);
   const [mode, setMode] = useState<RunMode>("conversation");
   const [prompt, setPrompt] = useState("");
   const [model, setModel] = useState("");
@@ -1301,17 +1306,20 @@ export function Run() {
         </div>
       )}
 
-      {!provider && (
-        <ProviderChooser
-          onChoose={setProvider}
-          onCancel={() => {
-            // A direct deep-link to /run still has the browser's initial
-            // about:blank entry. React Router records an `idx` only for
-            // actual app navigation, so do not send a first-time visitor
-            // back to that blank entry.
-            if (Number(window.history.state?.idx) > 0) navigate(-1);
-            else navigate("/", { replace: true });
-          }}
+      {!provider && !chooserDismissed && (
+        <ProviderChooser onChoose={setProvider} onCancel={() => setChooserDismissed(true)} />
+      )}
+
+      {!provider && chooserDismissed && (
+        <EmptyState
+          icon={Sparkles}
+          title={t("provider.notStartedTitle", "No agent selected")}
+          description={t("provider.notStartedDesc", "Pick an agent to start a run.")}
+          action={
+            <Button variant="primary" onClick={() => setChooserDismissed(false)}>
+              {t("provider.choose", "Choose")}
+            </Button>
+          }
         />
       )}
 

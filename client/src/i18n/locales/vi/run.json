@@ -8,6 +8,8 @@
     "chooseDescription": "Chọn một Agent cục bộ tương tác. Bạn có thể đổi trước khi bắt đầu lượt chạy mới.",
     "choose": "Chọn",
     "cancel": "Hủy",
+    "notStartedTitle": "Chưa chọn agent",
+    "notStartedDesc": "Chọn một agent để bắt đầu chạy.",
     "beta": "BETA",
     "claude": {
       "label": "Claude Code",

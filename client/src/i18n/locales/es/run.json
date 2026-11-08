@@ -8,6 +8,8 @@
     "chooseDescription": "Elige un agente local interactivo. Puedes cambiarlo antes de iniciar una ejecución nueva.",
     "choose": "Elegir",
     "cancel": "Cancelar",
+    "notStartedTitle": "Ningún agente seleccionado",
+    "notStartedDesc": "Elige un agente para iniciar una ejecución.",
     "beta": "BETA",
     "claude": {
       "label": "Claude Code",
