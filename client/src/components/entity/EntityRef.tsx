@@ -2,10 +2,11 @@
  * @file EntityRef.tsx
  * @description The one "link by reference" chip: a react-router `<Link>` to an
  * entity's primary page (session, agent, project, tool, event type, model or
- * event) with the full raw value as `title`, a default label per kind, and a
- * built-in right-click / long-press menu from `entityMenu`. A transient
- * session (pre-identity Codex process) renders a plain span with no link and
- * no menu.
+ * event), a default label per kind, and a built-in right-click / long-press
+ * menu from `entityMenu`. `title` is the full raw value, except an agent or
+ * session chip with a real name hovers that name instead — the raw id alone
+ * isn't something a user can tell sessions apart by. A transient session
+ * (pre-identity Codex process) renders a plain span with no link and no menu.
  * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
@@ -37,6 +38,23 @@ export type EntityRefProps = EntityTarget & {
 
 const chipClass = "text-gray-300 truncate max-w-full";
 const linkClass = "hover:text-gray-100 hover:underline decoration-dotted underline-offset-2";
+
+/**
+ * Hover title: the raw value (full id) by default, EXCEPT for agent/session
+ * chips with a real name — there the raw id tells you nothing the dashboard
+ * user can act on, so a given `name` (or a string `children` override, e.g.
+ * AgentCard's computed display name) wins. Synthesized fallback labels like
+ * "Session <id8>" don't count as a real name, so the id-less case still
+ * shows the full id.
+ */
+function defaultTitle(ref: EntityTarget, children: ReactNode): string {
+  const raw = entityValue(ref);
+  if (ref.kind === "agent" || ref.kind === "session") {
+    const custom = typeof children === "string" ? children : ref.name;
+    if (custom) return custom;
+  }
+  return raw;
+}
 
 function defaultLabel(ref: EntityTarget, chars: number, t: TFunction): ReactNode {
   const short = (id: string) => (chars > 0 ? id.slice(0, chars) : id);
@@ -80,6 +98,7 @@ export function EntityRef(props: EntityRefProps) {
   const { t } = useTranslation();
   const value = entityValue(props);
   const label = children ?? defaultLabel(props, chars, t);
+  const title = defaultTitle(props, children);
   const font = mono && "font-mono text-[11px]";
 
   if (props.kind === "session" && props.transient) {
@@ -96,7 +115,7 @@ export function EntityRef(props: EntityRefProps) {
   const link = asLink ? (
     <Link
       to={entityHref(props)}
-      title={value}
+      title={title}
       className={cn(font, chipClass, linkClass, className)}
       tabIndex={tabbable ? undefined : -1}
       onContextMenu={onContextMenu}
@@ -104,7 +123,7 @@ export function EntityRef(props: EntityRefProps) {
       {label}
     </Link>
   ) : (
-    <span className={cn(font, chipClass, className)} title={value} onContextMenu={onContextMenu}>
+    <span className={cn(font, chipClass, className)} title={title} onContextMenu={onContextMenu}>
       {label}
     </span>
   );

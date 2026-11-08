@@ -48,7 +48,7 @@ describe("EntityRef", () => {
       "Session abcdef12",
       "abcdef123456",
     ],
-    [{ kind: "session", id: "abc", name: "Fix login" }, "/sessions/abc", "Fix login", "abc"],
+    [{ kind: "session", id: "abc", name: "Fix login" }, "/sessions/abc", "Fix login", "Fix login"],
     [
       { kind: "agent", id: "agent-1234567", sessionId: "s1", type: "main" },
       "/sessions/s1?tab=agents#agent-agent-1234567",
@@ -59,7 +59,7 @@ describe("EntityRef", () => {
       { kind: "agent", id: "agent-1234567", sessionId: "s1", type: null, name: "Reviewer" },
       "/sessions/s1?tab=agents#agent-agent-1234567",
       "Reviewer",
-      "agent-1234567",
+      "Reviewer",
     ],
     [
       { kind: "agent", id: "agent-1234567", sessionId: "s1", type: null },
@@ -114,6 +114,22 @@ describe("EntityRef", () => {
     expect(screen.getByRole("link", { name: "Opus 4" })).toHaveAttribute(
       "title",
       "claude-opus-4-20250514"
+    );
+  });
+
+  it("agent/session chips hover a string children override instead of the raw id (#105)", () => {
+    // AgentCard passes its computed display name as children with no `name`
+    // prop at all — the chip must not fall back to the raw uuid on hover.
+    renderRef({
+      kind: "agent",
+      id: "agent-1234567",
+      sessionId: "s1",
+      type: "main",
+      children: "Fix login - investigate",
+    });
+    expect(screen.getByRole("link", { name: "Fix login - investigate" })).toHaveAttribute(
+      "title",
+      "Fix login - investigate"
     );
   });
 

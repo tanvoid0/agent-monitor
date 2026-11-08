@@ -56,7 +56,11 @@ export function CompactRow({
       className={`group flex items-center gap-1.5 min-w-0 px-2 py-1.5 rounded-md hover:bg-surface-3 transition-colors ${accent}`}
     >
       {badge}
-      <span className="flex-1 min-w-[4rem] text-sm font-medium text-gray-200 truncate">{name}</span>
+      {/* min-w-[8rem]: a 4rem floor truncated names to ~6 characters whenever
+          the chip/subtitle/time siblings claimed the rest of a narrow Kanban
+          column (#105) — raised so the name keeps a readable amount before
+          it starts eating into the optional siblings' room instead. */}
+      <span className="flex-1 min-w-[8rem] text-sm font-medium text-gray-200 truncate">{name}</span>
       {subtitle && (
         <span
           className="max-w-[30%] text-[11px] text-gray-500 truncate hidden sm:inline"

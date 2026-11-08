@@ -209,7 +209,11 @@ export function SessionCard({ session, projectRoot, onClick, variant = "card" }:
       } ${accent}`}
     >
       <div className="flex items-start justify-between gap-2 mb-3 min-w-0">
-        <div className="flex items-center gap-2.5 min-w-0 overflow-hidden">
+        {/* flex-1: claims the available width before the flex-shrink-0 badge
+            cluster on the right, so the title truncates only once space is
+            genuinely gone instead of shrinking to a few characters first
+            (#105). */}
+        <div className="flex flex-1 items-center gap-2.5 min-w-0 overflow-hidden">
           <div className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 bg-accent/15 text-accent">
             <FolderOpen className="w-3.5 h-3.5" />
           </div>
