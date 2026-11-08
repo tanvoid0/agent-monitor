@@ -448,14 +448,26 @@ router.get("/facets", (req, res) => {
     sourceFilter.clause,
     providerFilter.clause,
   ].filter(Boolean);
+  // One row per distinct cwd with the counts the Sessions project panel shows,
+  // so it never has to page through every session. "waiting" mirrors the
+  // client's isSessionAwaitingInput (active + awaiting_input_since set) and is
+  // excluded from "active", as on the Kanban board.
   const rows = db
-    .prepare(`SELECT DISTINCT s.cwd FROM sessions s WHERE ${clauses.join(" AND ")} ORDER BY s.cwd`)
+    .prepare(
+      `SELECT s.cwd,
+              COUNT(*) AS count,
+              SUM(s.status = 'active' AND COALESCE(s.awaiting_input_since, '') = '') AS active,
+              SUM(s.status = 'active' AND COALESCE(s.awaiting_input_since, '') != '') AS waiting,
+              MAX(COALESCE(NULLIF(s.updated_at, ''), s.ended_at, s.started_at)) AS last_activity -- sort key only
+       FROM sessions s WHERE ${clauses.join(" AND ")}
+       GROUP BY s.cwd ORDER BY s.cwd`
+    )
     .all(...sourceFilter.params, ...providerFilter.params);
   // Distinct origins present in the data, so the UI can offer a source facet /
   // scope selector. Always includes at least 'local' (the column default).
   const sources = stmts.distinctSessionSources.all().map((r) => r.source);
   const providers = stmts.distinctSessionProviders.all().map((r) => r.provider);
-  res.json({ cwds: rows.map((r) => r.cwd), sources, providers });
+  res.json({ cwds: rows.map((r) => r.cwd), projects: rows, sources, providers });
 });
 
 // Reveal a project directory in the OS file manager. Only a cwd the dashboard

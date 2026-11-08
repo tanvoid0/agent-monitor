@@ -22,7 +22,8 @@
  * base-defined `ErrorResponse` (shape `{ error: { code, message } }`); the
  * run-detail agents and events arrays reference the base `Agent` /
  * `DashboardEvent` schemas. The `SessionsFacetsResponse` schema additionally
- * exposes a `sources` array (the distinct `sessions.source` values).
+ * exposes a `sources` array (the distinct `sessions.source` values) and a
+ * `projects` array (per-cwd session counts for the Sessions project panel).
  * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
@@ -41,6 +42,31 @@ const schemas = {
           "Distinct, non-empty session working directories (the `cwd` column), sorted ascending. Powers the cwd filter dropdown.",
         items: { type: "string" },
         example: ["/Users/son/WebstormProjects/agent-monitor", "/Users/son/code/another-project"],
+      },
+      projects: {
+        type: "array",
+        description:
+          "One entry per `cwds` value (same order) with session counts for the Sessions page project panel. `active` excludes sessions awaiting user input, which are counted in `waiting`. `last_activity` is the newest session timestamp in that directory and is only a sort key.",
+        items: {
+          type: "object",
+          required: ["cwd", "count", "active", "waiting", "last_activity"],
+          properties: {
+            cwd: { type: "string" },
+            count: { type: "integer", description: "Sessions in this directory." },
+            active: { type: "integer", description: "Active sessions not awaiting input." },
+            waiting: { type: "integer", description: "Active sessions awaiting user input." },
+            last_activity: { type: "string", format: "date-time" },
+          },
+        },
+        example: [
+          {
+            cwd: "/Users/son/WebstormProjects/agent-monitor",
+            count: 42,
+            active: 2,
+            waiting: 1,
+            last_activity: "2026-09-24T18:02:11.412Z",
+          },
+        ],
       },
       sources: {
         type: "array",
@@ -613,7 +639,7 @@ const paths = {
       tags: ["Sessions"],
       summary: "List session facet values",
       description:
-        "Returns the distinct facet values for the Sessions page filters: the non-empty working directories (the `cwd` column, sorted ascending) in `cwds`, and the distinct data-source ids (the `sessions.source` column) in `sources`. `sources` always includes the built-in `local` history plus any configured remote SSH machines. Always returns a 200 with (possibly empty) arrays.",
+        "Returns the distinct facet values for the Sessions page filters: the non-empty working directories (the `cwd` column, sorted ascending) in `cwds`, per-directory session counts in `projects`, and the distinct data-source ids (the `sessions.source` column) in `sources`. `sources` always includes the built-in `local` history plus any configured remote SSH machines. Always returns a 200 with (possibly empty) arrays.",
       operationId: "listSessionFacets",
       responses: {
         200: {
@@ -625,6 +651,22 @@ const paths = {
                 cwds: [
                   "/Users/son/WebstormProjects/agent-monitor",
                   "/Users/son/code/another-project",
+                ],
+                projects: [
+                  {
+                    cwd: "/Users/son/WebstormProjects/agent-monitor",
+                    count: 42,
+                    active: 2,
+                    waiting: 1,
+                    last_activity: "2026-09-24T18:02:11.412Z",
+                  },
+                  {
+                    cwd: "/Users/son/code/another-project",
+                    count: 7,
+                    active: 0,
+                    waiting: 0,
+                    last_activity: "2026-09-20T09:14:03.001Z",
+                  },
                 ],
                 sources: ["local", "4d1f0e2a-7b9c-4c33-8a21-9e0f7b6d4c11"],
               },

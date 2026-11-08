@@ -632,6 +632,20 @@ export type EffectiveSessionStatus = SessionStatus | typeof AWAITING_STATUS;
 // are created lazily on their first observed event and mutated as events stream in.
 
 /**
+ * Per-directory session counts from GET /api/sessions/facets (`projects`),
+ * feeding the Sessions page project panel without loading every session.
+ * `active` excludes sessions awaiting input; those are counted in `waiting`.
+ */
+export interface SessionProjectFacet {
+  cwd: string;
+  count: number;
+  active: number;
+  waiting: number;
+  /** Newest session timestamp in the directory — a sort key only. */
+  last_activity: string;
+}
+
+/**
  * A monitored agent CLI invocation tracked by the dashboard — one row per top-level
  * process, created on its first observed event (or on import) and updated as
  * events stream in. Returned by GET /api/sessions, /api/sessions/:id, and

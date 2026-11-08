@@ -578,6 +578,25 @@ describe("Events API — filters", () => {
     assert.ok(Array.isArray(res.body.events));
   });
 
+  it("session /facets returns per-cwd project counts alongside cwds", async () => {
+    const cwd = "/facet-projects/app";
+    stmts.insertSession.run("facet-p1", "a", "active", cwd, null, null);
+    stmts.insertSession.run("facet-p2", "b", "active", cwd, null, null);
+    stmts.insertSession.run("facet-p3", "c", "completed", cwd, null, null);
+    stmts.setSessionAwaitingInput.run(new Date().toISOString(), "permission", "facet-p2");
+    const res = await fetch("/api/sessions/facets");
+    assert.equal(res.status, 200);
+    assert.deepEqual(
+      res.body.projects.map((p) => p.cwd),
+      res.body.cwds
+    );
+    const row = res.body.projects.find((p) => p.cwd === cwd);
+    assert.equal(row.count, 3);
+    assert.equal(row.active, 1);
+    assert.equal(row.waiting, 1);
+    assert.ok(row.last_activity);
+  });
+
   it("returns distinct event_types and tool_names from /facets", async () => {
     const res = await fetch("/api/events/facets");
     assert.equal(res.status, 200);

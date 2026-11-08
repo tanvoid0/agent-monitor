@@ -394,6 +394,7 @@ import type {
   ModelPricing,
   Session,
   SessionDrillIn,
+  SessionProjectFacet,
   SessionStats,
   Stats,
   TranscriptListResult,
@@ -624,14 +625,18 @@ export const api = {
      * the UI can offer them as filter options.
      *
      * @returns An object with `cwds`: the distinct working-directory strings,
+     *   `projects`: per-cwd session counts (same order) for the project panel,
      *   and `sources`: the distinct machine origins present in the data (always
      *   includes at least `"local"`), for the data-scope selector.
      */
     facets: () => {
       const qs = applyScope(new URLSearchParams());
-      return request<{ cwds: string[]; sources: string[]; providers: string[] }>(
-        `/sessions/facets${qs.size ? `?${qs.toString()}` : ""}`
-      );
+      return request<{
+        cwds: string[];
+        projects?: SessionProjectFacet[];
+        sources: string[];
+        providers: string[];
+      }>(`/sessions/facets${qs.size ? `?${qs.toString()}` : ""}`);
     },
     /**
      * POST /api/sessions/open-cwd - reveal a project directory in the OS file

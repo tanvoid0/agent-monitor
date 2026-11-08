@@ -1,12 +1,13 @@
 /**
- * @file Project side panel for the Kanban board — replaces the horizontal
- * project-tab strip once the board has more projects than fit on one line.
+ * @file Project side panel shared by the Kanban board and the Sessions list.
  * Lists every project group with live counts (active · waiting · unseen
- * completed), supports multi-select (`?project=a,b`, empty = all), substring
- * search, and sort by name / recent activity / session count. Collapsed state
- * and sort persist per browser; "seen" timestamps (for the unseen-completed
- * count) are stamped when a project is selected. Pure helpers are exported
- * so the page computes rows from the sessions it already holds.
+ * completed), supports multi-select (empty = all), substring search, and sort
+ * by name / recent activity / session count. Collapsed state and sort persist
+ * per browser (one preference for both pages); "seen" timestamps (for the
+ * unseen-completed count) are stamped when a Kanban project is selected. Pure
+ * helpers are exported so each page computes rows from what it already holds:
+ * `buildProjectRows` folds loaded sessions (Kanban), `buildProjectRowsFromFacets`
+ * folds the server's per-cwd counts (Sessions, which pages its list).
  * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
@@ -15,7 +16,7 @@ import { useTranslation } from "react-i18next";
 import { FolderKanban, PanelLeftClose, PanelLeftOpen, Search, X } from "lucide-react";
 import { cn } from "../../lib/cn";
 import { Badge, IconButton, MenuButton } from "../ui";
-import type { Session } from "../../lib/types";
+import type { Session, SessionProjectFacet } from "../../lib/types";
 import { isSessionAwaitingInput } from "../../lib/types";
 
 export interface ProjectRow {
@@ -101,6 +102,40 @@ export function buildProjectRows({
     }
     const ts = s.last_activity ?? s.ended_at ?? s.started_at ?? "";
     if (ts > row.lastActivity) row.lastActivity = ts;
+  }
+  return disambiguate([...rows.values()]);
+}
+
+/** Fold per-cwd counts from `GET /api/sessions/facets` into one row per
+ *  project group. No per-session data, so `unseenDone` stays 0. Pure. */
+export function buildProjectRowsFromFacets(
+  facets: SessionProjectFacet[],
+  rootByCwd: Map<string, string>,
+  labelOf: (root: string) => string,
+  dotOf: (root: string) => string
+): ProjectRow[] {
+  const rows = new Map<string, ProjectRow>();
+  for (const f of facets) {
+    const root = rootByCwd.get(f.cwd);
+    if (!root) continue;
+    let row = rows.get(root);
+    if (!row) {
+      row = {
+        root,
+        label: labelOf(root),
+        dot: dotOf(root),
+        count: 0,
+        active: 0,
+        waiting: 0,
+        unseenDone: 0,
+        lastActivity: "",
+      };
+      rows.set(root, row);
+    }
+    row.count += f.count;
+    row.active += f.active;
+    row.waiting += f.waiting;
+    if (f.last_activity > row.lastActivity) row.lastActivity = f.last_activity;
   }
   return disambiguate([...rows.values()]);
 }

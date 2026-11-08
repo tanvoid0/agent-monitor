@@ -1,7 +1,8 @@
 /**
- * @file Tests for the Kanban project panel: row building (active / waiting /
- * unseen-completed counts, recent-activity stamp), basename disambiguation,
- * sort modes, URL param parsing, and the multi-select interaction.
+ * @file Tests for the shared project panel: row building from sessions
+ * (active / waiting / unseen-completed counts, recent-activity stamp) and from
+ * the server's per-cwd facets, basename disambiguation, sort modes, URL param
+ * parsing, and the multi-select interaction.
  * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
@@ -10,6 +11,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import {
   ProjectPanel,
   buildProjectRows,
+  buildProjectRowsFromFacets,
   disambiguate,
   parseProjectParam,
   sortRows,
@@ -37,6 +39,34 @@ const rootByCwd = new Map([
   ["D:/a/x", "D:/a/x"],
   ["D:/b/x", "D:/b/x"],
 ]);
+
+describe("buildProjectRowsFromFacets", () => {
+  it("sums per-cwd counts onto their root, keeps the newest activity, skips unknown cwds", () => {
+    const facet = (cwd: string, count: number, active: number, waiting: number, at: string) => ({
+      cwd,
+      count,
+      active,
+      waiting,
+      last_activity: at,
+    });
+    const rows = buildProjectRowsFromFacets(
+      [
+        facet("D:/a/x", 3, 1, 1, "2026-09-15T10:00:00Z"),
+        facet("D:/a/x/wt", 2, 1, 0, "2026-09-15T12:00:00Z"),
+        facet("D:/b/x", 1, 0, 0, "2026-09-15T11:00:00Z"),
+        facet("D:/gone", 9, 9, 9, "2026-09-15T13:00:00Z"),
+      ],
+      new Map([...rootByCwd, ["D:/a/x/wt", "D:/a/x"]]),
+      (r) => r.split("/").pop()!,
+      () => "bg-x"
+    );
+    const a = rows.find((r) => r.root === "D:/a/x")!;
+    expect([a.count, a.active, a.waiting, a.unseenDone]).toEqual([5, 2, 1, 0]);
+    expect(a.lastActivity).toBe("2026-09-15T12:00:00Z");
+    expect(rows).toHaveLength(2);
+    expect(rows.map((r) => r.label).sort()).toEqual(["a/x", "b/x"]);
+  });
+});
 
 describe("buildProjectRows", () => {
   it("counts active, waiting and unseen-completed per root and disambiguates twins", () => {
