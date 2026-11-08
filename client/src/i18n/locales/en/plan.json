@@ -8,6 +8,8 @@
     "waitingCount": "{{count}} waiting"
   },
   "loading": "Loading plan…",
+  "noData": "No plan content yet",
+  "noDataDesc": "This project doesn't have any milestones or steps yet - check back once its PROGRESS.md has stories to show.",
   "error": "Couldn't load this plan: {{message}}",
   "rail": {
     "title": "Stories",

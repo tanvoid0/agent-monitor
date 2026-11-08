@@ -361,6 +361,14 @@ export function Plan() {
         />
       )}
 
+      {/* The API can legitimately 200 with a plan that has no stories yet
+          (a project just discovered, before its first milestone/step) -
+          `story` stays null and the board below never renders, which
+          otherwise left a blank page body below the header (#110). */}
+      {!loading && !error && model && !story && (
+        <EmptyState icon={SquareKanban} title={t("noData")} description={t("noDataDesc")} />
+      )}
+
       {model && story && (
         <div className="flex gap-4 min-h-[600px]">
           <aside className="hidden lg:block w-64 flex-shrink-0">

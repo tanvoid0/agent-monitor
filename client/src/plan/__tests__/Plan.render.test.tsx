@@ -130,4 +130,21 @@ describe("Plan page — ledgerflow fixture", () => {
       "/sessions/1ee316a7-e0a8-4575-889e-42860c12df39"
     );
   });
+
+  it("shows an empty state instead of a blank body when the plan has no stories yet (#110)", async () => {
+    modelMock.mockResolvedValue({
+      now: "2026-01-01T00:00:00Z",
+      status: { date: "2026-01-01", text: "" },
+      steps: { done: 0, total: 0, current: null },
+      milestones: [],
+      stories: [],
+      agents: {},
+      totals: {},
+    });
+    renderPlan("/plan/ledgerflow");
+    await settle();
+
+    expect(screen.getByText("No plan content yet")).toBeInTheDocument();
+    expect(screen.queryByText("To do")).not.toBeInTheDocument();
+  });
 });

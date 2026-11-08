@@ -8,6 +8,8 @@
     "waitingCount": "{{count}} đang chờ"
   },
   "loading": "Đang tải kế hoạch…",
+  "noData": "Chưa có nội dung kế hoạch",
+  "noDataDesc": "Dự án này chưa có milestone hay step nào - hãy kiểm tra lại khi PROGRESS.md của nó có story để hiển thị.",
   "error": "Không thể tải kế hoạch này: {{message}}",
   "rail": {
     "title": "Mạch truyện",

@@ -8,6 +8,8 @@
     "waitingCount": "{{count}} en espera"
   },
   "loading": "Cargando el plan…",
+  "noData": "Aún no hay contenido de plan",
+  "noDataDesc": "Este proyecto todavía no tiene hitos ni pasos - vuelve a comprobarlo cuando su PROGRESS.md tenga historias que mostrar.",
   "error": "No se pudo cargar este plan: {{message}}",
   "rail": {
     "title": "Historias",

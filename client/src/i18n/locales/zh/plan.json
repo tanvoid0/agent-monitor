@@ -8,6 +8,8 @@
     "waitingCount": "{{count}} 个等待中"
   },
   "loading": "正在加载计划…",
+  "noData": "暂无计划内容",
+  "noDataDesc": "该项目还没有任何里程碑或步骤——待其 PROGRESS.md 中出现故事后再查看。",
   "error": "无法加载此计划：{{message}}",
   "rail": {
     "title": "故事线",
