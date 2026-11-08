@@ -67,6 +67,7 @@
  * ## Public surface
  * - `groupEvents` — exported API; see TSDoc on the symbol for behavior.
  * - `EventGroup` — exported API; see TSDoc on the symbol for behavior.
+ * - `mcpToolLabel` — exported API; see TSDoc on the symbol for behavior.
  * - `statusFromEventType` — exported API; see TSDoc on the symbol for behavior.
  * - `activityStatusFromEvent` — exported API; see TSDoc on the symbol for behavior.
  * - `buildEventTitle` — exported API; see TSDoc on the symbol for behavior.
@@ -331,7 +332,7 @@ function humanizeMcpTool(raw: string): string {
  * //   → { server: "Github", tool: "create pull request" }
  * parseMcpToolName("Bash") // → null (native tool, no mcp__ prefix)
  */
-function parseMcpToolName(tool: string): { server: string; tool: string } | null {
+export function parseMcpToolName(tool: string): { server: string; tool: string } | null {
   if (!tool.startsWith("mcp__")) return null;
   // `filter(Boolean)` drops the empty strings produced by the doubled
   // underscores, leaving ["mcp", <server>, ...<toolWords>].
@@ -348,6 +349,20 @@ function parseMcpToolName(tool: string): { server: string; tool: string } | null
     // original multi-word action (parts were split on "__", not "_").
     tool: humanizeMcpTool(rest.join("_")),
   };
+}
+
+/** Compact "Server · action" label for an MCP tool name, or null for a
+ *  native tool (no `mcp__` prefix). Unlike {@link buildEventTitle}, this
+ *  carries no payload context - just the two structural parts - so a
+ *  fixed-width chip (e.g. the Top Tools list, #111) shows the
+ *  distinguishing server name up front instead of a shared "mcp__..."
+ *  prefix every MCP tool truncates to identically.
+ * @example mcpToolLabel("mcp__github__create_pull_request") // "Github · create pull request"
+ * @example mcpToolLabel("Bash") // null
+ */
+export function mcpToolLabel(tool: string): string | null {
+  const mcp = parseMcpToolName(tool);
+  return mcp ? `${mcp.server} · ${mcp.tool}` : null;
 }
 
 /** First short string found in tool_input using a generic priority list, then

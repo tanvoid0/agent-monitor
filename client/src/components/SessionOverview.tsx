@@ -77,6 +77,7 @@ import { api } from "../lib/api";
 import { eventBus } from "../lib/eventBus";
 import { isRemoteDataRefreshMessage } from "../lib/remoteDataEvents";
 import { fmt, formatDuration } from "../lib/format";
+import { mcpToolLabel } from "../lib/event-grouping";
 import { styleForTool } from "./conversation/toolStyle";
 import { EntityRef } from "./entity";
 import { SectionHeader } from "./ui";
@@ -155,7 +156,12 @@ function ToolUsageRow({
 
   return (
     <div className="flex items-center gap-3 group/tool">
-      <div className={`flex items-center gap-2 w-32 flex-shrink-0 ${style.text}`}>
+      {/* w-44 (not w-32): MCP tool names share the "mcp__<server>__" prefix, so
+          a narrower box truncated every row to that identical prefix,
+          making entries indistinguishable (#111). EntityRef already carries
+          the full name as its native hover title - this just means fewer
+          rows need it. */}
+      <div className={`flex items-center gap-2 w-44 flex-shrink-0 ${style.text}`}>
         <span
           className={`inline-flex items-center justify-center w-5 h-5 rounded ${style.chip} flex-shrink-0`}
         >
@@ -166,7 +172,14 @@ function ToolUsageRow({
           name={toolName}
           sessionId={sessionId}
           className={`text-xs ${style.text}`}
-        />
+        >
+          {/* MCP names share the "mcp__<server>__" prefix, so the raw string
+              is the one place two different tools look identical once
+              truncated - the humanized "Server · action" label puts the
+              distinguishing server name first instead (#111). Native tools
+              (no mcp__ prefix) keep their raw name as before. */}
+          {mcpToolLabel(toolName) ?? undefined}
+        </EntityRef>
       </div>
       <div className="flex-1 h-1.5 rounded-full bg-surface-3/60 overflow-hidden">
         <div
