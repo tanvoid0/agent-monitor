@@ -101,6 +101,8 @@
     "actionProviderScope": "Hiện {{provider}}",
     "actionClearRecents": "Xóa các lệnh gần đây",
     "actionApiDocs": "Mở tài liệu API",
+    "actionHelp": "Trợ giúp: sự kiện, bộ lọc và nhóm",
+    "actionHelpDetail": "Luồng hoạt động",
     "provider": {
       "both": "dữ liệu Claude và Codex",
       "claude": "chỉ dữ liệu Claude",

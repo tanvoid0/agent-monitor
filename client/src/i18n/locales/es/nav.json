@@ -101,6 +101,8 @@
     "actionProviderScope": "Mostrar {{provider}}",
     "actionClearRecents": "Borrar los comandos recientes",
     "actionApiDocs": "Abrir la referencia de la API",
+    "actionHelp": "Ayuda: eventos, filtros y agrupación",
+    "actionHelpDetail": "Feed de Actividad",
     "provider": {
       "both": "datos de Claude y Codex",
       "claude": "solo datos de Claude",

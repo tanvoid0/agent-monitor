@@ -612,6 +612,20 @@ export function buildPaletteCommands(ctx: PaletteContext): PaletteCommand[] {
       run: () => window.open("https://sonnguyenhoang.com", "_blank", "noopener,noreferrer"),
     },
     {
+      // #107: the Timeline/Activity Feed help panel ("About events, filters,
+      // and grouping") is the one genuinely good in-app help surface, but
+      // Ctrl+K search for "help" found nothing pointing at it. This doesn't
+      // open the panel itself (it's a page-local <details>, not a route) -
+      // landing on the page it lives on, one click away, is enough.
+      id: "action:help",
+      label: t("nav:palette.actionHelp"),
+      detail: t("nav:palette.actionHelpDetail"),
+      keywords: ["help", "faq", "guide", "about", "grouping", "docs"],
+      group: "actions",
+      icon: BookOpen,
+      run: go("/activity"),
+    },
+    {
       id: "action:api-docs",
       label: t("nav:palette.actionApiDocs"),
       detail: "/api/docs",

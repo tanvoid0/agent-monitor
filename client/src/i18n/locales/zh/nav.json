@@ -101,6 +101,8 @@
     "actionProviderScope": "显示{{provider}}",
     "actionClearRecents": "清除最近命令",
     "actionApiDocs": "打开 API 参考",
+    "actionHelp": "帮助：事件、筛选与分组",
+    "actionHelpDetail": "活动流",
     "provider": {
       "both": "Claude 与 Codex 数据",
       "claude": "仅 Claude 数据",

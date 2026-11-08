@@ -101,6 +101,8 @@
     "actionProviderScope": "Show {{provider}}",
     "actionClearRecents": "Clear recent commands",
     "actionApiDocs": "Open the API reference",
+    "actionHelp": "Help: events, filters, and grouping",
+    "actionHelpDetail": "Activity Feed",
     "provider": {
       "both": "Claude and Codex data",
       "claude": "Claude data only",

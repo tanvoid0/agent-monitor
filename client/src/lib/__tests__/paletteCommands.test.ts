@@ -130,6 +130,15 @@ describe("palette catalog coverage", () => {
     expect(navigate).toHaveBeenCalledWith("/sessions?status=active");
   });
 
+  it("indexes a help entry point into 'help' search, landing on the page that has it (#107)", () => {
+    const navigate = vi.fn();
+    const commands = buildPaletteCommands(makeContext({ navigate }));
+    const help = commands.find((command) => command.id === "action:help")!;
+    expect(help.keywords).toContain("help");
+    help.run();
+    expect(navigate).toHaveBeenCalledWith("/activity");
+  });
+
   it("maps the all-sessions filter to a bare route, not an empty parameter", () => {
     const navigate = vi.fn();
     buildPaletteCommands(makeContext({ navigate }))
