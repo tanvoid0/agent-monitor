@@ -1,7 +1,7 @@
 # Claude Code Working Guide
 
 ## Project status
-- AgentMonitor is an independent project maintained by the aipairs team. It began as a fork of tanvoid0/agent-monitor but has diverged too far to track it; there is no upstream remote and no upstream merges are planned.
+- AgentMonitor is an independent project maintained by the aipairs team, now hosted at tanvoid0/agent-monitor. It began as a fork of hoangsonww/Claude-Code-Agent-Monitor but has diverged too far to track it; there is no upstream remote and no upstream merges are planned.
 - Conventions below (headers, i18n parity, release skill) remain because they keep the repo consistent, not to ease upstream merges.
 
 ## Project mission
