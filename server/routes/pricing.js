@@ -28,6 +28,23 @@ function matchesModelPattern(pattern, model) {
 }
 
 /**
+ * Collapse model ids that differ only by snapshot date or a "-latest" alias
+ * onto one breakdown key, so a model that got a new dated snapshot mid-range
+ * doesn't show up as several non-adjacent "Cost by Model" rows with the same
+ * display name (client/src/lib/format.ts#formatModelName strips exactly this
+ * suffix for display - see #106). Pricing itself still prices every row at
+ * its own raw model/date; only the breakdown GROUPING key is normalized.
+ */
+function breakdownModelKey(model) {
+  const name = String(model || "");
+  const afterPrefix = name.includes("/") ? name.split("/").pop() : name;
+  return (afterPrefix || "")
+    .replace(/\[\d+[mk]\]$/i, "")
+    .replace(/-\d{8}$/, "")
+    .replace(/-latest$/i, "");
+}
+
+/**
  * Resolve the effective per-MTok rates for a token bucket, applying the pricing
  * modifiers carried on the bucket (fast mode, US data residency, Batch API).
  *   - Fast mode: premium input/output rates; cache rates scale with the fast
@@ -149,7 +166,7 @@ function calculateCost(tokenRows, pricingRules, asOf) {
     webSearchCost += wsCost;
     codeExecHours += ceHours;
 
-    const key = `${row.model}|${row.speed || "standard"}|${row.inference_geo || "global"}|${row.service_tier || "standard"}`;
+    const key = `${breakdownModelKey(row.model)}|${row.speed || "standard"}|${row.inference_geo || "global"}|${row.service_tier || "standard"}`;
     const agg = breakdownMap.get(key) || {
       model: row.model,
       speed: row.speed || "standard",
@@ -268,7 +285,7 @@ function calculateGptCost(tokenRows, pricingRules) {
       unpriced.set(key, entry);
     }
 
-    const key = `${row.model}|${row.speed || "standard"}|${contextSize}`;
+    const key = `${breakdownModelKey(row.model)}|${row.speed || "standard"}|${contextSize}`;
     const entry = breakdownMap.get(key) || {
       provider: "codex",
       model: row.model,

@@ -264,6 +264,20 @@ describe("calculateCost — model_pattern matching (dated ids, no cross-match)",
   });
 });
 
+describe("calculateCost — breakdown groups by model, not snapshot date (#106)", () => {
+  it("merges two dated snapshots of the same Claude model into one breakdown row", () => {
+    const r = calculateCost(
+      [
+        bucket({ model: "claude-opus-4-8-20260101", output_tokens: M }),
+        bucket({ model: "claude-opus-4-8-20260601", output_tokens: M }),
+      ],
+      RULES
+    );
+    assert.equal(r.breakdown.length, 1);
+    assert.equal(r.breakdown[0].cost, 50); // 2 * 1M output @ $25
+  });
+});
+
 describe("calculateGptCost — Codex pricing dimensions", () => {
   const GPT_RULES = [
     {
@@ -324,6 +338,17 @@ describe("calculateGptCost — Codex pricing dimensions", () => {
       GPT_RULES
     );
     assert.equal(r.total_cost, 28); // 4 + 24; Fast has its own published card
+  });
+
+  it("merges a dated Codex snapshot with its -latest alias into one breakdown row (#106)", () => {
+    const r = calculateGptCost(
+      [
+        gptBucket({ model: "gpt-5.6-terra-20260101", output_tokens: M }),
+        gptBucket({ model: "gpt-5.6-terra-latest", output_tokens: M }),
+      ],
+      GPT_RULES
+    );
+    assert.equal(r.breakdown.length, 1);
   });
 
   it("keeps Codex and Claude rate cards isolated in a combined total", () => {
