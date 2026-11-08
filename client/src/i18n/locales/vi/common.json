@@ -23,6 +23,7 @@
   "agent": "Agent",
   "live": "Trực tiếp",
   "offline": "Ngoại tuyến",
+  "connecting": "Đang kết nối...",
   "running": "đang chạy",
   "dashboardRun": "Chạy",
   "days": "ngày",

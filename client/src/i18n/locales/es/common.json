@@ -23,6 +23,7 @@
   "agent": "agente",
   "live": "En vivo",
   "offline": "Sin conexión",
+  "connecting": "Conectando...",
   "running": "ejecutando",
   "dashboardRun": "Ejecutar",
   "days": "días",

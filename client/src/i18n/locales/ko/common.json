@@ -23,6 +23,7 @@
   "agent": "Agent",
   "live": "실시간",
   "offline": "오프라인",
+  "connecting": "연결 중...",
   "running": "실행 중",
   "dashboardRun": "실행",
   "days": "일",
