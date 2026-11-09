@@ -1,6 +1,6 @@
 {
   "title": "工作流",
-  "subtitle": "Agent编排智能分析",
+  "subtitle": "逐图展示会话如何在各个代理间派生与交接工作——向下滚动可深入查看某个会话。",
   "failedLoad": "工作流数据加载失败",
   "filteredBy": "筛选：",
   "clearFilter": "清除筛选",

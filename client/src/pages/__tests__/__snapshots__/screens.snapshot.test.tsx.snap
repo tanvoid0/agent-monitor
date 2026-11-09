@@ -11940,7 +11940,7 @@ exports[`screen snapshots > Workflows 1`] = `
           <p
             class="text-xs text-gray-400"
           >
-            Agent orchestration intelligence
+            How sessions spawn and hand off work across agents, chart by chart - scroll down to drill into one session.
           </p>
         </div>
       </div>

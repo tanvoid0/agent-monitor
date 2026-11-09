@@ -1,6 +1,6 @@
 {
   "title": "Workflows",
-  "subtitle": "Agent orchestration intelligence",
+  "subtitle": "How sessions spawn and hand off work across agents, chart by chart - scroll down to drill into one session.",
   "failedLoad": "Failed to load workflow data",
   "filteredBy": "Filtered by:",
   "clearFilter": "Clear filter",

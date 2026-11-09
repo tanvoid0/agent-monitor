@@ -1,6 +1,6 @@
 {
   "title": "Quy trình",
-  "subtitle": "Phân tích điều phối Agent",
+  "subtitle": "Cách các session sinh ra và chuyển giao công việc giữa các agent, biểu đồ theo biểu đồ - cuộn xuống để xem chi tiết một session.",
   "failedLoad": "Không thể tải dữ liệu quy trình",
   "filteredBy": "Đang lọc theo:",
   "clearFilter": "Xóa bộ lọc",
