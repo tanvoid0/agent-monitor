@@ -564,6 +564,31 @@ export function formatModelName(model: string | null | undefined): string | null
 }
 
 /**
+ * Re-groups a cost breakdown by its {@link formatModelName} display name,
+ * summing cost per name. The server's breakdown is per (model, speed, geo,
+ * service_tier) bucket - real for billing (e.g. a "workflow" tier bucket
+ * sits alongside standard usage of the SAME model) - but a "Cost by Model"
+ * view is cost PER MODEL, so those buckets need collapsing before display
+ * or the same model reads as several unrelated rows (#106). Picks the first
+ * raw `model` id seen per display name, for callers that link into it.
+ * @param breakdown Rows carrying at least `model` and `cost`.
+ * @returns One row per distinct display name, cost descending.
+ */
+export function groupCostByModel<T extends { model: string; cost: number }>(
+  breakdown: readonly T[]
+): { model: string; cost: number }[] {
+  const byName = new Map<string, { model: string; cost: number }>();
+  for (const row of breakdown) {
+    if (row.cost <= 0) continue;
+    const label = formatModelName(row.model) ?? row.model;
+    const existing = byName.get(label);
+    if (existing) existing.cost += row.cost;
+    else byName.set(label, { model: row.model, cost: row.cost });
+  }
+  return [...byName.values()].sort((a, b) => b.cost - a.cost);
+}
+
+/**
  * Last segment of a filesystem path, POSIX or Windows - fine for cwd display.
  * "/Users/dav/code/my-project" → "my-project"; "D:\code\my-project" → "my-project".
  * @param p An absolute or relative path, or null/undefined.

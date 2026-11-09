@@ -17,6 +17,7 @@ import {
   formatTime,
   getCurrentLocale,
   formatModelName,
+  groupCostByModel,
   promptPreviewLines,
   isTransientProcess,
   formatCostShort,
@@ -262,6 +263,46 @@ describe("formatModelName", () => {
   it("title-cases unknown models", () => {
     expect(formatModelName("o1-mini")).toBe("O1 Mini");
     expect(formatModelName("o1-preview")).toBe("O1 Preview");
+  });
+});
+
+describe("groupCostByModel", () => {
+  it("merges buckets of the same model split by speed/geo/service_tier (#106 reopened)", () => {
+    // Shaped after the live breakdown that reopened #106: the same raw model
+    // split into a standard bucket, a "workflow"-tier bucket, and (for Opus)
+    // a fast-speed bucket - none differing by snapshot date, which is what
+    // the prior server-side fix normalized.
+    const grouped = groupCostByModel([
+      { model: "claude-opus-5", speed: "fast", cost: 10.5 },
+      { model: "claude-opus-5", speed: "standard", cost: 979.77 },
+      { model: "claude-opus-5", speed: "standard", service_tier: "workflow", cost: 12520 },
+      { model: "claude-sonnet-5", cost: 300 },
+      { model: "claude-sonnet-5", service_tier: "workflow", cost: 20 },
+    ]);
+    expect(grouped).toEqual([
+      { model: "claude-opus-5", cost: 13510.27 },
+      { model: "claude-sonnet-5", cost: 320 },
+    ]);
+  });
+
+  it("keeps distinct point releases separate (different display names)", () => {
+    const grouped = groupCostByModel([
+      { model: "claude-opus-5", cost: 10 },
+      { model: "claude-opus-5-5", cost: 20 }, // "Claude Opus 5.5" - a different model
+    ]);
+    expect(grouped.map((r) => r.model)).toEqual(["claude-opus-5-5", "claude-opus-5"]);
+  });
+
+  it("drops zero/negative-cost rows and sorts cost descending", () => {
+    const grouped = groupCostByModel([
+      { model: "claude-haiku-4-5", cost: 0 },
+      { model: "claude-sonnet-5", cost: 5 },
+      { model: "claude-opus-5", cost: 50 },
+    ]);
+    expect(grouped).toEqual([
+      { model: "claude-opus-5", cost: 50 },
+      { model: "claude-sonnet-5", cost: 5 },
+    ]);
   });
 });
 

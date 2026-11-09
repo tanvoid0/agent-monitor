@@ -75,7 +75,14 @@ import { api } from "../lib/api";
 import { eventBus } from "../lib/eventBus";
 import { isRemoteDataRefreshMessage } from "../lib/remoteDataEvents";
 import { useDataScope } from "../lib/dataScope";
-import { fmt, fmtCost, fmtCostFull, formatModelName, getCurrentLocale } from "../lib/format";
+import {
+  fmt,
+  fmtCost,
+  fmtCostFull,
+  formatModelName,
+  getCurrentLocale,
+  groupCostByModel,
+} from "../lib/format";
 import { Tip } from "../components/Tip";
 import { PaginatedLegend } from "../components/PaginatedLegend";
 import { Skeleton, StatValueSkeleton, TextSkeleton } from "../components/Skeleton";
@@ -824,9 +831,12 @@ export function Analytics() {
     dailyCostLast30[0] ?? { date: "", cost: 0 }
   );
   const totalCost30d = dailyCostLast30.reduce((sum, day) => sum + day.cost, 0);
-  const costBreakdown = [...(costData?.breakdown ?? [])]
-    .filter((b) => b.cost > 0)
-    .sort((a, b) => b.cost - a.cost);
+  // "Cost by Model" is cost PER MODEL - re-group the server's per-(model,
+  // speed, geo, service_tier) buckets by display name before rendering, or
+  // the same model splits into several unrelated rows (#106, reopened: a
+  // prior server-side fix normalized dated snapshot suffixes, but the
+  // duplicates users actually hit split by speed/tier, not date).
+  const costBreakdown = groupCostByModel(costData?.breakdown ?? []);
   const locale = i18n.resolvedLanguage ?? i18n.language;
   const weekdayOrder = [1, 2, 3, 4, 5, 6, 0];
   const weekdayCosts = weekdayOrder.map((dow) => {
@@ -990,7 +1000,7 @@ export function Analytics() {
           raw={costData ? fmtCostFull(costData.total_cost) : undefined}
           sub={
             costData
-              ? `${costData.breakdown.length} ${t("common:cost.model", { count: costData.breakdown.length })}`
+              ? `${costBreakdown.length} ${t("common:cost.model", { count: costBreakdown.length })}`
               : undefined
           }
           icon={DollarSign}
