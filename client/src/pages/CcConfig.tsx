@@ -158,7 +158,9 @@ function isMutableScope(scope: CcMdItem["scope"]): scope is "user" | "project" {
  *  `"<plugin>:<name>"` for a plugin-sourced one — matching how `subagent_type`
  *  is actually recorded on the Task invocation (see cc-config.js usage route). */
 function agentUsageKey(item: CcMdItem): string {
-  return item.scope === "plugin" && item.plugin ? `${item.plugin}:${item.name}` : item.name;
+  // Claude Code records subagent_type from the frontmatter `name`, not the filename.
+  const name = item.frontmatter.name || item.name;
+  return item.scope === "plugin" && item.plugin ? `${item.plugin}:${name}` : name;
 }
 
 function tabToArtifactType(
@@ -324,7 +326,12 @@ export function CcConfig() {
     return () => clearTimeout(id);
   }, [toast]);
 
+  // Drops results from an older fetch that resolves after a newer one (e.g.
+  // picker switched A → B): otherwise A's list would show under B, and
+  // Edit/Delete — which send the current cwd — would hit B's file of that name.
+  const fetchSeq = useRef(0);
   const fetchAll = useCallback(async () => {
+    const seq = ++fetchSeq.current;
     setLoading(true);
     setError(null);
     const cwdArg = cwd || undefined;
@@ -363,6 +370,7 @@ export function CcConfig() {
         // Decorative badge only: a failed usage read must not blank the page.
         api.ccConfig.agentUsage().catch(() => ({ items: [] })),
       ]);
+      if (seq !== fetchSeq.current) return;
       setData({
         overview,
         skills: skills.items,
@@ -382,10 +390,11 @@ export function CcConfig() {
       setAgentUsage(Object.fromEntries(usage.items.map((u) => [u.subagent_type, u.count])));
       setLastUpdated(new Date());
     } catch (err: unknown) {
+      if (seq !== fetchSeq.current) return;
       const msg = err instanceof Error ? err.message : "unknown error";
       setError(msg);
     } finally {
-      setLoading(false);
+      if (seq === fetchSeq.current) setLoading(false);
     }
   }, [scope, cwd, showPluginAgents]);
 
@@ -570,7 +579,12 @@ export function CcConfig() {
         onScopeChange={setScope}
         cwd={cwd}
         cwdOptions={cwdOptions}
-        onCwdChange={setCwd}
+        onCwdChange={(next) => {
+          // Blank the lists until the new project loads, so no row from the
+          // old project is clickable under the new cwd.
+          setData(EMPTY_STATE);
+          setCwd(next);
+        }}
         onRefresh={fetchAll}
         onOpenBackups={() => setBackupsOpen(true)}
         wsConnected={wsConnected}
@@ -671,7 +685,9 @@ export function CcConfig() {
             />
           )}
           {toast && <ToastNotice toast={toast} onDismiss={() => setToast(null)} />}
-          {backupsOpen && <BackupsModal onClose={() => setBackupsOpen(false)} />}
+          {backupsOpen && (
+            <BackupsModal cwd={cwd || undefined} onClose={() => setBackupsOpen(false)} />
+          )}
         </>
       )}
     </div>
@@ -1535,7 +1551,7 @@ function MdItemList({
             <div className="space-y-2">
               {g.items.map((it) => (
                 <MdItemCard
-                  key={`${it.scope}:${it.plugin ?? ""}:${it.name}`}
+                  key={it.file ?? `${it.scope}:${it.plugin ?? ""}:${it.name}`}
                   item={it}
                   onOpen={onOpen}
                   onEdit={onEdit}
@@ -3887,17 +3903,17 @@ function CommandSnippet({ command, label }: { command: string; label?: string })
 
 // ── Backups modal ──────────────────────────────────────────────────────
 
-function BackupsModal({ onClose }: { onClose: () => void }) {
+function BackupsModal({ cwd, onClose }: { cwd?: string; onClose: () => void }) {
   const { t } = useTranslation("ccConfig");
   const [items, setItems] = useState<CcBackup[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     api.ccConfig
-      .backups()
+      .backups({ cwd })
       .then((r) => setItems(r.items))
       .catch((err: unknown) => setError(err instanceof Error ? err.message : "unknown"));
-  }, []);
+  }, [cwd]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

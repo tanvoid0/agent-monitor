@@ -1255,7 +1255,8 @@ Inspección de lectura única de cada superficie de configuración de Claude Cod
 | -------- | ----------------------------------- | ----------- |
 | `GET` | `/api/cc-config/overview` | Raíces (claude home, proyecto .claude, raíz del proyecto, ~/.claude.json) + contadores para cada superficie |
 | `GET` | `/api/cc-config/skills` | Habilidades bajo `<scope>/.claude/skills/<name>/SKILL.md` con materia principal parseada; `?scope=user\|project\|all` |
-| `GET` | `/api/cc-config/agents` | Subagentes `<scope>/.claude/agents/*.md` |
+| `GET` | `/api/cc-config/agents` | Subagentes `<scope>/.claude/agents/*.md`; `?plugins=1` añade además agentes de solo lectura aportados por plugins (`scope:"plugin"` + `plugin`) |
+| `GET` | `/api/cc-config/agents/usage` | Recuento de ejecuciones de subagentes en todo el panel: `{ items: [{ subagent_type, count }] }` |
 | `GET` | `/api/cc-config/commands` | Comandos de guiones bajos `<scope>/.claude/commands/*.md` |
 | `GET` | `/api/cc-config/output-styles` | Estilos de salida `<scope>/.claude/output-styles/*.md` |
 | `GET` | `/api/cc-config/plugins` | Plugins instalados desde `~/.claude/plugins/installed_plugins.json`, unidos con `enabledPlugins` de la configuración; cada entrada incluye `contributes` (cuenta de habilidades/agentes/comandos/gatillos/estilos de salida dentro de la carpeta de instalación del plugin) más metadatos `plugin.json` |
@@ -1270,7 +1271,7 @@ Inspección de lectura única de cada superficie de configuración de Claude Cod
 | `GET` | `/api/cc-config/memory` | Archivos `CLAUDE.md` en el ámbito del usuario + proyecto, además de la memoria basada en archivos por proyecto: elementos `scope:"auto-memory"` (cada uno con `project`, `name`, `isIndex` y `frontmatter` parseado) para cada `*.md` bajo `~/.claude/projects/<slug>/memory/`. Mutar a través de `PUT`/`DELETE /api/cc-config/file` con `{ scope: "auto-memory", type: "auto-memory", project, name }` (las copias de seguridad se almacenan en `<memory-dir>/.cc-config-backups/auto-memory/`) |
 | `GET` | `/api/cc-config/file?path=…` | Cuerpo de un solo archivo (ruta contenida en CLAUDE_HOME / proyecto .claude / proyecto CLAUDE.md) |
 | `GET` | `/api/cc-config/backups` | Lista de todas las copias de seguridad con fecha y hora, opcionalmente filtradas `?scope=&type=` |
-| `PUT` | `/api/cc-config/file` | Crear o sobrescribir un artefacto de archivo de texto. Cuerpo: `{ scope, type, name?, content }`. Copia de seguridad automática si el archivo existe. Temporal atómico + renombrar. Límite de contenido de 256 KB, regex estricta de `name` |
+| `PUT` | `/api/cc-config/file` | Crear o sobrescribir un artefacto de archivo de texto. Cuerpo: `{ scope, type, name?, content }`. Copia de seguridad automática si el archivo existe. Temporal atómico + renombrar. Límite de contenido de 256 KB, regex estricta de `name`. Lee `cwd` de la cadena de consulta; `scope: "project"` con un `cwd` inexistente devuelve `400 EBADCWD` en lugar de crear el directorio |
 | `ELIMINAR` | `/api/cc-config/file`               | Hacer una copia de seguridad y luego eliminar un artefacto de archivo de texto. Las carpetas de habilidades se copian de seguridad enteras (preservando los activos empaquetados) antes de la eliminación recursiva |
 
 ### Ejecutar Claude (`/api/run`)

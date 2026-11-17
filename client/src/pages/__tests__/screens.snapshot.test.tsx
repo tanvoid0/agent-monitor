@@ -335,6 +335,7 @@ vi.mock("../../lib/api", async (importOriginal) => {
         }),
         skills: r(items),
         agents: r(items),
+        agentUsage: r(items),
         commands: r(items),
         outputStyles: r(items),
         plugins: r({ manifestPath: "", manifestExists: false, plugins: [] }),

@@ -249,7 +249,7 @@ Manage the remote (SSH) machines this dashboard pulls Claude Code, Codex, or bot
 | `am reinstall-hooks` | Rewrite the Claude Code hook entries in `~/.claude/settings.json` |
 | `am hooks status` | Read Claude Code and Codex hook installation state |
 | `am hooks install claude codex --yes` | Install either or both provider hook sets |
-| `am config claude <surface>` | Inspect Claude skills, agents, commands, plugins, marketplaces, MCP, hooks, settings, memory, keybindings, statusline, and backups |
+| `am config claude <surface>` | Inspect Claude skills, agents (`agents --plugins` adds plugin-contributed agents; `agents-usage` shows run counts), commands, plugins, marketplaces, MCP, hooks, settings, memory, keybindings, statusline, and backups |
 | `am config codex <action>` | Inspect or backup-backed edit Codex config, profiles, hooks, rules, skills, plugins, and instructions |
 | `am mcp [stdio|http|repl]` | Launch the MCP server built by `npm run setup` |
 | `am api <METHOD> /api/path [--data JSON\|--file path]` | Future-proof access to every JSON API route. Non-GET requests require `--yes`; clear-data additionally requires `--confirm CLEAR_ALL_DATA` |

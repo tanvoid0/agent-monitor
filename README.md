@@ -1277,7 +1277,8 @@ Read-only inspection of every Claude Code configuration surface, plus carefully-
 | -------- | ----------------------------------- | ----------- |
 | `GET`    | `/api/cc-config/overview`           | Roots (claude home, project .claude, project root, ~/.claude.json) + counts for every surface |
 | `GET`    | `/api/cc-config/skills`             | Skills under `<scope>/.claude/skills/<name>/SKILL.md` with parsed frontmatter; `?scope=user\|project\|all` |
-| `GET`    | `/api/cc-config/agents`             | Subagents `<scope>/.claude/agents/*.md` |
+| `GET`    | `/api/cc-config/agents`             | Subagents `<scope>/.claude/agents/*.md`; `?plugins=1` also appends read-only plugin-contributed agents (`scope:"plugin"` + `plugin`) |
+| `GET`    | `/api/cc-config/agents/usage`       | Dashboard-wide subagent run counts: `{ items: [{ subagent_type, count }] }` |
 | `GET`    | `/api/cc-config/commands`           | Slash commands `<scope>/.claude/commands/*.md` |
 | `GET`    | `/api/cc-config/output-styles`      | Output styles `<scope>/.claude/output-styles/*.md` |
 | `GET`    | `/api/cc-config/plugins`            | Installed plugins from `~/.claude/plugins/installed_plugins.json`, joined with `enabledPlugins` from settings; each entry includes `contributes` (count of skills/agents/commands/hooks/output-styles inside the plugin's install dir) plus `plugin.json` metadata |
@@ -1292,7 +1293,7 @@ Read-only inspection of every Claude Code configuration surface, plus carefully-
 | `GET`    | `/api/cc-config/memory`             | `CLAUDE.md` files at user + project scope, plus per-project file-based memory: `scope:"auto-memory"` items (each carrying `project`, `name`, `isIndex`, and parsed `frontmatter`) for every `*.md` under `~/.claude/projects/<slug>/memory/`. Mutate via `PUT`/`DELETE /api/cc-config/file` with `{ scope: "auto-memory", type: "auto-memory", project, name }` (backups land in `<memory-dir>/.cc-config-backups/auto-memory/`) |
 | `GET`    | `/api/cc-config/file?path=…`        | Body of a single file (path-contained to CLAUDE_HOME / project .claude / project CLAUDE.md) |
 | `GET`    | `/api/cc-config/backups`            | Listing of all timestamped backups, optionally filtered `?scope=&type=` |
-| `PUT`    | `/api/cc-config/file`               | Create or overwrite a text-file artifact. Body: `{ scope, type, name?, content }`. Auto-backs-up if file exists. Atomic temp + rename. 256 KB content cap, strict `name` regex |
+| `PUT`    | `/api/cc-config/file`               | Create or overwrite a text-file artifact. Body: `{ scope, type, name?, content }`. Auto-backs-up if file exists. Atomic temp + rename. 256 KB content cap, strict `name` regex. Reads `cwd` from the query string; `scope: "project"` with a non-existent `cwd` returns `400 EBADCWD` instead of creating the directory |
 | `DELETE` | `/api/cc-config/file`               | Backup-then-delete a text-file artifact. Skill dirs are backed up whole (preserving bundled assets) before recursive removal |
 
 ### Run Claude (`/api/run`)

@@ -120,7 +120,7 @@ MCP-side history uploads are capped at 50 MiB per file and 100 MiB total per cal
 
 ### Claude Code config
 
-- `dashboard_get_claude_config`, `dashboard_read_claude_config_file`
+- `dashboard_get_claude_config` (surface `agents-usage` returns subagent run counts; optional `plugins=true` with surface `agents` adds plugin-contributed agents), `dashboard_read_claude_config_file`
 - `dashboard_list_claude_config_backups`
 - `dashboard_write_claude_config_artifact`, `dashboard_delete_claude_config_artifact`
 - `dashboard_write_claude_keybindings`

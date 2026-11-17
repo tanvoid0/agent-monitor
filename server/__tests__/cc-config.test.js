@@ -313,6 +313,15 @@ describe("/api/cc-config", () => {
     assert.equal(helper.scope, "plugin");
     assert.equal(helper.plugin, "demo-plugin");
     assert.equal(helper.frontmatter.description, "Plugin-contributed helper agent");
+    // Exactly once, and never under a narrowed user/project scope.
+    assert.equal(body.items.filter((x) => x.name === "helper").length, 1);
+    const narrowed = await fetchJson(
+      `/api/cc-config/agents?cwd=${encodeURIComponent(FAKE_PROJECT)}&scope=project&plugins=1`
+    );
+    assert.equal(
+      narrowed.body.items.find((x) => x.scope === "plugin"),
+      undefined
+    );
   });
 
   it("agents/usage wraps the agentTypeDistribution query", async () => {

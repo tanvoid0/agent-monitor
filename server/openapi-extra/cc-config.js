@@ -1230,7 +1230,7 @@ const pluginsParam = {
   required: false,
   schema: { type: "string", enum: ["1"] },
   description:
-    'Pass `1` to append read-only plugin-contributed agents (scope "plugin") to the response. Omitted by default so the unflagged shape (consumed by MCP and `am`) never changes.',
+    'Pass `1` to append read-only agents contributed by enabled plugins (scope "plugin") to the response. Only honored with scope=all (the default); a narrowed user/project scope omits them. Omitted by default so the unflagged shape (consumed by MCP and `am`) never changes.',
   example: "1",
 };
 

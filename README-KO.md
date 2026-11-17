@@ -1242,7 +1242,8 @@ Claude Code의 모든 설정 표면을 읽기 전용으로 검사할 수 있으�
 | -------- | ----------------------------------- | ----------- |
 | `GET`    | `/api/cc-config/overview`           | 루트(claude 홈, 프로젝트 .claude, 프로젝트 루트, ~/.claude.json) + 모든 표면에 대한 개수 |
 | `GET`    | `/api/cc-config/skills`             | 파싱된 프런트매터를 포함한 `<scope>/.claude/skills/<name>/SKILL.md` 아래의 스킬; `?scope=user\|project\|all` |
-| `GET`    | `/api/cc-config/agents`             | 서브에이전트 `<scope>/.claude/agents/*.md` |
+| `GET`    | `/api/cc-config/agents`             | 서브에이전트 `<scope>/.claude/agents/*.md`; `?plugins=1`을 쓰면 플러그인이 제공하는 읽기 전용 에이전트(`scope:"plugin"` + `plugin`)도 함께 추가됩니다 |
+| `GET`    | `/api/cc-config/agents/usage`       | 대시보드 전체의 서브에이전트 실행 횟수: `{ items: [{ subagent_type, count }] }` |
 | `GET`    | `/api/cc-config/commands`           | 슬래시 명령어 `<scope>/.claude/commands/*.md` |
 | `GET`    | `/api/cc-config/output-styles`      | 출력 스타일 `<scope>/.claude/output-styles/*.md` |
 | `GET`    | `/api/cc-config/plugins`            | `~/.claude/plugins/installed_plugins.json`의 설치된 플러그인을 설정의 `enabledPlugins`와 조인한 결과; 각 항목에는 `contributes`(플러그인 설치 디렉터리 내부의 스킬/에이전트/명령어/Hook/출력 스타일 개수)와 `plugin.json` 메타데이터가 포함됩니다 |
@@ -1257,7 +1258,7 @@ Claude Code의 모든 설정 표면을 읽기 전용으로 검사할 수 있으�
 | `GET`    | `/api/cc-config/memory`             | 사용자 + 프로젝트 범위의 `CLAUDE.md` 파일과 프로젝트별 파일 기반 메모리: `~/.claude/projects/<slug>/memory/` 아래의 모든 `*.md`에 대한 `scope:"auto-memory"` 항목(각각 `project`, `name`, `isIndex` 및 파싱된 `frontmatter`를 포함). `{ scope: "auto-memory", type: "auto-memory", project, name }`와 함께 `PUT`/`DELETE /api/cc-config/file`로 변경합니다(백업은 `<memory-dir>/.cc-config-backups/auto-memory/`에 저장됨) |
 | `GET`    | `/api/cc-config/file?path=…`        | 단일 파일의 본문(경로는 CLAUDE_HOME / 프로젝트 .claude / 프로젝트 CLAUDE.md로 제한됨) |
 | `GET`    | `/api/cc-config/backups`            | 타임스탬프가 붙은 모든 백업 목록, 선택적으로 `?scope=&type=`로 필터링 가능 |
-| `PUT`    | `/api/cc-config/file`               | 텍스트 파일 아티팩트를 생성하거나 덮어씁니다. Body: `{ scope, type, name?, content }`. 파일이 존재하면 자동으로 백업합니다. 원자적 임시 파일 + 이름 변경 방식. 256 KB 내용 상한, 엄격한 `name` 정규식 적용 |
+| `PUT`    | `/api/cc-config/file`               | 텍스트 파일 아티팩트를 생성하거나 덮어씁니다. Body: `{ scope, type, name?, content }`. 파일이 존재하면 자동으로 백업합니다. 원자적 임시 파일 + 이름 변경 방식. 256 KB 내용 상한, 엄격한 `name` 정규식 적용. 쿼리 문자열에서 `cwd`를 읽으며, `scope: "project"`에 존재하지 않는 `cwd`를 주면 디렉터리를 만들지 않고 `400 EBADCWD`를 반환합니다 |
 | `DELETE` | `/api/cc-config/file`               | 텍스트 파일 아티팩트를 백업 후 삭제합니다. 스킬 디렉터리는 재귀적 제거 전에 통째로 백업됩니다(번들된 자산 보존) |
 
 ### Claude 실행 (`/api/run`)

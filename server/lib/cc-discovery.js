@@ -396,11 +396,18 @@ function readPlugins() {
  * these to GET /agents when the caller passes ?plugins=1 — the default
  * response shape (consumed by MCP/`am`) never changes. Read-only: cc-mutate's
  * rootForScope already rejects writes to scope "plugin" with EBADSCOPE.
+ * Skips plugins disabled in settings, and reads each install path once (one
+ * plugin installed at both user and project scope shares an install path).
+ * ponytail: project-scoped installs for other projects still show; filter on
+ * the manifest's projectPath vs cwd if that turns out to confuse anyone.
  */
 function readPluginAgents() {
   const out = [];
+  const seen = new Set();
   for (const p of readPlugins().plugins) {
-    if (!p.installPathExists || !p.installPath) continue;
+    if (!p.installPathExists || !p.installPath || p.enabled === false) continue;
+    if (seen.has(p.installPath)) continue;
+    seen.add(p.installPath);
     for (const a of readMdFilesAt("plugin", p.installPath, "agents")) {
       out.push({ ...a, plugin: p.name });
     }

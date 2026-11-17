@@ -77,7 +77,8 @@ router.get("/agents", (req, res) => {
   const items = cc.readAgents({ scope: scopeOf(req), cwd: cwdOf(req) });
   // Opt-in only: plugin agents are read-only and excluded unless the caller
   // explicitly asks, so the unflagged shape MCP/`am` consume never changes.
-  if (req.query.plugins === "1") items.push(...cc.readPluginAgents());
+  // Plugin agents are neither user nor project, so a narrowed scope omits them.
+  if (req.query.plugins === "1" && scopeOf(req) === "all") items.push(...cc.readPluginAgents());
   res.json({ items });
 });
 

@@ -17,6 +17,8 @@ Read with:
 ```bash
 am config claude overview
 am config claude skills --scope user
+am config claude agents --plugins
+am config claude agents-usage
 am config claude mcp
 am config claude hooks
 am config claude memory

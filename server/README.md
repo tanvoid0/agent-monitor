@@ -683,7 +683,8 @@ Reads — and carefully gated mutations for low-risk text-file artifacts — for
 | -------- | ------------------------------------- | ----------- |
 | `GET`    | `/api/cc-config/overview`             | Roots + counts for every surface (used by the Overview tab) |
 | `GET`    | `/api/cc-config/skills`               | Skills with parsed frontmatter, `?scope=user\|project\|all` |
-| `GET`    | `/api/cc-config/agents`               | Subagents under `<scope>/.claude/agents/*.md` |
+| `GET`    | `/api/cc-config/agents`               | Subagents under `<scope>/.claude/agents/*.md`; `?plugins=1` also appends read-only plugin-contributed agents (`scope:"plugin"` + `plugin`) |
+| `GET`    | `/api/cc-config/agents/usage`         | Dashboard-wide subagent run counts: `{ items: [{ subagent_type, count }] }` |
 | `GET`    | `/api/cc-config/commands`             | Slash commands under `<scope>/.claude/commands/*.md` |
 | `GET`    | `/api/cc-config/output-styles`        | Output styles under `<scope>/.claude/output-styles/*.md` |
 | `GET`    | `/api/cc-config/plugins`              | Installed plugins joined with `enabledPlugins` + per-plugin `contributes` count + `plugin.json` metadata |
@@ -698,7 +699,7 @@ Reads — and carefully gated mutations for low-risk text-file artifacts — for
 | `GET`    | `/api/cc-config/memory`               | `CLAUDE.md` files at user + project scope. Also returns the per-project file-based memory store as `scope:"auto-memory"` items (each carrying `project`, `name`, `isIndex`, and parsed `frontmatter`) — every `*.md` under `~/.claude/projects/<slug>/memory/` |
 | `GET`    | `/api/cc-config/file?path=…`          | Body of a single file (path-contained to allowed roots) |
 | `GET`    | `/api/cc-config/backups[?scope=&type=]` | Listing of all timestamped backups. Also lists `scope:"auto-memory"` backups (each carrying `project`) |
-| `PUT`    | `/api/cc-config/file`                 | Create or overwrite a text-file artifact (skills/agents/commands/output-styles/memory). Body: `{ scope, type, name?, content }`. Auto-backs-up if file exists. Atomic temp + rename. 256 KB cap. Per-project file-based memory is also editable via `{ scope: "auto-memory", type: "auto-memory", project, name }` — backups land under `<memory-dir>/.cc-config-backups/auto-memory/`, and an invalid project slug returns `EBADPROJECT` |
+| `PUT`    | `/api/cc-config/file`                 | Create or overwrite a text-file artifact (skills/agents/commands/output-styles/memory). Body: `{ scope, type, name?, content }`. Auto-backs-up if file exists. Atomic temp + rename. 256 KB cap. Per-project file-based memory is also editable via `{ scope: "auto-memory", type: "auto-memory", project, name }` — backups land under `<memory-dir>/.cc-config-backups/auto-memory/`, and an invalid project slug returns `EBADPROJECT`. `cwd` is read from the query string; `scope: "project"` with a non-existent `cwd` returns `EBADCWD` (400) rather than creating it |
 | `DELETE` | `/api/cc-config/file`                 | Backup-then-delete a text-file artifact. Skill dirs are backed up whole before recursive removal |
 
 ### Codex Config Explorer (`/api/codex-config`)
