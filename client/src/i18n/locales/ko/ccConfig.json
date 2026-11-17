@@ -97,7 +97,12 @@
     "user": "사용자",
     "project": "프로젝트",
     "projectLocal": "프로젝트(로컬)",
+    "plugin": "플러그인",
     "home": "Home"
+  },
+  "projectPicker": {
+    "label": "프로젝트",
+    "default": "현재 프로젝트"
   },
   "tabs": {
     "overview": "개요",
@@ -146,7 +151,12 @@
   "agents": {
     "name": "이름",
     "model": "모델",
-    "tools": "도구"
+    "tools": "도구",
+    "showPlugins": "플러그인 에이전트 표시",
+    "readOnlyPlugin": "읽기 전용(플러그인)",
+    "usageCount_one": "실행 {{count}}회",
+    "usageCount_other": "실행 {{count}}회",
+    "usageNever": "실행 기록 없음"
   },
   "plugins": {
     "manifest": "매니페스트",

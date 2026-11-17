@@ -79,6 +79,10 @@ fs.writeFileSync(
 fs.mkdirSync(path.join(PLUGIN_INSTALL, "agents"), { recursive: true });
 fs.writeFileSync(path.join(PLUGIN_INSTALL, "agents", "plug-agent.md"), "---\nname: pa\n---\n");
 fs.writeFileSync(
+  path.join(PLUGIN_INSTALL, "agents", "helper.md"),
+  "---\nname: helper\ndescription: Plugin-contributed helper agent\n---\n\nHelper body."
+);
+fs.writeFileSync(
   path.join(PLUGIN_INSTALL, ".claude-plugin", "plugin.json"),
   JSON.stringify({ name: "demo-plugin", description: "Demo", version: "1.0.0" })
 );
@@ -290,6 +294,33 @@ describe("/api/cc-config", () => {
     assert.match(a.frontmatter.tools, /Read/);
   });
 
+  it("agents excludes plugin agents unless ?plugins=1 is passed", async () => {
+    const { body } = await fetchJson(
+      `/api/cc-config/agents?cwd=${encodeURIComponent(FAKE_PROJECT)}`
+    );
+    assert.equal(
+      body.items.find((x) => x.name === "helper"),
+      undefined
+    );
+  });
+
+  it("agents?plugins=1 includes plugin agents tagged scope: plugin", async () => {
+    const { body } = await fetchJson(
+      `/api/cc-config/agents?cwd=${encodeURIComponent(FAKE_PROJECT)}&plugins=1`
+    );
+    const helper = body.items.find((x) => x.name === "helper");
+    assert.ok(helper, "plugin agent surfaced");
+    assert.equal(helper.scope, "plugin");
+    assert.equal(helper.plugin, "demo-plugin");
+    assert.equal(helper.frontmatter.description, "Plugin-contributed helper agent");
+  });
+
+  it("agents/usage wraps the agentTypeDistribution query", async () => {
+    const { status, body } = await fetchJson("/api/cc-config/agents/usage");
+    assert.equal(status, 200);
+    assert.ok(Array.isArray(body.items));
+  });
+
   it("plugins returns installed manifest with contributions and enabled state", async () => {
     const { body } = await fetchJson("/api/cc-config/plugins");
     assert.equal(body.manifestExists, true);
@@ -301,7 +332,7 @@ describe("/api/cc-config", () => {
     assert.equal(p.enabled, true);
     assert.ok(p.contributes, "contributions surfaced");
     assert.equal(p.contributes.skills, 1);
-    assert.equal(p.contributes.agents, 1);
+    assert.equal(p.contributes.agents, 2); // plug-agent.md + helper.md
     assert.equal(p.contributes.commands, 0);
     assert.equal(p.contributes.pluginJson.name, "demo-plugin");
   });
@@ -536,6 +567,29 @@ describe("/api/cc-config", () => {
     );
     assert.equal(status, 400);
     assert.equal(body.error.code, "EBADNAME");
+  });
+
+  it("PUT /file rejects scope: plugin (plugin agents are read-only)", async () => {
+    const { status, body } = await fetchJson(
+      `/api/cc-config/file?cwd=${encodeURIComponent(FAKE_PROJECT)}`,
+      {
+        method: "PUT",
+        body: { scope: "plugin", type: "agents", name: "helper", content: "evil" },
+      }
+    );
+    assert.equal(status, 400);
+    assert.equal(body.error.code, "EBADSCOPE");
+  });
+
+  it("PUT /file rejects a project-scoped write with a non-existent cwd", async () => {
+    const missingCwd = path.join(TMP, "does-not-exist");
+    const { status, body } = await fetchJson(`/api/cc-config/file?cwd=${missingCwd}`, {
+      method: "PUT",
+      body: { scope: "project", type: "agents", name: "ghost", content: "evil" },
+    });
+    assert.equal(status, 400);
+    assert.equal(body.error.code, "EBADCWD");
+    assert.equal(fs.existsSync(missingCwd), false);
   });
 
   it("PUT /file rejects unknown type", async () => {

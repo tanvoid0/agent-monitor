@@ -1658,6 +1658,10 @@ async function cmdConfig(flags, positional) {
   const sub = positional[1] || "overview";
   if (provider === "claude") {
     const surface = sub === "list" ? positional[2] || "overview" : sub;
+    if (surface === "agents-usage") {
+      console.log(JSON.stringify(await get("/api/cc-config/agents/usage"), null, 2));
+      return;
+    }
     const known = new Set([
       "overview",
       "skills",
@@ -1680,6 +1684,7 @@ async function cmdConfig(flags, positional) {
       if (flags.scope) query.set("scope", String(flags.scope));
       if (flags.cwd) query.set("cwd", String(flags.cwd));
       if (flags.type) query.set("type", String(flags.type));
+      if (surface === "agents" && flags.plugins) query.set("plugins", "1");
       const suffix = query.size ? `?${query}` : "";
       console.log(JSON.stringify(await get(`/api/cc-config/${surface}${suffix}`), null, 2));
       return;

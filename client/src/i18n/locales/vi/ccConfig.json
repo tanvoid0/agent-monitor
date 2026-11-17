@@ -97,7 +97,12 @@
     "user": "Người dùng",
     "project": "Dự án",
     "projectLocal": "Dự án (cục bộ)",
+    "plugin": "Plugin",
     "home": "Home"
+  },
+  "projectPicker": {
+    "label": "Dự án",
+    "default": "Dự án hiện tại"
   },
   "tabs": {
     "overview": "Tổng quan",
@@ -146,7 +151,12 @@
   "agents": {
     "name": "Tên",
     "model": "Model",
-    "tools": "Công cụ"
+    "tools": "Công cụ",
+    "showPlugins": "Hiện agent của plugin",
+    "readOnlyPlugin": "Chỉ đọc (plugin)",
+    "usageCount_one": "{{count}} lần chạy",
+    "usageCount_other": "{{count}} lần chạy",
+    "usageNever": "Chưa từng chạy"
   },
   "plugins": {
     "manifest": "Manifest",

@@ -97,7 +97,12 @@
     "user": "用户",
     "project": "项目",
     "projectLocal": "项目(本地)",
+    "plugin": "插件",
     "home": "Home"
+  },
+  "projectPicker": {
+    "label": "项目",
+    "default": "当前项目"
   },
   "tabs": {
     "overview": "概览",
@@ -146,7 +151,12 @@
   "agents": {
     "name": "名称",
     "model": "模型",
-    "tools": "工具"
+    "tools": "工具",
+    "showPlugins": "显示插件子代理",
+    "readOnlyPlugin": "只读(插件)",
+    "usageCount_one": "运行 {{count}} 次",
+    "usageCount_other": "运行 {{count}} 次",
+    "usageNever": "从未运行"
   },
   "plugins": {
     "manifest": "清单文件",

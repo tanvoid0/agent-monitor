@@ -1477,42 +1477,60 @@ export const api = {
     /**
      * GET /api/cc-config/overview - counts of every artifact kind, for the
      * explorer's landing page.
+     * @param cwd Optional project directory override (the picker in the UI);
+     *   omit to use the dashboard server's own cwd.
      * @returns {@link CcOverview} — filesystem roots plus per-kind counts.
      */
-    overview: () => request<CcOverview>("/cc-config/overview"),
+    overview: (cwd?: string) => request<CcOverview>(`/cc-config/overview${ccConfigQs({ cwd })}`),
     /**
      * GET /api/cc-config/skills - user and/or project SKILL.md files.
      *
-     * The optional `scope` is appended as `?scope=` only when provided; omitting
-     * it lets the server apply its default scope. Same pattern for the sibling
-     * list endpoints below (`agents`, `commands`, `outputStyles`).
+     * The optional `scope`/`cwd` are appended as query params only when
+     * provided; omitting them lets the server apply its defaults. Same
+     * pattern for the sibling list endpoints below (`agents`, `commands`,
+     * `outputStyles`).
      *
      * @param scope Optional {@link CcScope} ("user"|"project"|"all") filter.
+     * @param cwd Optional project directory override.
      * @returns `{ items }` — the {@link CcMdItem} summaries for each skill.
      */
-    skills: (scope?: CcScope) =>
-      request<{ items: CcMdItem[] }>(`/cc-config/skills${scope ? `?scope=${scope}` : ""}`),
+    skills: (scope?: CcScope, cwd?: string) =>
+      request<{ items: CcMdItem[] }>(`/cc-config/skills${ccConfigQs({ scope, cwd })}`),
     /**
      * GET /api/cc-config/agents - user and/or project subagent definitions.
      * @param scope Optional {@link CcScope} filter.
+     * @param cwd Optional project directory override.
+     * @param plugins Pass `true` to also append read-only plugin-contributed
+     *   agents (`scope: "plugin"`); omitted by default.
      * @returns `{ items }` — {@link CcMdItem} summaries for each subagent.
      */
-    agents: (scope?: CcScope) =>
-      request<{ items: CcMdItem[] }>(`/cc-config/agents${scope ? `?scope=${scope}` : ""}`),
+    agents: (scope?: CcScope, cwd?: string, plugins?: boolean) =>
+      request<{ items: CcMdItem[] }>(
+        `/cc-config/agents${ccConfigQs({ scope, cwd, plugins: plugins ? "1" : undefined })}`
+      ),
+    /**
+     * GET /api/cc-config/agents/usage - run counts per subagent_type, for the
+     * Subagents tab's inline usage badge. Not scoped to `cwd` — counts are
+     * dashboard-wide, same as the rest of Analytics.
+     * @returns `{ items }` — {@link CcAgentUsage} entries.
+     */
+    agentUsage: () => request<{ items: CcAgentUsage[] }>("/cc-config/agents/usage"),
     /**
      * GET /api/cc-config/commands - user and/or project slash commands.
      * @param scope Optional {@link CcScope} filter.
+     * @param cwd Optional project directory override.
      * @returns `{ items }` — {@link CcMdItem} summaries for each command.
      */
-    commands: (scope?: CcScope) =>
-      request<{ items: CcMdItem[] }>(`/cc-config/commands${scope ? `?scope=${scope}` : ""}`),
+    commands: (scope?: CcScope, cwd?: string) =>
+      request<{ items: CcMdItem[] }>(`/cc-config/commands${ccConfigQs({ scope, cwd })}`),
     /**
      * GET /api/cc-config/output-styles.
      * @param scope Optional {@link CcScope} filter.
+     * @param cwd Optional project directory override.
      * @returns `{ items }` — {@link CcMdItem} summaries for each output style.
      */
-    outputStyles: (scope?: CcScope) =>
-      request<{ items: CcMdItem[] }>(`/cc-config/output-styles${scope ? `?scope=${scope}` : ""}`),
+    outputStyles: (scope?: CcScope, cwd?: string) =>
+      request<{ items: CcMdItem[] }>(`/cc-config/output-styles${ccConfigQs({ scope, cwd })}`),
     /**
      * GET /api/cc-config/plugins - installed marketplace plugins and what
      * each one contributes (skills/agents/commands/hooks counts).
@@ -1521,24 +1539,31 @@ export const api = {
     plugins: () => request<CcPluginsResponse>("/cc-config/plugins"),
     /**
      * GET /api/cc-config/mcp - configured MCP servers, user and project-scoped.
+     * @param cwd Optional project directory override.
      * @returns {@link CcMcpResponse} — servers split into `user`/`projectScoped`.
      */
-    mcp: () => request<CcMcpResponse>("/cc-config/mcp"),
+    mcp: (cwd?: string) => request<CcMcpResponse>(`/cc-config/mcp${ccConfigQs({ cwd })}`),
     /**
      * GET /api/cc-config/hooks - hook entries from every settings.json layer.
+     * @param cwd Optional project directory override.
      * @returns `{ items }` — one {@link CcHookSource} per settings layer.
      */
-    hooks: () => request<{ items: CcHookSource[] }>("/cc-config/hooks"),
+    hooks: (cwd?: string) =>
+      request<{ items: CcHookSource[] }>(`/cc-config/hooks${ccConfigQs({ cwd })}`),
     /**
      * GET /api/cc-config/settings - raw settings.json files by scope.
+     * @param cwd Optional project directory override.
      * @returns `{ items }` — one {@link CcSettingsSource} per scope layer.
      */
-    settings: () => request<{ items: CcSettingsSource[] }>("/cc-config/settings"),
+    settings: (cwd?: string) =>
+      request<{ items: CcSettingsSource[] }>(`/cc-config/settings${ccConfigQs({ cwd })}`),
     /**
      * GET /api/cc-config/memory - CLAUDE.md files plus per-project auto-memory.
+     * @param cwd Optional project directory override.
      * @returns `{ items }` — {@link CcMemoryItem}s for CLAUDE.md + auto-memory.
      */
-    memory: () => request<{ items: CcMemoryItem[] }>("/cc-config/memory"),
+    memory: (cwd?: string) =>
+      request<{ items: CcMemoryItem[] }>(`/cc-config/memory${ccConfigQs({ cwd })}`),
     /**
      * GET /api/cc-config/file - raw contents of one config file by absolute path.
      *
@@ -1546,23 +1571,29 @@ export const api = {
      * path segment) so arbitrary filesystem paths survive intact.
      *
      * @param absPath Absolute path of the config file to read.
+     * @param cwd Optional project directory override (affects which roots a
+     *   relative-feeling path like CLAUDE.md resolves under).
      * @returns {@link CcFileResponse} — file text (possibly truncated) + metadata.
      */
-    file: (absPath: string) =>
-      request<CcFileResponse>(`/cc-config/file?path=${encodeURIComponent(absPath)}`),
+    file: (absPath: string, cwd?: string) =>
+      request<CcFileResponse>(`/cc-config/file${ccConfigQs({ path: absPath, cwd })}`),
     /**
      * PUT /api/cc-config/file - create/overwrite a config artifact; the
      * server writes a backup of any previous content first.
      *
      * The write is always preceded server-side by a timestamped backup (see
-     * {@link api.ccConfig.backups}), so edits are reversible.
+     * {@link api.ccConfig.backups}), so edits are reversible. `cwd` travels as
+     * a `?cwd=` query param (the server reads it from `req.query`, not the
+     * body, for every cc-config route including this one) and, for
+     * `scope: "project"`, must already exist on disk or the server returns
+     * `400 EBADCWD` rather than creating a project directory tree.
      *
-     * @param args {@link CcWriteArgs} — scope/type/name/content (+project for auto-memory).
+     * @param args {@link CcWriteArgs} — scope/type/name/content (+project for auto-memory, +cwd).
      * @returns {@link CcMutationResult} — the written path, backup path, and
      *   whether a new file was `created`.
      */
-    write: (args: CcWriteArgs) =>
-      request<CcMutationResult>("/cc-config/file", {
+    write: ({ cwd, ...args }: CcWriteArgs) =>
+      request<CcMutationResult>(`/cc-config/file${ccConfigQs({ cwd })}`, {
         method: "PUT",
         body: JSON.stringify(args),
       }),
@@ -1570,13 +1601,14 @@ export const api = {
      * DELETE /api/cc-config/file - remove a config artifact (also backed up).
      *
      * Note the DELETE carries a JSON body ({@link CcDeleteArgs}) identifying the
-     * artifact by scope/type/name rather than encoding it in the URL.
+     * artifact by scope/type/name rather than encoding it in the URL; `cwd`
+     * still travels as a `?cwd=` query param, same as `write`.
      *
      * @param args {@link CcDeleteArgs} — which artifact to delete.
      * @returns {@link CcMutationResult} — the deleted path and its backup path.
      */
-    delete: (args: CcDeleteArgs) =>
-      request<CcMutationResult>("/cc-config/file", {
+    delete: ({ cwd, ...args }: CcDeleteArgs) =>
+      request<CcMutationResult>(`/cc-config/file${ccConfigQs({ cwd })}`, {
         method: "DELETE",
         body: JSON.stringify(args),
       }),
@@ -1623,10 +1655,10 @@ export const api = {
      * {@link requestBackupsHelper} (extracted purely so its logic is
      * independently unit-referenceable).
      *
-     * @param params Optional `{ scope, type }` filter.
+     * @param params Optional `{ scope, type, cwd }` filter.
      * @returns `{ items }` — the matching {@link CcBackup} entries.
      */
-    backups: (params?: { scope?: "user" | "project"; type?: CcArtifactType }) =>
+    backups: (params?: { scope?: "user" | "project"; type?: CcArtifactType; cwd?: string }) =>
       requestBackupsHelper(params),
   },
 
@@ -2087,12 +2119,22 @@ export const api = {
  *
  *  @param params Optional `{ scope, type }` filter for the backup listing.
  *  @returns `{ items }` — the matching {@link CcBackup} entries. */
-function requestBackupsHelper(params?: { scope?: "user" | "project"; type?: CcArtifactType }) {
+function requestBackupsHelper(params?: {
+  scope?: "user" | "project";
+  type?: CcArtifactType;
+  cwd?: string;
+}) {
+  return request<{ items: CcBackup[] }>(`/cc-config/backups${ccConfigQs(params || {})}`);
+}
+
+/** Builds a `?a=1&b=2`-style query string for the `ccConfig` endpoints above,
+ *  skipping any param that is `undefined`/empty (so each list endpoint keeps
+ *  relying on the server's own default when a filter is omitted). */
+function ccConfigQs(params: Record<string, string | undefined>): string {
   const qs = new URLSearchParams();
-  if (params?.scope) qs.set("scope", params.scope);
-  if (params?.type) qs.set("type", params.type);
+  for (const [k, v] of Object.entries(params)) if (v) qs.set(k, v);
   const q = qs.toString();
-  return request<{ items: CcBackup[] }>(`/cc-config/backups${q ? `?${q}` : ""}`);
+  return q ? `?${q}` : "";
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2125,6 +2167,10 @@ export interface CcWriteArgs {
   content: string;
   /** Target project slug; required when `scope === "auto-memory"`. */
   project?: string;
+  /** Project directory override (the picker in the UI); only meaningful for
+   *  `scope === "project"`. Sent as a `?cwd=` query param, never in the body
+   *  (the server reads `cwd` from the query on every cc-config route). */
+  cwd?: string;
 }
 
 /** Body for DELETE /api/cc-config/file - remove one artifact. Mirrors the
@@ -2134,6 +2180,8 @@ export interface CcDeleteArgs {
   type: CcArtifactType;
   name?: string;
   project?: string;
+  /** See {@link CcWriteArgs.cwd}. */
+  cwd?: string;
 }
 
 /** Response shape of a successful `ccConfig.write`/`delete` call. */
@@ -2176,9 +2224,13 @@ export type CcScope = "user" | "project" | "all";
  *  a lightweight summary (frontmatter + a preview) rather than full contents;
  *  the full text is fetched on demand via {@link api.ccConfig.file}. */
 export interface CcMdItem {
-  scope: "user" | "project";
+  // "plugin" only appears for agents, only when fetched with `plugins: true`
+  // — a read-only agent contributed by an installed plugin.
+  scope: "user" | "project" | "plugin";
   /** Artifact name, derived from its filename/frontmatter. */
   name: string;
+  /** Owning plugin's name. Present only when `scope === "plugin"`. */
+  plugin?: string;
   /** Filename only, when the API returns it instead of a full path. */
   file?: string;
   /** Absolute path, when the API returns it instead of a bare filename. */
@@ -2192,6 +2244,16 @@ export interface CcMdItem {
   frontmatter: Record<string, string>;
   /** Leading excerpt of the file body, for list-view hover/preview. */
   preview: string;
+}
+
+/** One agent's run count, from GET /api/cc-config/agents/usage - a thin
+ *  wrapper over the existing `agentTypeDistribution` query (not scoped to a
+ *  project; counts are dashboard-wide). */
+export interface CcAgentUsage {
+  /** Agent name as recorded on the Task invocation - the agent's own name
+   *  for user/project agents, or `"<plugin>:<name>"` for a plugin agent. */
+  subagent_type: string;
+  count: number;
 }
 
 /** Counts of what a plugin contributes to Claude Code, plus its manifest

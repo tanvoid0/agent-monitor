@@ -59,6 +59,25 @@ function rootForScope(scope, opts = {}) {
   throw makeError("EBADSCOPE", `unknown scope: ${scope}`);
 }
 
+/**
+ * A project-scoped write resolves its root from the caller-supplied `cwd`
+ * and then mkdirs through it (atomicWriteFile's `fs.mkdirSync(..., {
+ * recursive: true })`). Before the project-picker UI, `cwd` always came from
+ * the dashboard server's own `process.cwd()`, which trivially exists. Now a
+ * user can type/pick any path, so a typo would silently conjure a new
+ * project directory tree on disk. Reject up front instead.
+ */
+function assertCwdExists(cwd) {
+  const root = getProjectRoot(cwd);
+  let stat;
+  try {
+    stat = fs.statSync(root);
+  } catch {
+    throw makeError("EBADCWD", `cwd does not exist: ${root}`);
+  }
+  if (!stat.isDirectory()) throw makeError("EBADCWD", `cwd is not a directory: ${root}`);
+}
+
 function memoryPathForScope(scope, opts = {}) {
   if (scope === "user") return path.join(getClaudeHome(), "CLAUDE.md");
   if (scope === "project") return path.join(getProjectRoot(opts.cwd), "CLAUDE.md");
@@ -260,6 +279,7 @@ function writeArtifact(args) {
   if (Buffer.byteLength(content, "utf8") > MAX_FILE_BYTES) {
     throw makeError("ETOOLARGE", `content exceeds ${MAX_FILE_BYTES} bytes`);
   }
+  if (scope === "project") assertCwdExists(cwd);
   const r = resolveTarget(scope, type, name, { cwd, project });
 
   // Containment guard: even after our regex, double-check that the resolved

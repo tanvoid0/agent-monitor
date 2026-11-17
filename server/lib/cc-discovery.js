@@ -389,6 +389,25 @@ function readPlugins() {
   };
 }
 
+/**
+ * Plugin-contributed subagents (<installPath>/agents/*.md for every plugin
+ * whose install path still exists on disk), tagged scope "plugin" plus the
+ * owning plugin's name. Opt-in surface: routes/cc-config.js only appends
+ * these to GET /agents when the caller passes ?plugins=1 — the default
+ * response shape (consumed by MCP/`am`) never changes. Read-only: cc-mutate's
+ * rootForScope already rejects writes to scope "plugin" with EBADSCOPE.
+ */
+function readPluginAgents() {
+  const out = [];
+  for (const p of readPlugins().plugins) {
+    if (!p.installPathExists || !p.installPath) continue;
+    for (const a of readMdFilesAt("plugin", p.installPath, "agents")) {
+      out.push({ ...a, plugin: p.name });
+    }
+  }
+  return out.sort((a, b) => a.plugin.localeCompare(b.plugin) || a.name.localeCompare(b.name));
+}
+
 // ── MCP servers ────────────────────────────────────────────────────────
 
 function readMcpServers(opts = {}) {
@@ -830,6 +849,7 @@ module.exports = {
   readCommands,
   readOutputStyles,
   readPlugins,
+  readPluginAgents,
   readMcpServers,
   readHooks,
   readSettings,

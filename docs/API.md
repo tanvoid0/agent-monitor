@@ -1304,28 +1304,33 @@ rows. Malformed JSON returns `400 INVALID_JSON`, an invalid bundle returns
 The `/api/cc-config/*` namespace powers the Claude Config Explorer page. All read endpoints are pure file reads under `CLAUDE_HOME` and the project's `.claude/` dir; requested files and allowed roots are canonicalized with `realpath`, so a symlink cannot escape those roots. Mutations are limited to low-risk text-file artifacts (skills, subagents, slash commands, output styles, memory) and always create a timestamped backup before writing. Plugins, MCP servers, hooks-in-settings, and live `settings.json` files stay read-only because they are written concurrently by the running Claude Code CLI.
 
 ```http
-GET /api/cc-config/overview
-GET /api/cc-config/skills?scope=user|project|all
-GET /api/cc-config/agents
-GET /api/cc-config/commands
-GET /api/cc-config/output-styles
+GET /api/cc-config/overview[?cwd=]
+GET /api/cc-config/skills?scope=user|project|all&cwd=
+GET /api/cc-config/agents[?scope=&cwd=&plugins=1]
+GET /api/cc-config/agents/usage
+GET /api/cc-config/commands?scope=&cwd=
+GET /api/cc-config/output-styles?scope=&cwd=
 GET /api/cc-config/plugins
 GET /api/cc-config/marketplaces
-GET /api/cc-config/mcp
-GET /api/cc-config/hooks
+GET /api/cc-config/mcp[?cwd=]
+GET /api/cc-config/hooks[?cwd=]
 GET /api/cc-config/hook-scripts
 GET /api/cc-config/keybindings
 PUT /api/cc-config/keybindings Body: { groups: [{ context, bindings: [{ key, action }] }] }
 GET /api/cc-config/statusline
-GET /api/cc-config/settings
-GET /api/cc-config/memory
-GET /api/cc-config/file?path=<absolute-path>
-GET /api/cc-config/backups[?scope=&type=]
-PUT /api/cc-config/file        Body: { scope, type, name?, content }
-DELETE /api/cc-config/file     Body: { scope, type, name? }
+GET /api/cc-config/settings[?cwd=]
+GET /api/cc-config/memory[?cwd=]
+GET /api/cc-config/file?path=<absolute-path>[&cwd=]
+GET /api/cc-config/backups[?scope=&type=&cwd=]
+PUT /api/cc-config/file[?cwd=]       Body: { scope, type, name?, content }
+DELETE /api/cc-config/file[?cwd=]    Body: { scope, type, name? }
 ```
 
 `scope` is `"user"`, `"project"`, or `"auto-memory"`. `type` is one of `skills`, `agents`, `commands`, `output-styles`, `memory`, `auto-memory`. `name` is required for everything except `memory` (which is `CLAUDE.md` itself). On `PUT`, `name` is validated against `^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$` (for `auto-memory` it must instead be a flat `*.md` filename). Settings are returned with secret-like keys (matching `/token|secret|password|api[_-]?key|auth/i`) replaced by `"<redacted>"`.
+
+`cwd` scopes any of the above (project picker in the UI) to a project other than the dashboard server's own `process.cwd()`. For `PUT`/`DELETE /api/cc-config/file` with `scope: "project"`, the server rejects a `cwd` that doesn't already exist as a directory with `400 EBADCWD` — it never creates a project directory tree on the write path.
+
+`GET /api/cc-config/agents?plugins=1` additionally appends read-only agents contributed by installed plugins (`<plugin install path>/agents/*.md`), each tagged `scope: "plugin"` plus a `plugin` name field. They are excluded by default so the response MCP/`am` consume is unchanged, and they are never writable — `PUT`/`DELETE /api/cc-config/file` with `scope: "plugin"` returns `400 EBADSCOPE`. `GET /api/cc-config/agents/usage` returns `{ items: [{ subagent_type, count }] }` — run counts per agent name (or `"<plugin>:<name>"` for a plugin agent), a thin read-only wrapper over the existing `agentTypeDistribution` query.
 
 `GET /api/cc-config/memory` also surfaces the per-project file-based memory store — every `*.md` under `~/.claude/projects/<slug>/memory/` (the common pattern of a `MEMORY.md` index plus one file per remembered fact). Those items have `scope: "auto-memory"` and carry `project` (the `projects/<slug>` dir name), `name` (filename), `isIndex` (true for `MEMORY.md` / `INDEX-*.md`, which sort first), and parsed `frontmatter`. They are **editable**: `PUT`/`DELETE /api/cc-config/file` accept `{ scope: "auto-memory", type: "auto-memory", project, name, content? }` and create a timestamped backup under `<memory-dir>/.cc-config-backups/auto-memory/` before mutating (an invalid `project` slug returns `EBADPROJECT`). `GET /api/cc-config/backups` lists these with `scope: "auto-memory"` and `project` set. Bodies are also readable via `GET /api/cc-config/file` (they live under `CLAUDE_HOME`).
 

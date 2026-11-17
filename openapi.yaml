@@ -2197,7 +2197,7 @@ components:
           example: Use this skill to review pull requests for correctness and style...
     CcConfigMdItem:
       type: object
-      description: A single-file markdown artifact (subagent, slash command, or output style) found under <root>/<subdir>/<name>.md.
+      description: 'A single-file markdown artifact (subagent, slash command, or output style) found under <root>/<subdir>/<name>.md. `scope: "plugin"` (agents only, opt-in via ?plugins=1) additionally carries `plugin` and is never user/project — plugin agents are read-only.'
       required:
         - scope
         - name
@@ -2213,8 +2213,13 @@ components:
           enum:
             - user
             - project
-          description: Which root this artifact was discovered under.
+            - plugin
+          description: Which root this artifact was discovered under. `plugin` only appears for GET /agents?plugins=1.
           example: project
+        plugin:
+          type: string
+          description: Owning plugin's name. Present only when scope is "plugin".
+          example: superpowers
         name:
           type: string
           description: Artifact name (filename with the trailing .md stripped).
@@ -2994,6 +2999,30 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CcConfigMdItem'
+    CcConfigAgentUsageItem:
+      type: object
+      description: Run count for one subagent_type, from the agents table.
+      required:
+        - subagent_type
+        - count
+      properties:
+        subagent_type:
+          type: string
+          description: Agent name as recorded on the Task invocation — the agent's own name for user/project agents, or "<plugin>:<name>" for a plugin-sourced agent.
+          example: crew:coder
+        count:
+          type: integer
+          description: Number of agent rows with this type.
+          example: 42
+    CcConfigAgentUsageResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CcConfigAgentUsageItem'
     CcConfigHooksResponse:
       type: object
       required:
@@ -8693,7 +8722,7 @@ paths:
       tags:
         - CcConfig
       summary: List subagents
-      description: Read-only. Lists single-file subagent definitions (<root>/agents/*.md) under the user and/or project roots, with parsed frontmatter and a 320-char preview. Truncated above 256 KiB; degrades to empty on errors.
+      description: Read-only. Lists single-file subagent definitions (<root>/agents/*.md) under the user and/or project roots, with parsed frontmatter and a 320-char preview. Truncated above 256 KiB; degrades to empty on errors. Pass ?plugins=1 to additionally append read-only plugin-contributed agents (scope "plugin") — omitted by default.
       operationId: ccConfigGetAgents
       parameters:
         - name: scope
@@ -8715,6 +8744,15 @@ paths:
             type: string
           description: Override the working directory used to resolve the project root and project .claude dir. Defaults to the dashboard server's own cwd.
           example: /repo
+        - name: plugins
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - '1'
+          description: Pass `1` to append read-only plugin-contributed agents (scope "plugin") to the response. Omitted by default so the unflagged shape (consumed by MCP and `am`) never changes.
+          example: '1'
       responses:
         '200':
           description: Agents list.
@@ -8734,6 +8772,26 @@ paths:
                       name: backend-reviewer
                       model: sonnet
                     preview: Review backend route and hook logic for regressions...
+  /api/cc-config/agents/usage:
+    get:
+      tags:
+        - CcConfig
+      summary: Agent run counts by subagent_type
+      description: Read-only. Thin wrapper over the existing agentTypeDistribution query (server/db.js) — run counts across the whole dashboard DB, keyed by subagent_type (the agent's own name, or "<plugin>:<name>" for a plugin agent). No scope/cwd parameters; not filtered to the current project.
+      operationId: ccConfigGetAgentUsage
+      responses:
+        '200':
+          description: Run counts.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CcConfigAgentUsageResponse'
+              example:
+                items:
+                  - subagent_type: Explore
+                    count: 71
+                  - subagent_type: crew:coder
+                    count: 12
   /api/cc-config/commands:
     get:
       tags:
@@ -9283,7 +9341,7 @@ paths:
                 backupPath: null
                 created: true
         '400':
-          description: Bad request. `EBADREQ` — scope/type missing or not strings. `EBADTYPE` — unknown type. `EBADSCOPE` — scope not user/project. `EBADNAME` — name fails the allowlist (or auto-memory name is not a flat *.md). `EBADPROJECT` — invalid auto-memory project slug. `EBADCONTENT` — content is not a string. `EOUTOFROOT` — resolved path escapes its containment root.
+          description: Bad request. `EBADREQ` — scope/type missing or not strings. `EBADTYPE` — unknown type. `EBADSCOPE` — scope not user/project (plugin agents are never writable here). `EBADNAME` — name fails the allowlist (or auto-memory name is not a flat *.md). `EBADPROJECT` — invalid auto-memory project slug. `EBADCONTENT` — content is not a string. `EBADCWD` — scope is `project` and `?cwd=` does not resolve to an existing directory. `EOUTOFROOT` — resolved path escapes its containment root.
           content:
             application/json:
               schema:

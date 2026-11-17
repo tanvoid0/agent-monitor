@@ -24,6 +24,7 @@ const ClaudeSurfaceSchema = z.enum([
   "overview",
   "skills",
   "agents",
+  "agents-usage",
   "commands",
   "output-styles",
   "plugins",
@@ -48,9 +49,14 @@ export function registerConfigTools(context: ToolContext): void {
       surface: ClaudeSurfaceSchema,
       scope: ClaudeScopeSchema.optional(),
       cwd: z.string().max(4096).optional(),
+      // Only applies to surface "agents": append read-only plugin-contributed
+      // agents (scope "plugin") to the response.
+      plugins: z.boolean().optional(),
     },
     async (args) => {
       const surface = args.surface as string;
+      // "agents-usage" maps to a nested path, not `/api/cc-config/<surface>`.
+      if (surface === "agents-usage") return api.get("/api/cc-config/agents/usage");
       const scoped = new Set([
         "overview",
         "skills",
@@ -67,6 +73,7 @@ export function registerConfigTools(context: ToolContext): void {
           ? {
               scope: args.scope as string | undefined,
               cwd: args.cwd as string | undefined,
+              plugins: surface === "agents" && args.plugins ? "1" : undefined,
             }
           : undefined,
       });

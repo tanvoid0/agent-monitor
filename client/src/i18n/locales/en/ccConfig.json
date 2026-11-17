@@ -97,7 +97,12 @@
     "user": "User",
     "project": "Project",
     "projectLocal": "Project (local)",
+    "plugin": "Plugin",
     "home": "Home"
+  },
+  "projectPicker": {
+    "label": "Project",
+    "default": "Current project"
   },
   "tabs": {
     "overview": "Overview",
@@ -146,7 +151,12 @@
   "agents": {
     "name": "Name",
     "model": "Model",
-    "tools": "Tools"
+    "tools": "Tools",
+    "showPlugins": "Show plugin agents",
+    "readOnlyPlugin": "Read-only (plugin)",
+    "usageCount_one": "{{count}} run",
+    "usageCount_other": "{{count}} runs",
+    "usageNever": "Never run"
   },
   "plugins": {
     "manifest": "Manifest",

@@ -131,6 +131,7 @@ import type {
   CcScope,
   CcSettingsSource,
   CcStatusline,
+  CwdSuggestion,
 } from "../lib/api";
 
 function isMutable(
@@ -143,6 +144,21 @@ function isMutable(
     tab === "outputStyles" ||
     tab === "memory"
   );
+}
+
+/** A subagent's source root is only mutable in the Config Explorer when it's
+ *  user/project — plugin-contributed agents (opt-in via the "Show plugin
+ *  agents" toggle) are read-only, both here and server-side
+ *  (`cc-mutate.rootForScope` rejects `scope: "plugin"` with EBADSCOPE). */
+function isMutableScope(scope: CcMdItem["scope"]): scope is "user" | "project" {
+  return scope === "user" || scope === "project";
+}
+
+/** Usage-count lookup key for an agent card: the agent's own name, or
+ *  `"<plugin>:<name>"` for a plugin-sourced one — matching how `subagent_type`
+ *  is actually recorded on the Task invocation (see cc-config.js usage route). */
+function agentUsageKey(item: CcMdItem): string {
+  return item.scope === "plugin" && item.plugin ? `${item.plugin}:${item.name}` : item.name;
 }
 
 function tabToArtifactType(
@@ -270,12 +286,27 @@ export function CcConfig() {
   // URL-backed so the palette can open any Agent Config tab directly.
   const [tab, setTab] = useUrlTab(TAB_KEYS, "overview");
   const [scope, setScope] = useState<CcScope>("all");
+  // "" = today's default (the dashboard server's own cwd). Only scopes
+  // project-rooted surfaces; plugins/marketplaces/keybindings/statusline are
+  // always user-level and ignore it.
+  const [cwd, setCwd] = useState("");
+  const [cwdOptions, setCwdOptions] = useState<CwdSuggestion[]>([]);
+  const [showPluginAgents, setShowPluginAgents] = useState(false);
+  const [agentUsage, setAgentUsage] = useState<Record<string, number>>({});
   const [data, setData] = useState<PageState>(EMPTY_STATE);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [search, setSearch] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
+
+  // Project picker options: fetched once, independent of scope/tab.
+  useEffect(() => {
+    void api.run
+      .cwds()
+      .then((r) => setCwdOptions(r.items))
+      .catch(() => void 0);
+  }, []);
   const [viewer, setViewer] = useState<{
     path: string;
     data: CcFileResponse | null;
@@ -296,6 +327,7 @@ export function CcConfig() {
   const fetchAll = useCallback(async () => {
     setLoading(true);
     setError(null);
+    const cwdArg = cwd || undefined;
     try {
       const [
         overview,
@@ -312,21 +344,24 @@ export function CcConfig() {
         memory,
         statusline,
         hookScripts,
+        usage,
       ] = await Promise.all([
-        api.ccConfig.overview(),
-        api.ccConfig.skills(scope),
-        api.ccConfig.agents(scope),
-        api.ccConfig.commands(scope),
-        api.ccConfig.outputStyles(scope),
+        api.ccConfig.overview(cwdArg),
+        api.ccConfig.skills(scope, cwdArg),
+        api.ccConfig.agents(scope, cwdArg, showPluginAgents),
+        api.ccConfig.commands(scope, cwdArg),
+        api.ccConfig.outputStyles(scope, cwdArg),
         api.ccConfig.plugins(),
         api.ccConfig.marketplaces(),
-        api.ccConfig.mcp(),
-        api.ccConfig.hooks(),
+        api.ccConfig.mcp(cwdArg),
+        api.ccConfig.hooks(cwdArg),
         api.ccConfig.keybindings(),
-        api.ccConfig.settings(),
-        api.ccConfig.memory(),
+        api.ccConfig.settings(cwdArg),
+        api.ccConfig.memory(cwdArg),
         api.ccConfig.statusline(),
         api.ccConfig.hookScripts(),
+        // Decorative badge only: a failed usage read must not blank the page.
+        api.ccConfig.agentUsage().catch(() => ({ items: [] })),
       ]);
       setData({
         overview,
@@ -344,6 +379,7 @@ export function CcConfig() {
         statusline,
         hookScripts,
       });
+      setAgentUsage(Object.fromEntries(usage.items.map((u) => [u.subagent_type, u.count])));
       setLastUpdated(new Date());
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "unknown error";
@@ -351,7 +387,7 @@ export function CcConfig() {
     } finally {
       setLoading(false);
     }
-  }, [scope]);
+  }, [scope, cwd, showPluginAgents]);
 
   useEffect(() => {
     void fetchAll();
@@ -385,16 +421,19 @@ export function CcConfig() {
     void fetchAll();
   });
 
-  const openViewer = useCallback(async (path: string) => {
-    setViewer({ path, data: null, error: null });
-    try {
-      const file = await api.ccConfig.file(path);
-      setViewer({ path, data: file, error: null });
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "unknown error";
-      setViewer({ path, data: null, error: msg });
-    }
-  }, []);
+  const openViewer = useCallback(
+    async (path: string) => {
+      setViewer({ path, data: null, error: null });
+      try {
+        const file = await api.ccConfig.file(path, cwd || undefined);
+        setViewer({ path, data: file, error: null });
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "unknown error";
+        setViewer({ path, data: null, error: msg });
+      }
+    },
+    [cwd]
+  );
 
   const openCreate = useCallback(
     (type: CcArtifactType, overrideScope?: "user" | "project") => {
@@ -483,6 +522,7 @@ export function CcConfig() {
         name: args.name,
         content: args.content,
         project: args.project,
+        cwd: cwd || undefined,
       });
       setEditor(null);
       setToast({
@@ -493,7 +533,7 @@ export function CcConfig() {
       });
       void fetchAll();
     },
-    [fetchAll, t]
+    [cwd, fetchAll, t]
   );
 
   const handleDelete = useCallback(async () => {
@@ -504,6 +544,7 @@ export function CcConfig() {
         type: confirmDelete.type,
         name: confirmDelete.name,
         project: confirmDelete.project,
+        cwd: cwd || undefined,
       });
       setConfirmDelete(null);
       setToast({
@@ -516,7 +557,7 @@ export function CcConfig() {
       setConfirmDelete(null);
       setToast({ kind: "error", message: t("edit.deleteError", { message: msg }) });
     }
-  }, [confirmDelete, fetchAll, t]);
+  }, [confirmDelete, cwd, fetchAll, t]);
 
   return (
     <div className="space-y-5">
@@ -527,6 +568,9 @@ export function CcConfig() {
         lastUpdated={lastUpdated}
         scope={scope}
         onScopeChange={setScope}
+        cwd={cwd}
+        cwdOptions={cwdOptions}
+        onCwdChange={setCwd}
         onRefresh={fetchAll}
         onOpenBackups={() => setBackupsOpen(true)}
         wsConnected={wsConnected}
@@ -568,6 +612,17 @@ export function CcConfig() {
                     <X className="w-3.5 h-3.5" />
                   </button>
                 )}
+                {tab === "agents" && (
+                  <label className="h-7 text-[11px] font-medium px-2 rounded-md border border-border bg-surface-2 hover:bg-surface-3 text-gray-300 inline-flex items-center gap-1.5 cursor-pointer flex-shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={showPluginAgents}
+                      onChange={(e) => setShowPluginAgents(e.target.checked)}
+                      className="accent-accent"
+                    />
+                    {t("agents.showPlugins")}
+                  </label>
+                )}
                 {isMutable(tab) && tab !== "memory" && (
                   <button
                     onClick={() => openCreate(tabToArtifactType(tab))}
@@ -584,6 +639,7 @@ export function CcConfig() {
                 tab={tab}
                 data={data}
                 search={search}
+                agentUsage={agentUsage}
                 onTabChange={setTab}
                 onOpenFile={openViewer}
                 onEdit={openEdit}
@@ -600,7 +656,12 @@ export function CcConfig() {
 
           {viewer && <FileViewer state={viewer} onClose={() => setViewer(null)} />}
           {editor && (
-            <EditorModal state={editor} onClose={() => setEditor(null)} onSave={handleSave} />
+            <EditorModal
+              state={editor}
+              cwd={cwd || undefined}
+              onClose={() => setEditor(null)}
+              onSave={handleSave}
+            />
           )}
           {confirmDelete && (
             <ConfirmDeleteModal
@@ -626,6 +687,9 @@ interface HeaderProps {
   lastUpdated: Date | null;
   scope: CcScope;
   onScopeChange: (s: CcScope) => void;
+  cwd: string;
+  cwdOptions: CwdSuggestion[];
+  onCwdChange: (cwd: string) => void;
   onRefresh: () => void;
   onOpenBackups: () => void;
   wsConnected: boolean;
@@ -638,6 +702,9 @@ function Header({
   lastUpdated,
   scope,
   onScopeChange,
+  cwd,
+  cwdOptions,
+  onCwdChange,
   onRefresh,
   onOpenBackups,
   wsConnected,
@@ -660,6 +727,9 @@ function Header({
         <div className="flex flex-col items-stretch lg:items-end gap-2 flex-shrink-0">
           <div className="flex items-center gap-2 justify-end flex-wrap">
             <ProviderToggle value={provider} onChange={onProviderChange} />
+            {provider === "claude" && (
+              <ProjectPicker value={cwd} options={cwdOptions} onChange={onCwdChange} />
+            )}
             {provider === "claude" && <ScopeToggle value={scope} onChange={onScopeChange} />}
             {provider === "claude" && (
               <Button size="xs" icon={History} onClick={onOpenBackups}>
@@ -734,6 +804,41 @@ function ScopeToggle({ value, onChange }: { value: CcScope; onChange: (s: CcScop
           {o.label}
         </button>
       ))}
+    </div>
+  );
+}
+
+/** Scopes the whole explorer to a project directory other than the dashboard
+ *  server's own cwd — a native `<select>` (platform picker, no autocomplete
+ *  machinery needed) populated from the same `api.run.cwds()` suggestions the
+ *  Run page's cwd field uses. Empty value = today's default behavior. */
+function ProjectPicker({
+  value,
+  options,
+  onChange,
+}: {
+  value: string;
+  options: CwdSuggestion[];
+  onChange: (cwd: string) => void;
+}) {
+  const { t } = useTranslation("ccConfig");
+  return (
+    <div className="relative inline-flex items-center">
+      <FolderTree className="absolute left-2 w-3.5 h-3.5 text-gray-500 pointer-events-none" />
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        title={value || t("projectPicker.default")}
+        aria-label={t("projectPicker.label")}
+        className="h-7 pl-7 pr-2 rounded-lg border border-border bg-surface-2 text-[11px] font-medium text-gray-300 hover:text-gray-100 focus:outline-none focus:border-accent/50 max-w-[220px] truncate"
+      >
+        <option value="">{t("projectPicker.default")}</option>
+        {options.map((o) => (
+          <option key={o.path} value={o.path} title={o.path}>
+            {o.kind === "recent" ? `${o.label} — ${o.path}` : o.label}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
@@ -902,6 +1007,8 @@ interface TabPanelProps {
   tab: TabKey;
   data: PageState;
   search: string;
+  /** subagent_type → run count, from GET /agents/usage (agents tab only). */
+  agentUsage: Record<string, number>;
   onTabChange: (tab: TabKey) => void;
   onOpenFile: (path: string) => void;
   onEdit: (
@@ -926,6 +1033,7 @@ function TabPanel({
   tab,
   data,
   search,
+  agentUsage,
   onTabChange,
   onOpenFile,
   onEdit,
@@ -956,6 +1064,7 @@ function TabPanel({
         <MdItemList
           items={data.agents}
           search={search}
+          agentUsage={agentUsage}
           onOpen={onOpenFile}
           onEdit={onEdit}
           onDelete={onDelete}
@@ -1366,6 +1475,8 @@ function RootRow({
 interface MdItemListProps {
   items: CcMdItem[] | null;
   search: string;
+  /** subagent_type → run count; only passed (and rendered) for kind "agents". */
+  agentUsage?: Record<string, number>;
   onOpen: (path: string) => void;
   onEdit: (
     type: CcArtifactType,
@@ -1380,7 +1491,16 @@ interface MdItemListProps {
   kind: "skills" | "agents" | "commands" | "outputStyles";
 }
 
-function MdItemList({ items, search, onOpen, onEdit, onDelete, kind }: MdItemListProps) {
+function MdItemList({
+  items,
+  search,
+  agentUsage,
+  onOpen,
+  onEdit,
+  onDelete,
+  kind,
+}: MdItemListProps) {
+  const { t } = useTranslation("ccConfig");
   const filtered = useMemo(() => {
     if (!items) return null;
     const q = search.toLowerCase();
@@ -1396,6 +1516,41 @@ function MdItemList({ items, search, onOpen, onEdit, onDelete, kind }: MdItemLis
 
   if (!filtered) return <SkeletonRows n={6} />;
   if (filtered.length === 0) return <Empty />;
+
+  // Subagents group by source (user/project/plugin) so a read-only plugin
+  // agent is never mistaken for an editable one; the other MD surfaces keep
+  // their existing flat list.
+  if (kind === "agents") {
+    const maxUsage = Math.max(1, ...filtered.map((it) => agentUsage?.[agentUsageKey(it)] ?? 0));
+    const groups = (["user", "project", "plugin"] as const)
+      .map((s) => ({ scope: s, items: filtered.filter((it) => it.scope === s) }))
+      .filter((g) => g.items.length > 0);
+    return (
+      <div className="space-y-5">
+        {groups.map((g) => (
+          <div key={g.scope}>
+            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 mb-2">
+              {t(`scope.${g.scope}`)} ({g.items.length})
+            </h3>
+            <div className="space-y-2">
+              {g.items.map((it) => (
+                <MdItemCard
+                  key={`${it.scope}:${it.plugin ?? ""}:${it.name}`}
+                  item={it}
+                  onOpen={onOpen}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  kind={kind}
+                  usageCount={agentUsage?.[agentUsageKey(it)]}
+                  maxUsage={maxUsage}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-2">
@@ -1427,11 +1582,25 @@ interface MdItemCardProps {
     path: string
   ) => void;
   kind: "skills" | "agents" | "commands" | "outputStyles";
+  /** This item's run count and the group's max, for the inline usage bar
+   *  (agents only — undefined on every other kind). */
+  usageCount?: number;
+  maxUsage?: number;
 }
 
-function MdItemCard({ item, onOpen, onEdit, onDelete, kind }: MdItemCardProps) {
+function MdItemCard({
+  item,
+  onOpen,
+  onEdit,
+  onDelete,
+  kind,
+  usageCount,
+  maxUsage,
+}: MdItemCardProps) {
   const { t } = useTranslation("ccConfig");
   const artifactType: CcArtifactType = kind === "outputStyles" ? "output-styles" : kind;
+  // Hoisted so the narrowing survives into the onClick closures below.
+  const mutableScope = isMutableScope(item.scope) ? item.scope : null;
 
   const filePath = item.file || `${item.path}/SKILL.md`;
   const description =
@@ -1444,9 +1613,14 @@ function MdItemCard({ item, onOpen, onEdit, onDelete, kind }: MdItemCardProps) {
     <div className="rounded-lg border border-border bg-surface-2 px-4 py-3 hover:border-border/80 transition-colors">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="font-mono text-sm text-gray-100 truncate">{item.name}</span>
             <ScopeBadge scope={item.scope} />
+            {item.plugin && (
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-3 text-gray-400 border border-border">
+                {item.plugin}
+              </span>
+            )}
             {item.frontmatter.model && (
               <EntityRef
                 kind="model"
@@ -1468,6 +1642,21 @@ function MdItemCard({ item, onOpen, onEdit, onDelete, kind }: MdItemCardProps) {
               <span className="font-mono text-gray-400">{item.frontmatter.tools}</span>
             </div>
           )}
+          {kind === "agents" && maxUsage !== undefined && (
+            <div className="mt-2 flex items-center gap-2 max-w-xs">
+              <div className="flex-1 bg-surface-3 rounded-full h-1.5">
+                <div
+                  className="bg-accent/50 h-1.5 rounded-full"
+                  style={{ width: `${Math.round(((usageCount ?? 0) / maxUsage) * 100)}%` }}
+                />
+              </div>
+              <span className="text-[10px] text-gray-500 tabular-nums flex-shrink-0">
+                {usageCount
+                  ? t("agents.usageCount", { count: usageCount })
+                  : t("agents.usageNever")}
+              </span>
+            </div>
+          )}
           <div className="mt-2 font-mono text-[10px] text-gray-600 truncate">{filePath}</div>
         </div>
         <div className="flex flex-col gap-1.5 flex-shrink-0">
@@ -1478,20 +1667,34 @@ function MdItemCard({ item, onOpen, onEdit, onDelete, kind }: MdItemCardProps) {
             <ExternalLink className="w-3 h-3" />
             {t("common.viewSource")}
           </button>
-          <button
-            onClick={() => onEdit(artifactType, { scope: item.scope, name: item.name, filePath })}
-            className="text-[11px] font-medium px-2 py-1 rounded-md border border-border bg-surface-1 hover:bg-surface-3 text-gray-300 hover:text-gray-100 inline-flex items-center gap-1.5"
-          >
-            <Pencil className="w-3 h-3" />
-            {t("edit.editButton")}
-          </button>
-          <button
-            onClick={() => onDelete(artifactType, item.scope, item.name, filePath)}
-            className="text-[11px] font-medium px-2 py-1 rounded-md border border-red-500/30 bg-red-500/5 hover:bg-red-500/15 text-red-300 inline-flex items-center gap-1.5"
-          >
-            <Trash2 className="w-3 h-3" />
-            {t("edit.deleteButton")}
-          </button>
+          {mutableScope ? (
+            <>
+              <button
+                onClick={() =>
+                  onEdit(artifactType, { scope: mutableScope, name: item.name, filePath })
+                }
+                className="text-[11px] font-medium px-2 py-1 rounded-md border border-border bg-surface-1 hover:bg-surface-3 text-gray-300 hover:text-gray-100 inline-flex items-center gap-1.5"
+              >
+                <Pencil className="w-3 h-3" />
+                {t("edit.editButton")}
+              </button>
+              <button
+                onClick={() => onDelete(artifactType, mutableScope, item.name, filePath)}
+                className="text-[11px] font-medium px-2 py-1 rounded-md border border-red-500/30 bg-red-500/5 hover:bg-red-500/15 text-red-300 inline-flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3 h-3" />
+                {t("edit.deleteButton")}
+              </button>
+            </>
+          ) : (
+            <span
+              title={t("agents.readOnlyPlugin")}
+              className="text-[11px] font-medium px-2 py-1 rounded-md border border-border bg-surface-1 text-gray-500 inline-flex items-center gap-1.5"
+            >
+              <Lock className="w-3 h-3" />
+              {t("agents.readOnlyPlugin")}
+            </span>
+          )}
         </div>
       </div>
     </div>
@@ -3171,7 +3374,9 @@ function ScopeBadge({ scope }: { scope: string }) {
         ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
         : scope === "project-local"
           ? "bg-violet-500/10 text-violet-300 border-violet-500/30"
-          : "bg-surface-3 text-gray-400 border-border";
+          : scope === "plugin"
+            ? "bg-fuchsia-500/10 text-fuchsia-300 border-fuchsia-500/30"
+            : "bg-surface-3 text-gray-400 border-border";
   const label =
     scope === "project-local"
       ? t("scope.projectLocal")
@@ -3179,7 +3384,9 @@ function ScopeBadge({ scope }: { scope: string }) {
         ? t("scope.user")
         : scope === "project"
           ? t("scope.project")
-          : scope;
+          : scope === "plugin"
+            ? t("scope.plugin")
+            : scope;
   return (
     <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${color}`}>{label}</span>
   );
@@ -3299,6 +3506,9 @@ function FileViewer({
 
 interface EditorModalProps {
   state: NonNullable<EditorState>;
+  /** Selected project override (empty = dashboard server's own cwd); only
+   *  matters when the artifact is project-scoped. */
+  cwd?: string;
   onClose: () => void;
   onSave: (args: {
     type: CcArtifactType;
@@ -3309,7 +3519,7 @@ interface EditorModalProps {
   }) => Promise<void>;
 }
 
-function EditorModal({ state, onClose, onSave }: EditorModalProps) {
+function EditorModal({ state, cwd, onClose, onSave }: EditorModalProps) {
   const { t } = useTranslation("ccConfig");
   const isCreate = state.mode === "create";
   const isAutoMemory = state.type === "auto-memory";
@@ -3327,7 +3537,7 @@ function EditorModal({ state, onClose, onSave }: EditorModalProps) {
     if (state.mode === "edit") {
       setLoading(true);
       api.ccConfig
-        .file(state.filePath)
+        .file(state.filePath, cwd)
         .then((r) => {
           setContent(r.text);
           setLoading(false);
@@ -3338,7 +3548,7 @@ function EditorModal({ state, onClose, onSave }: EditorModalProps) {
           setLoading(false);
         });
     }
-  }, [state]);
+  }, [state, cwd]);
 
   // Esc to close
   useEffect(() => {

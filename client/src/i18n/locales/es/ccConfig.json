@@ -97,7 +97,12 @@
     "user": "Usuario",
     "project": "Proyecto",
     "projectLocal": "Proyecto (local)",
+    "plugin": "Complemento",
     "home": "Inicio"
+  },
+  "projectPicker": {
+    "label": "Proyecto",
+    "default": "Proyecto actual"
   },
   "tabs": {
     "overview": "Resumen",
@@ -146,7 +151,12 @@
   "agents": {
     "name": "Nombre",
     "model": "Modelo",
-    "tools": "Herramientas"
+    "tools": "Herramientas",
+    "showPlugins": "Mostrar agentes de complementos",
+    "readOnlyPlugin": "Solo lectura (complemento)",
+    "usageCount_one": "{{count}} ejecución",
+    "usageCount_other": "{{count}} ejecuciones",
+    "usageNever": "Nunca ejecutado"
   },
   "plugins": {
     "manifest": "Manifiesto",

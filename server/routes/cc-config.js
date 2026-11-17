@@ -20,6 +20,7 @@ const { Router } = require("express");
 const cc = require("../lib/cc-discovery");
 const ccMutate = require("../lib/cc-mutate");
 const { broadcast } = require("../websocket");
+const { stmts } = require("../db");
 
 const router = Router();
 
@@ -41,6 +42,7 @@ const ERR_TO_STATUS = {
   ETOOLARGE: 413,
   EOUTOFROOT: 400,
   ENOTFOUND: 404,
+  EBADCWD: 400,
 };
 
 function mutateError(res, err) {
@@ -72,7 +74,19 @@ router.get("/skills", (req, res) => {
 });
 
 router.get("/agents", (req, res) => {
-  res.json({ items: cc.readAgents({ scope: scopeOf(req), cwd: cwdOf(req) }) });
+  const items = cc.readAgents({ scope: scopeOf(req), cwd: cwdOf(req) });
+  // Opt-in only: plugin agents are read-only and excluded unless the caller
+  // explicitly asks, so the unflagged shape MCP/`am` consume never changes.
+  if (req.query.plugins === "1") items.push(...cc.readPluginAgents());
+  res.json({ items });
+});
+
+// GET /api/cc-config/agents/usage — run counts per subagent_type (the agent's
+// own name, or "plugin:name" for a plugin-sourced agent), for the Subagents
+// tab's inline usage badge. Thin wrapper over the existing
+// agentTypeDistribution prepared statement — no new query logic.
+router.get("/agents/usage", (_req, res) => {
+  res.json({ items: stmts.agentTypeDistribution.all() });
 });
 
 router.get("/commands", (req, res) => {
