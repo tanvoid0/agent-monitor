@@ -1,7 +1,7 @@
 {
   "name": "am-devtools",
   "description": "Developer tools for AgentMonitor — session debugging, hook diagnostics, data export, and system health checks for maintaining a healthy monitoring setup.",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "author": { "name": "Tanveer Hoque", "url": "https://github.com/tanvoid0" },
   "homepage": "https://github.com/tanvoid0/agent-monitor",
   "repository": "https://github.com/tanvoid0/agent-monitor",

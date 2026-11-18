@@ -5,7 +5,7 @@ name: am
 # or run two active containers against the same data volume.
 services:
   agent-monitor:
-    image: ${AM_IMAGE:-am-dashboard:3.1.0}
+    image: ${AM_IMAGE:-am-dashboard:3.1.1}
     build:
       context: .
       dockerfile: Dockerfile
@@ -62,7 +62,7 @@ services:
   # Compose network and publishes MCP on host loopback only.
   mcp:
     profiles: ["mcp"]
-    image: ${AM_MCP_IMAGE:-am-mcp:3.1.0}
+    image: ${AM_MCP_IMAGE:-am-mcp:3.1.1}
     build:
       context: .
       dockerfile: mcp/Dockerfile

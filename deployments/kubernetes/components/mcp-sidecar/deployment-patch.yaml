@@ -8,7 +8,7 @@ spec:
     spec:
       containers:
         - name: mcp-sidecar
-          image: am-mcp:3.1.0
+          image: am-mcp:3.1.1
           imagePullPolicy: IfNotPresent
 
           ports:

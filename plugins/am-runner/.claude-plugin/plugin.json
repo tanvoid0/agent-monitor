@@ -1,7 +1,7 @@
 {
   "name": "am-runner",
   "description": "Operate dashboard-launched Claude Code and Codex runs with safe launch, follow-up, stop, resume, model discovery, and persistent run-history workflows.",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "author": { "name": "Tanveer Hoque", "url": "https://github.com/tanvoid0" },
   "homepage": "https://github.com/tanvoid0/agent-monitor",
   "repository": "https://github.com/tanvoid0/agent-monitor",
