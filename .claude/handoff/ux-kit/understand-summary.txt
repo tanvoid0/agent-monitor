@@ -1,0 +1,593 @@
+
+######## core-pages: client/src/App.tsx, pages/Dashboard.tsx, pages/Sessions.tsx, pages/SessionDeta
+## KIT CANDIDATES
+- PageHeader (x4): <PageHeader icon={FolderOpen} title subtitle live={wsConnected} actions={<Button…/>} tabs={<TabStrip/>} back={onBack?} />
+- LiveBadge (x3): <LiveBadge connected={bool} /> (uses useSyncExternalStore(eventBus.onConnection) internally)
+- TabStrip (x5): <TabStrip items={[{value,label,icon,count}]} value onChange variant="pill"|"underline"|"segmented"|"chips" ariaLabel />; pairs with useUrlTab
+- Button / IconButton (x11): <Button variant="primary"|"ghost"|"subtle" size icon={RefreshCw} loading>label</Button>; <IconButton icon label(required, aria) />
+- SectionHeader (x19): <SectionHeader icon iconTone title count aside={<…/>} size="xs"|"sm" />
+- Panel (x19): <Panel padding="sm"|"md" tone="default"|"muted"|"emerald"… header={<SectionHeader/>} />
+- Stat (x12): <Stat label value raw hint trend icon tone size="lg"|"sm" loading />  (merges StatCard + SessionOverview StatTile)
+- KeyValueRow / KeyValueList (x13): <KeyValueList rows={[{label,value,mono,tooltip}]} labelWidth="w-28" />
+- MetaChip (x20): <MetaChip icon={Cpu} tone="muted"|"surface"|"emerald" mono title>text</MetaChip>
+- Pill / Badge (generic) (x14): <Pill tone="emerald"|"sky"|"violet"|"amber"|"neutral" dot pulse icon size="xs"|"sm">label</Pill>; StatusBadge/ProjectBadge/ReasonChip compose it
+- EntityRef family (SessionRef, AgentRef, ProjectRef, ToolRef, ModelRef, EventRef) (x22): <SessionRef id name to="detail"|"timeline"|"conversation" chars={8} copy /> <ProjectRef cwd root scope="kanban"|"sessions" /> <ToolRef name onFilter to /> — each renders link + tooltip + context-menu hook
+- ShortId (x10): <ShortId value chars={8|12|16} copy mono /> — full id in title, optional CopyButton (move CopyButton out of event-views/primitives into ui/)
+- RelativeTime (x10): <RelativeTime iso format="ago"|"datetime"|"duration" title(full timestamp) /> renders <time dateTime>
+- Tooltip (single impl) (x3): <Tooltip content placement anchor="cursor"|"element" block>{trigger}</Tooltip> — keyboard focusable; replaces Tip + ColumnHelp + TodoProgressIndicator portal
+- BarRow (x10): <BarRow label icon pct value color tooltip labelWidth /> + <StackedBar segments />
+- EmptyState size=sm + LoadingSkeleton presets (x13): <EmptyState size="sm" title /> ; <SkeletonGrid count shape="card"|"tile"|"row" />
+- EventRow (x3): <EventRow event sessionLabel project agentLabel showSession showProject expandable onOpen onFilterTool onFilterAgent />
+- AgentTree (x2): <AgentTree agents expanded onToggle renderCard={(a)=><AgentCard variant="row"/>} autoExpandWorking showLeafMarker showActiveCount />
+- Callout (x6): <Callout tone="amber"|"yellow"|"emerald"|"sky" icon title body trailing to={link?} onDismiss />
+- Pagination / LoadMore (x3): <Pagination page totalPages from to total onChange /> ; <LoadMore shown total loading onClick />
+- ContextMenu + useContextMenu + Clickable (row/card wrapper) (x6): <Clickable as="div"|"tr" to onActivate menu={[{label,icon,onSelect,to,shortcut,separator}]} /> — role=link/button, tabIndex, Enter/Space, onContextMenu -> <ContextMenu items x y />; items built by entity helpers (session
+- useThrottledReload (x5): useThrottledReload(load, { types:['session_updated',…], predicate, windowMs, mode:'throttle'|'debounce' })
+- lib helpers (not UI): parseMetadata, isTransientProcess, promptPreviewLines, formatBytes, formatUptime into lib/ (x8): isTransientProcess(metadata) ; promptPreviewLines(text) ; formatBytes(n) ; formatUptime(s) ; parseMeta<T>(json)
+## PATTERNS (name:count)
+page-header:4; live-offline-badge:3; refresh-button:5; tab-strip:5; section-header:19; panel-surface:19; key-value-row:13; meta-chip:20; pill-badge:14; id-truncation:10; relative-time-label:8; copy-to-clipboard:4; tooltip-implementations:3; empty-and-loading-states:20; icon-only-button:8; progress-bar-row:10; clickable-row-without-keyboard:4; agent-tree-renderer:2; ws-throttled-reload:5; metadata-json-parse-helpers:6; duplicated-local-helpers:4; callout-banner:6; pagination-load-more:4; hardcoded-english-copy:68
+## URL PARAMS
+- Dashboard ?tab=monitor|health @client/src/pages/Dashboard.tsx:973-975: active tab; mirrored to localStorage dashboard_tab
+- Sessions ?status=|active|waiting|completed|error|abandoned @client/src/pages/Sessions.tsx:114,124: status filter ('' = all, param deleted)
+- Sessions ?cwd=<path> @client/src/pages/Sessions.tsx:138-141: seeds cwd multi-select ONCE on mount; later changes not written back to URL
+- SessionDetail ?/sessions/:id @client/src/pages/SessionDetail.tsx:156: session id path param
+- SessionDetail ?tab=agents|conversation|timeline @client/src/pages/SessionDetail.tsx:146,179: active tab (no agent/event/transcript selection in URL)
+- KanbanBoard ?view=agents|sessions @client/src/pages/KanbanBoard.tsx:121-124: board view; mirrored to localStorage kanban-board-view
+- KanbanBoard ?project=<group root> @client/src/pages/KanbanBoard.tsx:132-133,271: narrow both boards to one project group; unknown root falls back to all
+- Run (target, outside slice) ?session=, prompt=, autostart=1 @client/src/pages/Run.tsx:1096,1141,1144: resume session / prefill prompt
+- ActivityFeed (target, outside slice) ?(none) @client/src/pages/ActivityFeed.tsx (grep useSearchParams: 0 hits): reads NO URL params — no filtered deep-link target exists for session/tool/agent/event today
+## NAV GAPS
+- [Dashboard recent activity @client/src/pages/Dashboard.tsx:1522-1526] tool name (plain mono text) -> /activity?tool_name={tool} (needs ActivityFeed to read URL filters)
+- [Dashboard recent activity @client/src/pages/Dashboard.tsx:1493-1521] session (name or 8-char id; whole row navigates to detail) -> /sessions/{id}?tab=timeline#event-{event.id} (row) and /activity?session_id={id} (label)
+- [Dashboard health › Tool Usage @client/src/pages/Dashboard.tsx:782-787] tool name (plain text bar label) -> /activity?tool_name={tool}
+- [Dashboard health › Token Usage @client/src/pages/Dashboard.tsx:646-651] model (plain text) -> /analytics?tab=cost&model={model} (Analytics reads only ?tab)
+- [Dashboard health › Subagent Effectiveness @client/src/pages/Dashboard.tsx:832-835] subagent type (plain text) -> /kanban?view=agents (+ future subagent_type filter) or /analytics?tab=workflow
+- [Dashboard health › Integration @client/src/pages/Dashboard.tsx:876-889] project cwd (hook path) (basename text) -> /sessions?cwd={cwd} or /kanban?project={root}
+- [Sessions table @client/src/pages/Sessions.tsx:599-604] project cwd (truncate(cwd,30) mono text with title) -> in-page cwd filter (setCwds([cwd])) and /kanban?project={root}
+- [Sessions table @client/src/pages/Sessions.tsx:550-558] remote source (sky pill with label) -> data-scope set to that source (setScope) or /settings#remote-sources
+- [Sessions table @client/src/pages/Sessions.tsx:593-595] agent count (number) -> /sessions/{id}?tab=agents
+- [Sessions table @client/src/pages/Sessions.tsx:596-598] cost (fmtCost text) -> /sessions/{id}?tab=agents#cost (cost breakdown table)
+- [SessionDetail header @client/src/pages/SessionDetail.tsx:698-705] project cwd (full mono path + CopyButton) -> /sessions?cwd={cwd} and /kanban?project={root}; also open-cwd (ProjectBadge) for local
+- [SessionDetail header @client/src/pages/SessionDetail.tsx:676-681] model (Cpu chip text) -> /analytics?tab=cost (model filter)
+- [SessionDetail timeline row @client/src/pages/SessionDetail.tsx:1208-1212] tool name (mono chip) -> in-page filters.tool_name=[tool] (setFilters) and /activity?tool_name=
+- [SessionDetail timeline row @client/src/pages/SessionDetail.tsx:1196-1203] agent (origin label) (gray prefix text with title=agent_id) -> in-page filters.agent_id=[id] and ?tab=agents#agent-{id}; ?tab=conversation&transcript={id}
+- [SessionDetail timeline row @client/src/pages/SessionDetail.tsx:1162-1170] event (expandable button, id not in URL) -> ?tab=timeline&event={id} (deep-linkable, auto-expand + scroll)
+- [SessionDetail cost breakdown @client/src/pages/SessionDetail.tsx:1095-1097] model (mono text) -> /analytics?tab=cost&model=
+- [SessionDetail agents tab @client/src/pages/SessionDetail.tsx:976-997] agent (AgentCard (click -> conversation transcript); no a) -> id=agent-{id} anchor so ?tab=agents#agent-{id} scrolls; transcript id in URL
+- [AgentCard (Kanban/Dashboard) @client/src/components/AgentCard.tsx:220-226] agent (card navigates to session root) -> /sessions/{sid}?tab=agents#agent-{agent.id} (subagents) / ?tab=conversation&transcript=
+- [AgentCard footer @client/src/components/AgentCard.tsx:335-340] session (realSessionName · 8-char id at opacity-50, no titl) -> /sessions/{sid} (explicit link with full id tooltip)
+- [AgentCard footer @client/src/components/AgentCard.tsx:298-303] current tool (Wrench + text) -> /sessions/{sid}?tab=timeline&tool_name={tool}
+- [AgentCard/SessionCard @client/src/components/ProjectBadge.tsx:129-150] project (ProjectBadge (open-folder only)) -> /kanban?project={root} (on Dashboard) or in-page setProject (on Kanban); /sessions?cwd=
+- [SessionOverview › Top tools @client/src/components/SessionOverview.tsx:150-152] tool name (mono text) -> ?tab=timeline with filters.tool_name=[tool]
+- [SessionOverview › Subagents @client/src/components/SessionOverview.tsx:441-448] subagent type (mono text) -> ?tab=agents scrolled/filtered to that subagent_type
+- [SessionOverview › Event mix @client/src/components/SessionOverview.tsx:492-499] event type (chip text) -> ?tab=timeline with filters.event_type=[type]
+- [SessionOverview active-agent banner @client/src/components/SessionOverview.tsx:295-309] agent / tool (plain text) -> #agent-{id} and tool filter
+- [TodoProgressPanel owners / TaskRow @client/src/components/TodoProgressPanel.tsx:136-143,203-207] agent (owner) (agentType text) -> #agent-{owner.agentId} on agents tab
+- [KanbanBoard Column count / ProjectTabs @client/src/pages/KanbanBoard.tsx:599-601] status / project (count pill / chip) -> /sessions?status={status}&cwd={root} from the column header; ProjectTabs already in-page
+- [SessionDetail workflows @client/src/pages/SessionDetail.tsx:886] workflow run (WorkflowRunsPanel hideSessionLink) -> /workflows?run={id} (Workflows reads no URL params today)
+## ENTITIES
+- Session: pages=['Dashboard (sessionsById label in activity rows, AgentCard session prop)', 'Sessions (table row)', 'SessionDetail (header, overview, cost table)', 'KanbanBoard sessions view (SessionCard)', 'AgentCard footer']
+    avail=['Open detail@Sessions.tsx:533, SessionCard.', 'Copy session id@SessionDetail.tsx:674 (CopyBut', 'Copy cwd@SessionDetail.tsx:704, :288 (p', 'Open in Run / resume@Sessions.tsx:560, SessionDetai', 'Reveal cwd in file manager@ProjectBadge.tsx:117-127 (Sess', 'Filter by status@Sessions.tsx:460-476; palette ', 'Filter by cwd@Sessions.tsx:424-434 MultiSele', 'Search / sort@Sessions.tsx:410-418, 440-452;', 'Switch detail tab@SessionDetail.tsx:809-852', 'Refresh@Dashboard.tsx:1246, Sessions.t']
+    missing=['Rename session (server PATCH /api/sessions/:id accepts name — server/routes/sessions.js:645 — but api.ts has no sessions.update and no UI)', 'Mark completed / set status (same PATCH route, unused)', 'Delete/archive session (no route, no UI)', 'Open in Activity feed filtered (no target param)', 'Open in Kanban filtered by project (/kanban?project= exists, never linked from session surfaces)', 'Open sibling sessions by cwd (/sessions?cwd= exists, only via palette)', 'Copy deep link (/sessions/{id}?tab=…)', 'Export transcript / cost (settings.exportData exists globally only)']
+    ctxmenu=['Open details', 'Open conversation (?tab=conversation)', 'Open timeline (?tab=timeline)', 'Copy session id', 'Copy cwd', 'Copy link', 'Reveal folder (local only)', 'Resume in Run', 'Show in Activity (filtered)', 'Show project on Kanban']
+- Agent: pages=['Dashboard active-agents tree (AgentCard)', 'SessionDetail agents tab tree (AgentCard) + EventFilters agentOptions + timeline origin label', 'KanbanBoard agents view (AgentCard)', 'SessionOverview active-agent banner + subagent-type rows', 'TodoProgressPanel owners']
+    avail=['Open session / conversation@AgentCard.tsx:220-226 default;', 'Expand/collapse subagents@Dashboard.tsx:1353-1364,1410-1', 'Filter timeline by agent@SessionDetail.tsx:1143-1148 (E', 'Task progress tooltip@AgentCard.tsx:265-267 (TodoPro']
+    missing=['Copy agent id', 'Deep link to agent (#agent-{id} anchor / ?transcript=)', "Open agent's events (timeline filtered by agent_id) from the card", 'Open agent transcript directly from Kanban/Dashboard card (currently lands on session root)', 'Filter Kanban by subagent_type', 'Expand/collapse all']
+    ctxmenu=['Open conversation', 'Open events (timeline filtered)', 'Open parent session', 'Copy agent id', 'Copy session id', 'Copy link to agent', 'Expand/collapse all descendants', 'Show subagents of this type on board']
+- Project (cwd / group root): pages=['KanbanBoard ProjectTabs (?project=)', 'AgentCard/SessionCard ProjectBadge', 'Sessions table cwd column + MultiSelect filter', 'SessionDetail header cwd', 'Dashboard health Integration hook paths']
+    avail=['Select project tab@KanbanBoard.tsx:474-516', 'Reveal in file manager@ProjectBadge.tsx:117-127', 'Filter sessions by cwd@Sessions.tsx:424-434; paletteC', 'Copy cwd@SessionDetail.tsx:704, palette']
+    missing=['ProjectBadge label -> select Kanban tab / /kanban?project=', 'Sessions cwd cell -> add to cwd filter / open Kanban project', 'SessionDetail cwd -> /sessions?cwd= sibling list (only palette does this)', 'Dashboard hook path -> project sessions', 'Open in editor / terminal (only file manager)', 'Project colour legend']
+    ctxmenu=['Show sessions in this project', 'Show on Kanban', 'Reveal folder', 'Copy path', 'Filter Sessions list by this cwd']
+- Event: pages=['Dashboard recent activity rows', 'SessionDetail timeline rows (+ EventDetail expander)']
+    avail=['Open owning session@Dashboard.tsx:1496', 'Expand detail@SessionDetail.tsx:1162-1170', 'Filter (type/tool/agent/q/date)@SessionDetail.tsx:1143-1148 Ev', 'Load more@SessionDetail.tsx:1232-1241']
+    missing=['Deep link to event (?event= / #event-id)', 'Copy event id / payload (EventDetail may have, outside slice)', 'Jump from Dashboard row to the event in the timeline (lands on agents tab)', 'Filter by clicking tool chip / origin label', 'Open in Activity feed with same filters']
+    ctxmenu=['Open in session timeline (scrolled)', 'Filter timeline by this tool', 'Filter by this agent', 'Open agent conversation', 'Copy event id', 'Copy link']
+- Tool name: pages=['Dashboard recent activity chip', 'Dashboard health Tool Usage bars', 'SessionDetail timeline chip + EventFilters tool multi-select', 'SessionOverview Top tools rows (styleForTool icon)', 'AgentCard current_tool']
+    avail=['Filter timeline by tool@SessionDetail.tsx:1143 EventFi']
+    missing=['Click chip/bar to filter (Dashboard:1523, SessionDetail:1209, SessionOverview:150, Dashboard:786)', '/activity?tool_name= deep link (ActivityFeed reads none)', 'Consistent ToolChip with styleForTool everywhere']
+    ctxmenu=['Filter this session by tool', 'Show in Activity feed', 'Copy tool name']
+- Model: pages=['SessionDetail header chip + cost breakdown table', 'Dashboard health Token Usage', 'AgentCard/SessionCard footer (formatModelName)']
+    avail=[]
+    missing=['Link to /analytics cost by model', 'Tooltip with raw model id (formatModelName hides it; Dashboard:648 has title, SessionDetail:679 none)', 'Copy raw model id']
+    ctxmenu=['Show cost analytics for model', 'Copy model id']
+- Workflow run: pages=['SessionDetail agents tab (WorkflowRunsPanel hideSessionLink)']
+    avail=['(panel-internal)@SessionDetail.tsx:886']
+    missing=['/workflows?run= deep link (Workflows reads no params)']
+    ctxmenu=['Open on Workflows page', 'Copy run id']
+- Remote source: pages=['Sessions table pill', 'ProjectBadge (gates open button)']
+    avail=[]
+    missing=['Click pill to set data scope to that source', 'Link to Settings remote-sources section']
+    ctxmenu=['Scope to this source', 'Open source settings']
+- Task/Todo: pages=['Sessions table (TodoProgressIndicator donut)', 'AgentCard (TodoProgressIndicator)', 'SessionDetail (TodoProgressPanel)']
+    avail=['Hover/focus detail tooltip@TodoProgressIndicator.tsx:62-1', 'Paginate task rows@TodoProgressPanel.tsx:164-170']
+    missing=['Jump from Indicator to Panel (/sessions/{id}?tab=agents#tasks)', 'Owner row -> agent card anchor', 'Filter tasks by status/owner']
+    ctxmenu=['Open task panel', 'Show owner agent', 'Copy task text']
+## DENSITY
+- AgentCard @client/src/components/AgentCard.tsx:126: single layout: p-4, header (icon tile+title+subtitle+donut+badge), ProjectBadge  => Add `variant="row"` (one-line: icon · name · subtitle · badge · timeAgo, no badge row/task lines) for the Dashboard tree and nested subagents; keep current as `
+- SessionCard @client/src/components/SessionCard.tsx:116: single card layout mirroring AgentCard (SessionCard.tsx:146-229); the Sessions t => Extract SessionRow (table row) and SessionCard from one `SessionSummary` model; expose `variant="card"|"row"`; reuse ProjectBadge/StatusBadge/TodoProgressIndica
+- StatusBadge (Agent/Session) @client/src/components/StatusBadge.tsx:124: has `compact` (tooltip-only reason) and `pulse` props (StatusBadge.tsx:116-121,1 => Add `size="xs"` (dot-only with tooltip) for dense rows/trees; keep API.
+- TodoProgressIndicator / TodoProgressPanel @client/src/components/TodoProgressIndicator.tsx:28; TodoProgressPanel.tsx:23: already a compact/detailed pair sharing todoProgress helpers (Indicator 20px don => Model for the kit: keep, but make Indicator clickable to navigate to the Panel anchor instead of tooltip-only.
+- SessionDetail header @client/src/pages/SessionDetail.tsx:656: detailed session header hand-rolled (SessionDetail.tsx:656-711) with id/model/ti => Becomes `SessionHeader` (detailed variant) built from the same MetaChip/ShortId/EntityRef primitives as the card and row.
+- Event rows @client/src/pages/Dashboard.tsx:1493; client/src/pages/SessionDetail.tsx:1162: Dashboard row (1493-1530): badge · summary · session label · tool · timeAgo; Ses => `EventRow` with `density="compact"|"expandable"` and flags showSession/showProject/showAgent; expandable renders EventDetail.
+- StatCard vs StatTile @client/src/components/SessionOverview.tsx:90: two stat tile components: StatCard (components/StatCard.tsx, Dashboard 1256-1306 => One `Stat` with `size="lg"|"sm"` and `tone`; SessionOverview uses sm.
+- Kanban Column @client/src/pages/KanbanBoard.tsx:592: fixed w-72, 10-per-page show-more, cards only (KanbanBoard.tsx:575-626). => Column `density="cards"|"rows"` toggle (row variant of AgentCard/SessionCard) so busy boards fit 30+ items; add 'open in list' link in header.
+- Dashboard SystemHealthTab panels @client/src/pages/Dashboard.tsx:288: nine `card p-5` panels with bespoke inner layouts (Dashboard.tsx:288-961). => Panel + SectionHeader + KeyValueRow + BarRow primitives; no density variant needed, just composition.
+- Recent activity / active agents panes @client/src/pages/Dashboard.tsx:993: height-driven visible counts via ResizeObserver (Dashboard.tsx:986-1014). => Once row variants exist, replace magic constants with measured row height or CSS overflow + 'view all' only.
+## UX ISSUES
+- client/src/pages/SessionDetail.tsx:657 [high] Back button is icon-only (ArrowLeft) with no aria-label/title.
+- client/src/pages/SessionDetail.tsx:708 [medium] Refresh button icon-only, no aria-label; other pages show label text.
+- client/src/pages/SessionDetail.tsx:865 [medium] Dismiss button for transcript-not-found banner renders a `List` icon (reads as 'open list', not close) and has no aria-label.
+- client/src/pages/Dashboard.tsx:1356 [medium] Hardcoded English aria-label 'Collapse subagents'/'Expand subagents' (also SessionDetail.tsx:961) — violates i18n-parity rule.
+- client/src/pages/Dashboard.tsx:292 [high] Entire SystemHealthTab (lines 283-963) uses untranslated English labels, empties and tooltips (~40 strings).
+- client/src/components/SessionOverview.tsx:316 [high] All StatTile labels, section titles, hints and empties are untranslated English (~25 strings, 297-535).
+- client/src/pages/SessionDetail.tsx:458 [low] Fallback label `Session ${id}` untranslated while line 663 uses t('defaultName') — same session can show two different fallback names.
+- client/src/pages/Dashboard.tsx:1493 [high] Recent-activity row is a clickable div: no role=button/link, no tabIndex, no Enter/Space handler — keyboard users cannot open it.
+- client/src/pages/Sessions.tsx:528 [high] <tr onClick> navigation with no keyboard affordance; nested Link (560) relies on stopPropagation.
+- client/src/components/AgentCard.tsx:229 [high] Card is a div with onClick and cursor-pointer, no role/tabIndex/onKeyDown; same in SessionCard.tsx:147.
+- client/src/components/AgentCard.tsx:339 [medium] Session short id shown at opacity-50 with no title tooltip for the full id; Sessions.tsx:546 and SessionCard.tsx:167 also truncate without tooltip.
+- client/src/pages/SessionDetail.tsx:673 [low] Session id truncated to 16 chars here, 12 in Sessions/SessionCard, 8 in Dashboard/AgentCard — inconsistent identity rendering.
+- client/src/components/SessionCard.tsx:93 [medium] Local formatCost ($0 / 3-4 decimals under $1) differs from fmtCost used by AgentCard (always 2 decimals, K/M) — the same session shows different cost strings on
+- client/src/components/SessionCard.tsx:102 [medium] promptPreviewLines and isTransientProcessCard duplicated verbatim from AgentCard.tsx:90/117; isTransient also in Sessions.tsx:103.
+- client/src/pages/Dashboard.tsx:154 [low] formatBytes/formatUptime duplicated from Settings.tsx:292-298; belong in lib/format.ts.
+- client/src/pages/Dashboard.tsx:1325 [high] renderAgentNode tree (1325-1426) + auto-expand effect (1070-1095) duplicated in SessionDetail.tsx:934-1023/508-528 with subtle divergences (leaf CircleDot marke
+- client/src/pages/Dashboard.tsx:1097 [medium] Trailing-throttle WS reload copy-pasted into Sessions.tsx:276-329; Kanban/SessionDetail/SessionOverview each use a different debounce (300/500/600ms).
+- client/src/pages/Dashboard.tsx:993 [medium] AGENT_ROW_H=56 assumes a one-line row but AgentCard renders ~130px+, so visibleAgentCount over-estimates and the pane scrolls despite 'fit to height' logic.
+- client/src/pages/SessionDetail.tsx:1175 [low] Timeline expander uses the '▶' text glyph rotated 90° while every other expander uses lucide ChevronRight/ChevronDown.
+- client/src/pages/SessionDetail.tsx:809 [medium] Tabs are plain buttons (no role=tablist/tab, no aria-selected) unlike Kanban ViewToggle/ProjectTabs which set them; Dashboard tabs (1224) also lack roles.
+- client/src/components/StatusBadge.tsx:141 [medium] Waiting-reason explanation only reachable via mouse hover (Tip is mouse-follow, wrapper not focusable) — keyboard/screen-reader users never get the reason in co
+- client/src/pages/Dashboard.tsx:1379 [low] title tooltip placed on an aria-hidden, non-focusable span — unreachable by keyboard and hidden from AT.
+- client/src/pages/KanbanBoard.tsx:633 [low] ColumnHelp is a third tooltip implementation (Tip, TodoProgressIndicator portal, ColumnHelp) with role=img on a span containing a tooltip.
+- client/src/components/TodoProgressIndicator.tsx:90 [low] Hardcoded hex colours (#2a2a4a, #12121f, #303044, #34d399) bypass theme tokens; also TodoProgressPanel.tsx:54, Dashboard.tsx:400/521 (#1e1e2e).
+- client/src/pages/KanbanBoard.tsx:379 [low] `-mx-8 px-8` hard-codes Layout's page padding to bleed the column strip; breaks if Layout padding changes.
+- client/src/pages/Sessions.tsx:625 [low] Pager buttons (bg-surface-2) vs SessionDetail load-more (bg-accent/15, line 1236) vs Kanban show-more (ghost, 609) — three paging button styles.
+- client/src/components/SessionOverview.tsx:363 [medium] Panel surface 'rounded-lg border-surface-3 bg-surface-2/60 p-3.5' differs from .card (bg-surface-3 rounded-xl) used 30px above in the same tab, and from Kanban 
+- client/src/pages/SessionDetail.tsx:672 [low] Header meta chips use bg-surface-2 px-2 py-1 while card footers use bare text-[11px] chips with the same icons — two visual grammars for the same fields.
+- client/src/pages/Sessions.tsx:599 [medium] cwd cell renders truncate(cwd,30) text instead of ProjectBadge (colour + basename + open button) used on cards — inconsistent project identity across pages.
+- client/src/pages/Sessions.tsx:138 [low] ?cwd= is read once; subsequent MultiSelect changes never update the URL so the filtered view is not shareable/back-navigable (documented as intentional, but ?st
+- client/src/pages/SessionDetail.tsx:1147 [low] EventFilters agentOptions label falls back to raw agent id when name is null — unreadable option text.
+- client/src/pages/Dashboard.tsx:1522 [medium] Tool-name and session label in activity rows are plain spans (no hover state, no link) inside a clickable row — no affordance that they identify something.
+- client/src/components/ProjectBadge.tsx:140 [low] Nested <button> inside a clickable card div: works via stopPropagation but a11y tree exposes a button inside a non-button clickable; fine once card gets role=li
+- client/src/pages/SessionDetail.tsx:1061 [low] Cost breakdown table sits at the bottom of the agents tab with no anchor/heading id; Sessions cost column cannot link to it.
+- client/src/pages/KanbanBoard.tsx:171 [medium] Agents view fetches all sessions (limit 10000) just to hydrate AgentCard session props — heavy for a board refresh every 300ms debounce.
+## TEST/I18N: TESTS covering the slice — unit: client/src/components/__tests__/AgentCard.test.tsx (32 tests: display names, model/cost scoping, transient cards, ProjectBadge, todo indicator), SessionCard.test.tsx (4), ProjectBadge.test.tsx (6: projectRoots grouping, worktree collapse, open-cwd), StatusBadge.test.tsx (24: reason chip, compact, provider wording), TodoProgress.test.tsx (5: Indicator tooltip + Panel), StatCard.test.tsx, EmptyState.test.tsx, Select/MultiSelect/PaletteHint tests (used by Sessions). Pages: client/src/pages/__tests__/Dashboard.recentActivity.test.tsx (3: status badge parity, sessio
+
+######## shell-big-pages: client/src/components/Layout.tsx, Sidebar.tsx, CommandPalette.tsx, Palett
+## KIT CANDIDATES
+- PageHeader (x11): <PageHeader icon={Play} title subtitle live={wsConnected} actions={<>…</>} badges={<ProviderToggle/>} />
+- LivePill / StatusPill (x20): <StatusPill tone='live'|'offline'|'success'|'warn'|'error'|'neutral' pulse icon size='xs'|'sm'>label</StatusPill> — fold into existing StatusBadge.tsx
+- Chip (mono tag) (x21): <Chip mono tone='neutral'|'accent'|'sky'|'emerald'|'violet'|'amber'>{text}</Chip>
+- SegmentedControl (x4): <SegmentedControl<T> value options={[{value,label,badge?,count?}]} onChange shape='pill'|'rounded' size='xs'|'sm' aria-label />
+- TabStrip (x4): <TabStrip tabs={[{key,label,icon,count?}]} value onChange sticky? /> with built-in overflow chevrons + gradient
+- Button (x45): <Button variant='primary'|'secondary'|'ghost'|'danger'|'accent' size='xs'|'sm'|'md' icon={Icon} loading disabled> — supersedes .btn-primary/.btn-ghost
+- IconButton (x16): <IconButton icon={X} label={t(...)} size='xs'|'sm' tone='ghost'|'bordered' /> — label required (renders aria-label + title)
+- CopyButton / useCopy (x8): const {copied, copy} = useCopy(1500); <CopyButton value label /> — wraps clipboard + announceAction fallback
+- IdChip / EntityLink (x24): <EntityLink kind='session'|'project'|'model'|'tool'|'event' id label? truncate={8} copy /> → renders mono chip, full-id title, Link to canonical filtered route, right-click context menu
+- ContextMenu (x5): <ContextMenu items={[{label,icon,onSelect,danger?,shortcut?}]}>{children}</ContextMenu> — right-click + kebab trigger, portal, keyboard nav; reuse CollapsedLanguagePicker positioning (Sidebar.tsx:221-240)
+- SectionHeader (x20): <SectionHeader title icon description level='micro'|'h3' actions />
+- KeyValue / DetailRow (x6): <KeyValue label value mono align='row'|'stack' /> and <KeyValueList rows />
+- StatCard (extend existing) (x7): <StatCard label value unit? icon tone size='sm'|'md' onClick? accentBar? breakdown? />
+- Panel / Card (unify surface) (x55): <Panel level={1|2|3} padding='sm'|'md' hover interactive> — settle bg-surface-2 vs .card bg-surface-3
+- ItemRow (compact/detailed) (x11): <ItemRow name badges description meta path actions compact onOpen /> with ContextMenu built in
+- Modal (x13): <Modal open onClose title icon size='sm'|'md'|'lg'|'xl' footer> — portal, Escape, backdrop click, focus restore (Sidebar.tsx:897-904 + CommandPalette.tsx:234-241 already do the pieces)
+- SearchField (x4): <SearchField value onChange placeholder hint={<PaletteHint/>} onClear autoFocus size='sm'|'md' />
+- EmptyState (use existing) + SkeletonList (x10): <EmptyState icon title body dashed /> and <SkeletonList rows={n} height='h-16' />
+- formatBytes / RelativeTime (lib, not UI) (x7): move formatBytes into lib/format.ts; <RelativeTime iso live /> wrapping timeAgo with 1s tick
+- Toast (use ActionToast) (x2): announceAction(message, {kind:'success'|'error'}) from lib/appEvents — delete local toasts
+## PATTERNS (name:count)
+Page header (icon box + h1 + live/offline pill + subtitle + right actions):10; Live/offline WS pill:15; Segmented toggle / chip group:4; Scrollable tab strip / TOC with edge chevrons + gradient fade:4; Secondary button (border bg-surface-2):4; Small inline action button (text-[11px]/[10.5px] rounded-md border):20; Icon-only button (w-6/w-7 square, hover:bg-surface-3):13; Mono chip / tag (text-[10px] font-mono px-1.5 py-0.5 rounded border):17; Status pill with tone map:5; Section header (uppercase tracking-wider label / h3 with icon):74; Key-value metadata row:6; KPI / stat tile:7; Copy-to-clipboard with 1.5s Check flip:5; Relative / formatted time:3; ID truncation (.slice(0,8|12) + ellipsis):3; Empty state:8; Loading skeleton:2; Modal shell (backdrop + panel + icon header + X):13; Toast / notice:3; Panel container (rounded-lg border border-border bg-surface-2):40; Item card with vertical action column (View/Edit/Delete):9; Search input bar with clear X / hint:4; formatBytes duplicated:4; Duplicated route/section catalogs:3
+## URL PARAMS
+- /run ?session @client/src/pages/Run.tsx:1096-1130: session id → find live run handle via api.run.list() and attach; stripped after consumption; errors if no live run
+- /run ?prompt @client/src/pages/Run.tsx:1141-1149: prefill prompt textarea once, then stripped
+- /run ?autostart=1 @client/src/pages/Run.tsx:1144,1157: with prompt: fire run once preflight settles
+- /cc-config ?tab @client/src/pages/CcConfig.tsx:268: one of TAB_KEYS (overview…outputStyles); via useUrlTab, replace-history
+- /settings ?#<section-id> @client/src/pages/Settings.tsx:1030-1048: hash must match SETTINGS_SECTIONS id; scrolls after load, sets activeSection
+- (hook) any ?tab | custom @client/src/hooks/usePageShortcuts.ts:30-79: useUrlTab(valid, fallback, {param, storageKey}) — URL wins, then localStorage, then fallback; '' deletes param
+- / (verified target) ?tab @client/src/pages/Dashboard.tsx:973: monitor|health
+- /kanban (verified target) ?view, project @client/src/pages/KanbanBoard.tsx:121,133: agents|sessions; project cwd filter
+- /analytics (verified target) ?tab @client/src/pages/Analytics.tsx:687: cost|tokens|productivity|workflow
+- /sessions (verified target) ?status, cwd @client/src/pages/Sessions.tsx:124,139: status filter via useUrlTab; cwd seeds project filter on mount
+- /sessions/:id (verified target) ?tab @client/src/pages/SessionDetail.tsx:179: detail sub-tab
+- /activity ?(none) @client/src/pages/ActivityFeed.tsx: ActivityFeed reads no URL params (0 useSearchParams/useUrlTab) — every 'filter activity by X' link below is blocked on t
+## NAV GAPS
+- [CommandPalette / paletteCommands @client/src/lib/paletteCommands.ts:274-288] route /plan (sidebar NavLink only) -> palette page command `page:/plan` (and /plan/:slug views)
+- [Run @client/src/pages/Run.tsx:3657-3661] session id (plain mono text `slice(0,8)…` in live toolbar) -> /sessions/:id (make the id itself the link) + copy id
+- [Run @client/src/pages/Run.tsx:2810] project/cwd (font-mono truncate text in run history row) -> /sessions?cwd=<cwd> (param exists) or /kanban?project=<cwd>
+- [Run @client/src/pages/Run.tsx:2813, 3653] model (`· {row.model}` mono text in history row and init.) -> /analytics?tab=tokens (or cost) filtered by model; /settings#claude-pricing rule
+- [Run @client/src/pages/Run.tsx:3410, 3485] project/cwd (plain text in SessionPicker rows and selected-sess) -> /sessions?cwd=
+- [Run @client/src/pages/Run.tsx:4012, 3871] tool name (font-mono text-amber-200 in ToolUseBlock / CodexTo) -> /activity?tool=<name> (ActivityFeed needs a URL param) or session detail tool view
+- [Run @client/src/pages/Run.tsx:1096-1130] session (resume) (palette action session.openInRun exists but /run h) -> /run?resume=<session-id> to preselect SessionPicker
+- [CcConfig (memory tab) @client/src/pages/CcConfig.tsx:2623] project/cwd (font-mono text-xs truncate in MemoryProjectGroup h) -> /sessions?cwd= or /kanban?project=
+- [CcConfig (agents/skills) @client/src/pages/CcConfig.tsx:1474-1476] model (frontmatter.model chip) -> /settings#claude-pricing or analytics by model
+- [CcConfig (agents) @client/src/pages/CcConfig.tsx:1487] tool names (frontmatter.tools comma string) -> /activity filtered by tool
+- [CcConfig (hooks) @client/src/pages/CcConfig.tsx:1884] hook event name (plain text group header per event) -> /activity filtered by event type
+- [CcConfig (mcp) @client/src/pages/CcConfig.tsx:1768] MCP server name (font-mono text-sm) -> /activity?tool=mcp__<name>__* 
+- [Settings (pricing) @client/src/pages/Settings.tsx:1864-1865] model pattern (td font-mono) -> /analytics?tab=cost filtered by model
+- [Settings (session homes) @client/src/pages/Settings.tsx:2083, 2118] claude/codex home path (<code> plain text) -> /cc-config?tab=overview (which lists roots)
+- [Sidebar ConnectionStatusModal @client/src/components/Sidebar.tsx:1029, 1061, 1151] event type (font-mono text in last-event row, TypeBar and rece) -> /activity filtered by event type
+- [CommandPalette @client/src/components/CommandPalette.tsx:443, 731] session cwd/status (detail string `cwd · status` truncated to 38%) -> secondary action 'sessions in this project' (/sessions?cwd=) and /kanban?project=
+- [CodexConfigExplorer (profiles) @client/src/components/CodexConfigExplorer.tsx:741] model (ProfileSetting mono value) -> analytics by model / Run ModelPicker preselect
+- [CodexConfigExplorer @client/src/components/CodexConfigExplorer.tsx:787, 807] file path (break-all font-mono text (copy button only in File) -> open viewer (already clickable at 1162) — but 787/807 path rows are not
+- [Sidebar footer @client/src/lib/paletteCommands.ts:680-694] data source / remote source (not shown; palette scopes to a source (paletteComm) -> /settings#remote-sources per source id
+## ENTITIES
+- Session: pages=['Run (history row 2728-2827, live toolbar 3647-3692, SessionPicker 3348-3503, ActiveRunsSwitcher 2343-2474)', 'CommandPalette (session results 440-451, 692-741)']
+    avail=['Open session detail@Run.tsx:2815, 3674; CommandPal', 'Attach to live run@Run.tsx:2778', 'Resume conversation@Run.tsx:2787; palette page-act', 'View headless transcript@Run.tsx:2796', 'Stop run@Run.tsx:3665', 'New run@Run.tsx:3686', 'Search sessions@CommandPalette.tsx:260-261', 'Copy session id / path@paletteCommands.ts:230-240 (id']
+    missing=['copy id inline next to the truncated id (Run 3659, 2821)', 'show in Activity (no URL param on /activity)', 'sessions in same project (/sessions?cwd=)', 'open on Kanban (/kanban?project=)', 'deep-link into Run resume for a finished session (?resume=)', 'full-id tooltip on truncated ids']
+    ctxmenu=['Open detail', 'Copy session id', 'Copy cwd', 'Sessions in this project', 'Show on Board', 'Resume in Run', 'Show in Activity']
+- Dashboard run (handle): pages=['Run (UnifiedRunRowView 2728-2827, RunsModal 2474-2688, ActiveRunsSwitcher 2343-2474, RunSession toolbar 3647-3692)']
+    avail=['Attach@Run.tsx:2777', 'Resume@Run.tsx:2786', 'View@Run.tsx:2795', 'Refresh list@Run.tsx:2572', 'Filter by status/mode@Run.tsx:2689 FilterChipGroup', 'Stop / New run@Run.tsx:3665, 3686']
+    missing=['copy prompt', 'copy cwd', 'delete/prune history entry', 'rename run', 'open session detail from switcher trigger without opening modal']
+    ctxmenu=['Attach', 'Resume', 'View session', 'Copy prompt', 'Copy cwd', 'Remove from history']
+- Project / cwd: pages=['Run (2810, 3410, 3485, CwdAutocomplete 3190)', 'CcConfig memory tab (2623)', 'CommandPalette projects group (paletteCommands.ts:670-678; facets from api.sessions.facets CommandPalette.tsx:293)', 'Settings session homes (2083, 2118)']
+    avail=['Jump to sessions in project@paletteCommands.ts:677', 'Add auto-memory for project@CcConfig.tsx:2629']
+    missing=['link from every cwd render to /sessions?cwd= and /kanban?project=', 'copy path', 'start new run in this cwd (/run?cwd=… — Run has no cwd param)']
+    ctxmenu=['Sessions in project', 'Board for project', 'New run here', 'Copy path']
+- Model: pages=['Run (init.model chip 3653, row.model 2813, ModelPicker 3503-3604)', 'CcConfig (frontmatter.model chip 1474)', 'Settings (pricing table model_pattern 1864)', 'CodexConfigExplorer (profile model 741)']
+    avail=['Pick model for run@Run.tsx:3503 ModelPicker', 'Edit / delete pricing rule@Settings.tsx:1854 (editingPatt']
+    missing=['link chip → analytics by model', 'link chip → pricing rule', 'copy model id']
+    ctxmenu=['Analytics for model', 'Edit pricing rule', 'Copy model id']
+- Tool / MCP server: pages=['Run (ToolUseBlock 3996, ToolResultBlock 4025, CodexToolEvent 3856)', 'CcConfig (agent tools 1487, McpCard 1763-1813, hooks matcher 1895)', 'CodexConfigExplorer (MCP card 780)']
+    avail=['Expand input/result@Run.tsx:4002, 4027', 'Copy `claude mcp remove` snippet@CcConfig.tsx:1807 CommandSnipp']
+    missing=['filter Activity by tool', 'copy input JSON', 'copy tool name', 'jump to same tool in session detail']
+    ctxmenu=['Show in Activity', 'Copy input JSON', 'Copy name']
+- Hook event / WS event type: pages=['CcConfig hooks tab (1880-1905)', 'Sidebar ConnectionStatusModal (1029, 1043-1045 TypeBar, 1056-1064 recent list)']
+    avail=['Filter hooks by search@CcConfig.tsx:1854', 'Reset stats@Sidebar.tsx:1072']
+    missing=['link event type → /activity filtered by type', 'copy hook command']
+    ctxmenu=['Show in Activity', 'Copy command']
+- Config artifact (skill / agent / command / output-style / memory / plugin / marketplace / keybinding / backup): pages=['CcConfig (MdItemCard 1455-1518, PluginCard 1555, McpCard 1763, MemoryPanel 2373-2803, MarketplacesPanel 2804, KeybindingsPanel 2898, BackupRow 3758)', 'CodexConfigExplorer (FileRow 1135-1183, profile cards 718-760, MCP 780, plugins 870)']
+    avail=['View source@CcConfig.tsx:1494, Codex 1216', 'Edit@CcConfig.tsx:1501, Codex 1235', 'Delete@CcConfig.tsx:1508, Codex 1245', 'Create new@CcConfig.tsx:570, Codex 702', 'Copy path@CcConfig.tsx:3202 CopyButton (', 'Backups@CcConfig.tsx:681 → BackupsModa', 'Refresh@CcConfig.tsx:689, Codex 263; p', 'Open tab via palette@paletteCommands.ts:458-466']
+    missing=['duplicate artifact', 'copy file contents', 'reveal in file manager / open in editor', 'sessions that used this agent/skill', 'keyboard access to card actions (cards are divs; only buttons focusable)']
+    ctxmenu=['View source', 'Edit', 'Duplicate', 'Delete', 'Copy path', 'Copy contents', 'Reveal file']
+- Settings section: pages=['Settings TOC (1645-1667) + 13 <section id> anchors', 'paletteCommands.ts:296-310 settings group']
+    avail=['Jump to section@Settings.tsx:1652', 'Deep link@Settings.tsx:1030-1048', 'Palette jump@paletteCommands.ts:455']
+    missing=['copy section link', 'collapse/expand section']
+    ctxmenu=['Copy link to section']
+- Data source (machine): pages=['CommandPalette sourceActions (paletteCommands.ts:680-694; facets CommandPalette.tsx:292-306)']
+    avail=['Scope to source@paletteCommands.ts:690-693', 'Provider scope both|claude|codex@paletteCommands.ts:505-513']
+    missing=['manage source (/settings#remote-sources)', 'clear scope from palette']
+    ctxmenu=['Scope to this source', 'Manage source']
+- Page / route: pages=['Sidebar NAV_KEYS (98-109)', 'paletteCommands PAGE_COMMANDS (274-288), VIEW_COMMANDS (329-392)']
+    avail=['Navigate@Sidebar.tsx:589; CommandPalett', 'Copy link@paletteCommands.ts:479-486', 'Toggle sidebar / scroll top / bottom@Layout.tsx:96-102']
+    missing=['/plan in palette', 'pin/favourite page']
+    ctxmenu=['Open in new tab', 'Copy link']
+## DENSITY
+- Run.tsx UnifiedRunRowView (2728-2827) @client/src/pages/Run.tsx:2728: Medium card: pill row + prompt (2 lines) + cwd + meta row; only rendered inside  => Add `compact` (single line: status dot · prompt · cwd basename · time · actions on hover) for the ActiveRunsSwitcher dropdown (2343-2474) so live runs can be sw
+- Run.tsx SessionPicker rows (3453-3486) vs CommandPalette session rows (692-741) @client/src/pages/Run.tsx:3453; client/src/components/CommandPalette.tsx:692: Two different session row renderings; palette row is label + truncated detail on => One `SessionRow` with `compact` (palette: name, id8, status dot) and `default` (picker: name, id12, status chip, cwd, time)
+- CcConfig.tsx MdItemCard (1455-1518) @client/src/pages/CcConfig.tsx:1455: ~90px card with 3 stacked buttons per item; skills/commands tabs list dozens => Compact list row (name · ScopeBadge · model chip · path, kebab/context menu) as default; expanded panel with frontmatter/tools/description on click. No compact 
+- CodexConfigExplorer.tsx FileRow + FileActions (1135-1255) @client/src/components/CodexConfigExplorer.tsx:1135: Same shape as MdItemCard with a fixed w-32/w-36 action column => Share the same `ItemRow` component with `compact`; actions into a kebab; drop fixed column width
+- Stat tiles: Sidebar KpiTile (1108), CcConfig SummaryStat (1313), Codex CodexSummaryStat (1059)/CodexDefaultStat (1022)/CodexRootCard (998), Settings db/about tiles (2557, 2710) @client/src/components/Sidebar.tsx:1108: 7 bespoke tiles at 3 sizes => Extend existing components/StatCard.tsx with `size='sm'|'md'`, optional `onClick`, optional `accentBar`, `breakdown` slot
+- Sidebar ConnectionStatusModal (870-1084) @client/src/components/Sidebar.tsx:870: Full-screen modal for connection KPIs + sparkline + top types + recent list => Compact: anchored popover from the footer pill with KPI row + sparkline; detailed: keep modal (or link to /activity). Footer pill (688-722) already collapses to
+- CommandPalette rows (692-741) @client/src/components/CommandPalette.tsx:730: Single density; `detail` truncated to max-w-[38%] with no title => Two-line variant for sessions/projects (label + full detail line) and one-line for pages/actions
+- Settings.tsx sections (13 × `card p-5`) @client/src/pages/Settings.tsx:1711: Every section fully expanded on one 2787-line page; TOC (1630) mitigates => Collapsible section shell (header row clickable, remembers open state) so the page reads as a compact index; keep expanded as detailed variant
+- Run.tsx RunSession toolbar (3649-3692) @client/src/pages/Run.tsx:3649: Pills + truncated id + 3 buttons in one flex-wrap row => Fine as compact; move Stop/New run into a kebab on narrow widths; make the id chip a linked/copyable `IdChip`
+- CcConfig.tsx Tabs (772-920) / CodexTabs (382-500) / Settings TOC (1630-1679) @client/src/pages/CcConfig.tsx:772: Three copies of a scrollable strip with count badges => One `TabStrip` with `size='sm'|'md'` and optional `counts`; collapsed-sidebar-style icon-only mode for narrow widths
+## UX ISSUES
+- client/src/lib/paletteCommands.ts:279 [high] /plan route missing from PAGE_COMMANDS while Sidebar.tsx:101 shows it; coverage test (paletteCommands.test.ts:80-82) skips routes containing ':' so `plan/:slug?
+- client/src/pages/Run.tsx:1268 [medium] Error banner dismiss button is icon-only with no aria-label/title
+- client/src/pages/CcConfig.tsx:861 [medium] aria-label="scroll tabs left"/"scroll tabs right" (912) hardcoded English; same at Settings.tsx:1638/1673 ("Scroll left/right"), CcConfig.tsx:3615 ("dismiss"), 
+- client/src/components/Sidebar.tsx:1211 [low] Sparkline axis labels "−60s" and "now" are hardcoded literals, not i18n
+- client/src/components/Sidebar.tsx:1232 [low] formatRelative duplicates lib/format.ts:357 timeAgo with a different signature and its own nav:*Ago keys
+- client/src/pages/Run.tsx:3658 [medium] Session id truncated to 8 chars with no title tooltip, not a link, no copy; same at 2821 (title says 'view session', not the id) and 3479 (12 chars)
+- client/src/pages/Run.tsx:2810 [medium] cwd `truncate` with no title tooltip; same for palette detail (CommandPalette.tsx:731 max-w-[38%]) and CcConfig.tsx:1490 filePath, 2623 project
+- client/src/pages/Run.tsx:2217 [medium] RunProviderToggle is a verbatim copy of CcConfig.tsx:709 ProviderToggle; neither uses role="radiogroup"/aria-pressed, so screen readers get two unlabeled button
+- client/src/pages/CcConfig.tsx:1467 [low] `hover:border-border/80` makes the border *fainter* on hover (also CodexConfigExplorer.tsx:1159) — hover state reads as nothing happening
+- client/src/pages/CcConfig.tsx:3216 [medium] CopyButton is icon-only with `title` but no aria-label and no aria-live for the copied state (Codex FileActions 1229 does add aria-live)
+- client/src/pages/CcConfig.tsx:1493 [medium] Three full-size stacked buttons per item card (View/Edit/Delete) repeated on every card; heavy and inconsistent with Codex which adds a fourth (Copy path)
+- client/src/pages/CcConfig.tsx:686 [medium] When provider=codex the page header hides Refresh/Backups (679-697) and CodexConfigExplorer renders its own Refresh at a different position (253-271) with a `p`
+- client/src/pages/Settings.tsx:1617 [low] Export link uses a bespoke button class while its sibling Refresh (1622) uses btn-ghost; inconsistent sizes (text-xs px-3 py-1.5 vs btn-ghost px-3 py-1.5 text-s
+- client/src/pages/Settings.tsx:377 [low] Toggle checked colour is `bg-blue-500` rather than the accent token used everywhere else
+- client/src/pages/Settings.tsx:2068 [low] Home-path inputs use `bg-surface-4 border border-surface-3 rounded-lg` instead of the `.input` class used 11× elsewhere in the same file (also 2103)
+- client/src/pages/CcConfig.tsx:3243 [low] formatBytes duplicated in Settings.tsx:292, Dashboard.tsx, ImportHistory.tsx
+- client/src/pages/Run.tsx:2742 [low] Date rendered via inline toLocaleString instead of lib/format.ts formatDateTime (258); CcConfig.tsx:644 likewise uses toLocaleTimeString
+- client/src/components/CommandPalette.tsx:167 [low] `sidebarCollapsed` state is read (230) and listed in useMemo deps (423) but never passed to buildPaletteCommands — dead state; the storage key string duplicates
+- client/src/components/CommandPalette.tsx:97 [low] NOTIF_KEY 'agent-monitor-notifications' duplicates the key Settings.tsx:200-215 owns; shape coupling across files with no shared module
+- client/src/components/CommandPalette.tsx:659 [low] Result count and footer hints use text-gray-600 on bg-surface-1 — low contrast for the only affordance text in the dialog
+- client/src/components/CommandPalette.tsx:692 [low] Option rows are divs with onClick and no focus-visible style; keyboard works via aria-activedescendant but there is no visible ring when the input loses focus
+- client/src/components/Layout.tsx:142 [low] Sidebar widths '4.25rem'/'15rem' duplicated as magic numbers vs Sidebar.tsx:562 `w-[4.25rem]`/`w-60`
+- client/src/components/Sidebar.tsx:610 [low] Nav overflow chevrons are hidden when collapsed (`!collapsed &&`) so a collapsed rail with clipped items has no visible affordance
+- client/src/components/Sidebar.tsx:719 [low] Version label text-gray-600 on surface-2 — low contrast
+- client/src/pages/NotFound.tsx:84 [low] Buttons lack type="button" (also 88); Sidebar.tsx:661 collapse toggle same
+- client/src/pages/CcConfig.tsx:3595 [medium] Own ToastNotice (5s timer 286-291) and CodexConfigExplorer.tsx:1683 StatusNotice while Layout already mounts ActionToast (Layout.tsx:134) driven by announceActi
+- client/src/components/CodexConfigExplorer.tsx:1214 [low] FileActions fixed `w-32 sm:w-36` column wastes width and forces 4 stacked buttons
+- client/src/pages/Run.tsx:1096 [medium] `?session=` deep link errors ('No active dashboard run…') for any non-live session instead of falling back to resume mode; the palette's session.openInRun relie
+- client/src/hooks/usePageShortcuts.ts:39 [low] localStorage read on every render (IIFE, not memoised); harmless but wasteful on Dashboard/Kanban which re-render on every WS event
+- client/src/pages/CcConfig.tsx:772 [medium] Tabs (772-920) and CodexTabs (CodexConfigExplorer.tsx:382-500) are ~130-line duplicates including ResizeObserver affordance logic; Settings TOC (1630-1679) is a
+## TEST/I18N: Tests: client/src/components/__tests__/Sidebar.test.tsx (brand, 10 nav hrefs at line 63, live/disconnected, version, 5-language picker, collapsed portal menu); CommandPalette.test.tsx (30+ cases: chord, Alt guard, toggle, discovery retire, programmatic open event, empty-query pages + thisPage group, fuzzy filter, Enter navigates, arrow wrap, Escape, 2-char floor, debounce, stale-result drop, failure tolerance, settings/config/view reach, MRU incl. 'does not remember session picks', Home/End, Tab group step, Shift+Tab wrap, no-results, reopen clears); PaletteHint.test.tsx; client/src/lib/__test
+
+######## primitives-infra: client/src/index.css, tailwind.config.js, components/{Select,MultiSelect
+## KIT CANDIDATES
+- ui/Button (x295): <Button variant='primary'|'ghost'|'outline'|'danger'|'subtle' size='xs'|'sm'|'md' icon={Lucide} loading busy? iconOnly aria-label>children</Button> — replaces .btn-primary/.btn-ghost + 'border border-border' recombos, da
+- ui/IconButton (x40): <IconButton icon={X} label={t(...)} size='sm'|'md' tone='default'|'danger' /> — enforces aria-label; replaces close X, trash, refresh, pager arrows
+- ui/Badge (x129): <Badge tone='neutral'|'accent'|'success'|'warning'|'danger'|'info' size='xs'|'sm' shape='pill'|'square' dot icon>text</Badge> — replaces .badge + 112 inline pills, RemoteSources StatusPill, TabbyPanel Live pill, WebhookS
+- ui/Toggle (Switch) (x2): <Toggle checked onChange label description? size='sm' /> role=switch, accent colour
+- ui/Field + ui/Label (x23): <Field label help={<FieldHelp/>} hint error required htmlFor>{control}</Field> — one label cluster instead of three (text-xs gray-400 / text-[11px] gray-500 / text-xs gray-500 mb-1)
+- ui/SectionHeader / ui/PanelHeader (x16): <SectionHeader icon={Cloud} title subtitle actions={<Button/>} level='h3'|'h4' /> — Settings section h3 + hint, and panel header rows with right-aligned actions
+- ui/Tabs (segmented) (x6): <Tabs value onChange items={[{key,label,icon,badge}]} variant='segmented'|'underline' /> with role=tablist, arrow keys, optional useUrlTab binding
+- ui/Callout (x10): <Callout tone='info'|'warning'|'danger'|'neutral'|'success' icon compact>text</Callout>
+- ui/CopyButton + lib/useCopy (x7): <CopyButton value label? size='xs' /> — writeText + copied state + announceAction toast; hook `useCopy(ms=1500)`
+- ui/EmptyState compact + ui/ListRowSkeleton (x8): <EmptyState compact icon title description action /> ; <ListRowSkeleton rows={3} height='h-12' />
+- ui/Stat (StatCard size='sm') (x23): <Stat label value icon tone size='sm'|'md' trend raw loading onClick href />
+- ui/ContextMenu + ui/Kebab (x3): <ContextMenu items={[{label,icon,onSelect,tone,shortcut,disabled}]} trigger='contextmenu'|'button'>{row}</ContextMenu> — Radix-free portal menu with roving focus; used by RemoteSources/Webhook/Alert rows and, per project
+- ui/EntityRef (link-by-reference) (x6): <EntityRef kind='session'|'agent'|'project'|'tool'|'model'|'event'|'source' id label? short copy /> → builds /sessions/:id, /sessions/:id?tab=agents#agent, /kanban?project=, /activity?tool_name=, /sessions?status=; right
+- lib/format additions (x5): formatBytes(n), shortId(id, n=8), formatDateTime for RemoteSources:719 — delete 4 formatBytes copies
+- ui/Select size + label props (extend existing) (x4): <Select size='sm'|'md' aria-label id placeholder /> and <MultiSelect size /> sharing .input metrics; retire native <select>+ChevronDown
+- ui/Tooltip (merge Tip + FieldHelp + title) (x63): <Tooltip content side delay><trigger/></Tooltip> keyboard+hover, role=tooltip, token colours; keep Tip as alias for mouse-follow data tooltips
+- tailwind semantic tokens (x4): theme.extend.colors: success/warning/danger/info (emerald/amber/red/blue @ 400/500/10 /20 /30 aliases) + z-index scale (toast, modal, popover, tooltip) so Badge/Callout/Button tones map to tokens
+## PATTERNS (name:count)
+Inline button className clusters (bypassing .btn-primary/.btn-ghost):231; btn-ghost + 'border border-border' outlined re-combination:7; Inline badge / pill / chip clusters:112; Section header (icon + h3 + hint paragraph) on Settings sub-panels:12; Panel header row (title/subtitle left, action button right):6; Segmented tab strip / mode switcher:4; Toggle switch (role=switch) duplicated:2; Native <select> with ChevronDown overlay instead of <Select>:4; Native <input type=checkbox> instead of <Checkbox>:3; Form field label (label > span + FieldHelp + input.input):23; Copy-to-clipboard with transient 'copied' state:7; Inline delete confirmation instead of ConfirmModal:3; Error / warning banner boxes:8; Loading states: text-only vs Skeleton:4; Empty states: EmptyState vs ad-hoc:4; Spinner-in-button (Loader2/RefreshCw animate-spin ternary):27; Relative time / timestamp rendering:17; ID truncation:1; Three tooltip mechanisms:3; Mini stat tiles (compact StatCard clones):3; Icon box in dialog header (w-9 h-9 rounded-lg tinted):2; Duplicated formatBytes helper:4; Dropzone + selected-file chip + result card duplicated in ImportHistory:2; api.ts method catalog (name → route → entity/action):95
+## URL PARAMS
+- DocumentTitle (all routes) ?path prefix /sessions/:id, /sessions, /kanban, /activity, /analytics, /workflows, /cc-config, /run, /settings, /plan @src/components/DocumentTitle.tsx:21-45: maps pathname → document.title; session id sliced to 8 chars
+- /run ?prompt, autostart=1, session @src/pages/Run.tsx:1096,1141,1144: prefill composer, auto-send, resume a session (produced by Tabby.tsx:210)
+- /sessions ?status @src/pages/Sessions.tsx:124: useUrlTab(SESSION_FILTERS, '', {param:'status'}) — valid filter values incl. error
+- /sessions/:id ?tab @src/pages/SessionDetail.tsx:179: useUrlTab(DETAIL_TABS,'agents')
+- /kanban ?view, project @src/pages/KanbanBoard.tsx:121,133: board view + project filter
+- /analytics, /cc-config, / ?tab @src/pages/Analytics.tsx:687; src/pages/CcConfig.tsx:268; src/pages/Dashboard.tsx:973: useUrlTab active tab
+- /settings ?#hash @src/pages/Settings.tsx:2126,2131,2497: scrollIntoView on section id (alerts, import, remote-sources, claude-pricing, gpt-pricing)
+## NAV GAPS
+- [Settings › Alerts › Activity feed @src/components/AlertsNotifications.tsx:798-808] session id (generic 'View session' link; id itself never rende) -> /sessions/:id (keep) + show short id with copy; add 'View events' → /activity?session_id=
+- [Settings › Alerts › Activity feed @src/components/AlertsNotifications.tsx:789-810] agent id (not rendered at all (AlertEvent.agent_id available) -> /sessions/:session_id?tab=agents#agent-<id>
+- [Settings › Alerts › Activity feed @src/components/AlertsNotifications.tsx:797] alert rule (rule_name) (plain text after timeAgo) -> Rules tab scrolled to rule.id (setTab('rules') + #rule-<id>)
+- [Settings › Alerts › Rules list @src/components/AlertsNotifications.tsx:187-204,692] event type / tool name in rule config (plain 'event=PostToolUse · tool=Bash' text from de) -> /activity?event_type=&tool_name= (ActivityFeed does not yet read URL params — needs adding)
+- [Settings › Alerts › Channels (WebhookSettings) @src/components/WebhookSettings.tsx:439-443] scoped rules (rule_ids) ('Scoped to N rules' count text) -> expand to rule names / jump to Rules tab
+- [Settings › Alerts › Channels (WebhookSettings) @src/components/WebhookSettings.tsx:445-461] webhook delivery history (single last_delivery pill with error in native tit) -> deliveries drawer/list backed by api.webhooks.deliveries (api.ts:1957, currently unused)
+- [Settings › Remote sources @src/components/RemoteSources.tsx:676-688] source (remote machine id) ('{n} linked' session-count pill with hint title) -> /sessions filtered to this source (needs a source filter param; sessions.list only narrows via global ?sources
+- [Settings › Remote sources @src/components/RemoteSources.tsx:690-713] host / remote_home paths (mono text, truncated without tooltip) -> copy action (context menu) — no navigation target
+- [Settings › Import history @src/components/ImportHistory.tsx:730,389,488] project/cwd (result.path, default_projects_dir) (plain mono text) -> /sessions?cwd=<path> after import (Sessions supports cwd filter via api.sessions.list cwd[] but no URL param y
+- [Tabby panel @src/components/Tabby/TabbyPanel.tsx:173-178] errored sessions ('Errored' button navigates to bare /sessions) -> /sessions?status=error (param already accepted at Sessions.tsx:124)
+- [UpdateNotifier @src/components/UpdateNotifier.tsx:221-223] remote ref / SHA (commitsBehind text with remote_ref) -> none needed (external repo); copy SHA in context menu
+## ENTITIES
+- AlertRule: pages=['Settings#alerts › Rules tab (src/components/AlertsNotifications.tsx:675-720)', 'WebhookSettings rule-scoping checkboxes (src/components/WebhookSettings.tsx:760-774)']
+    avail=['Add rule (toggle form)@AlertsNotifications.tsx:439-44', 'Enable/Disable@AlertsNotifications.tsx:698-70', 'Delete@AlertsNotifications.tsx:709-71']
+    missing=['Edit rule (create-only form; no openEdit)', 'Duplicate rule', 'Test/preview matches (→ /activity filtered)', 'Copy rule id', 'Keyboard/palette access']
+    ctxmenu=['Edit', 'Enable/Disable', 'Duplicate', 'Preview matching events (→ /activity?event_type&tool_name)', 'Copy rule id', 'Delete']
+- AlertEvent (fired alert): pages=['Settings#alerts › Activity tab (src/components/AlertsNotifications.tsx:779-822)']
+    avail=['Acknowledge@AlertsNotifications.tsx:812-81', 'Acknowledge all@AlertsNotifications.tsx:754-76', 'Unacked only filter@AlertsNotifications.tsx:741-74', 'Refresh@AlertsNotifications.tsx:746-75', 'Load more@AlertsNotifications.tsx:826', 'View session@AlertsNotifications.tsx:801']
+    missing=['Open agent in session detail', 'Open rule', 'View details JSON', 'Copy message', 'Filter by rule', 'Unacknowledge']
+    ctxmenu=['Acknowledge', 'Open session', 'Open agent', 'Open rule', 'Copy message', 'Show details']
+- WebhookTarget: pages=['Settings#alerts › Channels tab (src/components/WebhookSettings.tsx:419-519)']
+    avail=['Add / Edit (inline form)@WebhookSettings.tsx:399-407 / ', 'Enable/Disable@WebhookSettings.tsx:462-466', 'Test@WebhookSettings.tsx:471-482', 'Delete@WebhookSettings.tsx:490-496 → ', 'Provider setup guide@WebhookSettings.tsx:594-634']
+    missing=['View delivery history (api.webhooks.deliveries api.ts:1957 unused)', 'Duplicate target', 'Copy url_preview', 'Open scoped rules']
+    ctxmenu=['Test', 'Edit', 'Enable/Disable', 'Deliveries', 'Copy URL preview', 'Delete']
+- RemoteSource: pages=['Settings#remote-sources (src/components/RemoteSources.tsx:646-903)', 'Data-scope chips (:437-455)']
+    avail=['Set data scope all/local/selected@RemoteSources.tsx:364-430 radi', 'Add / Edit source@RemoteSources.tsx:477-479 / :8', 'Test connection@RemoteSources.tsx:808-820', 'Sync now / Sync all@RemoteSources.tsx:821-829 / :4', 'Enable/Disable@RemoteSources.tsx:830-838', 'Remove (keep|purge data)@RemoteSources.tsx:846-852 → in']
+    missing=['View sessions from this source', 'Copy host / paths', 'Include only this source in scope (one click)', 'Uses inline confirm instead of ConfirmModal']
+    ctxmenu=['Sync now', 'Test', 'Edit', 'Enable/Disable', 'View sessions', 'Only this source (scope)', 'Copy host', 'Remove…']
+- Import job / ImportResult / ImportBackupResult: pages=['Settings#import (src/components/ImportHistory.tsx:328-781)']
+    avail=['Rescan default dir@ImportHistory.tsx:493-504', 'Scan folder path@ImportHistory.tsx:522-533', 'Upload archives (dropzone)@ImportHistory.tsx:540-600', 'Restore backup JSON@ImportHistory.tsx:610-670', 'Copy archive command@ImportHistory.tsx:421-434', 'Live progress@ImportHistory.tsx:169-179']
+    missing=['Open imported sessions (→ /sessions?cwd=)', 'Cancel running import', 'Import history log (component name says history but shows only last result)']
+    ctxmenu=['Copy path', 'Open sessions from path']
+- Update status (UpdateStatusPayload): pages=['Global modal (src/components/UpdateNotifier.tsx:197-310, mounted by Layout)']
+    avail=['Check now@UpdateNotifier.tsx:284-292', 'Dismiss (persists remote_sha in localStorage)@UpdateNotifier.tsx:147-155,:22', 'Copy command@UpdateNotifier.tsx:296-306', 'Reset dismissal@UpdateNotifier.tsx:137-141']
+    missing=['Snooze (time-based) vs permanent per-SHA dismiss', 'Open changelog/commit list']
+    ctxmenu=[]
+- Tabby companion status (TabbyStatus): pages=['Floating avatar + flyout on every page (src/components/Tabby/Tabby.tsx:227-284, TabbyPanel.tsx:105-216)']
+    avail=['Open/close panel@Tabby.tsx:250-283 (click), :18', 'Drag to reposition@Tabby.tsx:254-266 (useTabbyPos', 'Navigate Run/Activity/Sessions/Errored@TabbyPanel.tsx:166-178', 'Mute/Unmute, Clear alerts@TabbyPanel.tsx:179-189', 'Ask (intent match or hand off to /run?prompt=&autostart=1)@TabbyPanel.tsx:193-208, Tabby.']
+    missing=['Errored → /sessions?status=error', 'All copy is untranslated (no i18n namespace)']
+    ctxmenu=['Hide Tabby (tabbyPrefs.setEnabled)', 'Reset position', 'Mute']
+- Session / Agent / DashboardEvent / WorkflowRun (types only in this slice): pages=['types.ts definitions: Session :645-714, Agent :775-841, DashboardEvent :930-959, WorkflowRun :2276-2334, WSMessage union :1741-1790']
+    avail=['(rendered by other slices)@—']
+    missing=['A shared EntityRef/link helper: every id/cwd/model/tool string is rendered ad hoc by consumers']
+    ctxmenu=['Copy id', 'Open session', 'Open in Activity (session_id/agent_id/tool_name filters)', 'Open project on Kanban (?project=)', 'Open cwd (api.sessions.openCwd :616)']
+## DENSITY
+- StatCard @src/components/StatCard.tsx:100: single density: card p-5, uppercase label, text-2xl value, optional trend, `load => add `size: 'sm'|'md'` (sm = TabbyPanel StatChip :242-263 / ImportHistory ResultStat :873-880 layout) and optional `onClick`/`href` so tiles can link to filtered
+- EmptyState @src/components/EmptyState.tsx:93: fixed py-20, w-14 icon, text-base title (src/components/EmptyState.tsx:93-98); r => add `compact` (py-6, w-8 icon, text-sm) and use it for WebhookSettings.tsx:414, RemoteSources.tsx:633, MultiSelect.tsx:431
+- RemoteSources source card @src/components/RemoteSources.tsx:664: always-expanded card with 6 metadata rows + test detail grid (src/components/Rem => compact list row (label, StatusPill, host, last sync, kebab) with expand-on-click for provider chips/test output; move Test/Sync/Enable/Edit/Delete into a kebab
+- WebhookSettings target card @src/components/WebhookSettings.tsx:423: two-row card, 3 outlined buttons + toggle always visible (src/components/Webhook => single row: type badge, name, url_preview, last-delivery pill, toggle, kebab; detailed variant = deliveries drawer
+- AlertsNotifications rule row / alert row @src/components/AlertsNotifications.tsx:781: rows already compact (:677-718, :781-820) but no detailed variant; AlertEvent.de => expandable row (chevron) revealing details JSON + agent/session refs; rule row expand to show full config
+- Select vs MultiSelect trigger sizing @src/components/Select.tsx:193: Select trigger py-1.5 text-[11px] rounded-md (Select.tsx:193); MultiSelect trigg => one `size: 'sm'|'md'` prop on both, default md = .input metrics so filter bars align
+- Skeleton family @src/components/Skeleton.tsx:159: Skeleton, StatValueSkeleton, TextSkeleton, TableRowSkeleton, CardSkeleton exist  => add ListRowSkeleton (h-12/h-14 rows currently typed inline at AlertsNotifications.tsx:665-666,767-769)
+- ImportHistory instructions panel @src/components/ImportHistory.tsx:129: collapsible open by default (:129,:371-448) pushing the mode switcher below the  => default collapsed after first successful import; compact summary line when collapsed
+- ConfirmModal @src/components/ConfirmModal.tsx:238: fixed max-w-md dialog (:231); no room for an options row (RemoteSources purge ch => accept `children` slot for extra controls so RemoteSources/Settings inline confirms can adopt it
+## UX ISSUES
+- src/components/Tip.tsx:421 [high] Tooltip is mouse-only (onMouseEnter/Move/Leave); no focus/keyboard trigger, no role=tooltip/aria-describedby; hardcoded hex bg-[#12121f] border-[#2a2a4a] at :43
+- src/components/DateTimePicker.tsx:211 [high] Clear (X) is an <svg> with onClick nested inside the trigger <button> — not focusable, no label; prev/next month buttons :221/:233 have no aria-label; popover :
+- src/components/Tabby/TabbyPanel.tsx:109 [high] Every visible string is hardcoded English (:109,:117,:129,:135,:146-159,:166-188,:196,:199,:204) — violates i18n-parity rule; Tabby.tsx:273-275 aria-label/title
+- src/components/AlertsNotifications.tsx:397 [medium] Segmented tabs lack role=tablist/tab/aria-selected and are not arrow-key navigable; count badge colours differ per tab (:415-421)
+- src/components/AlertsNotifications.tsx:746 [medium] Refresh icon-only button has title but no aria-label; :473/:584 use native <select>+ChevronDown instead of <Select>; :838 passes an inline English default to t(
+- src/components/WebhookSettings.tsx:529 [medium] Close (X) and header-row remove (X :724-731) icon buttons have no aria-label; form label cluster `text-[11px] text-gray-500` differs from AlertsNotifications `t
+- src/components/WebhookSettings.tsx:102 [medium] TYPE_STYLES uses arbitrary brand hex classes (text-[#E01E5A] …) — 10 off-palette colours; Toggle :142-168 is a copy of Settings.tsx:373 and both use bg-blue-500
+- src/components/WebhookSettings.tsx:436 [low] url_preview truncated (max-w-[220px]) with no title/tooltip; rule-name checkbox labels truncated :772 without title
+- src/components/RemoteSources.tsx:112 [medium] StatusPill labels 'Idle/Syncing/OK/Error' hardcoded English (:114-121) and duplicate StatusBadge concept; every t() call carries an inline English default (:185
+- src/components/RemoteSources.tsx:839 [medium] Edit/Delete icon-only btn-ghost buttons rely on title only (no aria-label); delete uses inline confirm :857-898 with native checkbox instead of ConfirmModal/Che
+- src/components/RemoteSources.tsx:719 [low] last_sync_at rendered via raw `new Date().toLocaleString()` — ignores getCurrentLocale()/parseDate UTC handling in format.ts; host :690 truncated without toolti
+- src/components/ImportHistory.tsx:380 [medium] Collapsible header uses '▾'/'▸' glyphs and no aria-expanded; ModeButton :816 lacks aria-pressed; dropzone divs :540/:610 are click targets without role=button/t
+- src/components/ImportHistory.tsx:820 [low] Active state uses blue-500 (also :554,:858) while the rest of the app uses accent indigo — inconsistent selection colour
+- src/components/Checkbox.tsx:92 [low] role=checkbox button: Space toggles via native button but there is no focus-visible ring style; consumers pass ad-hoc labelClassName (WebhookSettings.tsx:692,75
+- src/components/Select.tsx:202 [medium] listbox aria-label is set to the current option's label (mislabels the control); no `aria-label`/`id` prop for the trigger so consumers cannot associate a <labe
+- src/components/MultiSelect.tsx:395 [low] popover width w-[min(32rem,calc(100vw-2rem))] overflows narrow parents; trigger metrics (h-[38px] text-sm rounded-lg) do not match Select (py-1.5 text-[11px] ro
+- src/components/Skeleton.tsx:106 [low] default aria-label 'Loading' (also CardSkeleton :161) is untranslated
+- src/components/ActionToast.tsx:57 [low] Toast is success-only (Check emerald) with a single fixed 2.2s timer; no error/info tone, no queue, z-[75] below ConfirmModal z-50? (higher) but below UpdateNot
+- src/components/UpdateNotifier.tsx:139 [low] Listens to raw window event 'dashboard:reset-update-dismissal' not declared in lib/appEvents.ts (which centralises ccam:* events)
+- src/components/SplashScreen.tsx:573 [low] ~280 lines of CSS-in-JS with its own hex palette and a parallel button system (.splash-continue, .splash-hook-gate-primary/secondary :733-795) — third styling s
+- src/index.css:14 [low] Scrollbar/skip-link colours hardcoded hex (:14,:23,:27,:32,:101-103,:112) duplicating tailwind.config tokens; tailwind.config.js:141-158 defines surface/border/
+- src/lib/api.ts:1141 [medium] settings.importData and import.upload (:1423) bypass request(): they skip the x-dashboard-token header path and re-implement error shaping
+- src/components/AlertsNotifications.tsx:684 [low] rule name/description/message truncated (:684,:692,:794) with no tooltip
+## TEST/I18N: TESTS. Vitest (jsdom, globals) configured in client/vitest.config.ts:34-35 (setupFiles ./src/test-setup.ts); vite.config.ts has no test block, only /api + /ws proxy to 127.0.0.1:$DASHBOARD_PORT (:51-63) and __APP_VERSION__ define (:48-50). tsconfig.json is the single tsconfig (strict, noUncheckedIndexedAccess :18); no tsconfig.app/node.json exist. test-setup.ts: jest-dom matchers (:14), imports i18n/index (:17), polyfills localStorage/sessionStorage with a Map store (:20-58), forces i18n 'en' beforeEach (:61-63), RTL cleanup afterEach (:66-68). screens.snapshot.test.tsx mocks the whole `api` o
+
+######## feed-analytics: client/src/pages/{ActivityFeed,Analytics,Workflows}.tsx, client/src/plan/{
+## KIT CANDIDATES
+- PageHeader (x4): <PageHeader icon={Activity} title subtitle live={wsConnected} meta={<UpdatedAt/>} actions={<>…</>} />
+- LivePill (x3): <LivePill connected={bool} /> — emerald pulse-dot vs gray; reads eventBus itself if no prop
+- FloatingTip + useAnchoredTip (x11): useAnchoredTip() → {show(anchorEl|point, node), hide, portal}; renders themed panel, clamps to viewport, flips; charts pass React nodes instead of createElement builders
+- TipRows (label/value rows for tooltips) (x5): <TipRows title subtitle rows={[[label,value],…]} description hint />
+- InfoPopover (x2): <InfoPopover label title sections={[{heading, body}]} value? /> — Info icon trigger, hover+focus+Escape, aria-describedby
+- StatTile (x21): <StatTile label value raw? sub? icon? accent? size='sm'|'md'|'lg' loading? info={<InfoPopover/>} />  (merge with components/StatCard.tsx)
+- Panel / ChartCard (x30): <Panel title subtitle? number? info? actions? footer? size? >children</Panel>
+- KVList / KVRow (x23): <KVList rows={[{label, value, mono?, tone?, raw?, copy?, to?}]} layout='inline'|'grid' />
+- SectionLabel (x45): <SectionLabel size='xs'|'sm' tone='muted'>{text}</SectionLabel> — one uppercase tracking style
+- TabStrip / SegmentedControl (x5): <TabStrip value onChange items={[{key,label,icon?}]} size='sm' variant='pill'|'accent' /> with tablist roles + arrow keys
+- Disclosure / CollapsibleRow (x9): <Disclosure open onToggle header={node} chevron='rotate'|'swap' meta?>{body}</Disclosure> — aria-expanded, Enter/Space
+- StatusPill + statusTone() (x9): statusTone(status): {text,bg,border,dot,hex} shared by StatusBadge, charts and d3; <StatusPill status size='xs'|'sm' />
+- CopyButton (move primitives.CopyButton to ui, add iconOnly) (x7): <CopyButton text iconOnly? label? size='xs' />
+- EmptyPanel (extend components/EmptyState with size='sm' and inline variant) (x28): <EmptyPanel icon? title description? action? size='sm'|'md' />
+- ListSkeleton / ChartSkeleton (x6): <ListSkeleton rows=4 /> <ChartSkeleton bodyH /> (promote Analytics ChartCardSkeleton 628 to ui)
+- RelativeTime (x5): <RelativeTime iso /> → timeAgo text with title=formatDateTimeFull, locale-aware, auto-refresh
+- EntityRef (link-by-reference chip) (x30): <EntityRef kind='session'|'agent'|'tool'|'project'|'model'|'event'|'run'|'plan' id label? truncate? to? onContextMenu /> — resolves route + filter URL, mono/short-id styling, copy on ctx menu
+- ContextMenu + useContextMenu (x0): <ContextMenu items={[{label, icon?, onSelect, to?, danger?, separator?}]} /> attached via onContextMenu; keyboard (Shift+F10), Escape, focus return
+- IconButton (x8): <IconButton icon={RefreshCw} label={t(...)} size='sm' variant='ghost' /> — always aria-label + title
+- Pagination (x1): <Pagination page pageSize total onChange window=5 />
+- BarRow (x6): <BarRow label value max color format={fmt} labelWidth trailer? onClick? />
+- Legend (extend PaginatedLegend with simple mode) (x8): <Legend items={[{label,color,shape?}]} paginate? />
+- CodePanel (unify event-views primitives + conversation CodeBlock) (x8): <CodePanel label lang? filename? tone? lineNumbers? maxHeight? copy>{text}</CodePanel>; Terminal/Output/Diff become thin wrappers
+- Drawer (x2): <Drawer side='left'|'right' title onClose width>{children}</Drawer> — role=dialog, focus trap, Escape, backdrop
+- Badge (extend .badge into a component) (x13): <Badge tone='neutral'|'accent'|'success'|'warning'|'danger'|custom size='xs'|'sm'>{label}</Badge>
+- chartTheme tokens (x8): export const chart = { palette:[…], status:{…}, grid:'#2a2a3d', font:'Inter, sans-serif', tip:{bg,border} } consumed by d3 renderers
+- FilterChipDropdown → reuse components/MultiSelect (x1): <MultiSelect label options selected onChange searchable /> replacing EventFilters ChipGroup
+## PATTERNS (name:count)
+Page header (icon box + h1 + live pill + subtitle + right-side actions):4; Live / Offline websocket pill:3; Fixed dark chart tooltip chrome (bg-[#12121f] border-[#2a2a4a]):11; Viewport-clamped tooltip/popover positioning code:8; Imperative DOM tooltip row builders (document.createElement + cssText):5; Info (i) hover/focus popover with titled sections:2; Stat tile (label / big value / icon / sub):5; Chart panel: `card p-5` + h3 text-sm font-medium title:25; Key/value summary row (flex justify-between text-xs, label gray-500, mono value):23; Uppercase micro section label (text-[10px] font-semibold uppercase tracking-wider):45; Tab strip / segmented control:5; Chevron disclosure header (expand/collapse row):9; Local status -> colour maps (parallel to shared StatusBadge):9; Copy-to-clipboard button:2; Hand-rolled empty states:28; Hand-rolled loading placeholders (bypassing shared Skeleton):6; Relative-time label without full-timestamp tooltip:5; Ad-hoc ID / label truncation:10; Local number/duration formatters duplicating lib/format:10; Icon-only buttons (refresh / close / export / external-link):8; Terminal / code chrome block (label bar + copy + <pre>):8; Horizontal bar row (label | track | value):6; Legend (swatch + label list):8; .badge with per-site colour classes:13; Overlay drawer / modal shell:2; Hardcoded hex chart palettes:8
+## URL PARAMS
+- /analytics ?tab @client/src/pages/Analytics.tsx:687: cost|tokens|productivity|workflow via useUrlTab(ANALYTICS_TABS,'cost'); also reachable by palette
+- /plan/:slug? ?:slug (route param) @client/src/plan/Plan.tsx:97: plan project slug; empty → redirect to last-used/first plan
+- /activity ?(none) @client/src/pages/ActivityFeed.tsx:117: filters (event_type, tool_name, agent_id, session_id, status, q, from, to) live only in useState — no deep link possible
+- /workflows ?(none) @client/src/pages/Workflows.tsx:106: statusFilter, selectedNode, selectedSessionId are useState only
+- /sessions/:id (target, out of slice) ?tab @client/src/pages/SessionDetail.tsx:179: agents|conversation|timeline via useUrlTab — usable as link target from this slice
+- /sessions (target, out of slice) ?cwd @client/src/pages/Sessions.tsx:139: seeds the cwd multi-select once on mount
+- /kanban (target, out of slice) ?project @client/src/pages/KanbanBoard.tsx:133: project filter read via useSearchParams
+- /run (target, out of slice) ?session @client/src/pages/SessionDetail.tsx:296: preselect a session to drive
+## NAV GAPS
+- [/activity @client/src/pages/ActivityFeed.tsx:117] filters (session_id/tool_name/agent_id/event_type/q/from/to) (in-memory EventFiltersValue only) -> /activity?session_id=&tool_name=&agent_id=&event_type=&q= (read on mount, write on change)
+- [/activity @client/src/pages/ActivityFeed.tsx:485] tool name (plain mono pill) -> /activity?tool_name=<name> (or toggle filters.tool_name in place)
+- [/activity @client/src/pages/ActivityFeed.tsx:471] project · session · agent origin label (gray text with title tooltip of raw ids) -> project → /sessions?cwd= or /kanban?project=; session → /sessions/:id; agent → /activity?agent_id= or /session
+- [/activity @client/src/pages/ActivityFeed.tsx:496] event ('View session' Link to /sessions/:id only) -> /sessions/:id?tab=timeline#event-<id> (SessionDetail timeline scrolled to event)
+- [/activity (EventDetail) @client/src/components/EventDetail.tsx:190] session_id / agent_id rows (plain FieldRow scalar text) -> /sessions/:id and /sessions/:id?tab=agents#<agent_id>; plus copy
+- [/activity (EventDetail) @client/src/components/EventDetail.tsx:117] cwd payload row (plain scalar) -> /sessions?cwd=<cwd> and 'Open folder' via api.sessions.openCwd
+- [/activity (EventDetail) @client/src/components/EventDetail.tsx:219] model / tool_name / transcript_path payload rows (plain scalar (model prettified only)) -> model → /settings pricing; tool_name → /activity?tool_name=; transcript_path → /sessions/:id?tab=conversation
+- [/analytics @client/src/pages/Analytics.tsx:1394] tool name (Tool usage bars) (BarRow label text) -> /activity?tool_name=<tool>
+- [/analytics @client/src/pages/Analytics.tsx:1317] subagent type (Subagent types bars) (BarRow label text) -> /sessions?subagent_type= (needs api) or /workflows with DAG node preselected
+- [/analytics @client/src/pages/Analytics.tsx:1370] event type (Event types bars) (BarRow label text) -> /activity?event_type=<type>
+- [/analytics @client/src/pages/Analytics.tsx:1252] model (Cost by model rows/donut) (formatModelName text) -> /settings (pricing table) / sessions filtered by model
+- [/analytics @client/src/pages/Analytics.tsx:241] day cell (heatmap / sparkline / cost line) (hover tooltip only) -> /activity?from=<day>&to=<day+1>
+- [/workflows @client/src/pages/Workflows.tsx:251] selected DAG node (subagent type) (badge with raw node id e.g. 'subagent:foo') -> /activity?agent_id= / sessions filtered — and actually filter ToolExecutionFlow (prop is ignored)
+- [/workflows (WorkflowStats) @client/src/components/workflows/WorkflowStats.tsx:325] most common tool flow 'A → B' (stat value text) -> /activity?tool_name=A,B
+- [/workflows (SubagentEffectiveness / ConcurrencyTimeline / WorkflowPatterns / ErrorPropagationMap / AgentCollaborationNetwork) @client/src/components/workflows/SubagentEffectiveness.tsx:341] subagent type (card title / lane label / StepPill / list text / S) -> /workflows DAG selection + /activity?agent_id= ; Analytics subagent bars
+- [/workflows (ErrorPropagationMap) @client/src/components/workflows/ErrorPropagationMap.tsx:260] error summary rows (truncated text with count) -> /activity?event_type=error,APIError&q=<summary>
+- [/workflows (SessionComplexityScatter) @client/src/components/workflows/SessionComplexityScatter.tsx:376] session bubble (tooltip name; click only drills in) -> /sessions/:id (in addition to in-page drill-in)
+- [/workflows (SessionDrillIn) @client/src/components/workflows/SessionDrillIn.tsx:448] session header name/id (plain bold text; no link anywhere in the panel) -> /sessions/:id (and ?tab=conversation|timeline)
+- [/workflows (SessionDrillIn AgentTree) @client/src/components/workflows/SessionDrillIn.tsx:195] agent node (tree row text) -> /sessions/:id?tab=agents#<agent_id> or ?tab=conversation&transcript=<agent_id>
+- [/workflows (SessionDrillIn ToolTimeline / EventSequence) @client/src/components/workflows/SessionDrillIn.tsx:265] tool name / event (indigo pill / uppercase type text) -> /activity?session_id=<id>&tool_name=<tool>; event → session timeline at event
+- [/workflows (SessionDrillIn) @client/src/pages/Workflows.tsx:107] selected session (drill-in) (useState only) -> /workflows?session=<id> so the drill-in is linkable
+- [/workflows (WorkflowRunsPanel) @client/src/components/workflows/WorkflowRunsPanel.tsx:400] workflow run (expand-only; session link lacks run/agent anchor) -> /workflows?run=<run_id> (expanded) and /sessions/:id?tab=conversation&transcript=<agentId> for each agent row
+- [/workflows (WorkflowRunsPanel) @client/src/components/workflows/WorkflowRunsPanel.tsx:386] run.default_model / a.model / a.lastToolName (raw mono text (not even formatModelName)) -> model → pricing; tool → /activity?tool_name=&agent_id=
+- [/plan/:slug @client/src/plan/Plan.tsx:806] agent (AgentRow / TaskCard badge) (type · lane text, badge) -> /sessions/:agent.session?tab=agents#<agent.claudeId> and /activity?agent_id=
+- [/plan/:slug @client/src/plan/Plan.tsx:243] plan cwd (picker hint, model.project.cwd) (Select option hint text) -> /sessions?cwd= , /kanban?project= , openCwd
+- [/plan/:slug @client/src/plan/Plan.tsx:107] task (useState selected) -> /plan/:slug?task=<key> so the drawer is linkable
+- [/plan/:slug @client/src/plan/Plan.tsx:518] milestone step commit sha (mono text) -> external git host / copy
+- [/plan/:slug (DetailDrawer) @client/src/plan/Plan.tsx:992] tool events (e.tool_name) (list text) -> /activity?agent_id=<agent.id>&tool_name=<tool>
+- [/plan/:slug (DetailDrawer) @client/src/plan/Plan.tsx:940] open session (<a href>) -> react-router Link to /sessions/:id (currently full reload <a href>)
+- [/sessions/:id conversation (MessageList) @client/src/components/conversation/MessageList.tsx:414] model pill / tool_use block (pill text / collapsible header) -> model → pricing; tool_use id → /sessions/:id?tab=timeline#event (PreToolUse with same tool_use_id)
+- [/sessions/:id conversation (ConversationView) @client/src/components/conversation/ConversationView.tsx:428] selected transcript (agent) (native <select>) -> ?tab=conversation&transcript=<agent_id> (prop initialTranscriptId exists but selection is not written back to 
+## ENTITIES
+- Event (DashboardEvent): pages=['/activity (ActivityFeed rows + EventDetail)', '/sessions/:id timeline (EventDetail, out of slice caller)', '/workflows SessionDrillIn ToolTimeline + EventSequence', '/plan DetailDrawer tool events']
+    avail=['Expand / collapse detail@ActivityFeed row', 'View session@ActivityFeed row Link', 'Copy tool_input/tool_response/raw JSON@EventDetail CodeView / Termina', 'Filter feed by status/event_type/tool/agent/session/text/date@EventFilters toolbar', 'Pause/resume live, refresh, clear filters@ActivityFeed header + palette', 'Paginate@ActivityFeed footer']
+    missing=['Copy event id / session id / agent id', "One-click 'filter by this tool / agent / session' from the row", 'Open session at timeline scrolled to this event (?tab=timeline#event-id)', 'Permalink to event (URL-backed filters + expanded id)', 'Open cwd folder (api.sessions.openCwd)', 'Show raw JSON toggle vs summary in the row', 'Keyboard shortcut to expand next/prev row']
+    ctxmenu=['Copy event ID', 'Copy session ID', 'Copy agent ID', 'Copy payload JSON', 'Filter by tool', 'Filter by agent', 'Filter by session', 'Filter by event type', 'Open session', 'Open session timeline at event']
+- Session: pages=['/activity (name pill, session filter chips)', '/workflows (SessionDrillIn header/selector, SessionComplexityScatter tooltip, WorkflowRunsPanel run.session_id link)', '/plan (DetailDrawer open-session link, totals.sessions, agent.session)', '/analytics (aggregates only: sessions_by_status, daily_sessions)']
+    avail=['View session@ActivityFeed row, WorkflowRuns', 'Drill in (in-page)@SessionComplexityScatter bubbl', 'Search sessions@SessionDrillIn SessionSelector', 'Open session@Plan DetailDrawer']
+    missing=['Filter activity by session (/activity?session_id=)', 'Open conversation / timeline tab directly', 'Copy session id', 'Open project folder (api.sessions.openCwd)', 'Drive in /run?session=', 'Server-side search (api.sessions.list({q}))']
+    ctxmenu=['Open session', 'Open conversation', 'Open timeline', 'Filter activity by session', 'Copy session ID', 'Copy session name', 'Open project folder', 'Open in Run']
+- Agent / subagent type: pages=['/activity (origin label via agentOriginLabel; EventDetail agent_name/agent_id rows; EventFilters agent chips)', '/analytics (Subagent types bars, Agent status donut)', '/workflows (OrchestrationDAG nodes, AgentCollaborationNetwork nodes, SubagentEffectiveness cards, WorkflowPatterns StepPills, ConcurrencyTimeline lanes, ErrorPropagationMap top types, SessionDrillIn AgentTree, WorkflowRunsPanel agent rows)', '/plan (AgentsPanel AgentRow, TaskCard agent badge, DetailDrawer)']
+    avail=['Select DAG node (filter badge)@OrchestrationDAG', 'Expand pattern detail@WorkflowPatterns', 'Drag node@AgentCollaborationNetwork', 'Hover tooltips@all workflow charts, Plan (non', 'Filter events by agent@EventFilters (only when agentO']
+    missing=['Jump to session scrolled to agent (?tab=agents#id)', 'Open agent transcript (ConversationView transcript select)', 'Filter activity by agent_id / subagent_type', 'Copy agent id', 'ActivityFeed should pass agentOptions/agentInfoById it already holds', 'Keyboard access to DAG/network nodes']
+    ctxmenu=['Open in session', 'Open agent transcript', 'Filter activity by agent', 'Show effectiveness (workflows)', 'Copy agent ID', 'Copy subagent type']
+- Tool: pages=['/activity (tool pill; EventFilters tool chips; EventDetail per-tool views)', '/analytics (Tool usage bars)', '/workflows (ToolExecutionFlow sankey, WorkflowStats topFlow, SessionDrillIn ToolTimeline, WorkflowRunsPanel lastToolName)', '/plan (DetailDrawer tool events, AgentRow lastTool)', '/sessions/:id conversation (ToolCallBlock header)']
+    avail=['Filter feed by tool@EventFilters ChipGroup', 'Expand tool call@ToolCallBlock', 'Copy command/output@primitives Terminal/OutputBloc', 'Hover share stats@ToolExecutionFlow nodes/links']
+    missing=['Click tool name anywhere → /activity?tool_name=', 'Copy file path from Read/Edit/Write views', 'Open file path (no API today)', 'Jump from ToolCallBlock to the matching PreToolUse/PostToolUse event']
+    ctxmenu=['Filter activity by tool', 'Copy tool name', 'Copy command / file path', 'Copy input JSON', 'Copy output', 'Open matching event']
+- Project / cwd: pages=['/activity (leading origin segment via projectFromEvent/projectFromCwd; EventDetail cwd row)', '/plan (picker hint p.cwd, model.project.cwd)']
+    avail=[]
+    missing=['→ /sessions?cwd=', '→ /kanban?project=', 'Open folder (api.sessions.openCwd exists, unused here)', 'Copy path']
+    ctxmenu=['Show sessions in project', 'Open kanban for project', 'Open folder', 'Copy path']
+- Model: pages=['/analytics (Cost by model donut/rows, StatPill sub)', '/workflows (ModelDelegationFlow nodes, SessionComplexityScatter tooltip, SessionDrillIn header/selector, WorkflowRunsPanel run.default_model/a.model)', '/plan (AgentRow, TaskCard badge, lane live agent)', '/sessions/:id conversation (MessageList pill)', '/activity (EventDetail model row)']
+    avail=['Hover stats@ModelDelegationFlow, DonutChar']
+    missing=['Link to pricing settings', 'Filter sessions by model (no api param today)', 'Copy model id', 'Consistent formatModelName (WorkflowRunsPanel shows raw)']
+    ctxmenu=['Copy model ID', 'Open pricing']
+- Workflow run (Workflow-tool journal): pages=['/workflows (WorkflowRunsPanel self-fetch)', '/sessions/:id (WorkflowRunsPanel controlled, out-of-slice caller)']
+    avail=['Expand run@run header', 'Filter by phase@phase badges', 'Expand agent result (lazy full transcript)@results list', 'Open parent session@header ExternalLink', 'Live refresh@eventBus workflow_upserted']
+    missing=['Permalink ?run=<id>', 'Open agent transcript in ConversationView', 'Copy run_id / agent id / result text', 'Export run JSON (api.workflows.run(runId) exists, unused)', 'Filter activity by run agents', 'Compact list variant for SessionDetail']
+    ctxmenu=['Open session', 'Open agent transcript', 'Copy run ID', 'Copy result', 'Copy prompt', 'Export run JSON', 'Filter activity by agent']
+- Plan (project / story / milestone / lane / task): pages=['/plan/:slug']
+    avail=['Pick plan@header Select', 'Refresh@header button', 'Select story / expand milestone / lane filter@RailPanel', 'Tick task@TaskCard / DetailDrawer Checkb', 'Open task detail@TaskCard click', 'Open session@DetailDrawer', 'Mobile rail/agents drawers@header buttons']
+    missing=['Deep link ?task=<key> / ?lane=<letter>', 'Copy task key / text', 'Open agent in session / activity', 'Open project cwd / sessions filtered by cwd', 'Link commit sha', 'Translate lane.mode / waiting.kind', 'Keyboard-accessible TaskCard and drawers with Escape/focus trap']
+    ctxmenu=['Tick / untick', 'Open task detail', 'Copy task key', 'Copy task text', 'Open agent session', 'Filter activity by agent', 'Show lane only', 'Open project folder']
+- Workflow pattern: pages=['/workflows (WorkflowPatterns)']
+    avail=['Expand detail@PatternItem', 'onPatternClick@Workflows.tsx:301']
+    missing=['Filter sessions by pattern (no api)', 'Copy pattern', "Jump to a step's subagent type"]
+    ctxmenu=['Copy pattern', 'Show sessions with pattern (future)']
+- Transcript message / conversation: pages=['/sessions/:id?tab=conversation (ConversationView + MessageList; out-of-slice caller)', '/workflows WorkflowRunsPanel (raw prompt/result <pre>)']
+    avail=['Pick transcript (main/subagent)@ConversationView toolbar', 'Refresh / load older / scroll to new@toolbar, top hint, floating bu', 'Expand thinking / tool call / collapsible blocks@MessageList, ToolCallBlock, Co', 'Copy code@CodeBlock']
+    missing=['Copy message text / raw block', 'Jump to matching timeline event for a tool_use', 'Permalink to message / transcript (?transcript=)', 'Search within conversation', 'i18n of all labels', 'Dense/compact row mode for embedding (WorkflowRunsPanel results)']
+    ctxmenu=['Copy message', 'Copy as markdown', 'Open tool event in timeline', 'Collapse all tool calls', 'Expand all thinking', 'Copy tool input / output']
+## DENSITY
+- ActivityFeed event row @client/src/pages/ActivityFeed.tsx:427: Single fixed layout: two-line time column, badge, origin, title, tool pill, time => Add `compact` variant (single line, icon-only session link, no date sub-line, py-2) for embedding in Dashboard/SessionDetail; keep EventDetail as the detailed p
+- EventDetail panel @client/src/components/EventDetail.tsx:244: Always renders SummaryBlock + every payload FieldRow; 160px label column breaks  => Add `variant='summary'|'full'` — summary-only for hover previews / compact rows; responsive label column (grid-cols-[minmax(96px,160px)_1fr]).
+- WorkflowRunsPanel @client/src/components/workflows/WorkflowRunsPanel.tsx:230: Same full expandable table + results rendered on /workflows and inside SessionDe => Add `variant='list'` (one-line row: name, status badge, agents/tokens/duration, timeAgo) for SessionDetail and Dashboard; keep expanded view as `variant='detail
+- Plan TaskCard @client/src/plan/Plan.tsx:694: depth===0 renders card-hover with badges; depth>0 renders a bare bordered line — => Make explicit `variant='card'|'row'`, reuse the row variant for the DetailDrawer child list and AgentsPanel; drop the parent-onSelect inheritance for children.
+- Plan AgentRow @client/src/plan/Plan.tsx:793: Compact card only (type · lane, model, cost, elapsed, lastTool, say). => Add a detailed variant (all PlanAgent fields, waiting since, session link, recent tool events) used in DetailDrawer instead of re-fetching events there.
+- Stat tiles (Analytics StatPill, WorkflowStats StatCard, CompactionImpact StatBox, SubagentEffectiveness MetricBox, WorkflowPatterns DetailStat) @client/src/pages/Analytics.tsx:584: Five local variants + shared StatCard; sizes 2xl/sm/xs and padding differ. => One StatTile with `size='sm'|'md'|'lg'`, optional `info` popover slot and `raw` tooltip; delete the 5 locals.
+- SessionDrillIn TreeNode / SessionSelector rows @client/src/components/workflows/SessionDrillIn.tsx:179: Bespoke compact rows with local status pills and raw status text. => Use AgentStatusBadge compact + a shared SessionRow mini variant (same one the Sessions list would use) so status/model/time render identically.
+- MessageList message row @client/src/components/conversation/MessageList.tsx:396: Always avatar + header + full blocks; MarkdownContent has `dense`, CodeBlock has => Add `dense` prop to MessageList (no avatar, single-line header, tool calls collapsed) and use it in WorkflowRunsPanel results instead of raw <pre>.
+- Analytics chart cards @client/src/pages/Analytics.tsx:1023: Uniform `card p-5` with h3; no compact form for Dashboard reuse. => ChartCard with `size='sm'` (h-32 body, no footer rows) so Dashboard can embed heatmap/sparkline without copying markup.
+- WorkflowPatterns PatternItem @client/src/components/workflows/WorkflowPatterns.tsx:195: Already a good two-density model: collapsed row (StepFlow max 4 pills) + expande => Keep; reuse its Disclosure shape as the kit's CollapsibleRow reference implementation.
+## UX ISSUES
+- client/src/pages/ActivityFeed.tsx:505 [medium] EventDetail is rendered without agentInfoById/sessionNameById although both maps are built at 124/134 — the panel shows raw ids on /activity while SessionDetail
+- client/src/pages/ActivityFeed.tsx:377 [medium] Refresh is an icon-only button with no aria-label or title.
+- client/src/pages/ActivityFeed.tsx:525 [low] aria-label="First page" / "Last page" (588) are hardcoded English, not i18n.
+- client/src/pages/ActivityFeed.tsx:474 [low] Origin label tooltip is `${session_id} · ${agent_id}` raw ids; not clickable, no copy.
+- client/src/pages/ActivityFeed.tsx:407 [low] Nested scroll region with magic max-h-[calc(100vh-260px)] min-h-[560px]; on short viewports the page scrolls and the list scrolls.
+- client/src/pages/ActivityFeed.tsx:391 [low] sessionOptions array rebuilt from the Map on every render (not memoized) and passed to EventFilters.
+- client/src/pages/Analytics.tsx:946 [low] lastUpdate.toLocaleTimeString() ignores the i18n locale (format.ts exposes getCurrentLocale); same in Workflows.tsx:612 and MessageList.tsx:185.
+- client/src/pages/Analytics.tsx:1064 [medium] Tab strip buttons lack role=tablist/tab, aria-selected; same for Workflows.tsx:577 and SessionDrillIn.tsx:135.
+- client/src/pages/Analytics.tsx:241 [medium] Heatmap cells, Sparkline bars (318), Donut arcs (525) and CostTrendLine points (402) are mouse-only divs/circles with no keyboard or aria equivalent.
+- client/src/pages/Analytics.tsx:379 [low] SVG gradient id 'daily-cost-fill' is a fixed global id — collides if the chart is mounted twice; same for OrchestrationDAG 'glow'/'edge-glow' (560,573), AgentCo
+- client/src/pages/Analytics.tsx:1036 [low] Axis labels use date.slice(5) (MM-DD) — not locale aware; same at 1212.
+- client/src/pages/Analytics.tsx:1455 [low] maxD recomputed inside .map for every row (O(n²)); trivial but sloppy.
+- client/src/pages/Analytics.tsx:1245 [medium] Donut colour palette literal inline; every chart file has its own hex palette and 'Inter, sans-serif' font string — no theme tokens, dark-only.
+- client/src/pages/Workflows.tsx:271 [high] filterAgentType from DAG selection is passed to ToolExecutionFlow but ignored (`_filterAgentType` at ToolExecutionFlow.tsx:190) — the 'Filtered by' badge (251) 
+- client/src/pages/Workflows.tsx:251 [medium] Filter badge shows the raw node id (e.g. 'subagent:frontend-reviewer', 'outcome:error').
+- client/src/pages/Workflows.tsx:301 [low] onPatternClick={() => {}} — no-op callback wired into WorkflowPatterns.
+- client/src/pages/Workflows.tsx:594 [medium] Refresh/Export icon buttons have title only (no aria-label).
+- client/src/pages/Workflows.tsx:484 [medium] ChartInfoPopover aria-label reuses the 'What this shows' label; popover has role=tooltip but no aria-describedby link, and opens on hover with pointer-events-no
+- client/src/pages/Workflows.tsx:174 [low] Loading uses raw `card h-24 animate-pulse bg-surface-2` instead of shared Skeleton/CardSkeleton.
+- client/src/pages/Workflows.tsx:406 [low] Section subtitle hidden below lg and only recoverable via title tooltip.
+- client/src/components/workflows/WorkflowRunsPanel.tsx:362 [high] <Link> (400) is nested inside a <button> — invalid interactive nesting; keyboard users can't reach the link.
+- client/src/components/workflows/WorkflowRunsPanel.tsx:360 [medium] Uses raw palette classes (border-gray-800, bg-card/40, bg-gray-900/30, hover:bg-gray-800/30) instead of the surface/border tokens every other component uses.
+- client/src/components/workflows/WorkflowRunsPanel.tsx:386 [low] run.default_model and a.model (563) shown raw, not formatModelName.
+- client/src/components/workflows/WorkflowRunsPanel.tsx:449 [low] Metrics table has no caption/scope; result rows (534) are buttons with nested badge+text but no aria-label describing the agent.
+- client/src/components/workflows/SessionDrillIn.tsx:82 [medium] statusColor duplicates StatusBadge colours; hand-rolled status pill (189) and raw untranslated s.status (626) instead of AgentStatusBadge/SessionStatusBadge.
+- client/src/components/workflows/SessionDrillIn.tsx:386 [low] NoSessionState re-declares the same tabs array as TabBar (117) — copy/paste duplication.
+- client/src/components/workflows/SessionDrillIn.tsx:510 [medium] Search loads up to 5000 sessions client-side instead of api.sessions.list({ q }).
+- client/src/components/workflows/SessionDrillIn.tsx:563 [medium] Selector trigger is a div with onClick; dropdown has no listbox/option roles, no arrow-key navigation, no Escape.
+- client/src/components/workflows/SessionDrillIn.tsx:334 [low] Event timestamps are opacity-0 until hover — invisible to keyboard/touch users.
+- client/src/components/workflows/SessionDrillIn.tsx:448 [medium] Session name/id in header has no link to /sessions/:id and no copy.
+- client/src/components/workflows/SessionComplexityScatter.tsx:360 [medium] Bubble click is the only way to drill in; no keyboard path, no link to session, tooltip has no session id copy.
+- client/src/components/workflows/SubagentEffectiveness.tsx:331 [low] ScoreCard lifts on hover (hover:-translate-y-0.5 shadow) but has no click action — misleading affordance.
+- client/src/components/workflows/ErrorPropagationMap.tsx:202 [low] Map callback parameter `t` shadows the i18n `t` inside the block; and 143 builds `${totalErrors}${t(...)}` by concatenation (locale-unsafe).
+- client/src/components/workflows/ErrorPropagationMap.tsx:97 [low] Hand-drawn inline SVG icons here (97, 245), ConcurrencyTimeline 232, SessionComplexityScatter 193, CompactionImpact 339, ModelDelegationFlow 407, OrchestrationD
+- client/src/components/workflows/OrchestrationDAG.tsx:1076 [medium] LEGEND_ITEMS labels ('Sessions', 'Main Agent', ...) hardcoded English; also `${compSessions} sessions` (283) and capitalised raw outcome status (303) bypass i18
+- client/src/components/workflows/OrchestrationDAG.tsx:265 [low] Reads `compactions` via `data as unknown as {...}` cast — OrchestrationData type is missing the field.
+- client/src/components/workflows/OrchestrationDAG.tsx:678 [medium] Nodes get role=button and aria-label but no tabindex/keydown — unreachable by keyboard; same for AgentCollaborationNetwork nodes (366) and ModelDelegationFlow (
+- client/src/components/workflows/AgentCollaborationNetwork.tsx:385 [low] Node labels truncated in SVG with no tooltip (title only appears in the legend list).
+- client/src/components/workflows/ToolExecutionFlow.tsx:646 [low] LEGEND_ITEMS duplicates TOOL_COLORS (71) colour-by-colour; legend i18n lives under `errors:toolLegend.*` — wrong namespace for a workflows chart.
+- client/src/plan/Plan.tsx:940 [medium] Plain <a href="/sessions/..."> causes a full page reload instead of react-router navigation.
+- client/src/plan/Plan.tsx:694 [high] TaskCard root is a div with onClick and no role/tabIndex/keyboard; child cards receive the parent's onSelect (755) so clicking a subtask opens the parent's draw
+- client/src/plan/Plan.tsx:903 [medium] DetailDrawer and MobileDrawer (383) overlays lack role=dialog/aria-modal, focus trap and Escape-to-close.
+- client/src/plan/Plan.tsx:404 [low] aria-label="Close" hardcoded while the other drawer uses t('common:close') (919).
+- client/src/plan/Plan.tsx:566 [low] lane.mode, waiting.kind, waiting.tool (733, 843) rendered raw/untranslated; metadata joined with ad-hoc ' · ' strings in 5 places (224, 250, 577, 721, 808).
+- client/src/plan/Plan.tsx:518 [low] Milestone step commit sha is plain mono text — not linked or copyable.
+- client/src/components/EventDetail.tsx:340 [low] Four copies of the `grid grid-cols-[160px_1fr]` row wrapper (340, 351, 361, 371); fixed 160px label column overflows at ~400px width.
+- client/src/components/EventDetail.tsx:190 [medium] session_id/agent_id/cwd/transcript_path rows are plain text: no copy button, no link.
+- client/src/components/EventFilters.tsx:399 [medium] ChipGroup uses role=listbox with checkbox <label> children (should be group/menuitemcheckbox); no Escape to close (only click-outside 368); dropdown is position
+- client/src/components/EventFilters.tsx:265 [low] Search input (py-1.5 text-xs) and DateTimePicker sit in one row with different heights; a shared MultiSelect component exists but ChipGroup re-implements it.
+- client/src/components/EventFiltersInfo.tsx:162 [low] Uses a text '▶' glyph for the disclosure arrow while every other disclosure uses lucide Chevron; summary line uses a literal '- ' separator (80).
+- client/src/components/event-views/primitives.tsx:149 [low] Hardcoded English chrome labels: 'terminal' (149), 'stdout'/'stderr' (190), 'no diff' (278), 'empty' (351), 'no files' (427), 'no matches' (446); tool-views 'or
+- client/src/components/event-views/primitives.tsx:372 [low] ValueCell boolean pill duplicates EventDetail ScalarValue (388); safeStringify duplicated in both files (416 / EventDetail 418).
+- client/src/components/conversation/ConversationView.tsx:444 [medium] Hardcoded English UI copy: 'message(s)' pluralisation (444), 'Refresh conversation' (450), 'Refresh' (455), 'Loading history...' (480), 'Loading conversation...
+- client/src/components/conversation/ConversationView.tsx:428 [low] Native <select> for transcript picker while the shared Select component exists (used by Plan.tsx:236); selection not reflected in URL despite initialTranscriptI
+- client/src/components/conversation/ConversationView.tsx:473 [low] maxHeight: calc(100vh - 320px) magic number.
+- client/src/components/conversation/MessageList.tsx:364 [high] useMemo is called after early returns (347-359) — conditional hook call violates rules-of-hooks; buildToolResultMap (361) is not memoized at all.
+- client/src/components/conversation/MessageList.tsx:88 [medium] SENDER_STYLES labels ('User', 'Assistant', 'Main agent', 'System', 'Tool') and 'Renamed session →' (199), 'System reminder' (271), 'Persisted output' (283), 'Ta
+- client/src/components/conversation/MessageList.tsx:488 [low] thinkKey = idx*100 + bIdx collides for messages with more than 100 content blocks.
+- client/src/components/conversation/MessageList.tsx:321 [low] CollapsibleBlock and thinking toggle (495) buttons lack aria-expanded; ToolCallBlock toggle (289) too.
+- client/src/components/conversation/ToolCallBlock.tsx:148 [medium] Labels 'Command', 'New file', 'Removed', 'Added', 'replace all', 'Pattern/Path/Glob', 'Error'/'Output', 'error'/'ok'/'pending' hardcoded English.
+- client/src/components/conversation/CodeBlock.tsx:191 [low] 'line(s)', 'Copy', 'Copied', aria 'Copy code' hardcoded; duplicates the i18n'd primitives.CopyButton.
+- client/src/components/conversation/MarkdownContent.tsx:324 [low] External links open in new tab with no external indicator; TranscriptImage (MessageList 146) links to a raw local path.
+## TEST/I18N: TESTS covering the slice: client/src/components/__tests__/EventDetail.test.tsx (10 render cases incl. agentInfoById/sessionNameById), EventFilters.test.tsx (status→event_type expansion, chips), CommandPalette.test.tsx (palette actions page.refresh/activity.*), components/workflows/__tests__/WorkflowRunsPanel.test.tsx + WorkflowRunsPanel.transcript.test.tsx + friendlyPreview.test.ts, components/conversation/__tests__/ConversationView.pagination.test.tsx, MarkdownContent.test.tsx, MessageList.sender.test.tsx, plan/__tests__/Plan.render.test.tsx, Plan.tick.test.tsx, Plan.ws.test.tsx, pages/__test

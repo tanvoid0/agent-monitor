@@ -1,0 +1,242 @@
+
+===== over-engineering / YAGNI (lazy senior de
+VERDICT: The spine is earned: routes.ts, EntityRef+entityMenu, ContextMenu, Clickable, PageHeader, Button/IconButton, Badge, TabStrip all have named §4 adopters. But roughly 40% of §2 (Panel, SectionHeader, KeyValueList, ShortId, RelativeTime, StatCard/EmptyState extensions, ContextMenuTarget, MenuButton, CopyButton move) and a third of the URL params (dashboard/ccConfig/workflows/plan/run.cwd/sessions.q) have no caller anywhere in §3/§4 - four implementers would build and test them for nobody. Four contract bugs must be fixed before fan-out: (1) routes.session cannot build the ?agent= timeline form §3
+
+MUST[§5 i18n keys] The JSON literal declares "menu" twice in the same object ("menu": "Actions" then "menu": {...}) - invalid/second wins - and re-declares strings common.json already has: `live`, `offline`, `actions`, `eventDetail.copy`, `eventDetail.copied`. §2 LivePill itself cites `common:live`/`common:offline`, contradicting §5's `ui.live`/`ui.offline`.
+  FIX: Replace §5 with: `"ui": { "back": "Back", "openMenu": "More actions", "density": {"cards":"Cards","rows":"Rows"}, "menu": { ...item labels as listed, minus openInNewTab } }`. LivePill uses `common:live`/`common:offline`; ContextMenu aria-label uses `common:actions`; copy feedback uses `common:eventDetail.copied`. No other new keys in common.json.
+
+MUST[§1 routes.session + §3 SessionDetail] `routes.session(id, {agent})` is defined to emit `#agent-<id>` and force tab=agents, but §3 requires a distinct `?agent=<id>` query that seeds timeline `filters.agent_id`, and the agent menu item 'Open events (timeline filtered by agent)' needs exactly that URL. There is no builder that can produce `?tab=timeline&agent=<id>`.
+  FIX: Split the two meanings: `session(id, { tab?, focusAgent?: string /* → ?tab=agents#agent-<id> */, agent?: string /* → ?tab=timeline&agent=<id> */, event?, transcript?, tool? })`. Agent kind primary href = `routes.session(sessionId, { focusAgent: id })`; 'Open events' = `routes.session(sessionId, { agent: id })`.
+
+MUST[§3 Navigation targets (ActivityFeed, SessionDetail)] 'Read on mount' semantics never fire when the page is already mounted: an EntityRef tool chip inside /activity links to /activity?tool_name=X (same route, no remount); SessionOverview 'top tools → timeline filters' links from /sessions/:id?tab=agents to ?tab=timeline&tool=X on the same page. Both silently do nothing. Also nothing says whether consumed params are stripped, so 'Clear filters' leaves ?tool=X in the URL and a refresh re-seeds it.
+  FIX: ActivityFeed: URL is the state - `const filters = useMemo(() => parseFilters(searchParams), [searchParams])`, `setFilters = (v) => setSearchParams(serialize(v), { replace: true })`; delete the local useState and any sync effect. SessionDetail: one `useEffect(..., [searchParams])` that applies `tool`/`agent`/`event`/`transcript` then deletes `tool`/`agent`/`event` from the URL (consume-once, like Run.tsx:1096-1130 does for ?session); `transcript` stays and is written back.
+
+MUST[§2 entityMenu (project/session 'Show on Board') + routes.kan] Kanban `?project=` is matched against the set of computed group roots, and any value not in that set silently falls back to 'all projects'. entityMenu passes the raw session cwd; a session started in `repo/apps/web` (grouped under `repo`) or in a worktree lands on the unfiltered board with no error.
+  FIX: Group A, KanbanBoard.tsx:271 becomes `const activeProject = projectCounts.has(project) ? project : (rootByCwd.get(project) ?? "")` so any known cwd resolves to its root. Builder and entityMenu keep passing the raw cwd. Add to §3 under a new 'Kanban' bullet.
+
+MUST[§2 EntityRef + Clickable interaction] EntityRef renders its own right-click menu and is placed inside Clickable rows that also own a menu (Sessions rows, Dashboard activity rows, timeline rows). Right-clicking the chip bubbles to the row: two menus open. Left-click is covered only by an optional `stop` prop.
+  FIX: Spec text: 'EntityRef always calls `e.preventDefault(); e.stopPropagation()` in both onClick and onContextMenu. Remove the `stop` prop.'
+
+MUST[§4 Group C (Analytics) and Group D (Sidebar)] 'Analytics bar labels (tool/event type/subagent/model) → EntityRef' and 'Sidebar ConnectionStatusModal event-type rows → EntityRef tool/type links' reference EntityRef kinds that do not exist (event type, subagent type). Implementers will either invent kinds or stall.
+  FIX: Group C: 'tool and model bar labels → EntityRef; event-type labels → plain `<Link to={routes.activity({ type })}>`; subagent-type labels stay text (no filter target exists).' Group D: 'event-type rows → plain `<Link to={routes.activity({ type })}>`'.
+
+MUST[§2 PageHeader] Spec says markup equals the current Dashboard header but then specifies `h1 text-xl` and `subtitle text-sm` - every page today is `text-lg` / `text-xs`, so adopting PageHeader silently restyles all ten headers. `back?: string` cannot express SessionDetail's history-aware goBack.
+  FIX: PageHeader: `h1 text-lg font-semibold text-gray-100`, subtitle `text-xs text-gray-500`; `onBack?: () => void` renders IconButton ArrowLeft (label `common:ui.back`); SessionDetail passes its existing goBack.
+
+MUST[§4 Group A 'Dedupe … formatCost into lib/format.ts'] Instructs adding formatCost to lib/format.ts, which already exports fmtCost; the result is two cost formatters with different rounding.
+  FIX: 'Delete SessionCard's local formatCost and call fmtCost from lib/format.ts. Move promptPreviewLines and isTransientProcess (AgentCard.tsx:90/117, SessionCard.tsx, Sessions.tsx:103) into lib/format.ts as the single copies.'
+
+MUST[§4 file ownership (parallel safety)] Group A owns StatusBadge.tsx, TodoProgressIndicator.tsx, TodoProgressPanel.tsx with no change specified for them; Group B is told to build a 'ProjectBadge-like chip' while Group A owns ProjectBadge - that is a second project chip; nothing forbids Phase B groups from adding keys to common.json, which all four would then edit concurrently.
+  FIX: Group A: drop StatusBadge.tsx, TodoProgressIndicator.tsx, TodoProgressPanel.tsx from the owned list (untouched in this PR). Group B: 'cwd cell renders the existing `<ProjectBadge cwd root source>`; do not edit ProjectBadge.tsx.' Add to §4 preamble: 'Phase B groups never edit common.json; page strings go in the group's own namespace files listed for it.'
+
+SHOULD[§2 Button / Badge vs .btn-primary / .btn-ghost / .badge] Two ways to get the same look with no declared winner: spec says the CSS classes stay and Button 'composes the same look', which invites re-typing the utility string.
+  FIX: 'Button renders `className="btn-primary"` / `"btn-ghost"` (plus size/variant deltas); Badge renders `className="badge"` + tone classes. New code uses the components; the CSS classes are legacy-only and are not to be added at new call sites.' IconButton reuses Button's variant class map (square padding only).
+
+SHOULD[§2 Clickable] `menu?: MenuItem[]` is built eagerly per row on every render (Sessions table 50 rows, re-rendered on each WS event); and `as="tr"` with role=link breaks table row semantics.
+  FIX: `menu?: () => MenuItem[]` called on open; ContextMenu returns null (no portal, no listeners) while closed. For `as="tr"`: no role attribute, only tabIndex=0 + Enter/Space + onContextMenu; the accessible name is the first cell's link.
+
+SHOULD[§3 SessionDetail `?event=<id>`] Timeline loads EVENTS_INITIAL_BATCH then 'Load more'; an event id outside the first batch has no `id="event-<id>"` node to scroll to. Behaviour is unspecified.
+  FIX: Add: 'If the event is not in the loaded batch, do nothing (no auto-paging, no error).'
+
+SHOULD[§2 entityMenu model → 'Pricing rules'] Hard-codes routes.settings('claude-pricing'); Codex/GPT models have their own section.
+  FIX: `routes.settings(/^(gpt|o\d|codex)/i.test(model) ? "gpt-pricing" : "claude-pricing")` (section ids at pages/Settings.tsx:148-149).
+
+SHOULD[§2 entityMenu ctx] `ctx: { t, navigate, copy, openCwd? }` injects two things that are plain imports.
+  FIX: `entityMenu(ref, { t, navigate })`; items call `copyText()` (lib) and `api.sessions.openCwd` (lib/api.ts:616) directly.
+
+SHOULD[§2 tooltips] Kit uses native `title` throughout while components/Tip.tsx (mouse-follow) exists; unstated which wins in kit code.
+  FIX: Add one line: 'Kit primitives use native `title` only; Tip stays for StatCard `raw` and chart tooltips and is not imported by anything in client/src/ui/.'
+
+SHOULD[§2 Badge] Explicit `title?: string` prop; other attrs (onClick, data-*) would need more props later.
+  FIX: `Badge` props extend `HTMLAttributes<HTMLSpanElement>` and spread the rest; drop the explicit `title`.
+
+SHOULD[§1 routes.ts as a fourth route catalog] paletteCommands.ts (page/view commands), Sidebar NAV_KEYS and DocumentTitle.tsx each carry their own route strings; routes.ts adds a fourth without retiring any.
+  FIX: State explicitly: 'paletteCommands/Sidebar/DocumentTitle keep their strings this PR (out of scope); routes.ts is the only place new links are built.'
+
+SHOULD[§2 Kanban density] `?density=cards|rows` + localStorage `kanban-density` restates what useUrlTab already does.
+  FIX: Write it as `useUrlTab(["cards","rows"], "cards", { param: "density", storageKey: "kanban-density" })` (hooks/usePageShortcuts.ts:30) so nobody hand-rolls the mirror.
+
+CUT[§2 Panel, SectionHeader, KeyValueList] No §4 group adopts any of them (only PageHeader/IconButton/Button/Badge/EntityRef/Clickable/TabStrip are in the 'common to every page' list). `<div className="card p-5">` (17 sites) is already the one way; a wrapper for a CSS class is a second way. Add when a page asks.
+
+CUT[§2 ShortId, RelativeTime] EntityRef already renders `font-mono` + `title={full id}` + `chars`; every id in §4 becomes an EntityRef, so ShortId has zero callers. RelativeTime has no adopter in §4; timeAgo() is a direct call today. Add RelativeTime when a group actually touches a timestamp.
+
+CUT[§2 StatCard `size`/`to`, EmptyState `compact`] No §4 target uses a small stat tile or a linked tile or a compact empty state (SessionOverview StatTile, Tabby StatChip, WebhookSettings/RemoteSources empties are not in scope). Speculative props + tests for nobody.
+
+CUT[§2 ContextMenuTarget, MenuButton (kebab), useContextMenu hook, `open(HTMLElement] Clickable with neither `to` nor `onActivate` is ContextMenuTarget. No §4 group places a kebab. The only imperative caller (Group C scatter bubble) needs `ContextMenu({ at: {x,y} | null, items, onClose })` and a useState - no hook, no element anchoring. Export ContextMenu, MenuItem, Clickable only.
+
+CUT[§2 MenuItem `href`, `shortcut`, `disabled`, `danger`, `type:"label"`; §5 `ui.men] None of the eight entityMenu item lists uses any of them. MenuItem = `{ label, icon?, onSelect?, to? } | { type: "separator" }`.
+
+CUT[§2 EntityRef kinds `run` and `source`; props `icon`, `muted`, `stop`] No §4 group renders a run id or a source id as EntityRef (WorkflowRunsPanel and the Sessions source pill are not targets). `icon`/`muted` have no named caller; `stop` becomes unconditional (see must_fix).
+
+CUT[§1 routes.dashboard, routes.ccConfig, routes.workflows, routes.plan({task}), rou] No menu item or adoption target links to any of these. A URL param without a producer is dead code plus a test. Keep routes: sessions({status,cwd}), session(...), kanban({view,project}), activity({...}), analytics({tab}), run({session,prompt,autostart}), settings(section).
+
+CUT[§2 CopyButton move + `useCopy`] With ShortId cut, nothing in §4 imports ui/CopyButton; the existing primitives.CopyButton (event-views/primitives.tsx:116) stays where it is. Menus only need `copyText(text: string): Promise<boolean>` in lib (writeText + announceAction(t('common:eventDetail.copied'))) - a function, not a hook, since
+
+CUT[§2 Button `iconRight`; Clickable `as: "li"`] No caller named anywhere in §4.
+
+CUT[§2 TabStrip `pills` variant] Only Sessions status filters would use it (Sessions.tsx:461-476), which are aria-pressed filter toggles, visually a hair from `segmented` (both bg-surface rounded-lg border p-*). Use `segmented` there; two variants, not three.
+
+CUT[§2 IconButton `to`] No pager/back link in §4 is a Link; SessionDetail back is a callback. Add when a Link-shaped icon button appears.
+
+===== accessibility + interaction UX (keyboard
+VERDICT: Not ready for a 4-way fan-out. The two things every group builds on — the Clickable container model and the URL-param vocabulary for SessionDetail — are wrong as written: Clickable puts role=link/button on containers that will hold EntityRef links (invalid nesting, `<tr role=link>` kills table semantics), and §1 vs §3 disagree on what `agent`/`tool` mean. The `#agent-` and `?event=` deep links fail in the common cases (react-router's setSearchParams drops the hash; nested subagents are not in the DOM; no single-event endpoint and only 50 events load). Touch users never discover the menus becau
+
+MUST[§2 Clickable (+ §4 all groups: 'rows/cards become Clickable'] Clickable sets role="link"|"button" + tabIndex=0 on the container, but §4 makes every row/card contain EntityRef `<Link>`s, ProjectBadge's open-folder `<button>`, CopyButtons and a kebab. Interactive content inside role=link/button is invalid (axe `nested-interactive`; button children are presentational so inner links vanish from AT), every row becomes two tab stops (container + inner link → 100 stops for a 50-row table), and `<tr role="link">` removes the row role so `<td>` cells lose table navigation entirely. The `stop: true` stopPropagation convention on EntityRef is a symptom of this design.
+  FIX: Replace the Clickable paragraph with: 'Clickable renders the container (`div`|`tr`|`li`) with NO role and NO tabIndex. It requires exactly one primary control among its children (an EntityRef/Link for `to`, or a `<button aria-expanded>` for `onActivate`) — that element is the keyboard target; Clickable only adds mouse conveniences: onClick on the container navigates/activates when `!(e.target as Element).closest("a,button,input,select,textarea,[role=button]")` (so inner controls need no stopPropagation), plain click only — ctrl/meta/middle click on a `to` row opens `window.open(to,"_blank")`; onContextMenu + Shift+F10 (from any focused descendant) open `menu`; it renders `<MenuButton items={menu}>` as its last child (see kebab rule). `expanded?: boolean` is forwarded to the primary button as aria-expanded. Drop `ariaLabel` and EntityRef's `stop` prop.'
+
+MUST[§2 ContextMenu / Kebab + §4 adoption] MenuButton (kebab) is defined but no §4 line places it on any row/card, so the whole context-menu surface is right-click only. iOS Safari fires no `contextmenu` on long-press of non-link elements; trackpad/touch users and screen-reader users never learn the menus exist. Hijacking `contextmenu` on every `<tr>`/card also removes the native menu (copy selected text, inspect) for the entire table body, and right-clicking an EntityRef inside a Clickable row opens two menus (chip's and row's) unless propagation is stopped.
+  FIX: Add to §2: 'Every Clickable with `menu` renders `<MenuButton size="xs" label={t("common:ui.openMenu")}>` as its last child with `opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [@media(pointer:coarse)]:opacity-100` (the container gets `group`); the button is always in the tab order. MenuButton sets `aria-haspopup="menu" aria-expanded aria-controls={menuId}`. Contextmenu is NOT hijacked when `e.shiftKey` or `window.getSelection()?.toString()` is non-empty (native menu passes through). Only one ContextMenu is open at a time: `useContextMenu.open()` closes any other via a module-level registry, and EntityRef's onContextMenu calls `e.stopPropagation()` so the enclosing Clickable's menu does not also open.' Add to §4 common list: 'every Clickable row/card shows the kebab per §2'.
+
+MUST[§2 ContextMenu — Escape / focus / Tab] Existing modals close on Escape via window/document listeners; a portaled menu opened inside one (Group D: ConnectionStatusModal event rows → EntityRef; Run RunsModal rows) will close both the menu and the modal on one Escape if the menu also uses a window listener (the pattern the codebase copies from Sidebar's language picker). ConfirmModal's Tab trap queries only `panelRef`, so Tab from a portaled menu jumps back into the dialog. 'Focus returns to trigger' is undefined when the trigger was a right-click point on a non-focusable area, and returns to an unmounted element after a `to` item navigates.
+  FIX: Replace the keyboard sentence with: 'Escape is handled by `onKeyDown` on the `role="menu"` element (which receives focus on open) and calls `e.stopPropagation()` — never a window/document keydown listener. Tab/Shift+Tab close the menu and let focus move naturally. On open, record `document.activeElement` (or the anchor element for MenuButton); on close, focus it if `document.contains()` it, else focus the Clickable container (`tabIndex={-1}`), else nothing. `to` items are rendered as `<Link role="menuitem" tabIndex={-1}>` so ctrl/meta/middle-click open a new tab natively; `href` items as `<a target="_blank" rel="noopener noreferrer" role="menuitem">`. Scroll OUTSIDE the menu closes it.'
+
+MUST[§1 routes.session ↔ §3 SessionDetail param vocabulary] §1 says `agent` → `#agent-<id>` hash (agents tab) and `tool` → `?tab=timeline&tool=<name>`; §3 says SessionDetail must read `?agent=<id>` to seed `filters.agent_id` and `?tool=<name>`. There is no builder for 'timeline filtered by agent', yet entityMenu(agent) 'Open events (timeline filtered by agent)' and entityMenu(event) 'Open agent' need both. The same EventFilters component drives /activity where the names are `tool_name`/`agent_id` — two vocabularies for one filter model, and `agent` meaning two different things.
+  FIX: Rewrite the `session` builder line as: `session(id, q?: { tab?; agent?: string /* → ?tab=agents#agent-<id>, tab forced */; event?: number|string /* → ?tab=timeline&event=<id> */; transcript?: string /* → ?tab=conversation&transcript=<agentId> */; tool_name?: string; agent_id?: string /* → ?tab=timeline&tool_name=&agent_id= (same names as routes.activity) */ })`. In §3 SessionDetail replace `?tool=<name>` / `?agent=<id>` with `?tool_name=` / `?agent_id=`. entityMenu(agent).'Open events' = routes.session(sessionId,{agent_id:id}).
+
+MUST[§3 SessionDetail `#agent-<id>`] Two concrete failures: (a) react-router's `setSearchParams` navigates to `"?" + params`, which resolves with an empty hash — so the moment the page calls `setActiveTab("agents")` (to 'force tab=agents') the `#agent-<id>` target is gone before agents finish loading; (b) `expandedAgents` starts empty and children render only when `hasChildren && isExpanded`, so a nested subagent's `id="agent-<id>"` is not in the DOM and scrollIntoView silently does nothing — the exact case the Dashboard tree / Plan / Workflows deep links target.
+  FIX: Replace the `#agent-` bullet with: 'routes.session(id,{agent}) emits `?tab=agents#agent-<id>` explicitly (no client-side tab forcing needed). SessionDetail captures `location.hash` into a ref keyed by `location.key` on navigation, then in an effect on `[agents, targetRef]`: expand every ancestor of the target (walk `parent_agent_id` via an agent map, `setExpandedAgents(prev ∪ ancestors)`), and on the next frame `document.getElementById("agent-<id>")?.scrollIntoView({block:"center"})` + ring class for ~1.5s; run once per hash value (ref), so tab switches do not re-scroll.'
+
+MUST[§3 SessionDetail `?event=<id>`] 'auto-expand that row + scroll' assumes the event is loaded. There is no GET /api/events/:id; the timeline loads the newest 50 only. Every 'View session at event' from ActivityFeed, AlertsNotifications, Dashboard recent-activity (for anything older than the last 50 events, or hidden by seeded `?tool_name=` filters) does nothing, silently. Also useUrlTab preserves unrelated params, so `?event=42` survives tab switches and would re-expand/re-scroll every time the timeline tab is shown unless guarded.
+  FIX: Replace the `?event=` bullet with: 'After the initial page loads, if `events.find(e => e.id === target)` is absent and `events.length < eventsTotal`, call `loadMoreEvents()` once (EVENTS_MORE_BATCH=500 covers 550 events in one extra request); if still absent, `announceAction(t("sessions:detail.eventNotLoaded"))` (new key, all five locales) and leave the timeline as-is. When found: `setExpandedEvents(prev ∪ {id})`, scroll `#event-<id>` into view, ring highlight. Trigger once per `event` value (ref), not on every render/tab switch. `?event=` does NOT add filters; if the user has seeded filters that exclude it, the not-loaded notice appears.'
+
+MUST[§2 PageHeader `back?: string (href)` + §4 Group B] SessionDetail's back button today is `navigate(-1)` when `history.state.idx > 0`, else `/sessions`. Making `back` an href regresses Kanban → session → Back (lands on /sessions instead of the board) and every other entry path the new EntityRefs create (Activity, Workflows, Plan, Alerts).
+  FIX: Change to `back?: string | (() => void)` — 'a string renders `IconButton` with `to`; a function renders a button calling it. SessionDetail passes its existing `goBack`.' Label stays `common:ui.back`.
+
+MUST[§2 TabStrip `pills` + §4 Group B 'status pills → TabStrip pi] Sessions status pills are filters, not tabs: today they are toggle buttons with `aria-pressed`, which is correct. Forcing role=tablist/tab/aria-selected onto them announces 'tab 1 of 6' and implies a tabpanel that does not exist (no page in the client renders `role=tabpanel`), and the spec's roving-focus contract makes each of them non-tabbable. Same problem for Kanban ProjectTabs and the Analytics/CcConfig strips if they adopt it without panels.
+  FIX: Add `semantics?: "tabs" | "toggle"` (default `tabs`). `toggle`: `role="group" aria-label`, each item a `<button aria-pressed>` in the tab order, no roving focus — used for Sessions status pills, Kanban density, provider toggles. `tabs`: role=tablist/tab, roving focus, automatic activation, tab `id={`${idBase}-tab-${value}`}`; the caller MUST put `role="tabpanel" id={`${idBase}-panel-${value}`} aria-labelledby={tabId}` on the panel it controls (TabStrip requires `idBase: string` and sets `aria-controls`). Existing Kanban ViewToggle/ProjectTabs keep `tabs` only if their panel gets the role; otherwise `toggle`.
+
+MUST[§4 Group A — `variant="row"` for AgentCard/SessionCard] 'row = status dot · name · subtitle/cwd · badges · time; no prompt preview/task lines' drops the three things the Dashboard active-agents tree exists to show: the waiting reason (a 'dot' has none; even the current compact StatusBadge exposes the reason only via mouse-follow Tip, so keyboard/SR users get nothing), the `current_tool` chip (what the agent is doing right now), and the TodoProgressIndicator. For SessionCard rows, unnamed sessions all render as 'Session xxxxxxxx' with no prompt line to tell them apart — 30 identical rows on a busy board.
+  FIX: Replace with: 'row = one line, in order: `<AgentStatusBadge compact>` (the reason MUST be exposed as `aria-label`/`title` on a focusable element or visually-hidden text, not Tip-only) · name (EntityRef) · subtitle = agent type/model for agents, `name ? cwd basename : promptPreviewLines(prompt)[0]` for sessions · `current_tool` chip (agents, truncated, title=full) · TodoProgressIndicator (if todo_summary) · RelativeTime. ProjectBadge and task lines are omitted; the cost/model footer is omitted.'
+
+MUST[§2 Badge tone map] 'accent indigo; success emerald; warning amber; danger red; info sky; violet violet' pins no shades or opacities — four implementers will ship four palettes (e.g. `text-indigo-400` on a `/15` tint is 4.9:1, borderline for 10px `size="xs"` text; `-300` text is 7.4–9.1:1). The codebase already has a canonical pill recipe.
+  FIX: Replace the tone map with exact classes: `neutral: text-gray-300 bg-surface-4 border-border` (10.6:1); `accent: text-indigo-300 bg-indigo-500/10 border-indigo-500/25`; `success: text-emerald-300 bg-emerald-500/10 border-emerald-500/25`; `warning: text-amber-300 bg-amber-500/10 border-amber-500/25`; `danger: text-red-300 bg-red-500/10 border-red-500/25`; `info: text-sky-300 bg-sky-500/10 border-sky-500/25`; `violet: text-violet-300 bg-violet-500/10 border-violet-500/25`. Text is always the `-300` shade (all ≥7.3:1 on surface-2/3); `size="xs"` = text-[10px] px-1.5 py-0.5, `sm` = `.badge` metrics.
+
+SHOULD[§2 IconButton / MenuButton sizes] `size xs|sm|md` has no pixel contract; a hover-revealed kebab at 20px fails WCAG 2.2 target size and is hard to hit on touch.
+  FIX: Pin `xs = w-6 h-6` (24px, the WCAG 2.2 AA minimum), `sm = w-7 h-7`, `md = w-8 h-8`; icon = w-3.5 / w-4 / w-4. Never render an IconButton below 24px.
+
+SHOULD[§2 CopyButton / useCopy] `navigator.clipboard` is undefined on plain-http LAN access (README documents `DASHBOARD_HOST=0.0.0.0`); the current CopyButton swallows the failure so nothing happens and nothing is announced. A working execCommand fallback already exists in CodexConfigExplorer.
+  FIX: Spec: 'useCopy uses `navigator.clipboard.writeText` and falls back to the hidden-textarea `document.execCommand("copy")` path (lift `copyText` from client/src/components/CodexConfigExplorer.tsx:1315-1337 into lib/); on failure `announceAction(t("common:ui.copyFailed"))` (new key). The copied state is announced via ActionToast (already role=status aria-live=polite).'
+
+SHOULD[§2 PageHeader subtitle + Button primary] PageHeader canonicalises `text-sm text-gray-500` subtitles — 3.55:1 on surface-3, failing AA (4.5:1) — across 11 pages. `.btn-primary` white on accent #6366f1 is 4.47:1, a hair under AA for 14px text.
+  FIX: Subtitle = `text-sm text-gray-400` (6.77:1). Keep primary as-is (existing look) but forbid `size="xs"` for `variant="primary"` and keep `font-medium`; note the 4.47:1 in the file header so nobody drops it to 12px.
+
+SHOULD[§2 LivePill / Badge pulse] Every page header gains an infinitely pulsing dot; no `prefers-reduced-motion` handling anywhere in the kit.
+  FIX: Pulse class is `animate-pulse motion-reduce:animate-none`; LivePill wrapper is `role="status"` so connection changes are announced once (avoid `aria-live` on Badge itself).
+
+SHOULD[§3 history semantics (all write-backs)] Only ActivityFeed says `{ replace: true }`. `?transcript=`, `?task=`, `?run=`, `?session=` (Workflows), Sessions `cwd`, Kanban `?density=` are unspecified — with push, Back cycles through every transcript/task the user looked at before leaving the page, contradicting useUrlTab's documented rule.
+  FIX: Add one rule under §3: 'Controls replace, links push: every in-page write-back (filters, tab, transcript, task, run, session drill-in, cwd, density) uses `setSearchParams(fn, { replace: true })`; EntityRef/Clickable `to` navigations push. Kanban density = `useUrlTab(["cards","rows"], "cards", { param: "density", storageKey: "kanban-density" })` — no bespoke localStorage code.'
+
+SHOULD[§2 EntityRef default labels] No per-kind label rule; four groups will render the same session as name, 8-char id, 12-char id and 16-char id (the inconsistency the summary already flags).
+  FIX: Add: 'Default label: session → `name ?? t("sessions:defaultName")+shortId(8)`; agent → `name ?? type ?? shortId(8)`; project → basename(cwd) (worktree-aware via ProjectBadge helper); tool → name; model → formatModelName(model); event → `#<id>`; run → shortId(8); source → label ?? id. `title` always = full raw value. `chars` only affects id fallbacks.'
+
+SHOULD[§2 TabStrip activation + §3] Roving focus with automatic activation means each ArrowRight replaces the URL and (SessionDetail timeline) triggers a fetch; acceptable, but unstated, and one implementer may pick manual activation.
+  FIX: State explicitly: 'automatic activation (arrow moves focus AND calls onChange); tabs are `type="button"`; only the selected tab is `tabIndex=0`.'
+
+SHOULD[§2 ShortId / RelativeTime tooltips] `title` on a `<span>`/`<time>` is mouse-only and unreachable by keyboard; the full id is otherwise only in the context menu.
+  FIX: When `copy` is false, render ShortId inside the parent EntityRef (focusable link with title) rather than standalone; standalone ShortId/RelativeTime add `tabIndex={0}` only when they are the sole carrier of the full value (e.g. SessionDetail header id chip) — otherwise leave non-focusable to avoid tab-stop bloat.
+
+SHOULD[§2 Clickable `as="tr"` right-click] Even with the kebab, hijacking contextmenu on the entire `<tbody>` surprises users who right-click to copy a cell.
+  FIX: Covered by the must-fix pass-through rule (Shift+right-click / active selection) — also add `data-menu` on the row so tests can assert which rows carry menus.
+
+CUT[§2 `ContextMenuTarget` wrapper] Does exactly what Clickable-with-`menu` does (attach onContextMenu + Shift+F10, render ContextMenu, wrap children). Two wrappers for one job guarantees the four groups split between them; keep Clickable only, and `useContextMenu` + `MenuButton` for the rare non-row trigger (chart bubbles).
+
+CUT[§2 EntityRef `stop?: boolean` prop] Only exists to paper over the nested-interactive container model; once Clickable ignores clicks from interactive descendants (must-fix 1) no child needs stopPropagation. Remove before it becomes 'the convention' in 30 call sites.
+
+CUT[§5 `ui.menu.openInNewTab` key] No entity item list in §2 uses it, and rendering `to` items as `<Link role=menuitem>` gives ctrl/middle-click new-tab natively. Dead i18n key × 5 locales.
+
+CUT[§2 Panel `interactive?: boolean`] No semantics defined (hover? focus? click?) and no §4 call site names it; an 'interactive' panel is just a Clickable with a `.card` className.
+
+CUT[§2 Clickable `ariaLabel?`] With no role on the container there is nothing to label; the accessible name lives on the primary inner control (EntityRef/expander button).
+
+CUT[§4 Group A Kanban density: 'localStorage `kanban-density`' as bespoke code] useUrlTab already does URL-wins-then-localStorage-then-fallback with replace semantics (Dashboard `dashboard_tab`, Kanban `kanban-board-view` use it today) — spec the one-liner, not a second persistence path.
+
+===== Feasibility against the actual code: eve
+VERDICT: Not ready for a 4-way fan-out. The kit itself is buildable (format.ts, api.sessions.openCwd, useUrlTab, EventFiltersValue, api.events.list arrays, tokens/CSS classes all exist as described), but the spec has one JSON-invalid i18n block, one overloaded route key, five navigation targets that cannot work as written (transcript id for main, Plan session prefix, ?event= beyond the first 50 rows, Kanban ?project= root vs cwd, /plan palette test), three existing test files that will crash because they render without a Router, and unowned/shared files (lib/format.ts, StatusBadge, the test files, scre
+
+MUST[§5 i18n keys] `ui` declares `"menu": "Actions"` and `"menu": { ... }` — a duplicate JSON key. JSON.parse keeps the last value so the string label vanishes silently; TypeScript (resolveJsonModule, tsconfig.json:22) rejects duplicate keys in imported JSON with TS1117.
+  FIX: Replace the `ui` block with: `"ui": { "back": "Back", "openMenu": "More actions", "density": { "cards": "Cards", "rows": "Rows" }, "menu": { ...items as listed minus copyId/openInNewTab... } }`. Menu trigger label uses existing `common:actions`; LivePill uses existing `common:live`/`common:offline`; CopyButton/useCopy use existing `common:eventDetail.copy`/`common:eventDetail.copied`.
+
+MUST[§1 routes.session + §3 SessionDetail] `agent` is overloaded: §1 says `agent → #agent-<id>` (agents tab), §3 says `?agent=<id>` seeds the timeline `filters.agent_id`, and entityMenu(agent) needs 'Open events (timeline filtered by agent)'. One key cannot produce both `/sessions/x#agent-a` and `/sessions/x?tab=timeline&agent=a`.
+  FIX: routes.session(id, q?: { tab?; agent?: string /* → `#agent-<id>`, implies tab=agents */; agentFilter?: string /* → `?tab=timeline&agent=<id>` */; event?; transcript?; tool? }). entityMenu(agent).openEvents = routes.session(sessionId, { agentFilter: id }); openAgent/Open = routes.session(sessionId, { agent: id }).
+
+MUST[§3 SessionDetail `?transcript=` + §2 entityMenu(agent) 'Open] (a) The transcript id for the main agent is the synthetic string "main", not the agent's db id, so `?transcript=<mainAgentId>` selects nothing. (b) 'write back when the user changes transcript' cannot be done with useSearchParams inside ConversationView: ConversationView.pagination.test.tsx renders it with no Router and would throw.
+  FIX: §2 entityMenu(agent).openConversation → routes.session(sessionId, { transcript: type === "main" ? "main" : id }) (the `type` prop becomes required for kind "agent"). §3/Group B: ConversationView gains `onTranscriptChange?: (id: string | null) => void` called from the <select> and from the initialTranscriptId sync; SessionDetail owns the URL (`setSearchParams(prev => …transcript…, { replace: true })`). ConversationView must not import router hooks.
+
+MUST[§4 Group A ProjectBadge → EntityRef(project)] ProjectBadge.test.tsx renders <ProjectBadge> without any Router; an EntityRef (react-router <Link> + useNavigate) inside it throws 'useHref() may be used only in the context of a <Router>'. The same test and AgentCard.test use `getByTitle(cwd)`, which throws if both the outer span and the EntityRef carry `title={cwd}`; and `queryByRole("button")` must stay null for remote sources, so no kebab/MenuButton in the badge.
+  FIX: Group A also owns components/__tests__/ProjectBadge.test.tsx and wraps its two ProjectBadge renders in <MemoryRouter>. ProjectBadge moves `title={cwd}` off the outer span onto the single EntityRef (which wraps label + sub-path), keeps the FolderOpen button as the only <button>, and adds no MenuButton.
+
+MUST[§4 Group C EventDetail → EntityRef(session/agent)] EventDetail.test.tsx renders <EventDetail> with no Router (Link/useNavigate throw) and asserts the FULL ids by exact text (`getByText("agent-abc")` is 9 chars; `getAllByText("sess-123")` length 1). EntityRef's default `chars: 8` truncates to "agent-ab".
+  FIX: Group C owns components/__tests__/EventDetail.test.tsx: wrap renders in <MemoryRouter>. In EventDetail render `<EntityRef kind="session" id=… chars={0} />` where `chars: 0` (or `full`) means no truncation; state in §2: 'chars=0 disables truncation'.
+
+MUST[§4 Group C Plan → EntityRef(agent) / open-session <Link>] `PlanAgent.session` is an 8-character prefix, not a session id, and GET /api/sessions/:id is an exact-match lookup. `routes.session(agent.session, { agent: agent.id })` (and the existing `<a href="/sessions/${agent.session}">`) lands on a 404 'Session not found'.
+  FIX: Either (preferred) Group C additionally owns server/plan/join.js and client/src/plan/types.ts and adds `sessionId: r.session_id` next to `session` (field-level asserts in server/__tests__/plan-join.test.js are unaffected), and Plan uses `agent.sessionId` for EntityRef(agent) and the open-session Link; or drop 'Plan agent rows/task cards → EntityRef(agent)' and leave the current link alone. Do not build EntityRef(agent) on `agent.session`.
+
+MUST[§3 SessionDetail `?event=<id>` auto-expand + scroll] SessionDetail loads only the newest 50 events (then 500 per 'load more') and there is no single-event endpoint, so an event id older than the first page (the common case for 'Open in session timeline' from Activity/Analytics) is not in `events` and nothing expands; the spec gives no bounded behaviour.
+  FIX: Spec text: 'On `?event=<id>`: set tab=timeline; after `loadEvents` resolves, if `events.some(e => e.id === id)` expand + scroll (`id="event-<id>"`); otherwise call `loadMoreEvents()` once (500 more) and retry; if still absent, leave the timeline open with no highlight. Active timeline filters are not cleared.'
+
+MUST[§2 EntityRef(project) 'Show on Board' / §1 routes.kanban({pr] KanbanBoard's `?project=` must equal a computed group root; a raw cwd (nested checkout, worktree, or Windows backslashes) fails `projectCounts.has(project)` and the board silently falls back to 'All projects'.
+  FIX: Keep routes.kanban({ project: cwd }) taking the raw cwd, and in Group A change KanbanBoard.tsx:271 to `const activeProject = projectCounts.has(project) ? project : (rootByCwd.get(project) ?? "");`. State this explicitly in §3 under a new 'Kanban' bullet.
+
+MUST[§3 paletteCommands `/plan` + coverage test] The coverage test does not fail today (it filters out any route containing ':' so `plan/:slug?` is skipped), but adding `/plan` to PAGE_COMMANDS breaks CommandPalette.test.tsx which asserts exactly 9 empty-query options.
+  FIX: Group D owns lib/__tests__/paletteCommands.test.ts AND components/__tests__/CommandPalette.test.tsx. Add `{ to: "/plan", icon: SquareKanban, navKey: "nav:plan" }` after /workflows; in paletteCommands.test insert `.map((path) => path.replace(/\/:[^/]+\?$/, ""))` before the ':' filter; bump CommandPalette.test:136 to 10 and its comment to 'ten sidebar routes'.
+
+MUST[§3 ActivityFeed (and Sessions) URL-backed filters] 'Read on mount, write on every change' leaves two sources of truth: navigating in-app from `/activity?tool_name=Bash` to `/activity` (sidebar link, same mounted component) keeps the stale state and the write-back immediately re-adds `?tool_name=Bash`. Also `setFilters(EMPTY_FILTERS)` from the palette action bypasses the URL.
+  FIX: Spec text: 'ActivityFeed: `const [searchParams, setSearchParams] = useSearchParams(); const filters = useMemo(() => parseFilters(searchParams), [searchParams]); const setFilters = (v) => setSearchParams(serializeFilters(v), { replace: true });` — no filter useState. Same shape in Sessions for `cwd` (getAll) and `q`.' EventFilters.tsx is not modified.
+
+MUST[§2 Clickable props] §3 requires `id="event-<id>"` on timeline rows and an existing test finds recent-activity rows via `closest("div.px-4")`, but Clickable's prop list has no `id` and no attribute pass-through (aria-expanded for toggle rows, data-*). Also `as: "tr"` with `role="link"` is invalid ARIA inside a <table>.
+  FIX: Clickable: `{ as?: "div"|"tr"|"li"; to?; onActivate?; menu?; className?; ariaLabel?; children } & Omit<HTMLAttributes<HTMLElement>, "onClick">` — spreads rest (id, aria-expanded, data-*). role="link"/"button" only when `as !== "tr"`; a <tr> keeps its implicit row role and gets tabIndex=0 + key handlers.
+
+MUST[§4 Phase B file ownership] Files are not disjoint/complete: `lib/format.ts` is edited by Group A (dedupe) but unowned; `components/StatusBadge.tsx` is in Group A although its tests pin `.animate-pulse-dot`/`.bg-yellow-400`/`.text-amber-300` and B/C render it; `components/Layout.tsx` is in Group D with no task; no test files are assigned although A/B/C/D each break at least one; `pages/__tests__/screens.snapshot.test.tsx` + `__snapshots__` are touched by every group.
+  FIX: Move the dedupe (`promptPreviewLines`, `isTransientProcess(metadata)`, `formatCostShort` with SessionCard's exact tiers) into Phase A so lib/format.ts is frozen before fan-out. Remove StatusBadge.tsx from A ('do not touch') and Layout.tsx from D. Add per-group test ownership as listed in evidence, plus server/plan/join.js + plan/types.ts to C if the Plan fix is taken. Nobody edits screens.snapshot.test.tsx or __snapshots__; each agent's gate is `npx vitest run --exclude "**/screens.snapshot.test.tsx"` and the orchestrator regenerates after review.
+
+SHOULD[§2 PageHeader] Markup does not match the header it claims to mirror: h1 is `text-lg` (not text-xl), subtitle is `text-xs` (not text-sm), there is no `mb-6` (pages space with a parent `gap-8` column), icon is `w-4.5 h-4.5 text-accent`. SessionDetail's back button is history-aware (navigate(-1) or /sessions), which a static `back: string` cannot express.
+  FIX: Copy the exact classes from pages/Dashboard.tsx:1198-1218 (h1 `text-lg font-semibold text-gray-100`, subtitle `text-xs text-gray-500`, wrapper `flex flex-wrap items-center justify-between gap-3`, no margin). `back?: string | (() => void)`; SessionDetail passes its existing `goBack` (SessionDetail.tsx:205-213).
+
+SHOULD[§1 routes.sessions cwd] Comma-joining `cwd` breaks on any path containing a comma and diverges from the server, which already accepts repeated `cwd` params as an array (server/routes/sessions.js:249-252). Sessions reads `.get("cwd")` (single).
+  FIX: routes.sessions serializes arrays as repeated params (`?cwd=a&cwd=b`); Sessions reads `searchParams.getAll("cwd")`. Keep comma-joining only for routes.activity, whose page state is already comma-safe id/name lists.
+
+SHOULD[§2 EntityRef kinds vs §4 targets] Group D 'ConnectionStatusModal event-type rows → EntityRef tool/type' and Group C 'Analytics bar labels (event type / subagent type)' have no matching kind: event types are not tools, and subagent types have no navigation target anywhere.
+  FIX: Add `{ kind: "eventType"; type: string }` → routes.activity({ type }) with menu [Show in Activity, Copy]. Leave subagent-type bar labels as plain text (BarRow `label: ReactNode` for tool/eventType only). Sidebar.tsx:1042 TypeBar gets an EntityRef(eventType).
+
+SHOULD[§2 EntityRef(model) label] Display text for kind "model" is unspecified; WorkflowRunsPanel.test expects the raw string `claude-opus-4-8` (line 95) while cards show `formatModelName(...)` (AgentCard.test:151,178).
+  FIX: Default label = the raw `model` string; callers that want the short name pass `children={formatModelName(model)}`. `title` = raw model id.
+
+SHOULD[§2 EntityRef event handling] Only `stopPropagation` on click is specified; a right-click on an EntityRef inside a Clickable row would open both the chip menu and the row menu.
+  FIX: EntityRef onContextMenu: `e.preventDefault(); e.stopPropagation();` before opening its own menu. Same for the Shift+F10 key path.
+
+SHOULD[§4 Group A/B transient sessions] Pre-identity Codex sessions (`metadata.pre_identity_process`) have no detail page; an EntityRef(session) id chip links to a 404, and the Sessions <tr> Clickable must not navigate for them (existing tests).
+  FIX: SessionCard/Sessions: when `isTransientProcess(session.metadata)` render the id as plain `<span className="font-mono">` and pass no `to` to Clickable (keeps SessionCard.test:103-105 and screens.snapshot 'transient Codex startup row' green).
+
+SHOULD[§3 SessionDetail `#agent-<id>`] The target AgentCard may be inside a collapsed subtree (`expandedAgents`) or on an unvisited tab, so `scrollIntoView` finds nothing.
+  FIX: On hash: `setActiveTab("agents")`; add the target and every ancestor (walk `parent_agent_id`, cf. the auto-expand loop at SessionDetail.tsx:498-512) to `expandedAgents`; then `requestAnimationFrame(() => document.getElementById(`agent-${id}`)?.scrollIntoView({ block: "center" }))` and a 1.5s ring class.
+
+SHOULD[§3 Workflows `?run=` / `?session=`] WorkflowRunsPanel has no way to expand a run by id (internal `expanded` Set, props are runs/statusFilter/sessionId/hideSessionLink) and SessionDrillIn is Section 11 at the bottom of a long page, so 'opens the drill-in' is invisible without scrolling.
+  FIX: Add additive props `expandedRunId?: string | null; onExpandedRunChange?: (id: string | null) => void` to WorkflowRunsPanel (components/workflows/WorkflowRunsPanel.tsx:101-110, :241); ignore an id not present in the fetched list. SessionDetail keeps calling it unchanged. Workflows: on `?session=` also `scrollIntoView` the drill-in Section.
+
+SHOULD[§2 LivePill / kit modules and test mocks] Several page tests mock `../../lib/eventBus` with only `subscribe` and mock `../../lib/api` without importOriginal (no `openCwd`, no `run`).
+  FIX: State: 'LivePill/PageHeader are prop-driven (no eventBus import in client/src/ui). Kit modules import only `{ api }` from lib/api and dereference `api.sessions.openCwd` lazily inside onSelect, never at render.' Evidence: SessionDetail.hookOnly.test.tsx:71, SessionDetail.nestedAgents.test.tsx:52-98, Dashboard.recentActivity.test.tsx:45-71.
+
+SHOULD[§2 CopyButton / useCopy] jsdom has no `navigator.clipboard`; the existing CopyButton takes `{ text }` (EventDetail.tsx:409, SessionDetail.tsx:674,704) while the new one takes `{ value }`.
+  FIX: `copy()` guards `navigator.clipboard?.writeText`; §6 tests stub `Object.assign(navigator, { clipboard: { writeText: vi.fn().mockResolvedValue(undefined) } })`. The primitives.tsx alias is `export const CopyButton = ({ text }: { text: string }) => <UiCopyButton value={text} />`.
+
+SHOULD[§3 Sessions `?q` / §3 Run `?cwd`] Sessions' server-facing `search` is derived from `searchInput` by a 300ms debounce; seeding only `search` gets overwritten. Run's cwd default effect only keeps a pre-existing value.
+  FIX: Sessions: seed `searchInput` (Sessions.tsx:128-130). Run: `const [cwd, setCwd] = useState(() => searchParams.get("cwd") ?? "")` at Run.tsx:698 — the suggestion effect's `current || preferred.path` (:742) then preserves it. `?session` fallback: in the `.then` at Run.tsx:1107-1123, when no live handle: `api.sessions.get(sid).then(({ session }) => { setProvider(session.provider ?? "claude"); setMode("conversation"); setResumeSession(session); })` — ConfigCard flips `resumePicked` from `isResume` (Run.tsx:2883-2893); keep the finally-strip.
+
+SHOULD[§2 ui/index.ts] tsconfig has `isolatedModules: true`; re-exporting types with a plain `export { MenuItem }` fails.
+  FIX: Barrel uses `export type { MenuItem, EntityRefProps, ... }` for types and `export { ... }` for values.
+
+SHOULD[§2 entityMenu Reveal folder] Success/failure announcements already exist as `kanban:project.opened` / `kanban:project.openFailed` (ProjectBadge.tsx:121-126); the spec's `common:ui.*` list has none, so implementers will add duplicates.
+  FIX: entityMenu.revealFolder reuses `t("kanban:project.opened", { name })` / `t("kanban:project.openFailed", { message })` via announceAction.
+
+SHOULD[§7 Gates] `npx prettier --check client/src` is narrower than the repo gate (`npm run format:check` = `prettier --check .`), which also covers the locale JSON files every group edits.
+  FIX: Use `npm run format:check` from the repo root (or `npx prettier --check client/src client/src/i18n`).
+
+CUT[KeyValueList, Panel, SectionHeader, ShortId, RelativeTime (§2)] No Phase B target in §4 adopts any of them (the 'Common to every page' list is PageHeader/IconButton/Button/Badge/EntityRef/Clickable/TabStrip); ShortId is subsumed by EntityRef, RelativeTime is `<time title={formatDateTimeFull}>{timeAgo}</time>` inline. Building them in Phase A yields untested dead
+
+CUT[ContextMenuTarget and MenuButton (kebab) (§2)] Third and fourth ways to attach the same menu; every §4 use is either an EntityRef (built-in menu) or a Clickable (`menu` prop). Neither ContextMenuTarget nor MenuButton is referenced by any adoption bullet.
+
+CUT[i18n keys `ui.live`, `ui.offline`, `ui.menu` (string), `ui.copy`, `ui.copied`, `] `common:live`, `common:offline`, `common:actions`, `common:eventDetail.copy/copied` already exist in all five locales; `copyId` and `openInNewTab` are used by no menu list in §2.
+
+CUT[`components/Layout.tsx` from Group D; `components/StatusBadge.tsx` from Group A] Layout has no task in §4. StatusBadge is rendered by B and C and its 24 tests pin concrete class names (`.animate-pulse-dot`, `.bg-yellow-400`, `.text-amber-300`); leaving it untouched removes a cross-group hazard for zero visible gain.
+
+CUT[SessionCard `variant="row"` + Kanban `?density` toggle + `ui.density.*` keys (§4] Scope creep unrelated to the navigation/kit goal: only the Dashboard agent tree needs a row variant (AgentCard). If the density toggle is kept, it should be a Phase C item so Group A's SessionCard/Kanban diff stays reviewable alongside the EntityRef/Clickable changes.
