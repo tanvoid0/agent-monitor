@@ -3,7 +3,7 @@
  * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
 
-const CACHE_NAME = "wiki-v120";
+const CACHE_NAME = "wiki-v121";
 const PRECACHE = [
   "./",
   "./index.html",

@@ -606,10 +606,10 @@ export function buildPaletteCommands(ctx: PaletteContext): PaletteCommand[] {
     {
       id: "action:website",
       label: t("nav:website"),
-      detail: "sonnguyenhoang.com",
+      detail: "tanvoid0.com",
       group: "actions",
       icon: Globe,
-      run: () => window.open("https://sonnguyenhoang.com", "_blank", "noopener,noreferrer"),
+      run: () => window.open("https://tanvoid0.com", "_blank", "noopener,noreferrer"),
     },
     {
       // #107: the Timeline/Activity Feed help panel ("About events, filters,
