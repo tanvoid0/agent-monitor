@@ -473,7 +473,7 @@ Các cổng host mặc định chỉ bind loopback: dashboard `4820`, MCP `8819`
 
 Nếu bạn không muốn giữ một cửa sổ terminal mở, hãy cài đặt **ứng dụng máy tính để bàn gốc** tùy chọn. Nó nhúng máy chủ ngay trong tiến trình, thêm biểu tượng tray ở menu-bar / khu vực thông báo và hỗ trợ tự khởi động lúc đăng nhập (macOS Login Items / Windows startup).
 
-Cách nhanh nhất là **tải trình cài dựng sẵn** từ [bản GitHub Release mới nhất](https://github.com/tanvoid0/agent-monitor/releases/latest) (CI tự động phát hành một `vX.Y.Z` mỗi khi `package.json` được nâng phiên bản trên `master`):
+Cách nhanh nhất là **tải trình cài dựng sẵn** từ [bản GitHub Release mới nhất](https://github.com/tanvoid0/agent-monitor/releases/latest) (CI tự động phát hành một `vX.Y.Z` mỗi khi `package.json` được nâng phiên bản trên `main`):
 
 - **macOS** — tải `AgentMonitor-<version>-arm64.dmg` (Apple Silicon) hoặc `-x64.dmg` (Intel) rồi kéo **AgentMonitor.app** vào `/Applications`.
 - **Windows** — tải `AgentMonitor-Setup-<version>-x64.exe` (trình cài) hoặc `AgentMonitor-<version>-x64-portable.exe` (không cần cài) rồi chạy.
@@ -1439,7 +1439,7 @@ Ngoài ra, bất kỳ sự kiện hook `Notification` nào từ Claude Code đ�
 
 ## Thông báo cập nhật
 
-Bảng điều khiển tự giám sát git checkout của chính nó và hiện một modal bất cứ khi nào nhánh mặc định chuẩn có commit mới đi trước HEAD. **Nhận biết nhánh và fork:** nếu có remote `upstream` (quy ước chuẩn cho fork), nó được ưu tiên hơn `origin`; `master`/`main`/`HEAD` của remote được chọn chính là ref so sánh. `manual_command` tự điều chỉnh theo tình huống — chỉ dùng `git pull --ff-only` khi nhánh cục bộ thực sự theo dõi ref chuẩn, ngược lại dùng `git fetch` (kèm fast-forward merge ở trường hợp fork), để lệnh không bao giờ nói dối. Người dùng nhận được lệnh chính xác để chạy trong terminal — máy chủ **không bao giờ** tự pull hoặc khởi động lại, giữ cho cơ chế này có thể chạy đồng nhất giữa các phiên dev, tiến trình được quản lý bởi pm2/systemd/launchd/Docker, và các triển khai từ xa.
+Bảng điều khiển tự giám sát git checkout của chính nó và hiện một modal bất cứ khi nào nhánh mặc định chuẩn có commit mới đi trước HEAD. **Nhận biết nhánh và fork:** nếu có remote `upstream` (quy ước chuẩn cho fork), nó được ưu tiên hơn `origin`; `main`/`master`/`HEAD` của remote được chọn chính là ref so sánh. `manual_command` tự điều chỉnh theo tình huống — chỉ dùng `git pull --ff-only` khi nhánh cục bộ thực sự theo dõi ref chuẩn, ngược lại dùng `git fetch` (kèm fast-forward merge ở trường hợp fork), để lệnh không bao giờ nói dối. Người dùng nhận được lệnh chính xác để chạy trong terminal — máy chủ **không bao giờ** tự pull hoặc khởi động lại, giữ cho cơ chế này có thể chạy đồng nhất giữa các phiên dev, tiến trình được quản lý bởi pm2/systemd/launchd/Docker, và các triển khai từ xa.
 
 <p align="center">
   <img src="images/update.png" alt="Modal cập nhật với lệnh sao chép" width="100%">
@@ -1589,7 +1589,7 @@ PWA giúp cài đặt bảng điều khiển trong các trình duyệt nền Chr
 
 **Cách A — tải trình cài dựng sẵn (khuyến nghị):**
 
-Tải từ [**Releases → latest**](https://github.com/tanvoid0/agent-monitor/releases/latest) (công khai, không cần đăng nhập GitHub). Mỗi khi bản cập nhật `version` trong `package.json` được đẩy lên `master`, CI tự động phát hành một `vX.Y.Z` mới, nên liên kết này luôn trỏ đến bản build hiện tại:
+Tải từ [**Releases → latest**](https://github.com/tanvoid0/agent-monitor/releases/latest) (công khai, không cần đăng nhập GitHub). Mỗi khi bản cập nhật `version` trong `package.json` được đẩy lên `main`, CI tự động phát hành một `vX.Y.Z` mới, nên liên kết này luôn trỏ đến bản build hiện tại:
 
 | Nền tảng | Tệp asset | Ghi chú |
 | --- | --- | --- |
@@ -1766,7 +1766,7 @@ Hoặc mở  → *System Settings → Privacy & Security*, cuộn tới ứng d�
 
 ### Tích hợp liên tục (CI)
 
-`.github/workflows/ci.yml` có hai job desktop được **lọc theo đường dẫn** (một job `changes` dùng `dorny/paths-filter` phát hiện thay đổi trong `desktop/**`; các job này cũng chạy trên mọi `push`, hoặc khi PR gắn nhãn `desktop`): job `🍎 macOS Desktop (DMG)` chạy trên `macos-latest` dựng cả hai DMG theo kiến trúc rồi tải lên dưới dạng artifact `AgentMonitor-dmg` (hai DMG một-kiến-trúc); job `🪟 Windows Desktop (EXE)` chạy trên `windows-latest` dựng rồi tải lên dưới dạng artifact `AgentMonitor-win` (trình cài NSIS + bản portable). Khi đẩy bản nâng phiên bản lên `master`, job `release` đính kèm **cả** DMG macOS lẫn `.exe` Windows vào bản GitHub Release `vX.Y.Z` đã phát hành. Biểu tượng Windows (`desktop/assets/icon.ico`) được commit vào kho mã (tạo lại từ `icon.png` bằng `npm run build:win-icon`, dùng PowerShell + .NET, không cần công cụ phụ).
+`.github/workflows/ci.yml` có hai job desktop được **lọc theo đường dẫn** (một job `changes` dùng `dorny/paths-filter` phát hiện thay đổi trong `desktop/**`; các job này cũng chạy trên mọi `push`, hoặc khi PR gắn nhãn `desktop`): job `🍎 macOS Desktop (DMG)` chạy trên `macos-latest` dựng cả hai DMG theo kiến trúc rồi tải lên dưới dạng artifact `AgentMonitor-dmg` (hai DMG một-kiến-trúc); job `🪟 Windows Desktop (EXE)` chạy trên `windows-latest` dựng rồi tải lên dưới dạng artifact `AgentMonitor-win` (trình cài NSIS + bản portable). Khi đẩy bản nâng phiên bản lên `main`, job `release` đính kèm **cả** DMG macOS lẫn `.exe` Windows vào bản GitHub Release `vX.Y.Z` đã phát hành. Biểu tượng Windows (`desktop/assets/icon.ico`) được commit vào kho mã (tạo lại từ `icon.png` bằng `npm run build:win-icon`, dùng PowerShell + .NET, không cần công cụ phụ).
 
 ### Thay đổi duy nhất ngoài `desktop/`
 

@@ -88,7 +88,7 @@ The repo has two packages:
 
 ## Branching and Commits
 
-- Branch off `master`. Use a short, descriptive branch name:
+- Branch off `main`. Use a short, descriptive branch name:
   - `feat/budget-alerts`
   - `fix/token-counting`
   - `docs/setup-guide`
@@ -99,7 +99,7 @@ The repo has two packages:
   - `fix stale session detection on resume`
   - `update Dockerfile to node 22`
 
-- Do not commit directly to `master`.
+- Do not commit directly to `main`.
 
 ---
 
@@ -116,7 +116,7 @@ The repo has two packages:
 ```bash
 npm test           # all server and client tests must pass
 npm run format     # run Prettier
-bash .claude/skills/file-headers/scripts/check-headers-pr.sh origin/master HEAD
+bash .claude/skills/file-headers/scripts/check-headers-pr.sh origin/main HEAD
 ```
 
 Applicable source files (`.js`, `.ts`, `.tsx`, `.py`, `.sh`, `.css`, etc.) must

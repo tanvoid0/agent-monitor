@@ -112,5 +112,5 @@ files changed in the PR diff (added, copied, renamed, or modified). Test locally
 before pushing:
 
 ```bash
-bash .claude/skills/file-headers/scripts/check-headers-pr.sh origin/master HEAD
+bash .claude/skills/file-headers/scripts/check-headers-pr.sh origin/main HEAD
 ```

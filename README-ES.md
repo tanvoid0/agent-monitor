@@ -448,7 +448,7 @@ Crea 8 sesiones de muestra, 23 agentes y 106 eventos para que puedas explorar la
 
 Si prefieres no mantener un terminal abierto, instala la aplicación de escritorio **opcional nativa**. Incorpora el servidor en el proceso, agrega un icono de barra de menú / área de notificaciones ( bandeja) y admite el inicio automático al iniciar sesión (elementos de inicio de sesión de macOS / inicio de sesión de Windows).
 
-El camino más rápido es **descargar un instalador precompilado** desde la [última versión de GitHub](https://github.com/tanvoid0/agent-monitor/releases/latest) (CI publica automáticamente una `vX.Y.Z` cada vez que `package.json` se actualiza en `master`):
+El camino más rápido es **descargar un instalador precompilado** desde la [última versión de GitHub](https://github.com/tanvoid0/agent-monitor/releases/latest) (CI publica automáticamente una `vX.Y.Z` cada vez que `package.json` se actualiza en `main`):
 
 - **macOS** — agarra `AgentMonitor-<version>-arm64.dmg` (Apple Silicon) o `-x64.dmg` (Intel) y arrastra **AgentMonitor.app** a `/Applications`.
 - **Windows** — obtenga `AgentMonitor-Setup-<version>-x64.exe` (instalador) o `AgentMonitor-<version>-x64-portable.exe` (sin instalar) y ejecútelo.
@@ -1510,7 +1510,7 @@ El proyecto envía tres aplicaciones web progresivas independientes: una para ca
 
 ## Notificador de actualización
 
-El panel de control observa su propia verificación de git y muestra una modalidad cada vez que la rama predeterminada canónica tiene commits por delante de HEAD. **Conocedor de ramas y bifurcaciones:** si tiene una remota `upstream` (la convención estándar para bifurcaciones), se prefiere sobre `origin`; el `master`, `main` o `HEAD` de la remota elegida es la referencia de comparación. El `manual_command` se adapta a su situación: `git pull --ff-only` solo cuando su rama realmente rastrea la referencia canónica, de lo contrario una `git fetch` (y una fusión de avance rápido en el caso de la bifurcación) para que el comando nunca mienta. Los usuarios obtienen el comando exacto para ejecutar en un terminal: el servidor **nunca** se carga o reinicia, lo que mantiene el mecanismo portátil a través de las sesiones de desarrollo, la supervisión de pm2/systemd/launchd/Docker y las implementaciones remotas.
+El panel de control observa su propia verificación de git y muestra una modalidad cada vez que la rama predeterminada canónica tiene commits por delante de HEAD. **Conocedor de ramas y bifurcaciones:** si tiene una remota `upstream` (la convención estándar para bifurcaciones), se prefiere sobre `origin`; el `main`, `master` o `HEAD` de la remota elegida es la referencia de comparación. El `manual_command` se adapta a su situación: `git pull --ff-only` solo cuando su rama realmente rastrea la referencia canónica, de lo contrario una `git fetch` (y una fusión de avance rápido en el caso de la bifurcación) para que el comando nunca mienta. Los usuarios obtienen el comando exacto para ejecutar en un terminal: el servidor **nunca** se carga o reinicia, lo que mantiene el mecanismo portátil a través de las sesiones de desarrollo, la supervisión de pm2/systemd/launchd/Docker y las implementaciones remotas.
 
 <p align="center">
 <img src="images/update.png" alt="Modal de actualización del panel de control con el comando copiar al portapapeles">
@@ -1784,7 +1784,7 @@ Al iniciar la aplicación:
 
 ### Entiéndelo
 
-**Opción A - descargar un instalador preconstruido (recomendado).** Desde **[Versiones → última](https://github.com/tanvoid0/agent-monitor/releases/latest)** (público, sin inicio de sesión en GitHub). CI publica automáticamente una nueva versión `vX.Y.Z` cada vez que la versión en `package.json` se actualiza en `master`, por lo que este enlace siempre sirve para la construcción actual:
+**Opción A - descargar un instalador preconstruido (recomendado).** Desde **[Versiones → última](https://github.com/tanvoid0/agent-monitor/releases/latest)** (público, sin inicio de sesión en GitHub). CI publica automáticamente una nueva versión `vX.Y.Z` cada vez que la versión en `package.json` se actualiza en `main`, por lo que este enlace siempre sirve para la construcción actual:
 
 | Plataforma | Activo | Notas |
 | --- | --- | --- |
@@ -1793,7 +1793,7 @@ Al iniciar la aplicación:
 | Windows (instalador) | `AgentMonitor-Setup-<ver>-x64.exe` | instalación por usuario, sin administrador |
 | Windows (portátil) | `AgentMonitor-<ver>-x64-portable.exe` | ejecutar sin instalar |
 
-Las construcciones frescas por compromiso también existen como artefactos CI (se requiere inicio de sesión, retención de 14 días): `AgentMonitor-dmg` del trabajo `🍎 macOS Desktop (DMG)` y `AgentMonitor-win` del trabajo `🪟 Windows Desktop (EXE)`, útiles para probar `master` antes de la próxima etiqueta de lanzamiento.
+Las construcciones frescas por compromiso también existen como artefactos CI (se requiere inicio de sesión, retención de 14 días): `AgentMonitor-dmg` del trabajo `🍎 macOS Desktop (DMG)` y `AgentMonitor-win` del trabajo `🪟 Windows Desktop (EXE)`, útiles para probar `main` antes de la próxima etiqueta de lanzamiento.
 
 **Opción B: construíselo tú mismo.** Desde la raíz del repositorio:
 
@@ -1876,7 +1876,7 @@ El DMG de macOS está **firmado ad hoc** por defecto, por lo que cualquiera pued
 - **`better-sqlite3`** es el único módulo nativo en el árbol de dependencias, y un módulo nativo debe compilarse contra la ABI exacta del Nodo A en la que se ejecuta. El espacio de trabajo `desktop/` envía su **propia copia** de `better-sqlite3` reconstruida para la ABI de Electron y utiliza un redireccionamiento `require` local al proceso para apuntar a `server/db.js`; la copia de la raíz del repositorio se mantiene construida para el Nodo del sistema (por lo que `npm run test:server` sigue funcionando).
 - **La construcción de un DMG reconstruye `better-sqlite3` para la arquitectura de destino**, lo que puede dejar la copia del escritorio construida para la otra arquitectura de CPU y romper `npm run desktop:dev` / `npm run desktop:test` con `ERR_DLOPEN_FAILED`. El paso de `prebuild` del escritorio ahora **auto-curará** el módulo nativo para la máquina local en la próxima construcción, por lo que los flujos de desarrollo y prueba de humo siguen funcionando después de una construcción de DMG específica de la arquitectura. El paso de `prebuild` también **falla rápidamente con ayuda de configuración** cuando el binario nativo de `better-sqlite3` falta por completo, convirtiendo un fallo de tiempo de ejecución en un error de tiempo de construcción que se puede copiar y pegar.
 - El **único cambio fuera de `desktop/`** es una refactorización que preserva el comportamiento de `server/index.js`: su post-listen bootstrap (programador de actualización, `cc-watcher`, reconciliación de ejecución huérfana) se extrajo en un `startBackgroundServices()` exportado para que el servidor incorporado ejecute exactamente lo que ejecuta `node server/index.js`. El camino independiente de `node server/index.js` no ha cambiado funcionalmente; `client/`, `scripts/`, `mcp/` y `vscode-extension/` no han sido tocados.
-- Dos trabajos de CI de escritorio filtrados por ruta construyen, prueban con humo y empaquetan la aplicación: **`🍎 macOS Desktop (DMG)`** en `macos-latest` (carga el artefacto `AgentMonitor-dmg` — dos DMG de arquitectura única) y **`🪟 Windows Desktop (EXE)`** en `windows-latest` (carga el artefacto `AgentMonitor-win` — instalador NSIS + portátil). En una actualización de versión a `master`, el trabajo de `release` adjunta **ambos** los DMG de macOS y los `.exe` de Windows a la publicación de la versión `vX.Y.Z` de GitHub. El icono de Windows (`desktop/assets/icon.ico`) se compromete al repositorio (regénéralo desde `icon.png` con `npm run build:win-icon`, PowerShell + .NET, sin herramientas adicionales).
+- Dos trabajos de CI de escritorio filtrados por ruta construyen, prueban con humo y empaquetan la aplicación: **`🍎 macOS Desktop (DMG)`** en `macos-latest` (carga el artefacto `AgentMonitor-dmg` — dos DMG de arquitectura única) y **`🪟 Windows Desktop (EXE)`** en `windows-latest` (carga el artefacto `AgentMonitor-win` — instalador NSIS + portátil). En una actualización de versión a `main`, el trabajo de `release` adjunta **ambos** los DMG de macOS y los `.exe` de Windows a la publicación de la versión `vX.Y.Z` de GitHub. El icono de Windows (`desktop/assets/icon.ico`) se compromete al repositorio (regénéralo desde `icon.png` con `npm run build:win-icon`, PowerShell + .NET, sin herramientas adicionales).
 
 Para la guía completa del usuario (descargar, instalar, Gatekeeper / SmartScreen, menú de bandeja, inicio automático), consulte [`DESKTOP.md`](./DESKTOP.md); para la referencia del contribuyente / arquitectura (modelo de proceso, ciclo de vida de arranque, descubrimiento de puertos, pipeline de construcción, con diagramas de Mermaid), consulte [`desktop/README.md`](./desktop/README.md).
 
@@ -2418,7 +2418,7 @@ agentmonitor/
 
 Las contribuciones son bienvenidas, consulte [`.github/CONTRIBUTING.md`](.github/CONTRIBUTING.md) para la guía completa.
 
-Todos los colaboradores deben firmar el [Acuerdo de Licencia del Colaborador](https://github.com/tanvoid0/agent-monitor/blob/master/CLA.md). Esto se aplica automáticamente en cada solicitud de extracción por la Acción de GitHub `🖋️ Asistente de CLA`: la primera vez que abres una PR, un bot te pide que firmes comentando `He leído el Documento de CLA y por la presente firmo el CLA`. El control de estado del **Asistente de CLA** de la PR permanece en rojo hasta que lo hagas, y firmar una vez cubre todas las contribuciones futuras.
+Todos los colaboradores deben firmar el [Acuerdo de Licencia del Colaborador](https://github.com/tanvoid0/agent-monitor/blob/main/CLA.md). Esto se aplica automáticamente en cada solicitud de extracción por la Acción de GitHub `🖋️ Asistente de CLA`: la primera vez que abres una PR, un bot te pide que firmes comentando `He leído el Documento de CLA y por la presente firmo el CLA`. El control de estado del **Asistente de CLA** de la PR permanece en rojo hasta que lo hagas, y firmar una vez cubre todas las contribuciones futuras.
 
 ---
 

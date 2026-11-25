@@ -6,7 +6,7 @@
 # Usage:
 #   check-headers-pr.sh [<base-sha> <head-sha>]
 #
-# When omitted, compares the current branch against origin/master (or master).
+# When omitted, compares the current branch against origin/main (or main).
 # @author Tanveer Hoque <tanvoid0@gmail.com>
 
 set -euo pipefail
@@ -40,10 +40,10 @@ HEAD_SHA="${2:-}"
 cd "$ROOT"
 
 if [[ -z "$BASE_SHA" || -z "$HEAD_SHA" ]]; then
-  if git show-ref --verify --quiet refs/remotes/origin/master; then
-    BASE_SHA="$(git merge-base HEAD origin/master)"
-  elif git show-ref --verify --quiet refs/heads/master; then
-    BASE_SHA="$(git merge-base HEAD master)"
+  if git show-ref --verify --quiet refs/remotes/origin/main; then
+    BASE_SHA="$(git merge-base HEAD origin/main)"
+  elif git show-ref --verify --quiet refs/heads/main; then
+    BASE_SHA="$(git merge-base HEAD main)"
   else
     echo "error: could not resolve base ref; pass <base-sha> <head-sha>" >&2
     exit 1

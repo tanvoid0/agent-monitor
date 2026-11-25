@@ -23,7 +23,7 @@ maintainers:
   - name: David Nguyen
     url: https://github.com/tanvoid0
 
-icon: https://raw.githubusercontent.com/tanvoid0/agent-monitor/master/favicon.svg
+icon: https://raw.githubusercontent.com/tanvoid0/agent-monitor/main/favicon.svg
 
 annotations:
   artifacthub.io/license: MIT

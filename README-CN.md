@@ -454,7 +454,7 @@ npm run seed
 
 如果你不想一直开着终端窗口，可以安装可选的**原生桌面应用**。它将 Express 服务器以进程内方式嵌入运行，提供菜单栏 / 通知区域（托盘）图标，并支持开机自启（macOS 登录项 / Windows 启动项）。
 
-最快的方式是从 [最新 GitHub Release](https://github.com/tanvoid0/agent-monitor/releases/latest) **下载预构建的安装包**（每当 `master` 上的 `package.json` 版本号被提升时，CI 都会自动发布一个新的 `vX.Y.Z`）：
+最快的方式是从 [最新 GitHub Release](https://github.com/tanvoid0/agent-monitor/releases/latest) **下载预构建的安装包**（每当 `main` 上的 `package.json` 版本号被提升时，CI 都会自动发布一个新的 `vX.Y.Z`）：
 
 - **macOS** —— 下载 `AgentMonitor-<version>-arm64.dmg`（Apple Silicon）或 `-x64.dmg`（Intel），并将 **AgentMonitor.app** 拖入 `/Applications`。
 - **Windows** —— 下载 `AgentMonitor-Setup-<version>-x64.exe`（安装版）或 `AgentMonitor-<version>-x64-portable.exe`（免安装版），然后运行它。
@@ -1455,7 +1455,7 @@ Dashboard 支持通过 Web Push (VAPID) 实现持久化浏览器通知。即使 
 
 ## 更新提醒
 
-Dashboard 会监视自身的 git 检出，当规范默认分支领先于 HEAD 时弹出模态框。**支持分支与 fork：** 若配置了 `upstream` 远程（fork 的常规约定），则优先于 `origin`；所选远程的 `master`/`main`/`HEAD` 即为对比引用。`manual_command` 会根据用户处境调整——只有在本地分支真正跟踪规范引用时才用 `git pull --ff-only`，否则用 `git fetch`（fork 场景再加上 fast-forward 合并），命令永不撒谎。用户得到的是要在终端里执行的确切命令——服务端**永远不会**自动拉取或重启自己，这样机制在开发会话、pm2/systemd/launchd/Docker 等进程管理以及远程部署中都保持可移植性。
+Dashboard 会监视自身的 git 检出，当规范默认分支领先于 HEAD 时弹出模态框。**支持分支与 fork：** 若配置了 `upstream` 远程（fork 的常规约定），则优先于 `origin`；所选远程的 `main`/`master`/`HEAD` 即为对比引用。`manual_command` 会根据用户处境调整——只有在本地分支真正跟踪规范引用时才用 `git pull --ff-only`，否则用 `git fetch`（fork 场景再加上 fast-forward 合并），命令永不撒谎。用户得到的是要在终端里执行的确切命令——服务端**永远不会**自动拉取或重启自己，这样机制在开发会话、pm2/systemd/launchd/Docker 等进程管理以及远程部署中都保持可移植性。
 
 <p align="center">
   <img src="images/update.png" alt="带有一键复制命令的 Dashboard 更新模态框" width="100%">
@@ -1636,7 +1636,7 @@ flowchart TD
 
 **方式 A —— 下载预构建的安装包（推荐）：**
 
-从 [**Releases → latest**](https://github.com/tanvoid0/agent-monitor/releases/latest) 下载（公开，无需登录 GitHub）。每当 `master` 上的 `package.json` 版本号被提升时，CI 都会自动发布一个新的 `vX.Y.Z`，因此该链接始终指向当前版本：
+从 [**Releases → latest**](https://github.com/tanvoid0/agent-monitor/releases/latest) 下载（公开，无需登录 GitHub）。每当 `main` 上的 `package.json` 版本号被提升时，CI 都会自动发布一个新的 `vX.Y.Z`，因此该链接始终指向当前版本：
 
 | 平台 | 资源文件 | 说明 |
 | --- | --- | --- |
@@ -1813,7 +1813,7 @@ flowchart TD
 
 ### 持续集成
 
-`.github/workflows/ci.yml` 中有两个经过**路径过滤**的桌面作业（一个 `changes` 作业用 `dorny/paths-filter` 检测 `desktop/**` 的改动；这些作业也会在任何 `push` 时、或 PR 带有 `desktop` 标签时运行）：运行在 `macos-latest` 上的 `🍎 macOS Desktop (DMG)` 作业会构建**两个按架构的 DMG**（arm64 + x64；对偶发的 `hdiutil detach` 失败会重试）并上传为 `AgentMonitor-dmg` 产物（两个单架构 DMG）；运行在 `windows-latest` 上的 `🪟 Windows Desktop (EXE)` 作业会构建并上传为 `AgentMonitor-win` 产物（NSIS 安装包 + 便携版）。在向 `master` 推送版本号提升时，`release` 作业会把 macOS DMG 与 Windows `.exe` **都**附加到所发布的 `vX.Y.Z` GitHub Release。Windows 图标（`desktop/assets/icon.ico`）已提交到仓库中（可用 `npm run build:win-icon` 从 `icon.png` 重新生成，基于 PowerShell + .NET，无需额外工具）。
+`.github/workflows/ci.yml` 中有两个经过**路径过滤**的桌面作业（一个 `changes` 作业用 `dorny/paths-filter` 检测 `desktop/**` 的改动；这些作业也会在任何 `push` 时、或 PR 带有 `desktop` 标签时运行）：运行在 `macos-latest` 上的 `🍎 macOS Desktop (DMG)` 作业会构建**两个按架构的 DMG**（arm64 + x64；对偶发的 `hdiutil detach` 失败会重试）并上传为 `AgentMonitor-dmg` 产物（两个单架构 DMG）；运行在 `windows-latest` 上的 `🪟 Windows Desktop (EXE)` 作业会构建并上传为 `AgentMonitor-win` 产物（NSIS 安装包 + 便携版）。在向 `main` 推送版本号提升时，`release` 作业会把 macOS DMG 与 Windows `.exe` **都**附加到所发布的 `vX.Y.Z` GitHub Release。Windows 图标（`desktop/assets/icon.ico`）已提交到仓库中（可用 `npm run build:win-icon` 从 `icon.png` 重新生成，基于 PowerShell + .NET，无需额外工具）。
 
 ### 桌面应用故障排查
 

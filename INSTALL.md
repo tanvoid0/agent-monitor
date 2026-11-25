@@ -192,7 +192,7 @@ The fastest path. There are two flavours:
 
 **1a. From the latest GitHub Release** *(recommended — public, no sign-in)*
 
-Open [**Releases → latest**](https://github.com/tanvoid0/agent-monitor/releases/latest) and download the asset for your platform. CI publishes a new `vX.Y.Z` release automatically every time the version in `package.json` is bumped on `master`, so this link always points at the current shipping build.
+Open [**Releases → latest**](https://github.com/tanvoid0/agent-monitor/releases/latest) and download the asset for your platform. CI publishes a new `vX.Y.Z` release automatically every time the version in `package.json` is bumped on `main`, so this link always points at the current shipping build.
 
 | Platform | Asset | Notes |
 |---|---|---|

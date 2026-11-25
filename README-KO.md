@@ -449,7 +449,7 @@ npm run seed
 
 터미널을 계속 열어 두고 싶지 않다면 선택적 **네이티브 데스크톱 앱**을 설치하세요. 서버를 인프로세스로 임베드하고, 메뉴 바 / 알림 영역(트레이) 아이콘을 추가하며, 로그인 시 자동 시작(macOS 로그인 항목 / Windows 시작 프로그램)을 지원합니다.
 
-가장 빠른 방법은 [최신 GitHub Release](https://github.com/tanvoid0/agent-monitor/releases/latest)에서 **미리 빌드된 설치 파일을 다운로드**하는 것입니다(`master`에서 `package.json` 버전이 올라갈 때마다 CI가 `vX.Y.Z`를 자동 게시합니다):
+가장 빠른 방법은 [최신 GitHub Release](https://github.com/tanvoid0/agent-monitor/releases/latest)에서 **미리 빌드된 설치 파일을 다운로드**하는 것입니다(`main`에서 `package.json` 버전이 올라갈 때마다 CI가 `vX.Y.Z`를 자동 게시합니다):
 
 - **macOS** — `AgentMonitor-<version>-arm64.dmg`(Apple Silicon) 또는 `-x64.dmg`(Intel)를 받아 **AgentMonitor.app**을 `/Applications`로 드래그하세요.
 - **Windows** — `AgentMonitor-Setup-<version>-x64.exe`(설치 관리자) 또는 `AgentMonitor-<version>-x64-portable.exe`(무설치)를 받아 실행하세요.
@@ -1500,7 +1500,7 @@ stateDiagram-v2
 
 ## 업데이트 알리미
 
-대시보드는 자체 git 체크아웃을 감시하고, 정식(canonical) 기본 브랜치에 HEAD보다 앞선 커밋이 있을 때마다 모달을 표시합니다. **브랜치 및 포크 인식:** `upstream` 원격(포크의 표준 관례)이 있으면 `origin`보다 우선하며, 선택된 원격의 `master`/`main`/`HEAD`가 비교 기준 ref가 됩니다. `manual_command`는 상황에 맞게 조정됩니다 — 브랜치가 실제로 정식 ref를 추적할 때만 `git pull --ff-only`이고, 그 외에는 `git fetch`(포크의 경우 fast-forward 병합 포함)이므로 명령이 결코 거짓을 말하지 않습니다. 사용자는 터미널에서 실행할 정확한 명령을 받습니다 — 서버는 **절대** 스스로 pull하거나 재시작하지 않으므로, 이 메커니즘은 개발 세션, pm2/systemd/launchd/Docker 감독, 원격 배포 전반에서 이식성을 유지합니다.
+대시보드는 자체 git 체크아웃을 감시하고, 정식(canonical) 기본 브랜치에 HEAD보다 앞선 커밋이 있을 때마다 모달을 표시합니다. **브랜치 및 포크 인식:** `upstream` 원격(포크의 표준 관례)이 있으면 `origin`보다 우선하며, 선택된 원격의 `main`/`master`/`HEAD`가 비교 기준 ref가 됩니다. `manual_command`는 상황에 맞게 조정됩니다 — 브랜치가 실제로 정식 ref를 추적할 때만 `git pull --ff-only`이고, 그 외에는 `git fetch`(포크의 경우 fast-forward 병합 포함)이므로 명령이 결코 거짓을 말하지 않습니다. 사용자는 터미널에서 실행할 정확한 명령을 받습니다 — 서버는 **절대** 스스로 pull하거나 재시작하지 않으므로, 이 메커니즘은 개발 세션, pm2/systemd/launchd/Docker 감독, 원격 배포 전반에서 이식성을 유지합니다.
 
 <p align="center">
   <img src="images/update.png" alt="Dashboard update modal with copy-to-clipboard command" width="100%">
@@ -1773,7 +1773,7 @@ flowchart LR
 
 ### 받는 방법
 
-**옵션 A — 사전 빌드된 설치 프로그램 다운로드(권장).** **[Releases → latest](https://github.com/tanvoid0/agent-monitor/releases/latest)**에서 받을 수 있습니다(공개, GitHub 로그인 불필요). `master`에서 `package.json`의 버전이 올라갈 때마다 CI가 새 `vX.Y.Z` 릴리스를 자동 게시하므로, 이 링크는 항상 현재 빌드를 제공합니다:
+**옵션 A — 사전 빌드된 설치 프로그램 다운로드(권장).** **[Releases → latest](https://github.com/tanvoid0/agent-monitor/releases/latest)**에서 받을 수 있습니다(공개, GitHub 로그인 불필요). `main`에서 `package.json`의 버전이 올라갈 때마다 CI가 새 `vX.Y.Z` 릴리스를 자동 게시하므로, 이 링크는 항상 현재 빌드를 제공합니다:
 
 | 플랫폼 | 에셋 | 비고 |
 | --- | --- | --- |
@@ -1782,7 +1782,7 @@ flowchart LR
 | Windows (설치 프로그램) | `AgentMonitor-Setup-<ver>-x64.exe` | 사용자별 설치, 관리자 권한 불필요 |
 | Windows (포터블) | `AgentMonitor-<ver>-x64-portable.exe` | 설치 없이 실행 |
 
-커밋별 최신 빌드도 CI 아티팩트로 제공됩니다(로그인 필요, 14일 보존): `🍎 macOS Desktop (DMG)` 잡의 `AgentMonitor-dmg`와 `🪟 Windows Desktop (EXE)` 잡의 `AgentMonitor-win`입니다 — 다음 릴리스 태그 전에 `master`를 테스트할 때 유용합니다.
+커밋별 최신 빌드도 CI 아티팩트로 제공됩니다(로그인 필요, 14일 보존): `🍎 macOS Desktop (DMG)` 잡의 `AgentMonitor-dmg`와 `🪟 Windows Desktop (EXE)` 잡의 `AgentMonitor-win`입니다 — 다음 릴리스 태그 전에 `main`를 테스트할 때 유용합니다.
 
 **옵션 B — 직접 빌드하기.** 리포지토리 루트에서:
 
@@ -1865,7 +1865,7 @@ macOS DMG는 기본적으로 **ad-hoc 서명**되므로 유료 Apple Developer �
 - **`better-sqlite3`**은 의존성 트리에서 유일한 네이티브 모듈이며, 네이티브 모듈은 실행되는 정확한 Node ABI에 맞춰 컴파일되어야 합니다. `desktop/` 워크스페이스는 Electron의 ABI에 맞게 다시 빌드된 `better-sqlite3`의 **자체 복사본**을 포함하고, 프로세스 로컬 `require` 리디렉션을 사용해 `server/db.js`가 이를 가리키도록 합니다. 리포지토리 루트의 복사본은 시스템 Node용으로 빌드된 상태를 유지합니다(따라서 `npm run test:server`는 계속 동작합니다).
 - **DMG를 빌드하면 대상 아키텍처에 맞게 `better-sqlite3`이 다시 빌드되는데**, 이로 인해 데스크톱 복사본이 다른 CPU 아키텍처용으로 빌드된 채 남아 `npm run desktop:dev` / `npm run desktop:test`가 `ERR_DLOPEN_FAILED`로 깨질 수 있습니다. 이제 데스크톱 `prebuild` 단계가 다음 빌드 시 로컬 머신에 맞게 네이티브 모듈을 **자동 복구**하므로, 특정 아키텍처용 DMG 빌드 후에도 개발 및 스모크 테스트 흐름이 계속 동작합니다. 또한 `prebuild` 단계는 `better-sqlite3` 네이티브 바이너리가 아예 없을 때 **설정 도움말과 함께 빠르게 실패**하여, 런타임 크래시를 복사해 붙여넣을 수 있는 빌드 타임 오류로 바꿉니다.
 - **`desktop/` 외부의 유일한 변경**은 `server/index.js`의 동작 보존 리팩터링입니다: listen 이후의 부트스트랩(업데이트 스케줄러, `cc-watcher`, 고아 실행 조정)을 내보내기된(exported) `startBackgroundServices()`로 추출하여, 내장 서버가 `node server/index.js`가 실행하는 것과 정확히 동일하게 실행되도록 했습니다. 독립 실행형 `node server/index.js` 경로는 기능적으로 변경되지 않았으며, `client/`, `scripts/`, `mcp/`, `vscode-extension/`은 건드리지 않았습니다.
-- 경로 필터링된 두 개의 데스크톱 CI 잡이 앱을 빌드하고, 스모크 테스트하고, 패키징합니다: `macos-latest`의 **`🍎 macOS Desktop (DMG)`**(`AgentMonitor-dmg` 아티팩트 업로드 — 단일 아키텍처 DMG 2개)과 `windows-latest`의 **`🪟 Windows Desktop (EXE)`**(`AgentMonitor-win` 아티팩트 업로드 — NSIS 설치 프로그램 + 포터블)입니다. `master`로 버전을 올리는 푸시가 있으면 `release` 잡이 macOS DMG와 Windows `.exe` **모두**를 게시된 `vX.Y.Z` GitHub Release에 첨부합니다. Windows 아이콘(`desktop/assets/icon.ico`)은 리포지토리에 커밋되어 있습니다(`npm run build:win-icon`으로 `icon.png`에서 재생성, PowerShell + .NET, 추가 도구 불필요).
+- 경로 필터링된 두 개의 데스크톱 CI 잡이 앱을 빌드하고, 스모크 테스트하고, 패키징합니다: `macos-latest`의 **`🍎 macOS Desktop (DMG)`**(`AgentMonitor-dmg` 아티팩트 업로드 — 단일 아키텍처 DMG 2개)과 `windows-latest`의 **`🪟 Windows Desktop (EXE)`**(`AgentMonitor-win` 아티팩트 업로드 — NSIS 설치 프로그램 + 포터블)입니다. `main`로 버전을 올리는 푸시가 있으면 `release` 잡이 macOS DMG와 Windows `.exe` **모두**를 게시된 `vX.Y.Z` GitHub Release에 첨부합니다. Windows 아이콘(`desktop/assets/icon.ico`)은 리포지토리에 커밋되어 있습니다(`npm run build:win-icon`으로 `icon.png`에서 재생성, PowerShell + .NET, 추가 도구 불필요).
 
 전체 사용자 가이드(다운로드, 설치, Gatekeeper / SmartScreen, 트레이 메뉴, 자동 시작)는 [`DESKTOP.md`](./DESKTOP.md)를, 기여자 / 아키텍처 레퍼런스(프로세스 모델, 부팅 생명주기, 포트 탐색, 빌드 파이프라인 — Mermaid 다이어그램 포함)는 [`desktop/README.md`](./desktop/README.md)를 참조하십시오.
 
@@ -2422,7 +2422,7 @@ agentmonitor/
 
 기여를 환영합니다 — 전체 가이드는 [`.github/CONTRIBUTING.md`](.github/CONTRIBUTING.md)를 참조하십시오.
 
-모든 기여자는 [Contributor License Agreement](https://github.com/tanvoid0/agent-monitor/blob/master/CLA.md)에 서명해야 합니다. 이는 `🖋️ CLA Assistant` GitHub Action에 의해 모든 풀 리퀘스트에서 자동으로 적용됩니다: 처음 PR을 열면 봇이 `I have read the CLA Document and I hereby sign the CLA`라고 댓글을 달아 서명하도록 요청합니다. 서명할 때까지 PR의 **CLA Assistant** 상태 검사는 빨간색으로 유지되며, 한 번 서명하면 이후의 모든 기여에 적용됩니다.
+모든 기여자는 [Contributor License Agreement](https://github.com/tanvoid0/agent-monitor/blob/main/CLA.md)에 서명해야 합니다. 이는 `🖋️ CLA Assistant` GitHub Action에 의해 모든 풀 리퀘스트에서 자동으로 적용됩니다: 처음 PR을 열면 봇이 `I have read the CLA Document and I hereby sign the CLA`라고 댓글을 달아 서명하도록 요청합니다. 서명할 때까지 PR의 **CLA Assistant** 상태 검사는 빨간색으로 유지되며, 한 번 서명하면 이후의 모든 기여에 적용됩니다.
 
 ---
 

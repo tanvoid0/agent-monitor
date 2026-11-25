@@ -696,7 +696,7 @@ flowchart LR
   force-detaching any stale volume between attempts.
 - The built DMG is uploaded as the **`AgentMonitor-dmg`** artifact
   (downloadable from the workflow run).
-- On `master`, a follow-on **`release`** job reads the version from
+- On `main`, a follow-on **`release`** job reads the version from
   `package.json` and publishes `vX.Y.Z` as a GitHub Release with the DMG
   attached — but only when no release exists for that version yet, so bumping
   the version is what cuts a release. The result is a permanent, anonymous

@@ -21,7 +21,7 @@ The two coexist — install whichever fits your workflow.
 
 **Option A — download a pre-built installer** (recommended):
 
-1. Open [**Releases → latest**](https://github.com/tanvoid0/agent-monitor/releases/latest) and grab the asset for your platform. Every `master` commit that bumps the version in `package.json` cuts a new `vX.Y.Z` release automatically (CI publishes it), so this link always lands on the current build — no GitHub sign-in required.
+1. Open [**Releases → latest**](https://github.com/tanvoid0/agent-monitor/releases/latest) and grab the asset for your platform. Every `main` commit that bumps the version in `package.json` cuts a new `vX.Y.Z` release automatically (CI publishes it), so this link always lands on the current build — no GitHub sign-in required.
 
    | Platform | Asset | Notes |
    |---|---|---|
