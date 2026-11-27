@@ -1,7 +1,7 @@
 {
   "name": "am-platform",
   "description": "Administer Agent Monitor's Claude Code and Codex configuration explorers, provider-aware history import, backup restore, hook installation, home directories, updates, and MCP server.",
-  "version": "3.1.1",
+  "version": "3.2.0",
   "author": { "name": "Tanveer Hoque", "url": "https://github.com/tanvoid0" },
   "homepage": "https://github.com/tanvoid0/agent-monitor",
   "repository": "https://github.com/tanvoid0/agent-monitor",

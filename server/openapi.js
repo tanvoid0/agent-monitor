@@ -484,7 +484,7 @@ function createOpenApiSpec() {
             version: {
               type: "string",
               description: "Dashboard release version from package.json",
-              example: "3.1.1",
+              example: "3.2.0",
             },
             timestamp: { type: "string", format: "date-time" },
           },

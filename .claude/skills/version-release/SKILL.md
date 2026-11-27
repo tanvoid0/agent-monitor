@@ -17,7 +17,7 @@ When the user explicitly requests a concrete version, that instruction overrides
 ## Agent Monitor release workflow
 
 1. Read the current root `package.json` version and summarize why the change is patch, minor, or major.
-2. Update the root `package.json` and root lockfile.
+2. Update the root `package.json` and root lockfile, plus the `packages[".."].version` entry in `mcp/package-lock.json` (mcp links the root via `file:..`).
 3. Mirror the shipping version in `desktop/package.json` and `desktop/package-lock.json`.
 4. Update the OpenAPI version example in `server/openapi.js`, then run `npm run openapi:yaml`.
 5. Update the deployment surface, which carries the release in many places: `docker-compose.yml` (`am-dashboard` and `am-mcp` image tags), `deployments/helm/agent-monitor/Chart.yaml` (`version` **and** `appVersion`), every `deployments/kubernetes/**` manifest (`app.kubernetes.io/version` labels, `image:` tags, kustomize `newTag`), and `deployments/scripts/deploy.sh` (the `--tag` example and the `sed` image substitution).

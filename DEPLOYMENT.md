@@ -201,7 +201,7 @@ Render and replace the local image name with an immutable registry reference:
 REGISTRY="ghcr.io/$(gh repo view --json owner -q .owner.login)"
 IMAGE_TAG="$(git rev-parse --short HEAD)"
 kubectl kustomize deployments/kubernetes/overlays/production \
-  | sed "s|am-dashboard:3.1.1|${REGISTRY}/agentmonitor:${IMAGE_TAG}|g" \
+  | sed "s|am-dashboard:3.2.0|${REGISTRY}/agentmonitor:${IMAGE_TAG}|g" \
   | kubectl apply --server-side --field-manager=am-deployer -f -
 ```
 

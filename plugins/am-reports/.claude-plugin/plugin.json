@@ -1,7 +1,7 @@
 {
   "name": "am-reports",
   "description": "Generate stakeholder-ready Agent Monitor reports from local session, cost, reliability, and workflow data with explicit scope, evidence, and export-friendly Markdown.",
-  "version": "3.1.1",
+  "version": "3.2.0",
   "author": { "name": "Tanveer Hoque", "url": "https://github.com/tanvoid0" },
   "homepage": "https://github.com/tanvoid0/agent-monitor",
   "repository": "https://github.com/tanvoid0/agent-monitor",

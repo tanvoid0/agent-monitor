@@ -1,6 +1,6 @@
 {
   "name": "agentmonitor-desktop",
-  "version": "3.1.1",
+  "version": "3.2.0",
   "private": true,
   "description": "Native macOS, Windows and Linux desktop shell for Agent Monitor.",
   "author": "Tanveer Hoque <tanvoid0@gmail.com>",

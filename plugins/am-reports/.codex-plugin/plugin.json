@@ -1,6 +1,6 @@
 {
   "name": "am-reports",
-  "version": "3.1.1",
+  "version": "3.2.0",
   "description": "Generate stakeholder-ready Agent Monitor reports from local session, cost, reliability, and workflow data with explicit scope, evidence, and export-friendly Markdown.",
   "author": {
     "name": "Tanveer Hoque",
