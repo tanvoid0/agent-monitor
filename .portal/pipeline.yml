@@ -16,7 +16,7 @@ actions:
     run: node scripts/portal-release.js preflight
   verify:
     name: Local gate (npm run verify)
-    run: npm run verify
+    run: node scripts/portal-release.js verify
   push:
     name: Push main
     run: node scripts/portal-release.js push
