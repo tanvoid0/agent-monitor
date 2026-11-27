@@ -6,7 +6,7 @@
  * A release here is a version bump pushed to `main`: CI's `release` job then
  * publishes vX.Y.Z with the macOS DMGs, Windows EXEs and Linux AppImage/deb.
  *   node scripts/portal-release.js preflight   on main, clean, in sync, version unreleased
- *   node scripts/portal-release.js verify      npm run verify, with Git Bash on PATH (Windows)
+ *   node scripts/portal-release.js verify      npm run verify (inside Git Bash on Windows)
  *   node scripts/portal-release.js push        git push origin main
  *   node scripts/portal-release.js watch       wait for that CI run, list the release assets
  * `--dry-run` (or RELEASE_DRY_RUN=1, which Portal sets on Rehearse) makes push
@@ -51,18 +51,15 @@ const steps = {
   },
 
   verify() {
-    // The gate shells out to `bash` (header audit). Portal runs steps through
-    // cmd, where `bash` is WSL's System32 launcher, so put Git Bash first.
-    const env = { ...process.env };
-    if (process.platform === "win32") {
-      const key = Object.keys(env).find((k) => k.toUpperCase() === "PATH") || "PATH";
-      const gitBin = path.resolve(sh("git", ["--exec-path"]), "../../../bin");
-      env[key] = `${gitBin}${path.delimiter}${env[key] || ""}`;
-    }
-    execFileSync("npm", ["run", "verify"], {
+    if (process.platform !== "win32") return run("npm", ["run", "verify"]);
+    // Portal runs steps through cmd, where `bash` is WSL's System32 launcher,
+    // and the gate's header audit and bash-driven tests need Git Bash's own
+    // environment. Run the gate in a Git Bash login shell, as developers do.
+    const gitBash = path.resolve(sh("git", ["--exec-path"]), "../../../bin/bash.exe");
+    const cwd = process.cwd().replace(/\\/g, "/");
+    execFileSync(gitBash, ["-lc", `cd "${cwd}" && npm run verify`], {
       stdio: "inherit",
-      env,
-      shell: process.platform === "win32",
+      env: { ...process.env, CHERE_INVOKING: "1" },
     });
   },
 
