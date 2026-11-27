@@ -1,7 +1,7 @@
 ---
 name: health-check
 description: >
-  Run comprehensive health checks on the AgentMonitor system.
+  Run comprehensive health checks on the Agent Monitor system.
   Validates dashboard API, database, WebSocket, hooks, and disk usage.
   Use to verify the monitoring setup is working correctly.
 ---

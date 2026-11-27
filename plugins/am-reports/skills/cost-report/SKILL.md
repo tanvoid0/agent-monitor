@@ -1,7 +1,7 @@
 ---
 name: cost-report
 description: >
-  Produce a scoped AgentMonitor cost and token report by model, provider, source, and
+  Produce a scoped Agent Monitor cost and token report by model, provider, source, and
   session. Use for spend reviews, model-mix analysis, unpriced usage detection,
   or export-friendly cost summaries.
 ---

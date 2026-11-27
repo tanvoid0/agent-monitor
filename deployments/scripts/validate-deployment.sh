@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# validate-deployment.sh — advisory static review of AgentMonitor container and cloud
+# validate-deployment.sh — advisory static review of Agent Monitor container and cloud
 # deployment assets. It checks the single-writer SQLite topology plus the
 # Docker, Compose, Nginx, Helm, Kustomize, Terraform, dependency, and header
 # contracts.

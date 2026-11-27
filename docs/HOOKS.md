@@ -21,7 +21,7 @@ Comprehensive guide to integrating with Claude Code's hook system for real-time 
 
 ## Overview
 
-Claude Code provides a hook system that allows external tools to receive real-time events during agent execution. AgentMonitor uses these hooks to capture session lifecycle, tool executions, and notifications.
+Claude Code provides a hook system that allows external tools to receive real-time events during agent execution. Agent Monitor uses these hooks to capture session lifecycle, tool executions, and notifications.
 
 > **Cursor (informational):** Live hooks fire from Claude Code. **Cursor** sessions that only exist as JSONL under `~/.claude` (Cursor uses the same paths locally) are still counted — they appear via startup import, continuous project sync, or remote SSH sync, not via hooks.
 

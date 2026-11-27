@@ -9,7 +9,7 @@
 
 ## 1. Summary
 
-**Tabby** is a floating cat avatar pinned to the bottom-right corner of the AgentMonitor on every route. It is two things at once:
+**Tabby** is a floating cat avatar pinned to the bottom-right corner of the Agent Monitor on every route. It is two things at once:
 
 1. **A reactive mascot** — an SVG cat whose face, ears, eyes, and posture react in real time to what the monitored Claude Code sessions are doing (a session finishes → tail-up, eyes `^^`; an error/hook fails → arch + ears-back; idle → curls up asleep). Eyes track the cursor when alert.
 2. **An assistant** — click the avatar (or press `⌘B` / `Ctrl+B`) to expand a panel with a live status line, quick navigation actions, and an **Ask** box that answers simple questions from cached dashboard data, with a handoff to the existing **Run** page to ask Claude for real.

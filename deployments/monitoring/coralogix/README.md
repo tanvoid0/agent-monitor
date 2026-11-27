@@ -1,6 +1,6 @@
 # Coralogix Integration
 
-Full-stack observability for AgentMonitor via [Coralogix](https://coralogix.com) — logs, metrics, traces, and SLO tracking through a single platform.
+Full-stack observability for Agent Monitor via [Coralogix](https://coralogix.com) — logs, metrics, traces, and SLO tracking through a single platform.
 
 ## Architecture
 

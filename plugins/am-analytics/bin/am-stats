@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# am-stats — Quick CLI stats from AgentMonitor
+# am-stats — Quick CLI stats from Agent Monitor
 # Usage: am-stats [--json] [--cost] [--sessions] [--all]
 set -euo pipefail
 
@@ -7,7 +7,7 @@ DASHBOARD_URL="${AM_DASHBOARD_URL:-http://localhost:4820}"
 
 usage() {
   cat <<EOF
-am-stats — AgentMonitor Quick Stats
+am-stats — Agent Monitor Quick Stats
 
 USAGE:
   am-stats [OPTIONS]
@@ -151,7 +151,7 @@ if $JSON_MODE; then
 fi
 
 echo ""
-echo "  AgentMonitor — $(date '+%Y-%m-%d %H:%M')"
+echo "  Agent Monitor — $(date '+%Y-%m-%d %H:%M')"
 echo "  Dashboard: ${DASHBOARD_URL}"
 echo ""
 

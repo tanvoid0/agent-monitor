@@ -1,7 +1,7 @@
 /**
  * @file stdio-smoke.mjs
  * @description End-to-end MCP stdio smoke test. It connects a real MCP client
- * to the built AgentMonitor server, verifies the complete tool catalog, and calls the
+ * to the built Agent Monitor server, verifies the complete tool catalog, and calls the
  * dashboard health tool through an optionally authenticated local API.
  * @author Tanveer Hoque <tanvoid0@gmail.com>
  */

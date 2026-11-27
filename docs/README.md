@@ -1,6 +1,6 @@
 # Documentation Index
 
-Comprehensive documentation for the AgentMonitor project.
+Comprehensive documentation for the Agent Monitor project.
 
 ---
 
@@ -22,11 +22,11 @@ Start with the smallest set of documents for the job at hand, then use the catal
 
 | Goal | Start here | Continue with |
 | --- | --- | --- |
-| Use or troubleshoot AgentMonitor day to day | [GitHub Wiki](https://github.com/tanvoid0/agent-monitor/wiki) | [Localized product Wiki](https://tanvoid0.github.io/agent-monitor/wiki/) or the exact references below |
-| Run AgentMonitor locally | [INSTALL.md](../INSTALL.md) | [SETUP.md](../SETUP.md), then the dashboard |
+| Use or troubleshoot Agent Monitor day to day | [GitHub Wiki](https://github.com/tanvoid0/agent-monitor/wiki) | [Localized product Wiki](https://tanvoid0.github.io/agent-monitor/wiki/) or the exact references below |
+| Run Agent Monitor locally | [INSTALL.md](../INSTALL.md) | [SETUP.md](../SETUP.md), then the dashboard |
 | Integrate with the API or WebSocket | [API.md](./API.md) | [MCP.md](./MCP.md) for an MCP-based integration |
 | Understand captured activity | [HOOKS.md](./HOOKS.md) | [DATABASE.md](./DATABASE.md) and [ARCHITECTURE.md](../ARCHITECTURE.md) |
-| Operate AgentMonitor in production | [DEPLOYMENT.md](./DEPLOYMENT.md) | [server/README.md](../server/README.md) and [monitoring/README.md](../monitoring/README.md) |
+| Operate Agent Monitor in production | [DEPLOYMENT.md](./DEPLOYMENT.md) | [server/README.md](../server/README.md) and [monitoring/README.md](../monitoring/README.md) |
 | Extend the UI or localization | [client/README.md](../client/README.md) | [I18N.md](./I18N.md) |
 
 ---

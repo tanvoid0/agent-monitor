@@ -1,9 +1,9 @@
 {
   "id": "agentmonitor-wiki",
-  "name": "AgentMonitor - Wiki",
+  "name": "Agent Monitor - Wiki",
   "author": "Tanveer Hoque",
   "short_name": "CC Wiki",
-  "description": "Comprehensive technical wiki for AgentMonitor.",
+  "description": "Comprehensive technical wiki for Agent Monitor.",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",

@@ -1,6 +1,6 @@
 /**
  * @file App.tsx
- * @description Top-level React tree for the AgentMonitor dashboard.
+ * @description Top-level React tree for the Agent Monitor dashboard.
  * Wires together routing, real-time WebSocket ingestion, browser notifications,
  * and the splash screen shown on cold load.
  *

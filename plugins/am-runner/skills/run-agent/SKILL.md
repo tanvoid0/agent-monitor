@@ -1,7 +1,7 @@
 ---
 name: run-agent
 description: >
-  Launch and supervise Claude Code or Codex through the AgentMonitor Run API. Use when
+  Launch and supervise Claude Code or Codex through the Agent Monitor Run API. Use when
   the user wants to start a monitored agent, select a model, approval policy,
   sandbox, or working directory, send a follow-up, inspect live output, resume
   a native session, or stop a dashboard-launched run.

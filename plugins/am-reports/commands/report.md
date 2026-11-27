@@ -1,9 +1,9 @@
 ---
-description: Generate an evidence-backed AgentMonitor executive, cost, reliability, or workflow report.
+description: Generate an evidence-backed Agent Monitor executive, cost, reliability, or workflow report.
 argument-hint: "[executive|cost|reliability|workflow] [scope]"
 ---
 
-Generate the requested report type from the local AgentMonitor API.
+Generate the requested report type from the local Agent Monitor API.
 
 Use **$ARGUMENTS** to determine the report type and optional provider, source,
 session, or time scope. Default to an executive report over all available local

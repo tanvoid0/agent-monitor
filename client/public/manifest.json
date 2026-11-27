@@ -1,7 +1,7 @@
 {
   "id": "claude-code-agentmonitor",
-  "name": "AgentMonitor - AgentMonitor",
-  "short_name": "AgentMonitor",
+  "name": "Agent Monitor",
+  "short_name": "Agent Monitor",
   "description": "Real-time monitoring platform for Claude Code agent activity.",
   "author": "Tanveer Hoque",
   "start_url": "/",

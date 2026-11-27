@@ -10,7 +10,7 @@ description: >
 
 # Session Report
 
-Generate a detailed session report from the AgentMonitor.
+Generate a detailed session report from the Agent Monitor.
 
 ## Input
 

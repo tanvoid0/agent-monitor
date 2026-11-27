@@ -1,6 +1,6 @@
 ---
 name: integration-operator
-description: Safely manages AgentMonitor alerts, webhooks, push notifications, and SSH data sources.
+description: Safely manages Agent Monitor alerts, webhooks, push notifications, and SSH data sources.
 model: sonnet
 tools:
   - Bash

@@ -1,6 +1,6 @@
 # Terraform deployment
 
-This module deploys AgentMonitor to an existing conformant Kubernetes cluster through
+This module deploys Agent Monitor to an existing conformant Kubernetes cluster through
 the validated Helm chart. It works with EKS, GKE, AKS, OKE, or self-managed
 Kubernetes because cloud infrastructure and identity are supplied by the
 cluster, CSI driver, ingress or Gateway implementation, and secret controller.
@@ -37,6 +37,6 @@ state.
 ## Safety
 
 The module and Helm schema both reject more than one replica and reject HPA.
-AgentMonitor uses SQLite and supports one active dashboard writer per persistent volume.
+Agent Monitor uses SQLite and supports one active dashboard writer per persistent volume.
 Upgrades use Helm atomic Recreate rollouts. Back up with
 `deployments/scripts/db-backup.sh` before production changes.

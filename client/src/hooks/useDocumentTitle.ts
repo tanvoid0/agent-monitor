@@ -7,7 +7,7 @@
 
 import { useEffect } from "react";
 
-const APP_SUFFIX = "AgentMonitor";
+const APP_SUFFIX = "Agent Monitor";
 
 /**
  * Update the browser tab title while this component is mounted.

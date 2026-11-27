@@ -1,4 +1,4 @@
-# AgentMonitor Helm values. The bundled SQLite backend is a single-writer database.
+# Agent Monitor Helm values. The bundled SQLite backend is a single-writer database.
 # The chart intentionally rejects replicaCount != 1 and autoscaling.enabled=true.
 replicaCount: 1
 

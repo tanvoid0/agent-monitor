@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * @file am — the AgentMonitor command-line interface.
+ * @file am — the Agent Monitor command-line interface.
  *
  * A dependency-free umbrella CLI that brings the full dashboard feature
  * surface to the terminal. After the normal project setup (`npm run setup`,
@@ -2302,7 +2302,7 @@ function cmdHelp() {
       `${section(group)}\n` + items.map(([n, a, d]) => catalogRow(n, a, d)).join("\n")
   ).join("\n");
   console.log(
-    `${c.cyan("▍")}${c.bold("am")} — AgentMonitor CLI\n\n` +
+    `${c.cyan("▍")}${c.bold("am")} — Agent Monitor CLI\n\n` +
       `${c.bold("Usage:")} am <command> [options]\n` +
       body +
       "\n" +
@@ -2612,7 +2612,7 @@ function replCompleter(line) {
   return [[], word];
 }
 
-// The AgentMonitor word-mark, shown once when the interactive shell starts (and via
+// The Agent Monitor word-mark, shown once when the interactive shell starts (and via
 // the `banner` built-in). Kept as raw text so the backslashes render verbatim.
 const BANNER_ART = String.raw`
           _____                    _____                    _____                    _____
@@ -2650,7 +2650,7 @@ function replBanner(up) {
   const dot = up ? c.green("●") : c.red("○");
   const where = up ? baseUrl().replace(/^https?:\/\//, "") : "offline";
   console.log(
-    `  ${c.bold("AgentMonitor")} ${c.dim("· interactive shell")}` +
+    `  ${c.bold("Agent Monitor")} ${c.dim("· interactive shell")}` +
       (v ? c.dim(` · v${v}`) : "") +
       `   ${dot} ${c.dim(where)}`
   );

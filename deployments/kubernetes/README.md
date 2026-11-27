@@ -1,6 +1,6 @@
 # Kubernetes deployment
 
-The Kustomize stack deploys one AgentMonitor dashboard writer with a retained
+The Kustomize stack deploys one Agent Monitor dashboard writer with a retained
 ReadWriteOnce PVC and `strategy.type: Recreate`. This is the supported SQLite
 production topology.
 

@@ -139,7 +139,7 @@ function createApp() {
     "/api/docs",
     swaggerUi.serve,
     swaggerUi.setup(openApiSpec, {
-      customSiteTitle: "AgentMonitor API Docs",
+      customSiteTitle: "Agent Monitor API Docs",
       customfavIcon: "/favicon.svg",
     })
   );
@@ -159,7 +159,7 @@ function createApp() {
         renderRedocHtml(
           "/api/openapi.json",
           "/api/redoc/redoc.standalone.js",
-          "AgentMonitor API Reference",
+          "Agent Monitor API Reference",
           "/favicon.svg"
         )
       );
@@ -251,7 +251,7 @@ function startServer(app, port) {
       }
       const mode = isProduction ? "production" : "development";
       const shown = boundLoopback ? "localhost" : host;
-      console.log(`AgentMonitor server running on http://${shown}:${port} (${mode})`);
+      console.log(`Agent Monitor server running on http://${shown}:${port} (${mode})`);
       if (!boundLoopback) {
         console.warn(
           `⚠️  Dashboard bound to ${host} — reachable from the network. ` +
@@ -1243,7 +1243,7 @@ if (require.main === module) {
   probeDashboardHealth(PORT).then((alreadyRunning) => {
     if (alreadyRunning && !isWatchMode) {
       console.log(
-        `AgentMonitor is already running on http://localhost:${PORT} — not starting a ` +
+        `Agent Monitor is already running on http://localhost:${PORT} — not starting a ` +
           `second instance. Open that URL, or stop the other dashboard first.`
       );
       process.exit(0);

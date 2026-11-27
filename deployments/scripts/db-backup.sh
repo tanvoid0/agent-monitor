@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# db-backup.sh – SQLite database backup for AgentMonitor
+# db-backup.sh – SQLite database backup for Agent Monitor
 #
 # Usage:
 #   ./db-backup.sh --env production --output ./backups/
@@ -261,7 +261,7 @@ upload_backup() {
 main() {
   echo ""
   echo -e "${BOLD}${BLUE}╔══════════════════════════════════════════════════╗${NC}"
-  echo -e "${BOLD}${BLUE}║   AgentMonitor – DB Backup         ║${NC}"
+  echo -e "${BOLD}${BLUE}║   Agent Monitor – DB Backup        ║${NC}"
   echo -e "${BOLD}${BLUE}╚══════════════════════════════════════════════════╝${NC}"
   echo ""
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# deploy.sh – Main deployment orchestrator for AgentMonitor
+# deploy.sh – Main deployment orchestrator for Agent Monitor
 #
 # Usage:
 #   ./deploy.sh --env dev|staging|production --method helm|kustomize
@@ -38,7 +38,7 @@ fatal() { err "$@"; exit 1; }
 banner() {
   echo ""
   echo -e "${BOLD}${BLUE}╔══════════════════════════════════════════════════╗${NC}"
-  echo -e "${BOLD}${BLUE}║   AgentMonitor – Deploy            ║${NC}"
+  echo -e "${BOLD}${BLUE}║   Agent Monitor – Deploy           ║${NC}"
   echo -e "${BOLD}${BLUE}╚══════════════════════════════════════════════════╝${NC}"
   echo ""
 }
@@ -337,8 +337,8 @@ run_health_check() {
   service_name=$(kubectl get service -n "${NAMESPACE}" \
     -l "app.kubernetes.io/name=${APP_NAME}" \
     -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
-  [[ -n "$deployment_name" ]] || fatal "No AgentMonitor Deployment found in ${NAMESPACE}"
-  [[ -n "$service_name" ]] || fatal "No AgentMonitor Service found in ${NAMESPACE}"
+  [[ -n "$deployment_name" ]] || fatal "No Agent Monitor Deployment found in ${NAMESPACE}"
+  [[ -n "$service_name" ]] || fatal "No Agent Monitor Service found in ${NAMESPACE}"
 
   # Determine health check URL
   local health_url=""

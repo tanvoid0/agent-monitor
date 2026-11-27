@@ -81,7 +81,7 @@ async function main() {
   const tmpDir = path.join(DATA_ROOT, "downloads");
   await fs.promises.mkdir(tmpDir, { recursive: true });
 
-  console.log("Downloading AgentMonitor monitoring binaries (one-time setup)…");
+  console.log("Downloading Agent Monitor monitoring binaries (one-time setup)…");
   await installPrometheus(tmpDir);
   await installGrafana(tmpDir);
   await fs.promises.rm(tmpDir, { recursive: true, force: true });

@@ -1,6 +1,6 @@
 name: am
 
-# The dashboard is intentionally a single writer. AgentMonitor stores its operational
+# The dashboard is intentionally a single writer. Agent Monitor stores its operational
 # state in one SQLite database, so never scale agent-monitor above one replica
 # or run two active containers against the same data volume.
 services:

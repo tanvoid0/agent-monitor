@@ -22,7 +22,7 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "AgentMonitor Workflows",
+    "displayName": "Agent Monitor Workflows",
     "shortDescription": "Analyze multi-agent orchestration and Workflow-tool fleet runs — DAGs, delegation,...",
     "longDescription": "Analyze multi-agent orchestration and Workflow-tool fleet runs — DAGs, delegation, concurrency, error propagation, and effectiveness — via the Agent Monitor workflow intelligence API at http://localhost:4820. Maps parent→child subagent edges, scores model delegation and subagent success, surfaces concurrency lanes and serialization bottlenecks, and traces error cascades by agent depth.",
     "developerName": "Tanveer Hoque",
@@ -30,8 +30,8 @@
     "capabilities": ["Read"],
     "websiteURL": "https://github.com/tanvoid0/agent-monitor",
     "defaultPrompt": [
-      "Use AgentMonitor Workflows to inspect the local AgentMonitor dashboard.",
-      "Use AgentMonitor Workflows to analyze recent agent activity."
+      "Use Agent Monitor Workflows to inspect the local Agent Monitor dashboard.",
+      "Use Agent Monitor Workflows to analyze recent agent activity."
     ],
     "brandColor": "#6366F1"
   }

@@ -1,5 +1,5 @@
 ---
-description: List live and persisted AgentMonitor-launched Claude Code and Codex runs
+description: List live and persisted Agent Monitor-launched Claude Code and Codex runs
 ---
 
 Run `am run list` and `am run history --limit 30`. Summarize live handles

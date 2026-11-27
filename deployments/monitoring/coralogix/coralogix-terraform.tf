@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Coralogix Terraform Integration for AgentMonitor
+# Coralogix Terraform Integration for Agent Monitor
 #
 # Provisions Coralogix resources via the official Terraform provider:
 #   - Alert rules (mirroring Prometheus/Alertmanager rules)

@@ -1,6 +1,6 @@
 ---
 name: platform-admin
-description: Administers AgentMonitor configuration, hooks, imports, backups, updates, and MCP safely.
+description: Administers Agent Monitor configuration, hooks, imports, backups, updates, and MCP safely.
 model: sonnet
 tools:
   - Bash

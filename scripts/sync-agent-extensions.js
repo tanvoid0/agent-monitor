@@ -119,10 +119,10 @@ function listDirs(directory) {
 
 function titleCase(value) {
   return value
-    .replace(/^am-/, "AgentMonitor ")
+    .replace(/^am-/, "Agent Monitor ")
     .split(/[-_ ]+/)
     .map((word) =>
-      word === "am" ? "AgentMonitor" : `${word[0]?.toUpperCase() || ""}${word.slice(1)}`
+      word === "am" ? "Agent Monitor" : `${word[0]?.toUpperCase() || ""}${word.slice(1)}`
     )
     .join(" ");
 }
@@ -173,7 +173,7 @@ function writeSkillMetadata(skillDir, name, description) {
     "interface:",
     `  display_name: ${yamlQuote(titleCase(name))}`,
     `  short_description: ${yamlQuote(summary)}`,
-    `  default_prompt: ${yamlQuote(`Use $${name} to inspect AgentMonitor data and complete this workflow safely.`)}`,
+    `  default_prompt: ${yamlQuote(`Use $${name} to inspect Agent Monitor data and complete this workflow safely.`)}`,
     "policy:",
     `  allow_implicit_invocation: ${allowImplicitInvocation}`,
     "",
@@ -225,7 +225,7 @@ function codexManifest(name, claudeManifest, pluginRoot) {
     capabilities: WRITE_CAPABLE.has(name) || name === "am-dashboard" ? ["Read", "Write"] : ["Read"],
     websiteURL: REPOSITORY,
     defaultPrompt: [
-      `Use ${titleCase(name)} to inspect the local AgentMonitor dashboard.`,
+      `Use ${titleCase(name)} to inspect the local Agent Monitor dashboard.`,
       `Use ${titleCase(name)} to analyze recent agent activity.`,
     ],
     brandColor: "#6366F1",
@@ -309,13 +309,13 @@ async function sync() {
 
   await writeJson(CLAUDE_MARKETPLACE, {
     name: originalMarketplace.name,
-    description: `Official Claude Code plugin marketplace for AgentMonitor with ${totals.plugins} plugins, ${totals.skills} skills, ${totals.agents} agents, ${totals.commands} commands, and comprehensive local dashboard operations.`,
+    description: `Official Claude Code plugin marketplace for Agent Monitor with ${totals.plugins} plugins, ${totals.skills} skills, ${totals.agents} agents, ${totals.commands} commands, and comprehensive local dashboard operations.`,
     owner: originalMarketplace.owner,
     plugins: claudeEntries,
   });
   await writeJson(CODEX_MARKETPLACE, {
     name: "agentmonitor-plugins",
-    interface: { displayName: "AgentMonitor" },
+    interface: { displayName: "Agent Monitor" },
     plugins: codexEntries,
   });
 

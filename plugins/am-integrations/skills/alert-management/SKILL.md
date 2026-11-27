@@ -1,7 +1,7 @@
 ---
 name: alert-management
 description: >
-  Inspect fired AgentMonitor alerts and manage alert rules for token thresholds, event
+  Inspect fired Agent Monitor alerts and manage alert rules for token thresholds, event
   patterns, inactivity, and status duration. Use when acknowledging alerts,
   creating or editing a rule, checking cooldowns, or connecting alert rules to
   webhook targets.

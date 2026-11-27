@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# rollback.sh – Rollback deployments for AgentMonitor
+# rollback.sh – Rollback deployments for Agent Monitor
 #
 # Usage:
 #   ./rollback.sh --env production --method helm --revision 5
@@ -100,8 +100,8 @@ discover_resources() {
   SERVICE_NAME=$(kubectl get service -n "${NAMESPACE}" \
     -l "app.kubernetes.io/name=${APP_NAME}" \
     -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
-  [[ -n "$DEPLOYMENT_NAME" ]] || fatal "No AgentMonitor Deployment found in ${NAMESPACE}"
-  [[ -n "$SERVICE_NAME" ]] || fatal "No AgentMonitor Service found in ${NAMESPACE}"
+  [[ -n "$DEPLOYMENT_NAME" ]] || fatal "No Agent Monitor Deployment found in ${NAMESPACE}"
+  [[ -n "$SERVICE_NAME" ]] || fatal "No Agent Monitor Service found in ${NAMESPACE}"
 }
 
 backup_current() {
@@ -237,7 +237,7 @@ run_health_check() {
 main() {
   echo ""
   echo -e "${BOLD}${YELLOW}╔══════════════════════════════════════════════════╗${NC}"
-  echo -e "${BOLD}${YELLOW}║   AgentMonitor – Rollback          ║${NC}"
+  echo -e "${BOLD}${YELLOW}║   Agent Monitor – Rollback         ║${NC}"
   echo -e "${BOLD}${YELLOW}╚══════════════════════════════════════════════════╝${NC}"
   echo ""
 

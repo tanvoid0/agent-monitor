@@ -1,6 +1,6 @@
-# AgentMonitor for VS Code
+# Agent Monitor for VS Code
 
-**AgentMonitor** brings a high-fidelity, real-time dashboard for your Claude Code AI sessions directly into your VS Code workspace. Monitor token usage, track agent health, and view deep analytics without switching windows.
+**Agent Monitor** brings a high-fidelity, real-time dashboard for your Claude Code AI sessions directly into your VS Code workspace. Monitor token usage, track agent health, and view deep analytics without switching windows.
 
 ![Extension Screenshot](https://raw.githubusercontent.com/tanvoid0/agent-monitor/refs/heads/master/vscode-extension/vscode.png)
 
@@ -36,14 +36,14 @@ Jump directly to specific views from the sidebar:
 ## 🛠️ Getting Started
 
 ### 1. Requirements
-Ensure you have the AgentMonitor server running locally:
+Ensure you have the Agent Monitor server running locally:
 ```bash
 npm install
 npm run dev
 ```
 
 ### 2. Installation
-- Search for **"AgentMonitor"** in the VS Code Marketplace.
+- Search for **"Agent Monitor"** in the VS Code Marketplace.
 - Click **Install**.
 
 ### 3. Usage

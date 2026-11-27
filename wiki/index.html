@@ -9,14 +9,14 @@
     <link rel="manifest" href="manifest.json" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <title>AgentMonitor - Project Wiki</title>
+    <title>Agent Monitor - Project Wiki</title>
     <meta
       name="description"
-      content="Comprehensive technical wiki for AgentMonitor — real-time local monitoring with MCP server integration plus Claude Code and Codex extension scaffolding."
+      content="Comprehensive technical wiki for Agent Monitor — real-time local monitoring with MCP server integration plus Claude Code and Codex extension scaffolding."
     />
     <meta
       name="keywords"
-      content="Claude Code, Codex, MCP, Model Context Protocol, AgentMonitor, AI monitoring, real-time dashboard, WebSocket, SQLite, React, TypeScript, developer tools, session tracking, agent skills"
+      content="Claude Code, Codex, MCP, Model Context Protocol, Agent Monitor, AI monitoring, real-time dashboard, WebSocket, SQLite, React, TypeScript, developer tools, session tracking, agent skills"
     />
     <meta name="author" content="Tanveer Hoque" />
     <meta name="robots" content="index, follow" />
@@ -24,11 +24,11 @@
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="AgentMonitor" />
-    <meta property="og:title" content="AgentMonitor - Project Wiki" />
+    <meta property="og:site_name" content="Agent Monitor" />
+    <meta property="og:title" content="Agent Monitor - Project Wiki" />
     <meta
       property="og:description"
-      content="Comprehensive technical wiki for AgentMonitor — real-time local monitoring with MCP server integration plus Claude Code and Codex extension scaffolding."
+      content="Comprehensive technical wiki for Agent Monitor — real-time local monitoring with MCP server integration plus Claude Code and Codex extension scaffolding."
     />
     <meta property="og:image" content="../og-image.svg" />
     <meta property="og:image:width" content="1200" />
@@ -36,12 +36,12 @@
     <meta property="og:image:type" content="image/svg+xml" />
     <meta
       property="og:image:alt"
-      content="AgentMonitor — real-time Claude Code monitoring platform"
+      content="Agent Monitor — real-time Claude Code monitoring platform"
     />
 
     <!-- Twitter / X Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="AgentMonitor - Project Wiki" />
+    <meta name="twitter:title" content="Agent Monitor - Project Wiki" />
     <meta
       name="twitter:description"
       content="Real-time local monitoring for Claude Code agent activity with MCP integration, extension scaffolding, analytics, and WebSocket push."
@@ -49,7 +49,7 @@
     <meta name="twitter:image" content="../og-image.svg" />
     <meta
       name="twitter:image:alt"
-      content="AgentMonitor — real-time Claude Code monitoring platform"
+      content="Agent Monitor — real-time Claude Code monitoring platform"
     />
     <meta name="twitter:creator" content="@tanvoid0" />
 
@@ -58,7 +58,7 @@
       {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
-        "name": "AgentMonitor",
+        "name": "Agent Monitor",
         "description": "Real-time monitoring platform for Claude Code agent activity. Tracks sessions, agents, and tool events via native hooks, stores them in SQLite, and streams updates to a React UI over WebSocket.",
         "applicationCategory": "DeveloperApplication",
         "operatingSystem": "Windows, macOS, Linux",
@@ -507,7 +507,7 @@
             <a href="#hero" class="sidebar-logo">
               <div class="logo-icon">⬡</div>
               <div class="logo-text">
-                AgentMonitor
+                Agent Monitor
                 <span class="logo-sub">Project Wiki</span>
               </div>
             </a>
@@ -601,7 +601,7 @@
             ><span class="nav-icon">◈</span>Statusline Utility</a
           >
           <a href="#vscode-ext" class="nav-link"><span class="nav-icon">◈</span>VS Code Extension</a>
-          <a href="#desktop-app" class="nav-link"><span class="nav-icon">◈</span>Desktop App (macOS &amp; Windows)</a>
+          <a href="#desktop-app" class="nav-link"><span class="nav-icon">◈</span>Desktop App (macOS, Windows &amp; Linux)</a>
           <a href="#settings-page" class="nav-link"><span class="nav-icon">◈</span>Settings Page</a>
           <a href="#config-explorer" class="nav-link"><span class="nav-icon">◈</span>Claude Config Explorer</a>
           <a href="#alerts-webhooks" class="nav-link"><span class="nav-icon">◈</span>Alerts &amp; Webhooks</a>
@@ -703,7 +703,7 @@
             <span class="dot"></span>
             Real-time · Local-first · Zero-config
           </div>
-          <h1 style="padding-bottom: 2px">AgentMonitor</h1>
+          <h1 style="padding-bottom: 2px">Agent Monitor</h1>
           <p class="hero-desc">
             A professional monitoring platform for Claude Code agent activity. Captures sessions,
             agents, and tool events via native hooks, persists them in SQLite, and streams updates
@@ -874,13 +874,13 @@
 
           <div class="screenshot-gallery gallery-single">
             <div class="screenshot-card">
-              <img src="../images/analytics.png" alt="AgentMonitor dashboard showing live agent cards, stats, and recent activity feed" width="1918" height="1046" loading="lazy" decoding="async" />
+              <img src="../images/analytics.png" alt="Agent Monitor dashboard showing live agent cards, stats, and recent activity feed" width="1918" height="1046" loading="lazy" decoding="async" />
               <div class="screenshot-caption"><span class="caption-icon">📡</span> Live dashboard — real-time agent cards, stats, and activity feed</div>
             </div>
           </div>
 
           <p>
-            AgentMonitor integrates with Claude Code through its native hook system. When Claude
+            Agent Monitor integrates with Claude Code through its native hook system. When Claude
             Code performs any action — tool use, session start, subagent orchestration, session end
             — it fires a hook that calls a small Node.js script bundled with this project. That
             script forwards the event over HTTP to the dashboard server, which stores it in SQLite
@@ -1013,11 +1013,10 @@
                   </p>
                 </div>
                 <div class="feature-card">
-                  <div class="feature-icon ic-cyan">🍎🪟</div>
-                  <h3 id="feat-desktop-app">Desktop App (macOS &amp; Windows)</h3>
+                  <div class="feature-icon ic-cyan">🍎🪟🐧</div>
+                  <h3 id="feat-desktop-app">Desktop App (macOS, Windows &amp; Linux)</h3>
                   <p>
-                    Electron packages AgentMonitor as a macOS <code>.dmg</code> and Windows installer or
-                    portable <code>.exe</code>. The app embeds the Express server in-process and
+                    Electron packages Agent Monitor as a macOS <code>.dmg</code>, a Windows installer or portable <code>.exe</code>, and a Linux AppImage or <code>.deb</code>. The app embeds the Express server in-process and
                     renders the React client in a native window, with tray controls, application
                     menus, login startup, and a single-instance lock. Closing the window leaves the
                     local server running, and first boot installs Claude Code hooks automatically so
@@ -1586,16 +1585,16 @@
               <div class="screenshot-caption"><span class="caption-icon">📗</span> <span><strong>API Docs · ReDoc</strong> — a self-hosted, read-optimized rendering of the full OpenAPI 3.0 spec at <code>/api/redoc</code>, served entirely offline with no CDN. Complements the interactive Swagger UI at <code>/api/docs</code>; every backend route is documented with parameters, schemas, and examples</span></div>
             </div>
             <div class="screenshot-card" id="ss-grafana">
-              <img src="../images/grafana.png" alt="Grafana AgentMonitor — Overview dashboard" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">📊</span> <span><strong>Observability · Grafana</strong> — default home dashboard <em>AgentMonitor — Overview</em> (four boards auto-provisioned): live fleet snapshot, database totals, breakdown charts, and rates from <code>/api/metrics</code> scrapes. The npm-only local helper uses <code>admin</code> / <code>admin</code>; container stacks read the admin password from <code>deployments/secrets/grafana-admin-password</code>.</span></div>
+              <img src="../images/grafana.png" alt="Grafana Agent Monitor — Overview dashboard" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">📊</span> <span><strong>Observability · Grafana</strong> — default home dashboard <em>Agent Monitor — Overview</em> (four boards auto-provisioned): live fleet snapshot, database totals, breakdown charts, and rates from <code>/api/metrics</code> scrapes. The npm-only local helper uses <code>admin</code> / <code>admin</code>; container stacks read the admin password from <code>deployments/secrets/grafana-admin-password</code>.</span></div>
             </div>
             <div class="screenshot-card" id="ss-prometheus-console">
-              <img src="../images/prometheus-console.png" alt="Prometheus AgentMonitor console" width="100%" loading="lazy" decoding="async" />
+              <img src="../images/prometheus-console.png" alt="Prometheus Agent Monitor console" width="100%" loading="lazy" decoding="async" />
               <div class="screenshot-caption"><span class="caption-icon">🔥</span> <span><strong>Observability · Prometheus console</strong> — pre-built landing page at <code>/consoles/index.html</code> with live metric cards, session/token tables, and drill-down links into the Graph UI (Prometheus 3.x compatible — queries the HTTP API directly)</span></div>
             </div>
             <div class="screenshot-card" id="ss-prometheus-query">
-              <img src="../images/prometheus-query.png" alt="Prometheus Graph with AgentMonitor PromQL" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">📈</span> <span><strong>Observability · Prometheus Graph</strong> — run PromQL against scraped AgentMonitor series (e.g. <code>sum(am_sessions)</code>, <code>am_events_total</code>, <code>rate(am_tokens_total[5m])</code>) with starter expressions from the AgentMonitor console and recording rules in <code>monitoring/prometheus/am-rules.yml</code></span></div>
+              <img src="../images/prometheus-query.png" alt="Prometheus Graph with Agent Monitor PromQL" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">📈</span> <span><strong>Observability · Prometheus Graph</strong> — run PromQL against scraped Agent Monitor series (e.g. <code>sum(am_sessions)</code>, <code>am_events_total</code>, <code>rate(am_tokens_total[5m])</code>) with starter expressions from the Agent Monitor console and recording rules in <code>monitoring/prometheus/am-rules.yml</code></span></div>
             </div>
           </div>
 
@@ -2355,6 +2354,11 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
                   <td>Build the no-install portable <code>AgentMonitor-&lt;ver&gt;-x64-portable.exe</code> (Windows host)</td>
                 </tr>
                 <tr>
+                  <td><code>desktop:linux</code></td>
+                  <td><code>npm run desktop:linux</code></td>
+                  <td>Build the Linux x64 AppImage + <code>.deb</code> (<code>AgentMonitor-&lt;ver&gt;-x86_64.AppImage</code>, <code>AgentMonitor-&lt;ver&gt;-amd64.deb</code>; Linux host)</td>
+                </tr>
+                <tr>
                   <td><code>build:win-icon</code></td>
                   <td><code>npm run build:win-icon</code></td>
                   <td>Regenerate <code>desktop/assets/icon.ico</code> from <code>icon.png</code> (PowerShell + .NET; Windows host)</td>
@@ -2393,7 +2397,7 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
           <p>
             For a live monitoring session, <code>am repl</code> (aliases
             <code>shell</code> / <code>i</code>) opens an interactive shell where you type
-            commands without the <code>am</code> prefix — with a AgentMonitor welcome banner,
+            commands without the <code>am</code> prefix — with an Agent Monitor welcome banner,
             tab-completion, persisted arrow-key history, a live server-status prompt
             (<code>●</code> up / <code>○</code> offline), a grouped <code>help</code> /
             <code>help &lt;cmd&gt;</code> menu, and a <code>watch [secs] &lt;cmd&gt;</code>
@@ -3419,7 +3423,7 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
               <span class="method method-get">GET</span>
               <span class="route-path">/api/metrics</span>
               <span class="route-desc"
-                >Live counters in Prometheus text-exposition format (v0.0.4): sessions and agents by status, total events, cumulative tokens by kind, connected WebSocket clients, configured remote sources, process uptime and RSS, and build version — so AgentMonitor can be scraped into Prometheus / Grafana. Read-only, and — being under <code>/api</code> — behind the DNS-rebinding Host-header guard and the optional <code>DASHBOARD_TOKEN</code>: a non-loopback scraper (e.g. Prometheus in Docker via <code>host.docker.internal</code>) must be allowlisted with <code>DASHBOARD_ALLOWED_HOSTS</code> or the scrape returns <code>403 EBADHOST</code>, and must send the token when one is set. A ready-to-run Prometheus + Grafana stack with a pre-provisioned "AgentMonitor — Overview" dashboard lives in <code>monitoring/</code> (<code>cd monitoring && docker compose up -d</code>; Grafana on port 3000).</span
+                >Live counters in Prometheus text-exposition format (v0.0.4): sessions and agents by status, total events, cumulative tokens by kind, connected WebSocket clients, configured remote sources, process uptime and RSS, and build version — so Agent Monitor can be scraped into Prometheus / Grafana. Read-only, and — being under <code>/api</code> — behind the DNS-rebinding Host-header guard and the optional <code>DASHBOARD_TOKEN</code>: a non-loopback scraper (e.g. Prometheus in Docker via <code>host.docker.internal</code>) must be allowlisted with <code>DASHBOARD_ALLOWED_HOSTS</code> or the scrape returns <code>403 EBADHOST</code>, and must send the token when one is set. A ready-to-run Prometheus + Grafana stack with a pre-provisioned "Agent Monitor — Overview" dashboard lives in <code>monitoring/</code> (<code>cd monitoring && docker compose up -d</code>; Grafana on port 3000).</span
               >
             </div>
           </div>
@@ -3763,7 +3767,7 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
             <code>SessionStart</code> hook, native live-thread row, or rollout then creates the
             durable session and main-agent rows without copying the temporary card into history.
             If the user selects an existing thread in Codex's Resume picker, that exact Codex PID
-            opens the resumed rollout or writer lock immediately. AgentMonitor uses that signal to switch
+            opens the resumed rollout or writer lock immediately. Agent Monitor uses that signal to switch
             from the temporary card to the durable resumed session before the first new message.
           </p>
           <p>
@@ -4828,7 +4832,7 @@ am-export all --output backup.json</code></pre>
           </div>
 
           <p>
-            The <b>AgentMonitor</b> is a premium, high-fidelity extension designed to minimize context 
+            The <b>Agent Monitor</b> is a premium, high-fidelity extension designed to minimize context 
             switching for AI engineers. It brings the full power of the dashboard directly into VS Code, 
             allowing you to monitor complex subagent orchestration without ever leaving your active code file.
           </p>
@@ -4900,16 +4904,15 @@ am-export all --output backup.json</code></pre>
           </p>
         </section>
 
-        <!-- ─── Desktop App (macOS & Windows) ───────────────────────────────── -->
+        <!-- ─── Desktop App (macOS, Windows & Linux) ───────────────────────────────── -->
         <section id="desktop-app">
           <div class="section-label">◈ Integrations</div>
-          <h2>Desktop App (macOS &amp; Windows)</h2>
+          <h2>Desktop App (macOS, Windows &amp; Linux)</h2>
 
           <p>
             The dashboard ships as an optional <strong>native desktop application</strong> — a
             <code>desktop/</code> workspace that wraps the existing server and client into a
-            macOS <code>.app</code> (distributed as a <code>.dmg</code>) and a Windows
-            <code>.exe</code> (an NSIS installer plus a no-install portable build) you install
+            macOS <code>.app</code> (distributed as a <code>.dmg</code>), a Windows <code>.exe</code> (an NSIS installer plus a no-install portable build), and Linux packages (an <code>.AppImage</code> plus a <code>.deb</code>) you install
             once and forget. <code>desktop/</code> is a sibling workspace to
             <code>client/</code>, <code>server/</code>, <code>mcp/</code>, and
             <code>vscode-extension/</code>, built with <strong>Electron 35</strong>. It
@@ -4922,12 +4925,12 @@ am-export all --output backup.json</code></pre>
           </p>
 
           <div class="screenshot-card" style="margin: 8px 0 32px;">
-            <img src="../images/macos.png" alt="AgentMonitor running as a native desktop app" width="100%" loading="lazy" decoding="async" />
+            <img src="../images/macos.png" alt="Agent Monitor running as a native desktop app" width="100%" loading="lazy" decoding="async" />
             <div class="screenshot-caption"><span class="caption-icon">🍎🪟</span> <span>The full dashboard, natively on macOS <strong>and</strong> Windows — same React client, same Express server, real <code>BrowserWindow</code>. Menu-bar / notification-area (tray) icon included. Shipped as a macOS DMG and a Windows EXE (macOS shown) — see <a href="https://github.com/tanvoid0/agent-monitor/blob/master/DESKTOP.md"><code>DESKTOP.md</code></a>.</span></div>
           </div>
 
           <div class="screenshot-card" style="margin: 8px 0 32px;">
-            <img src="../images/windows_app.png" alt="AgentMonitor running as a native desktop app on Windows, showing the Activity Feed, native Windows window menu, and Tabby companion" width="100%" loading="lazy" decoding="async" />
+            <img src="../images/windows_app.png" alt="Agent Monitor running as a native desktop app on Windows, showing the Activity Feed, native Windows window menu, and Tabby companion" width="100%" loading="lazy" decoding="async" />
             <div class="screenshot-caption"><span class="caption-icon">🪟</span> <span>The same dashboard as a native <strong>Windows</strong> app — real <code>BrowserWindow</code> with the native Windows window menu, live Activity Feed, and the Tabby companion. A notification-area (system tray) icon sits beside the clock for quick access.</span></div>
           </div>
 
@@ -4982,8 +4985,7 @@ am-export all --output backup.json</code></pre>
               <div class="feature-icon ic-cyan">📍</div>
               <h3>Menu-Bar / Notification-Area (Tray) Icon</h3>
               <p>
-                An always-on tray icon — the macOS menu bar (a tinted template glyph) or the
-                Windows notification area (the colored <code>icon.ico</code>). A single click
+                An always-on tray icon — the macOS menu bar (a tinted template glyph), the Windows notification area (the colored <code>icon.ico</code>), or the Linux system tray (the colored <code>icon.png</code>). A single click
                 (left or right) opens a dropdown with a <strong>live status snapshot</strong>
                 queried straight from SQLite at click time — server port, active sessions,
                 working agents, events today — followed by <strong>Open Dashboard</strong>,
@@ -5011,14 +5013,14 @@ am-export all --output backup.json</code></pre>
               <div class="feature-icon ic-emerald">🔁</div>
               <h3>Auto-Start at Login</h3>
               <p>
-                Flip <em>Open at Login</em> in the tray or app menu — both platforms go through
+                Flip <em>Open at Login</em> in the tray or app menu — macOS and Windows go through
                 Electron's first-party <code>app.*LoginItemSettings</code> API. On macOS it
                 registers via the modern <code>SMAppService</code> API and appears under
                 <strong>System Settings → General → Login Items</strong>; on Windows it writes a
                 per-user <code>HKCU\Software\Microsoft\Windows\CurrentVersion\Run</code> entry,
                 visible in <strong>Task Manager → Startup</strong>. When the app is launched at
                 login it starts tray-only, with no window jumping into view (on Windows the login
-                launch is detected via a <code>--am-hidden</code> argument).
+                launch is detected via a <code>--am-hidden</code> argument). On Linux the toggle is a no-op.
               </p>
             </div>
             <div class="feature-card">
@@ -5084,8 +5086,8 @@ am-export all --output backup.json</code></pre>
               <p>
                 The SQLite database and VAPID keys live in a per-user app-data directory
                 <em>outside</em> the application bundle / install dir —
-                <code>~/Library/Application Support/AgentMonitor/data/</code> on macOS,
-                <code>%APPDATA%\AgentMonitor\data\</code> on Windows.
+                <code>~/Library/Application Support/Agent Monitor/data/</code> on macOS,
+                <code>%APPDATA%\Agent Monitor\data\</code> on Windows, <code>~/.config/Agent Monitor/data/</code> on Linux.
                 <code>server-host.ts</code> points <code>DASHBOARD_DATA_DIR</code> at that
                 per-user directory on boot. Because a packaged, code-signed, or
                 app-translocated bundle is read-only, older builds that stored the database
@@ -5112,8 +5114,8 @@ am-export all --output backup.json</code></pre>
                 make sure <code>claude</code> is a real executable on your <code>PATH</code> — a
                 shell alias or function cannot be spawned — and check the
                 <code>user PATH resolved</code> line in the desktop log
-                (<code>~/Library/Logs/AgentMonitor/desktop.log</code> on macOS,
-                <code>%APPDATA%\AgentMonitor\logs\desktop.log</code> on Windows).
+                (<code>~/Library/Logs/Agent Monitor/desktop.log</code> on macOS,
+                <code>%APPDATA%\Agent Monitor\logs\desktop.log</code> on Windows, <code>~/.config/Agent Monitor/logs/desktop.log</code> on Linux).
               </p>
             </div>
           </div>
@@ -5173,7 +5175,7 @@ am-export all --output backup.json</code></pre>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               Releases → latest
             </a>
-            and download the asset for your platform. The macOS and Windows Desktop CI jobs
+            and download the asset for your platform. The macOS, Windows, and Linux Desktop CI jobs
             auto-publish a new <code>vX.Y.Z</code> release every time the version in
             <code>package.json</code> is bumped on <code>master</code>, so this link always
             points at the current build. Releases are public — no GitHub sign-in required.
@@ -5209,6 +5211,16 @@ am-export all --output backup.json</code></pre>
                   <td><code>AgentMonitor-&lt;ver&gt;-x64-portable.exe</code></td>
                   <td>Run without installing</td>
                 </tr>
+                <tr>
+                  <td>Linux (AppImage)</td>
+                  <td><code>AgentMonitor-&lt;ver&gt;-x86_64.AppImage</code></td>
+                  <td>Run <code>chmod +x</code> on it, then launch it</td>
+                </tr>
+                <tr>
+                  <td>Linux (deb)</td>
+                  <td><code>AgentMonitor-&lt;ver&gt;-amd64.deb</code></td>
+                  <td>Install with <code>sudo apt install ./AgentMonitor-&lt;ver&gt;-amd64.deb</code></td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -5218,18 +5230,15 @@ am-export all --output backup.json</code></pre>
             Want a build straight off the tip of <code>master</code>, ahead of the next tagged
             release? Every green run of the <code>🍎 macOS Desktop (DMG)</code> job on
             <code>macos-latest</code> uploads both per-arch DMGs as the
-            <code>AgentMonitor-dmg</code> workflow artifact, and the
-            <code>🪟 Windows Desktop (EXE)</code> job on <code>windows-latest</code> uploads the
-            installer + portable EXEs as the <code>AgentMonitor-win</code> artifact. Open
-            the
+            <code>AgentMonitor-dmg</code> workflow artifact, the <code>🪟 Windows Desktop (EXE)</code> job on <code>windows-latest</code> uploads the
+            installer + portable EXEs as the <code>AgentMonitor-win</code> artifact, and the <code>🐧 Linux Desktop (AppImage + deb)</code> job on <code>ubuntu-latest</code> uploads the AppImage + <code>.deb</code> as the <code>AgentMonitor-linux</code> artifact. Open the
             <a href="https://github.com/tanvoid0/agent-monitor/actions/workflows/ci.yml?query=branch%3Amaster+is%3Asuccess"
                target="_blank" rel="noopener noreferrer"
                class="dl-chip">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
               latest passing run
             </a>,
-            scroll to its Artifacts section, and download
-            <code>AgentMonitor-dmg</code> or <code>AgentMonitor-win</code>. (GitHub
+            scroll to its Artifacts section, and download <code>AgentMonitor-dmg</code>, <code>AgentMonitor-win</code>, or <code>AgentMonitor-linux</code>. (GitHub
             sign-in required; 14-day retention.)
           </p>
 
@@ -5259,9 +5268,12 @@ npm run desktop:dmg          # both per-arch DMGs (arm64 + x64) — for release,
 npm run desktop:win          # NSIS installer → AgentMonitor-Setup-<ver>-x64.exe
 npm run desktop:win:portable # no-install portable → AgentMonitor-<ver>-x64-portable.exe
 
-# electron-builder packages for the HOST OS — build DMGs on a Mac, EXEs on Windows.
+# 4c. ON Linux — build an AppImage + .deb:
+npm run desktop:linux        # → AgentMonitor-<ver>-x86_64.AppImage + AgentMonitor-<ver>-amd64.deb
+
+# electron-builder packages for the HOST OS — build DMGs on a Mac, EXEs on Windows, AppImage/deb on Linux.
 # desktop:dmg:arm64 / desktop:dmg:x64 each emit ONE arch-labelled DMG (the volume
-# title states the arch, e.g. "AgentMonitor (Apple Silicon)"). desktop:dmg
+# title states the arch, e.g. "Agent Monitor (Apple Silicon)"). desktop:dmg
 # builds BOTH per-arch DMGs at once (arm64 + x64) — the release pair.
 open desktop/release/AgentMonitor-*-arm64.dmg   # match the arch you built</code></pre>
 
@@ -5295,7 +5307,7 @@ open desktop/release/AgentMonitor-*-arm64.dmg   # match the arch you built</code
             <div class="qs-card">
               <div class="qs-step">2</div>
               <h3>Drag to Applications</h3>
-              <p>Drag <code>AgentMonitor.app</code> into your <code>Applications</code> folder</p>
+              <p>Drag <code>Agent Monitor.app</code> into your <code>Applications</code> folder</p>
             </div>
             <div class="qs-card">
               <div class="qs-step">3</div>
@@ -5323,7 +5335,7 @@ open desktop/release/AgentMonitor-*-arm64.dmg   # match the arch you built</code
           </div>
           <div class="code-header"><span class="code-lang">bash</span></div>
           <pre><code># After dragging the app into /Applications:
-xattr -cr "/Applications/AgentMonitor.app"</code></pre>
+xattr -cr "/Applications/Agent Monitor.app"</code></pre>
           <p>
             Alternatively, open <strong>System Settings → Privacy &amp; Security</strong>,
             find the blocked app, and click <em>Open Anyway</em>. Code signing and Apple
@@ -5357,7 +5369,7 @@ xattr -cr "/Applications/AgentMonitor.app"</code></pre>
 
           <div class="screenshot-card" style="margin: 8px 0 32px;">
             <img src="../images/setup_win_wizard2.png" alt="Windows NSIS installer step 2 — Choose Install Location" width="100%" loading="lazy" decoding="async" />
-            <div class="screenshot-caption"><span class="caption-icon">2️⃣</span> <span>NSIS installer, step 2 — <strong>Choose Install Location</strong>: defaults to <code>%LOCALAPPDATA%\Programs\AgentMonitor</code>, or point it anywhere.</span></div>
+            <div class="screenshot-caption"><span class="caption-icon">2️⃣</span> <span>NSIS installer, step 2 — <strong>Choose Install Location</strong>: defaults to <code>%LOCALAPPDATA%\Programs\Agent Monitor</code>, or point it anywhere.</span></div>
           </div>
 
           <div class="screenshot-card" style="margin: 8px 0 32px;">
@@ -5375,7 +5387,7 @@ xattr -cr "/Applications/AgentMonitor.app"</code></pre>
                 <strong>SmartScreen</strong> may show <em>"Windows protected your PC"</em> the
                 first time you run it; click <strong>More info → Run anyway</strong>. The
                 installer lays the app down <strong>per-user</strong> under
-                <code>%LOCALAPPDATA%\Programs\AgentMonitor</code> (and lets you choose the
+                <code>%LOCALAPPDATA%\Programs\Agent Monitor</code> (and lets you choose the
                 install directory) and sets an <code>AppUserModelId</code>
                 (<code>tanvoid0.agentmonitor.desktop</code>) so native toast notifications are
                 attributed correctly and the window groups under one taskbar entry.
@@ -5385,14 +5397,19 @@ xattr -cr "/Applications/AgentMonitor.app"</code></pre>
 
           <div class="callout callout-info">
             <div class="callout-icon">ℹ</div>
-            <div class="callout-body">
+            <h4>Linux</h4>
+          <p>
+            AppImage: run <code>chmod +x AgentMonitor-&lt;ver&gt;-x86_64.AppImage</code>, then launch it.
+            Debian/Ubuntu: <code>sudo apt install ./AgentMonitor-&lt;ver&gt;-amd64.deb</code> (executable
+            <code>agentmonitor</code>, category Development). The tray uses the colored app icon, and
+            <em>Open at Login</em> is a no-op on Linux.
+          </p>
+
+          <div class="callout-body">
               <strong>Bundle size</strong>
               <p>
                 The DMG is roughly 80&nbsp;MB, about 250&nbsp;MB installed on disk — the
-                standard Electron tax; the Windows installer is comparable. The app runs
-                natively on <strong>macOS and Windows</strong>; Linux is tracked as a follow-up.
-                Logs live at <code>~/Library/Logs/AgentMonitor/desktop.log</code> on macOS
-                or <code>%APPDATA%\AgentMonitor\logs\desktop.log</code> on Windows (reach
+                standard Electron tax; the Windows installer and Linux packages are comparable. The app runs natively on <strong>macOS, Windows, and Linux</strong>. Logs live at <code>~/Library/Logs/Agent Monitor/desktop.log</code> on macOS, <code>%APPDATA%\Agent Monitor\logs\desktop.log</code> on Windows, or <code>~/.config/Agent Monitor/logs/desktop.log</code> on Linux (reach
                 them from the tray menu → <em>Show Logs</em>).
               </p>
             </div>
@@ -6157,21 +6174,21 @@ xattr -cr "/Applications/AgentMonitor.app"</code></pre>
 
           <div class="screenshot-gallery">
             <div class="screenshot-card">
-              <img src="../images/grafana.png" alt="Grafana AgentMonitor — Overview dashboard with live fleet metrics" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">📊</span> <span><strong>Grafana · AgentMonitor — Overview</strong> — default home dashboard after login on port 3000: fleet snapshot, database totals, breakdown charts, and rates from live <code>/api/metrics</code> scrapes — no sample or synthetic data. The npm-only local helper uses <code>admin</code> / <code>admin</code>; container stacks use <code>deployments/secrets/grafana-admin-password</code>.</span></div>
+              <img src="../images/grafana.png" alt="Grafana Agent Monitor — Overview dashboard with live fleet metrics" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">📊</span> <span><strong>Grafana · Agent Monitor — Overview</strong> — default home dashboard after login on port 3000: fleet snapshot, database totals, breakdown charts, and rates from live <code>/api/metrics</code> scrapes — no sample or synthetic data. The npm-only local helper uses <code>admin</code> / <code>admin</code>; container stacks use <code>deployments/secrets/grafana-admin-password</code>.</span></div>
             </div>
             <div class="screenshot-card">
-              <img src="../images/prometheus-console.png" alt="Prometheus AgentMonitor console landing page" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">🔥</span> <span><strong>Prometheus · AgentMonitor console</strong> — static HTML at <code>/consoles/index.html</code> (Prometheus 3.x compatible): live metric cards, session/token tables, and one-click Graph drill-down links that query the Prometheus HTTP API directly</span></div>
+              <img src="../images/prometheus-console.png" alt="Prometheus Agent Monitor console landing page" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">🔥</span> <span><strong>Prometheus · Agent Monitor console</strong> — static HTML at <code>/consoles/index.html</code> (Prometheus 3.x compatible): live metric cards, session/token tables, and one-click Graph drill-down links that query the Prometheus HTTP API directly</span></div>
             </div>
             <div class="screenshot-card">
-              <img src="../images/prometheus-query.png" alt="Prometheus Graph UI running AgentMonitor PromQL" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">📈</span> <span><strong>Prometheus · Graph</strong> — ad-hoc PromQL against scraped AgentMonitor series; starter expressions ship in the AgentMonitor console and <code>monitoring/README.md</code>, with derived rates in <code>monitoring/prometheus/am-rules.yml</code></span></div>
+              <img src="../images/prometheus-query.png" alt="Prometheus Graph UI running Agent Monitor PromQL" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">📈</span> <span><strong>Prometheus · Graph</strong> — ad-hoc PromQL against scraped Agent Monitor series; starter expressions ship in the Agent Monitor console and <code>monitoring/README.md</code>, with derived rates in <code>monitoring/prometheus/am-rules.yml</code></span></div>
             </div>
           </div>
 
           <p>
-            AgentMonitor exposes a read-only <strong>Prometheus text-exposition</strong> endpoint at
+            Agent Monitor exposes a read-only <strong>Prometheus text-exposition</strong> endpoint at
             <code>GET /api/metrics</code> — sessions and agents by status, cumulative events and
             tokens, connected WebSocket clients, configured remote sources, process uptime/RSS, and
             build version — so the same dashboard you use for Claude Code monitoring can be scraped
@@ -6184,7 +6201,7 @@ xattr -cr "/Applications/AgentMonitor.app"</code></pre>
             <strong>Quick start (npm):</strong> run the dashboard on loopback, then
             <code>npm run monitoring:install</code> once and <code>npm run monitoring:up</code>.
             Open Grafana at <code>http://localhost:3000</code> and Prometheus at
-            <code>http://localhost:9090</code>. The pre-built AgentMonitor console is at
+            <code>http://localhost:9090</code>. The pre-built Agent Monitor console is at
             <code>http://localhost:9090/consoles/index.html</code> (also reachable from the
             Prometheus UI under <strong>Consoles</strong>). For an all-Docker path use
             <code>npm run monitoring:docker:up</code> or <code>npm run docker:full:up</code> for
@@ -6198,10 +6215,10 @@ xattr -cr "/Applications/AgentMonitor.app"</code></pre>
               <div class="feature-icon ic-amber">📊</div>
               <h3>Four Grafana boards</h3>
               <p>
-                <strong>AgentMonitor — Overview</strong> (default home),
-                <strong>AgentMonitor — Sessions &amp; Agents</strong>,
-                <strong>AgentMonitor — Tokens &amp; Events</strong>, and
-                <strong>AgentMonitor — Platform</strong> — all provisioned from
+                <strong>Agent Monitor — Overview</strong> (default home),
+                <strong>Agent Monitor — Sessions &amp; Agents</strong>,
+                <strong>Agent Monitor — Tokens &amp; Events</strong>, and
+                <strong>Agent Monitor — Platform</strong> — all provisioned from
                 <code>monitoring/grafana/dashboards/</code> with PromQL against your live scrape.
                 The npm-only local helper uses <code>admin</code> / <code>admin</code> via
                 <code>monitoring/grafana.defaults.env</code>. Container stacks read the password
@@ -6212,7 +6229,7 @@ xattr -cr "/Applications/AgentMonitor.app"</code></pre>
               <div class="feature-icon ic-rose">🔥</div>
               <h3>Prometheus console</h3>
               <p>
-                Prometheus 3.x dropped the legacy console template libraries, so AgentMonitor ships a
+                Prometheus 3.x dropped the legacy console template libraries, so Agent Monitor ships a
                 <strong>static HTML console</strong> at
                 <code>monitoring/prometheus/consoles/index.html</code> that fetches
                 <code>/api/v1/query</code> directly — live cards, session tables, and Graph links
@@ -6670,12 +6687,12 @@ xattr -cr "/Applications/AgentMonitor.app"</code></pre>
           <div class="callout callout-info">
             <div class="callout-icon">ℹ</div>
             <div class="callout-body">
-              <strong>A third way to run: the Desktop App (macOS &amp; Windows)</strong>
+              <strong>A third way to run: the Desktop App (macOS, Windows &amp; Linux)</strong>
               <p>
                 Beyond development and standalone production, the dashboard also ships as a
-                native desktop app — a macOS <code>.app</code> and a Windows <code>.exe</code> —
+                native desktop app — a macOS <code>.app</code>, a Windows <code>.exe</code>, and Linux packages —
                 that embeds the same production server in-process, no terminal required. See the
-                <a href="#desktop-app">Desktop App (macOS &amp; Windows)</a> section for download,
+                <a href="#desktop-app">Desktop App (macOS, Windows &amp; Linux)</a> section for download,
                 build, and install instructions.
               </p>
             </div>
@@ -7048,7 +7065,7 @@ npm run install-hooks</code></pre>
                 <tr>
                   <td><strong>React 19</strong></td>
                   <td>
-                    Current supported client runtime with strong TypeScript support. AgentMonitor remains a
+                    Current supported client runtime with strong TypeScript support. Agent Monitor remains a
                     client-rendered SPA and does not enable Server Components or RSC.
                   </td>
                 </tr>
@@ -7113,7 +7130,7 @@ npm run install-hooks</code></pre>
         <!-- ─── Footer ─────────────────────────────────────────────────────── -->
         <footer class="wiki-footer footer-enhanced">
           <div>
-            <div class="footer-brand-name">AgentMonitor</div>
+            <div class="footer-brand-name">Agent Monitor</div>
             <p class="footer-note">
               Local-first monitoring for Claude Code sessions, agents, and tool events. Built for
               real-time visibility with zero external dependencies.
@@ -7147,8 +7164,8 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=99" defer></script>
-    <script src="script.js?v=58" defer></script>
+    <script src="i18n-content.js?v=100" defer></script>
+    <script src="script.js?v=59" defer></script>
     <script>
       (function () {
         var carousel = document.getElementById("feature-carousel");

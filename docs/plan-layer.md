@@ -9,18 +9,18 @@
 
 ## 1. Decision
 
-Fork AgentMonitor. Keep everything it already does — sessions, agents, events, tokens and cost, waiting badges, WebSocket
+Fork Agent Monitor. Keep everything it already does — sessions, agents, events, tokens and cost, waiting badges, WebSocket
 push, SQLite, the React UI, the Electron shell, the hook installer — and add one thing on top: **the plan join**.
 A project's `PROGRESS.md` (milestones → steps → lanes → boxes) becomes a page where every box shows the agent on it,
 what it ran, what failed, what it cost; and a text API the main thread reads instead of the files.
 
 Why fork rather than build (the earlier draft said build): the requirement is a proper UI and a database, across every
-project. AgentMonitor has both, plus a year of edge cases in hook ingestion and transcript parsing we would otherwise
+project. Agent Monitor has both, plus a year of edge cases in hook ingestion and transcript parsing we would otherwise
 re-discover. What it lacks is exactly one domain, ours, and that domain is additive.
 
 Why it is viable — checked in the source, not the README:
 
-| we need | AgentMonitor has | where |
+| we need | Agent Monitor has | where |
 |---|---|---|
 | every project, every session | hooks installed in `~/.claude/settings.json`; `sessions.cwd` | `scripts/install-hooks.js`, `server/db.js:163` |
 | subagents with their prompt | `agents` row per `Agent` dispatch; `agents.task` = first 500 chars of the prompt — `Lane X — name` is in there | `server/routes/hooks.js:418-456` |
@@ -37,7 +37,7 @@ And the gap that is not additive, found in `server/routes/hooks.js`:
 > to the subagent's agent_id." (`hooks.js:1224` at v2.2.0; the §4.1 patch rewords that comment)
 
 That was true once; it is not now. `PreToolUse`/`PostToolUse` fire inside subagents and carry `agent_id` +
-`agent_type` (probed 2026-09-15, Claude Code 2.1.238 — ledgerflow ADR 0001). AgentMonitor does not read `data.agent_id` on
+`agent_type` (probed 2026-09-15, Claude Code 2.1.238 — ledgerflow ADR 0001). Agent Monitor does not read `data.agent_id` on
 tool hooks, does not install `SubagentStart`, gives each subagent its own `uuidv4()`, attributes live tool events to
 the "deepest working agent" and matches `SubagentStop` by name prefix → `subagent_type` → prompt → oldest working.
 With three `crew:coder`s on three lanes that is wrong while they run and repaired only by the JSONL scan at stop. The
@@ -167,7 +167,7 @@ Lane heading parts after `·` are tags; one is the mode: `serial | parallel | in
 
 ### 4.4 The join — `server/plan/join.js`
 
-Input: `plans.parsed` + `plan_log` for the current step + AgentMonitor's `sessions`, `agents`, `events` for that `cwd` +
+Input: `plans.parsed` + `plan_log` for the current step + Agent Monitor's `sessions`, `agents`, `events` for that `cwd` +
 per-agent transcript figures. Output: the v2 model shape (below), computed on request, cached per `cwd` until any
 input changes (a `sessions`/`agents`/`events` write for that cwd, a `plan_log` insert, a plan re-parse, a transcript
 mtime).
@@ -186,7 +186,7 @@ mtime).
 - **tool attribution**: the `start` for KEY by label L opens a window closing at L's next later line that is another
   key's `start` or this key's `done`/`blocked`; `events` rows with `event_type = 'PreToolUse'` by a matching agent on
   that lane inside the window count (`tools`; `errors` = the paired `PostToolUse` with `data.is_error`,
-  `tool_response.interrupted`, or a non-empty `tool_response.stderr` — AgentMonitor has no `PostToolUseFailure` event type).
+  `tool_response.interrupted`, or a non-empty `tool_response.stderr` — Agent Monitor has no `PostToolUseFailure` event type).
   v2 compares its second-precision log timestamps against ms event timestamps as strings, so its per-task `tools`
   miss the start second and include the end second; ours are numerically right (model-only; summary/wip unaffected).
 - **live**: v2's rule — `agents.status = 'working'` (or `'waiting'` with `awaiting_reason = 'notification'`) **and**
@@ -197,8 +197,8 @@ mtime).
   `sessions.transcript_path` (main) — `transcriptCache.extract()` for `tokensByModel`/`latestModel`; our own tail for
   `ctx` (latest message's input + cache_creation + cache_read), `window` (200k, or 1M once exceeded), `ctxPct`, and
   `say` (last assistant text block, ≤ 300 chars). `out`/`calls` count the **first** record per `message.id` (v2's
-  rule; `tokens out: 477119` only reproduces that way — AgentMonitor's cache keeps the last record, which gives 697k across
-  the fixture). `cost` = `tokensByModel` × `model_pricing` — AgentMonitor's table, AgentMonitor's
+  rule; `tokens out: 477119` only reproduces that way — Agent Monitor's cache keeps the last record, which gives 697k across
+  the fixture). `cost` = `tokensByModel` × `model_pricing` — Agent Monitor's table, Agent Monitor's
   rates, so the plan page and the Analytics page agree to the cent.
 
 Model (`GET /api/plans/:slug/model`, WS `plan_model`):
@@ -236,11 +236,11 @@ Model (`GET /api/plans/:slug/model`, WS `plan_model`):
 | `GET /:slug/lane/:X` · `/:slug/task/:key` · `/:slug/agent/:id` | text, as v2 |
 | `POST /:slug/tick` `{"key","done"}` | flips the checkbox in `<cwd>/PROGRESS.md` (first match, any indent), rewrites `(N / M boxes)` in the Status line, re-parses, answers with the summary. 404 unknown key. The UI's checkbox calls the same route |
 | `POST /:slug/log` `{"agent","key","status","note"}` | inserts a `plan_log` row for the current step; `broadcast("plan_log", …)` |
-| `POST /:slug/export` `{"dir","prompts": true}` | writes `index.html` (the v2 snapshot page, kept at `server/plan/snapshot.html`), `model.json`, `events.jsonl` (last 5000 events of the project, v2 line shape; `agent` carries the AgentMonitor agent id — the page keys `model.agents` by it — `type: "main"` still marks mains) into `dir` and answers with the exact `Artifact(...)` call. The Artifact tool reads only cwd/scratchpad, hence a directory the caller names |
+| `POST /:slug/export` `{"dir","prompts": true}` | writes `index.html` (the v2 snapshot page, kept at `server/plan/snapshot.html`), `model.json`, `events.jsonl` (last 5000 events of the project, v2 line shape; `agent` carries the Agent Monitor agent id — the page keys `model.agents` by it — `type: "main"` still marks mains) into `dir` and answers with the exact `Artifact(...)` call. The Artifact tool reads only cwd/scratchpad, hence a directory the caller names |
 | every text route | `?format=json` |
 
 Text rules: one fact per line, no tables, no headers, `hh:mm:ss` absolute, `12s ago`/`3m`/`1.2h` relative, ≤ 60 lines
-except `task` and `agent`. If `tokenGuard` is armed (`DASHBOARD_API_TOKEN` in AgentMonitor's settings) the skill passes the
+except `task` and `agent`. If `tokenGuard` is armed (`DASHBOARD_API_TOKEN` in Agent Monitor's settings) the skill passes the
 header; by default it is not.
 
 WS messages (through `broadcast`): `plan_updated {slug}` (re-parse), `plan_model {slug, model}` (debounced 300 ms,
@@ -248,7 +248,7 @@ at least every 5 s while any agent on the plan is working), `plan_log {slug, row
 
 ### 4.6 Page — `client/src/plan/`, route `/plan/:slug?`
 
-The v2 page in AgentMonitor's components and Tailwind, one route, one nav item (`nav:plan`, icon `SquareKanban` — lucide-react 0.474 dropped the `KanbanSquare` name):
+The v2 page in Agent Monitor's components and Tailwind, one route, one nav item (`nav:plan`, icon `SquareKanban` — lucide-react 0.474 dropped the `KanbanSquare` name):
 
 - **Project picker** (top bar): `GET /api/plans`, live/waiting badges, last-used remembered in `localStorage`.
 - **Stories rail** (left): milestones → steps → lanes, current step expanded, counts per lane, mode chip.
@@ -259,7 +259,7 @@ The v2 page in AgentMonitor's components and Tailwind, one route, one nav item (
   swimlane timeline of tool ticks (d3 is already a dependency) — deferred past 0.1.0: the model carries only
   per-agent aggregates; the timeline needs a per-event slice the routes do not expose yet.
 - **Detail** (drawer): breadcrumb `Step 17 › Lane D › D1`, status, text, log lines, attributed tool events with
-  stdout/stderr tails (from `events.data`), link to the AgentMonitor session page (`/sessions/:id`; AgentMonitor has no per-agent
+  stdout/stderr tails (from `events.data`), link to the Agent Monitor session page (`/sessions/:id`; Agent Monitor has no per-agent
   route) — the deep dive is already built.
 - Strings in `client/src/i18n/locales/<xx>/plan.json` for **all five locales** — the repo's i18n-parity rule and
   `bash .claude/skills/i18n-parity/scripts/i18n-audit.sh` require every namespace file in every locale dir with the
@@ -269,7 +269,7 @@ The v2 page in AgentMonitor's components and Tailwind, one route, one nav item (
   pass the audit.
 - 400 px: rail and agents collapse into drawers; board scrolls.
 
-Dark/light follows AgentMonitor's theme. No new theming.
+Dark/light follows Agent Monitor's theme. No new theming.
 
 ### 4.7 The skill and the per-project file
 
@@ -324,7 +324,7 @@ _touches: `client/src/plan/**`, `client/src/App.tsx` (one route), `client/src/co
 ### Lane D — docs, skill, fixture glue · parallel · `crew:coder` on sonnet (`crew:quick` refuses three-plus files; this lane touches eight)
 _touches: `docs/plan-layer-skill.md`, `docs/PLUGINS.md` (one section), `README.md` (one section + screenshot slot) mirrored into `README-CN.md`, `README-VN.md`, `README-KO.md`, `README-ES.md` (repo rule), `test/fixtures/plan/seed.js`_
 
-- [ ] D1 `seed.js`: v2 `events.jsonl` → AgentMonitor rows (the mapping table in a comment)
+- [ ] D1 `seed.js`: v2 `events.jsonl` → Agent Monitor rows (the mapping table in a comment)
 - [ ] D2 `plan-layer-skill.md` per §4.7; the ledgerflow `CLAUDE.local.md` replacement block
 - [ ] D3 README + PLUGINS sections; CHANGELOG entry under a `plan` heading
 
@@ -370,8 +370,8 @@ Everything else is a new file. After the upstream PR merges, the `hooks.js` line
   signal. `.local/log.md` import covers a project that wants a file.
 - `tick` writes `PROGRESS.md` while the main thread may be editing it by hand (expanding a step). Same race as v2;
   the rule is: expand first, then dispatch, then tick.
-- The artifact is a snapshot. The desktop app or a hosted AgentMonitor (its `DEPLOYMENT.md`) is the live board.
-- One Node process per hook (AgentMonitor's fire-and-forget handler, ~50 ms); ledgerflow's Python hooks double it until §8.
+- The artifact is a snapshot. The desktop app or a hosted Agent Monitor (its `DEPLOYMENT.md`) is the live board.
+- One Node process per hook (Agent Monitor's fire-and-forget handler, ~50 ms); ledgerflow's Python hooks double it until §8.
   Hooks get dropped under load — the live smoke lost a dispatch's `PreToolUse Agent` while a test suite ran. The
   `SubagentStart` row insert and the `PostToolUse Agent` back-fill cover a missed dispatch hook; a missed
   `SubagentStart` falls back to the heuristics until the stop-time scan.
@@ -399,7 +399,7 @@ Everything else is a new file. After the upstream PR merges, the `hooks.js` line
 
 ## 9. Not doing
 
-Rebranding the fork; a second UI beside AgentMonitor's; native task tools as the plan; PermissionRequest-based approvals from
+Rebranding the fork; a second UI beside Agent Monitor's; native task tools as the plan; PermissionRequest-based approvals from
 the page (the desktop app has that UI; if wanted later, CCK's `approval-gate.sh` design is the reference — gate on
 `PermissionRequest`, not `PreToolUse`); Codex plans; a hosted mode of our own.
 

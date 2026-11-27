@@ -1,6 +1,6 @@
 {
   "name": "agentmonitor-plugins",
-  "interface": { "displayName": "AgentMonitor" },
+  "interface": { "displayName": "Agent Monitor" },
   "plugins": [
     {
       "name": "am-analytics",

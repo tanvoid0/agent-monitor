@@ -13,7 +13,7 @@
   "keywords": ["productivity", "standup", "reports", "sprint", "workflow", "claude-code"],
   "skills": "./skills/",
   "interface": {
-    "displayName": "AgentMonitor Productivity",
+    "displayName": "Agent Monitor Productivity",
     "shortDescription": "Productivity workflows for Claude Code — daily standups, weekly reports, sprint summaries,...",
     "longDescription": "Productivity workflows for Claude Code — daily standups, weekly reports, sprint summaries, and intelligent workflow optimization powered by Agent Monitor session data.",
     "developerName": "Tanveer Hoque",
@@ -21,8 +21,8 @@
     "capabilities": ["Read"],
     "websiteURL": "https://github.com/tanvoid0/agent-monitor",
     "defaultPrompt": [
-      "Use AgentMonitor Productivity to inspect the local AgentMonitor dashboard.",
-      "Use AgentMonitor Productivity to analyze recent agent activity."
+      "Use Agent Monitor Productivity to inspect the local Agent Monitor dashboard.",
+      "Use Agent Monitor Productivity to analyze recent agent activity."
     ],
     "brandColor": "#6366F1"
   }

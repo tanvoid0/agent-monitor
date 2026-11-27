@@ -1,6 +1,6 @@
 {
   "uid": "am-platform",
-  "title": "AgentMonitor — Platform Health",
+  "title": "Agent Monitor — Platform Health",
   "description": "Scrape health, process resources, remote sources, and build info from live metrics.",
   "tags": ["am", "claude-code", "platform", "health"],
   "timezone": "browser",
@@ -76,7 +76,7 @@
     {
       "id": 2,
       "type": "stat",
-      "title": "AgentMonitor API",
+      "title": "Agent Monitor API",
       "datasource": { "type": "prometheus", "uid": "am-prometheus" },
       "gridPos": { "h": 5, "w": 6, "x": 6, "y": 1 },
       "options": {
@@ -348,7 +348,7 @@
     {
       "id": 13,
       "type": "table",
-      "title": "AgentMonitor build info",
+      "title": "Agent Monitor build info",
       "datasource": { "type": "prometheus", "uid": "am-prometheus" },
       "gridPos": { "h": 6, "w": 12, "x": 0, "y": 26 },
       "options": { "showHeader": true },

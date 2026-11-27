@@ -834,7 +834,7 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Plugin Marketplace": "插件市场",
       "Statusline Utility": "状态栏工具",
       "VS Code Extension": "VS Code 扩展",
-      "Desktop App (macOS & Windows)": "桌面应用（macOS 与 Windows）",
+      "Desktop App (macOS, Windows & Linux)": "桌面应用（macOS、Windows 与 Linux）",
       "Settings Page": "设置页面",
       "Alerts & Webhooks": "告警与 Webhook",
       "Update Notifier": "更新提醒",
@@ -860,6 +860,7 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Check 4 — Is Node.js in PATH?": "检查 4 —— Node.js 在 PATH 中吗？",
       macOS: "macOS",
       Windows: "Windows",
+      Linux: "Linux",
       "Option A — download the latest GitHub Release (recommended)":
         "方式 A —— 下载最新的 GitHub Release（推荐）",
       "Option B — per-commit CI artifact": "方式 B —— 每次提交的 CI 产物",
@@ -1074,7 +1075,7 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Plugin Marketplace": "Chợ plugin",
       "Statusline Utility": "Tiện ích Statusline",
       "VS Code Extension": "Tiện ích VS Code",
-      "Desktop App (macOS & Windows)": "Ứng dụng máy tính (macOS & Windows)",
+      "Desktop App (macOS, Windows & Linux)": "Ứng dụng máy tính (macOS, Windows & Linux)",
       "Settings Page": "Trang cài đặt",
       "Alerts & Webhooks": "Cảnh báo & Webhook",
       "Update Notifier": "Thông báo cập nhật",
@@ -1099,6 +1100,7 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Check 4 — Is Node.js in PATH?": "Kiểm tra 4 — Node.js có trong PATH?",
       macOS: "macOS",
       Windows: "Windows",
+      Linux: "Linux",
       "Option A — download the latest GitHub Release (recommended)":
         "Cách A — tải bản GitHub Release mới nhất (khuyến nghị)",
       "Option B — per-commit CI artifact": "Cách B — artifact CI theo từng commit",
@@ -1308,7 +1310,7 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Plugin Marketplace": "플러그인 마켓플레이스",
       "Statusline Utility": "Statusline 유틸리티",
       "VS Code Extension": "VS Code 확장",
-      "Desktop App (macOS & Windows)": "데스크톱 앱 (macOS & Windows)",
+      "Desktop App (macOS, Windows & Linux)": "데스크톱 앱 (macOS, Windows & Linux)",
       "Settings Page": "설정 페이지",
       "Alerts & Webhooks": "알림 & Webhook",
       "Update Notifier": "업데이트 알리미",
@@ -1523,7 +1525,7 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Plugin Marketplace": "Mercado de complementos",
       "Statusline Utility": "Herramienta de línea de estado",
       "VS Code Extension": "Extensión de VS Code",
-      "Desktop App (macOS & Windows)": "Aplicación para escritorio (macOS y Windows)",
+      "Desktop App (macOS, Windows & Linux)": "Aplicación para escritorio (macOS, Windows y Linux)",
       "Settings Page": "Página de ajustes",
       "Alerts & Webhooks": "Alertas y Webhooks",
       "Update Notifier": "Notificador de actualización",
@@ -1549,6 +1551,7 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Check 4 — Is Node.js in PATH?": "Verificar 4: ¿Está Node.js en PATH?",
       macOS: "macOS",
       Windows: "Windows",
+      Linux: "Linux",
       "Option A — download the latest GitHub Release (recommended)":
         "Opción A: descargar la última versión de GitHub (recomendada)",
       "Option B — per-commit CI artifact": "Opción B: artefacto CI por compromiso",
@@ -1790,11 +1793,11 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       es: "Seleccionar idioma",
     },
     Language: { zh: "语言", vi: "Ngôn ngữ", ko: "언어", es: "Idioma" },
-    "AgentMonitor dashboard showing live agent cards, stats, and recent activity feed": {
-      zh: "AgentMonitor 仪表盘，显示实时 Agent 卡片、统计数据和最近活动流",
-      vi: "Bảng điều khiển AgentMonitor hiển thị thẻ Agent trực tiếp, số liệu và luồng hoạt động gần đây",
-      ko: "실시간 Agent 카드, 통계, 최근 활동 피드를 보여 주는 AgentMonitor 대시보드",
-      es: "Panel de AgentMonitor con tarjetas de Agent en tiempo real, estadísticas y actividad reciente",
+    "Agent Monitor dashboard showing live agent cards, stats, and recent activity feed": {
+      zh: "Agent Monitor 仪表盘，显示实时 Agent 卡片、统计数据和最近活动流",
+      vi: "Bảng điều khiển Agent Monitor hiển thị thẻ Agent trực tiếp, số liệu và luồng hoạt động gần đây",
+      ko: "실시간 Agent 카드, 통계, 최근 활동 피드를 보여 주는 Agent Monitor 대시보드",
+      es: "Panel de Agent Monitor con tarjetas de Agent en tiempo real, estadísticas y actividad reciente",
     },
     "Previous features": {
       zh: "上一组功能",
@@ -1964,23 +1967,23 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       ko: "ReDoc API 참조",
       es: "Referencia de API de ReDoc",
     },
-    "Grafana AgentMonitor — Overview dashboard": {
-      zh: "Grafana AgentMonitor — 概览仪表盘",
-      vi: "Grafana AgentMonitor — bảng điều khiển tổng quan",
-      ko: "Grafana AgentMonitor — 개요 대시보드",
-      es: "Grafana AgentMonitor — panel de resumen",
+    "Grafana Agent Monitor — Overview dashboard": {
+      zh: "Grafana Agent Monitor — 概览仪表盘",
+      vi: "Grafana Agent Monitor — bảng điều khiển tổng quan",
+      ko: "Grafana Agent Monitor — 개요 대시보드",
+      es: "Grafana Agent Monitor — panel de resumen",
     },
-    "Prometheus AgentMonitor console": {
-      zh: "Prometheus AgentMonitor 控制台",
-      vi: "Bảng điều khiển Prometheus AgentMonitor",
-      ko: "Prometheus AgentMonitor 콘솔",
-      es: "Consola de Prometheus AgentMonitor",
+    "Prometheus Agent Monitor console": {
+      zh: "Prometheus Agent Monitor 控制台",
+      vi: "Bảng điều khiển Prometheus Agent Monitor",
+      ko: "Prometheus Agent Monitor 콘솔",
+      es: "Consola de Prometheus Agent Monitor",
     },
-    "Prometheus Graph with AgentMonitor PromQL": {
-      zh: "使用 AgentMonitor PromQL 的 Prometheus Graph",
-      vi: "Prometheus Graph với AgentMonitor PromQL",
-      ko: "AgentMonitor PromQL을 사용하는 Prometheus Graph",
-      es: "Prometheus Graph con AgentMonitor PromQL",
+    "Prometheus Graph with Agent Monitor PromQL": {
+      zh: "使用 Agent Monitor PromQL 的 Prometheus Graph",
+      vi: "Prometheus Graph với Agent Monitor PromQL",
+      ko: "Agent Monitor PromQL을 사용하는 Prometheus Graph",
+      es: "Prometheus Graph con Agent Monitor PromQL",
     },
     "Interactive Swagger UI rendering the dashboard's OpenAPI 3.0 spec, with collapsible endpoint groups, request/response schemas, and try-it-out controls":
       {
@@ -2029,18 +2032,18 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       ko: "실시간 상태, 분석, 탐색을 보여 주는 VS Code 확장 사이드바",
       es: "Barra lateral de la extensión de VS Code con estado, análisis y navegación en tiempo real",
     },
-    "AgentMonitor running as a native desktop app": {
-      zh: "作为原生桌面应用运行的 AgentMonitor",
-      vi: "AgentMonitor chạy dưới dạng ứng dụng desktop gốc",
-      ko: "네이티브 데스크톱 앱으로 실행되는 AgentMonitor",
-      es: "AgentMonitor ejecutándose como aplicación de escritorio nativa",
+    "Agent Monitor running as a native desktop app": {
+      zh: "作为原生桌面应用运行的 Agent Monitor",
+      vi: "Agent Monitor chạy dưới dạng ứng dụng desktop gốc",
+      ko: "네이티브 데스크톱 앱으로 실행되는 Agent Monitor",
+      es: "Agent Monitor ejecutándose como aplicación de escritorio nativa",
     },
-    "AgentMonitor running as a native desktop app on Windows, showing the Activity Feed, native Windows window menu, and Tabby companion":
+    "Agent Monitor running as a native desktop app on Windows, showing the Activity Feed, native Windows window menu, and Tabby companion":
       {
-        zh: "在 Windows 上作为原生桌面应用运行的 AgentMonitor，显示活动流、原生窗口菜单和 Tabby 伴侣",
-        vi: "AgentMonitor chạy như ứng dụng Windows gốc, hiển thị luồng hoạt động, menu cửa sổ và bạn đồng hành Tabby",
-        ko: "Windows 네이티브 데스크톱 앱으로 실행되며 활동 피드, Windows 창 메뉴, Tabby 동반자를 보여 주는 AgentMonitor",
-        es: "AgentMonitor como aplicación nativa de Windows, con actividad, menú de ventana y compañero Tabby",
+        zh: "在 Windows 上作为原生桌面应用运行的 Agent Monitor，显示活动流、原生窗口菜单和 Tabby 伴侣",
+        vi: "Agent Monitor chạy như ứng dụng Windows gốc, hiển thị luồng hoạt động, menu cửa sổ và bạn đồng hành Tabby",
+        ko: "Windows 네이티브 데스크톱 앱으로 실행되며 활동 피드, Windows 창 메뉴, Tabby 동반자를 보여 주는 Agent Monitor",
+        es: "Agent Monitor como aplicación nativa de Windows, con actividad, menú de ventana y compañero Tabby",
       },
     "Windows NSIS installer step 1 — Choose Installation Options": {
       zh: "Windows NSIS 安装程序第 1 步 — 选择安装选项",
@@ -2096,23 +2099,23 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       ko: "처리량 스파크라인, 주요 이벤트 유형, 최근 활동이 있는 연결 상세 모달",
       es: "Modal de conexión con minigráfico de rendimiento, principales eventos y actividad reciente",
     },
-    "Grafana AgentMonitor — Overview dashboard with live fleet metrics": {
-      zh: "Grafana AgentMonitor — 带实时集群指标的概览仪表盘",
-      vi: "Grafana AgentMonitor — bảng điều khiển tổng quan với số liệu fleet trực tiếp",
-      ko: "Grafana AgentMonitor — 실시간 플릿 메트릭이 있는 개요 대시보드",
-      es: "Grafana AgentMonitor — panel de resumen con métricas de flota en tiempo real",
+    "Grafana Agent Monitor — Overview dashboard with live fleet metrics": {
+      zh: "Grafana Agent Monitor — 带实时集群指标的概览仪表盘",
+      vi: "Grafana Agent Monitor — bảng điều khiển tổng quan với số liệu fleet trực tiếp",
+      ko: "Grafana Agent Monitor — 실시간 플릿 메트릭이 있는 개요 대시보드",
+      es: "Grafana Agent Monitor — panel de resumen con métricas de flota en tiempo real",
     },
-    "Prometheus AgentMonitor console landing page": {
-      zh: "Prometheus AgentMonitor 控制台首页",
-      vi: "Trang đầu bảng điều khiển Prometheus AgentMonitor",
-      ko: "Prometheus AgentMonitor 콘솔 시작 페이지",
-      es: "Página de inicio de la consola Prometheus AgentMonitor",
+    "Prometheus Agent Monitor console landing page": {
+      zh: "Prometheus Agent Monitor 控制台首页",
+      vi: "Trang đầu bảng điều khiển Prometheus Agent Monitor",
+      ko: "Prometheus Agent Monitor 콘솔 시작 페이지",
+      es: "Página de inicio de la consola Prometheus Agent Monitor",
     },
-    "Prometheus Graph UI running AgentMonitor PromQL": {
-      zh: "运行 AgentMonitor PromQL 的 Prometheus Graph UI",
-      vi: "Giao diện Prometheus Graph chạy AgentMonitor PromQL",
-      ko: "AgentMonitor PromQL을 실행하는 Prometheus Graph UI",
-      es: "Interfaz Prometheus Graph ejecutando AgentMonitor PromQL",
+    "Prometheus Graph UI running Agent Monitor PromQL": {
+      zh: "运行 Agent Monitor PromQL 的 Prometheus Graph UI",
+      vi: "Giao diện Prometheus Graph chạy Agent Monitor PromQL",
+      ko: "Agent Monitor PromQL을 실행하는 Prometheus Graph UI",
+      es: "Interfaz Prometheus Graph ejecutando Agent Monitor PromQL",
     },
     "Tabby Companion": {
       zh: "Tabby 伴侣",
@@ -2134,59 +2137,59 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
   );
   const META = {
     en: {
-      title: "AgentMonitor - Project Wiki",
+      title: "Agent Monitor - Project Wiki",
       description:
-        "Comprehensive technical wiki for AgentMonitor — real-time local monitoring with MCP server integration plus Claude Code and Codex extension scaffolding.",
-      socialTitle: "AgentMonitor - Project Wiki",
+        "Comprehensive technical wiki for Agent Monitor — real-time local monitoring with MCP server integration plus Claude Code and Codex extension scaffolding.",
+      socialTitle: "Agent Monitor - Project Wiki",
       socialDescription:
-        "Comprehensive technical wiki for AgentMonitor — real-time local monitoring with MCP server integration plus Claude Code and Codex extension scaffolding.",
+        "Comprehensive technical wiki for Agent Monitor — real-time local monitoring with MCP server integration plus Claude Code and Codex extension scaffolding.",
       twitterDescription:
         "Real-time local monitoring for Claude Code agent activity with MCP integration, extension scaffolding, analytics, and WebSocket push.",
-      socialImageAlt: "AgentMonitor — real-time Claude Code monitoring platform",
+      socialImageAlt: "Agent Monitor — real-time Claude Code monitoring platform",
     },
     zh: {
-      title: "AgentMonitor - 项目维基",
+      title: "Agent Monitor - 项目维基",
       description:
-        "AgentMonitor 综合技术维基：本地实时监控、MCP Server 集成，以及 Claude Code 和 Codex 扩展脚手架。",
-      socialTitle: "AgentMonitor - 项目维基",
+        "Agent Monitor 综合技术维基：本地实时监控、MCP Server 集成，以及 Claude Code 和 Codex 扩展脚手架。",
+      socialTitle: "Agent Monitor - 项目维基",
       socialDescription:
-        "AgentMonitor 综合技术维基：本地实时监控、MCP Server 集成，以及 Claude Code 和 Codex 扩展脚手架。",
+        "Agent Monitor 综合技术维基：本地实时监控、MCP Server 集成，以及 Claude Code 和 Codex 扩展脚手架。",
       twitterDescription:
         "面向 Claude Code Agent 活动的本地实时监控，集成 MCP、扩展脚手架、分析和 WebSocket 推送。",
-      socialImageAlt: "AgentMonitor — Claude Code 实时监控平台",
+      socialImageAlt: "Agent Monitor — Claude Code 实时监控平台",
     },
     vi: {
-      title: "AgentMonitor - Wiki dự án",
+      title: "Agent Monitor - Wiki dự án",
       description:
-        "Wiki kỹ thuật toàn diện cho AgentMonitor — giám sát cục bộ theo thời gian thực, tích hợp MCP Server và bộ khung tiện ích Claude Code cùng Codex.",
-      socialTitle: "AgentMonitor - Wiki dự án",
+        "Wiki kỹ thuật toàn diện cho Agent Monitor — giám sát cục bộ theo thời gian thực, tích hợp MCP Server và bộ khung tiện ích Claude Code cùng Codex.",
+      socialTitle: "Agent Monitor - Wiki dự án",
       socialDescription:
-        "Wiki kỹ thuật toàn diện cho AgentMonitor — giám sát cục bộ theo thời gian thực, tích hợp MCP Server và bộ khung tiện ích Claude Code cùng Codex.",
+        "Wiki kỹ thuật toàn diện cho Agent Monitor — giám sát cục bộ theo thời gian thực, tích hợp MCP Server và bộ khung tiện ích Claude Code cùng Codex.",
       twitterDescription:
         "Giám sát cục bộ theo thời gian thực cho hoạt động Agent Claude Code, với MCP, tiện ích mở rộng, phân tích và WebSocket.",
-      socialImageAlt: "AgentMonitor — nền tảng giám sát Claude Code theo thời gian thực",
+      socialImageAlt: "Agent Monitor — nền tảng giám sát Claude Code theo thời gian thực",
     },
     ko: {
-      title: "AgentMonitor - 프로젝트 위키",
+      title: "Agent Monitor - 프로젝트 위키",
       description:
-        "AgentMonitor 종합 기술 위키 — 실시간 로컬 모니터링, MCP Server 통합, Claude Code 및 Codex 확장 스캐폴딩.",
-      socialTitle: "AgentMonitor - 프로젝트 위키",
+        "Agent Monitor 종합 기술 위키 — 실시간 로컬 모니터링, MCP Server 통합, Claude Code 및 Codex 확장 스캐폴딩.",
+      socialTitle: "Agent Monitor - 프로젝트 위키",
       socialDescription:
-        "AgentMonitor 종합 기술 위키 — 실시간 로컬 모니터링, MCP Server 통합, Claude Code 및 Codex 확장 스캐폴딩.",
+        "Agent Monitor 종합 기술 위키 — 실시간 로컬 모니터링, MCP Server 통합, Claude Code 및 Codex 확장 스캐폴딩.",
       twitterDescription:
         "MCP 통합, 확장 스캐폴딩, 분석, WebSocket 푸시를 갖춘 Claude Code Agent 활동 실시간 로컬 모니터링.",
-      socialImageAlt: "AgentMonitor — 실시간 Claude Code 모니터링 플랫폼",
+      socialImageAlt: "Agent Monitor — 실시간 Claude Code 모니터링 플랫폼",
     },
     es: {
-      title: "AgentMonitor - Wiki del proyecto",
+      title: "Agent Monitor - Wiki del proyecto",
       description:
-        "Wiki técnica completa para AgentMonitor: monitorización local en tiempo real con integración de servidor MCP y andamiaje de extensiones para Claude Code y Codex.",
-      socialTitle: "AgentMonitor - Wiki del proyecto",
+        "Wiki técnica completa para Agent Monitor: monitorización local en tiempo real con integración de servidor MCP y andamiaje de extensiones para Claude Code y Codex.",
+      socialTitle: "Agent Monitor - Wiki del proyecto",
       socialDescription:
-        "Wiki técnica completa para AgentMonitor: monitorización local en tiempo real con integración de servidor MCP y andamiaje de extensiones para Claude Code y Codex.",
+        "Wiki técnica completa para Agent Monitor: monitorización local en tiempo real con integración de servidor MCP y andamiaje de extensiones para Claude Code y Codex.",
       twitterDescription:
         "Monitorización local en tiempo real de la actividad del agente Claude Code con integración MCP, andamiaje de extensiones, análisis y envío por WebSocket.",
-      socialImageAlt: "AgentMonitor — plataforma de monitorización de Claude Code en tiempo real",
+      socialImageAlt: "Agent Monitor — plataforma de monitorización de Claude Code en tiempo real",
     },
   };
   const trH = (lang, en) => (lang === "en" ? en : (H[lang] && H[lang][norm(en)]) || en);

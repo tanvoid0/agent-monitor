@@ -1,5 +1,5 @@
 /**
- * @file Sidebar provider for AgentMonitor VSCode extension
+ * @file Sidebar provider for Agent Monitor VSCode extension
  * Renders a rich, real-time WebviewView showing backend status, live agent
  * health, usage analytics, recent sessions, and quick navigation.
  *
@@ -510,7 +510,7 @@ class DashboardWebviewProvider {
     </svg>
   </div>
   <div>
-    <div class="hero-title">AgentMonitor</div>
+    <div class="hero-title">Agent Monitor</div>
     <div class="hero-sub" id="hero-sub">Connecting…</div>
   </div>
   <div class="pill off" id="pill"><span class="dot"></span><span id="pill-text">Offline</span></div>

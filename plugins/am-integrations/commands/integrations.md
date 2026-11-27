@@ -1,5 +1,5 @@
 ---
-description: Read-only inventory of AgentMonitor alerts, webhook targets, and remote sources
+description: Read-only inventory of Agent Monitor alerts, webhook targets, and remote sources
 ---
 
 Run `am alerts --unacked`, `am alert-rules list`, `am webhooks`, and

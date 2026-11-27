@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Prometheus alerting rules for AgentMonitor
+# Prometheus alerting rules for Agent Monitor
 # ─────────────────────────────────────────────────────────────────────────────
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule

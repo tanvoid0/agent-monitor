@@ -93,7 +93,7 @@ describe("plan join — ledgerflow fixture", () => {
     assert.equal(step.lanes[2].tasks[2].status, "doing"); // I3: note line, unticked
   });
 
-  it("events in the v2 line shape carry the AgentMonitor agent id", () => {
+  it("events in the v2 line shape carry the Agent Monitor agent id", () => {
     const lines = join.eventLines(plan, { limit: 50 });
     assert.equal(lines.length, 50);
     const last = lines[lines.length - 1];
@@ -238,7 +238,7 @@ describe("plan join — helpers", () => {
     }
     assert.equal(join.labelMatches("main", a), false);
     assert.ok(join.labelMatches("main", { id: "s-main", claudeId: null, type: "main", lane: "C" }));
-    // without a claude id the suffix is the AgentMonitor id's
+    // without a claude id the suffix is the Agent Monitor id's
     assert.ok(
       join.labelMatches("e1968", { id: "af01d6844fb0e1968", claudeId: null, type: "x", lane: null })
     );

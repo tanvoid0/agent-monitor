@@ -1,6 +1,6 @@
 {
   "name": "am-integrations",
-  "description": "Manage AgentMonitor alert rules, universal webhook providers, browser push notifications, and SSH Remote Data Sources with explicit mutation and external-send confirmation.",
+  "description": "Manage Agent Monitor alert rules, universal webhook providers, browser push notifications, and SSH Remote Data Sources with explicit mutation and external-send confirmation.",
   "version": "3.1.1",
   "author": { "name": "Tanveer Hoque", "url": "https://github.com/tanvoid0" },
   "homepage": "https://github.com/tanvoid0/agent-monitor",

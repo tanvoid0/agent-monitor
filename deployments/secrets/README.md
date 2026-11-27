@@ -8,7 +8,7 @@ Secret files are intentionally ignored by Git.
 - `mcp-token`: bearer token for the optional MCP HTTP and SSE transport.
 - `grafana-admin-password`: Grafana administrator password for the full stack.
 
-Create both before exposing AgentMonitor outside host loopback:
+Create both before exposing Agent Monitor outside host loopback:
 
 ```bash
 umask 077

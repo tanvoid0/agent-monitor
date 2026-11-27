@@ -1,7 +1,7 @@
 ---
 name: history-portability
 description: >
-  Import Claude Code or Codex history and move complete AgentMonitor datasets between
+  Import Claude Code or Codex history and move complete Agent Monitor datasets between
   machines. Use when rescanning provider history, importing a copied directory,
   uploading JSONL or archives, exporting a backup, restoring it idempotently,
   or verifying that tokens, workflows, runs, rules, and pricing survived.

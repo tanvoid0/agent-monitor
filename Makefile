@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# AgentMonitor — Makefile
+# Agent Monitor — Makefile
 # A collection of convenient commands for development, testing, and deployment.
 # Prerequisites: GNU Make, Node.js, npm
 # Author: Tanveer Hoque <tanvoid0@gmail.com>

@@ -1,7 +1,7 @@
 ---
 name: workflow-report
 description: >
-  Create a workflow-intelligence report from AgentMonitor orchestration, delegation,
+  Create a workflow-intelligence report from Agent Monitor orchestration, delegation,
   tool flow, concurrency, complexity, compaction, and fleet-run data. Use for
   architecture reviews, agent-fleet analysis, or workflow optimization reports.
 ---

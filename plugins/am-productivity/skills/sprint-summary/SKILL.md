@@ -9,7 +9,7 @@ description: >
 
 # Sprint Summary
 
-Generate a sprint summary from AgentMonitor data.
+Generate a sprint summary from Agent Monitor data.
 
 ## Input
 

@@ -78,14 +78,14 @@ function formatDiscord(alert) {
   if (alert.agent_id)
     fields.push({ name: "Agent", value: truncate(alert.agent_id, 1024), inline: true });
   return {
-    username: "AgentMonitor",
+    username: "Agent Monitor",
     embeds: [
       {
         title: truncate(`🔔 ${alert.rule_name}`, 256),
         description: truncate(alert.message, 4000),
         color: ACCENT_INT,
         fields,
-        footer: { text: "AgentMonitor" },
+        footer: { text: "Agent Monitor" },
         timestamp: alert.triggered_at,
       },
     ],
@@ -144,7 +144,7 @@ function formatGoogleChat(alert) {
 // Mattermost incoming webhook — Slack-compatible (legacy attachments).
 function formatMattermost(alert) {
   return {
-    username: "AgentMonitor",
+    username: "Agent Monitor",
     text: `🔔 **${alert.rule_name}**`,
     attachments: [
       {
@@ -152,7 +152,7 @@ function formatMattermost(alert) {
         color: ACCENT_HEX,
         text: truncate(alert.message, 3000),
         fields: attachmentFields(alert),
-        footer: "AgentMonitor",
+        footer: "Agent Monitor",
       },
     ],
   };
@@ -161,7 +161,7 @@ function formatMattermost(alert) {
 // Rocket.Chat incoming webhook — text + Slack-style attachments.
 function formatRocketChat(alert) {
   return {
-    alias: "AgentMonitor",
+    alias: "Agent Monitor",
     text: `🔔 *${alert.rule_name}*`,
     attachments: [
       {

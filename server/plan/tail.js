@@ -2,7 +2,7 @@
  * @file Per-agent transcript figures for the plan join (docs/plan-layer.md
  * §4.4): the v2 tailer — model, API calls, output tokens, current context and
  * its window, the last thing the agent said — read incrementally from the
- * agent's JSONL, plus `cost` from AgentMonitor's own transcript cache × model_pricing
+ * agent's JSONL, plus `cost` from Agent Monitor's own transcript cache × model_pricing
  * so the plan page and the Analytics page agree to the cent.
  * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
@@ -41,7 +41,7 @@ function fresh() {
   };
 }
 
-// v2 dedupe: the FIRST record of a message.id counts (AgentMonitor's cache takes the
+// v2 dedupe: the FIRST record of a message.id counts (Agent Monitor's cache takes the
 // last — see transcript-cache.js; the plan figures keep v2's numbers so the
 // fixture text reproduces). `say` comes from the latest record, whose text is
 // the most complete.

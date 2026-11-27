@@ -1,7 +1,7 @@
 ---
 name: reliability-report
 description: >
-  Generate a AgentMonitor reliability report from session outcomes, hook events,
+  Generate an Agent Monitor reliability report from session outcomes, hook events,
   alerts, tool failures, and data freshness. Use for health reviews, incident
   follow-up, hook-delivery audits, or reliability trend summaries.
 ---

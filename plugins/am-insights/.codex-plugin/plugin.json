@@ -20,7 +20,7 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "AgentMonitor Insights",
+    "displayName": "Agent Monitor Insights",
     "shortDescription": "AI-powered insights for Claude Code — pattern detection, anomaly alerting, optimization...",
     "longDescription": "AI-powered insights for Claude Code — pattern detection, anomaly alerting, optimization recommendations, and session comparison using Agent Monitor analytics.",
     "developerName": "Tanveer Hoque",
@@ -28,8 +28,8 @@
     "capabilities": ["Read"],
     "websiteURL": "https://github.com/tanvoid0/agent-monitor",
     "defaultPrompt": [
-      "Use AgentMonitor Insights to inspect the local AgentMonitor dashboard.",
-      "Use AgentMonitor Insights to analyze recent agent activity."
+      "Use Agent Monitor Insights to inspect the local Agent Monitor dashboard.",
+      "Use Agent Monitor Insights to analyze recent agent activity."
     ],
     "brandColor": "#6366F1"
   }

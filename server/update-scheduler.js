@@ -51,7 +51,7 @@ function startUpdateScheduler({ broadcast }) {
       if (becameAvailable) {
         const line = "━".repeat(52);
         console.log(`\n${line}`);
-        console.log("  AgentMonitor: upstream update available");
+        console.log("  Agent Monitor: upstream update available");
         console.log(`  ${status.message || ""}`);
         if (status.situation_note) {
           console.log(`  ${status.situation_note}`);

@@ -11,7 +11,7 @@ description: >
 
 # Anomaly Alert
 
-Detect anomalous sessions in AgentMonitor data.
+Detect anomalous sessions in Agent Monitor data.
 
 ## Input
 

@@ -1,9 +1,9 @@
-# Turnkey Prometheus + Grafana stack for the AgentMonitor `/api/metrics` endpoint.
+# Turnkey Prometheus + Grafana stack for the Agent Monitor `/api/metrics` endpoint.
 #
 #   cd monitoring && docker compose up -d
 #   open http://localhost:3000
 #
-# The "AgentMonitor — Overview" dashboard and the Prometheus datasource are
+# The "Agent Monitor — Overview" dashboard and the Prometheus datasource are
 # pre-provisioned, so there is nothing to click after start. Prometheus scrapes
 # the dashboard running on the HOST (a plain `npm start` on :4820) via
 # host.docker.internal — see ./prometheus/prometheus.yml to change the target
@@ -24,7 +24,7 @@ services:
       - prometheus-data:/prometheus
     ports:
       - "127.0.0.1:9090:9090"
-    # Lets the container reach a AgentMonitor server running on the host (Linux needs the
+    # Lets the container reach an Agent Monitor server running on the host (Linux needs the
     # explicit host-gateway mapping; Docker Desktop resolves it natively).
     extra_hosts:
       - "host.docker.internal:host-gateway"

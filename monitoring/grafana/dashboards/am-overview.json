@@ -1,6 +1,6 @@
 {
   "uid": "am-overview",
-  "title": "AgentMonitor — Overview",
+  "title": "Agent Monitor — Overview",
   "description": "Live metrics scraped from GET /api/metrics on each 15s interval. Every value is read from your SQLite database at scrape time — no sample or synthetic data.",
   "tags": ["am", "claude-code"],
   "timezone": "browser",

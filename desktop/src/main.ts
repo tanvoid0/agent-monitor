@@ -57,10 +57,18 @@
  * - `.claude/skills/file-headers/` — mandatory `@author` header policy.
  * ============================================================================= */
 
+import * as fs from "node:fs";
+import * as path from "node:path";
+
 import { BrowserWindow, Notification, app, dialog, shell } from "electron";
 
-import { APP_ID, APP_NAME } from "./constants";
-import { isOpenAtLogin, launchedAtLogin, toggleOpenAtLogin } from "./login-item";
+import { APP_ID, APP_NAME, LEGACY_APP_NAME } from "./constants";
+import {
+  isOpenAtLogin,
+  launchedAtLogin,
+  migrateLegacyLoginItem,
+  toggleOpenAtLogin,
+} from "./login-item";
 import { log } from "./logger";
 import { focusOrCreateWindow, installApplicationMenu } from "./menu";
 import {
@@ -111,7 +119,7 @@ const state: AppState = {
 };
 
 /**
- * Show the "Quit AgentMonitor?" confirmation dialog. Clicking Quit
+ * Show the "Quit Agent Monitor?" confirmation dialog. Clicking Quit
  * runs the synchronous teardown and exits. Pressing ⌘Q again while the
  * dialog is open is caught by `before-quit` below and skips this prompt.
  */
@@ -127,7 +135,7 @@ function requestQuit(): void {
     defaultId: 0,
     cancelId: 1,
     title: APP_NAME,
-    message: "Quit AgentMonitor?",
+    message: "Quit Agent Monitor?",
     detail:
       "The embedded server will stop and your dashboard window will close. " +
       `Press ${quitAccel} again to skip this prompt and quit immediately.`,
@@ -257,6 +265,8 @@ async function boot(): Promise<void> {
     }
   }
 
+  migrateLegacyLoginItem();
+
   // Recover the user's shell PATH before the server boots — a Finder/Dock or
   // login-launched app only inherits launchd's minimal PATH, which makes the
   // "Run Claude" feature unable to find the `claude` CLI.
@@ -368,7 +378,30 @@ function wireLifecycle(): void {
   });
 }
 
+/**
+ * One-time move of the per-user app-data folder from the pre-rename
+ * `AgentMonitor` name to `Agent Monitor` (window state, a legacy database,
+ * Windows logs). Runs before `requestSingleInstanceLock`, whose lock lives in
+ * that folder. Best effort: while an old build is still running the folder
+ * stays put (Windows refuses the rename; on macOS/Linux its `SingletonLock`
+ * would otherwise travel along and hand our single-instance check to the old
+ * process), and the app starts with fresh window state.
+ */
+function migrateLegacyUserData(): void {
+  const appData = app.getPath("appData");
+  const from = path.join(appData, LEGACY_APP_NAME);
+  const to = path.join(appData, APP_NAME);
+  if (!fs.existsSync(from) || fs.existsSync(to)) return;
+  try {
+    if (fs.readdirSync(from).includes("SingletonLock")) return;
+    fs.renameSync(from, to);
+  } catch (err) {
+    log.warn("could not move legacy app data", { from, to, err: String(err) });
+  }
+}
+
 app.setName(APP_NAME);
+migrateLegacyUserData();
 // Windows: associate this process with the installed app's AppUserModelID so
 // `new Notification()` toasts (e.g. "Server restarted") render under the app's
 // name/icon and taskbar windows group correctly. Must be set before any window

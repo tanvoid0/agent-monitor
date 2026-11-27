@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Import legacy Claude Code sessions from ~/.claude/ into the AgentMonitor.
+ * Import legacy Claude Code sessions from ~/.claude/ into the Agent Monitor.
  * Reads per-project JSONL session files to populate sessions, agents, token
  * usage, and compact recent-human-turn card context that existed before the
  * dashboard was installed.

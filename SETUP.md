@@ -1,10 +1,10 @@
 # Setup Guide
 
-A comprehensive guide to setting up and configuring the AgentMonitor, including how it integrates with Claude Code, environment variables, container deployment, and troubleshooting common issues.
+A comprehensive guide to setting up and configuring the Agent Monitor, including how it integrates with Claude Code, environment variables, container deployment, and troubleshooting common issues.
 
 ## How it works
 
-AgentMonitor integrates with Claude Code through its native hook system. When Claude Code performs any action (session start, tool use, turn completion, subagent finish, session exit), it fires a hook that calls a small Node.js script bundled with this project. That script forwards the event over HTTP to the dashboard server, which stores it in SQLite and broadcasts it to the browser over WebSocket.
+Agent Monitor integrates with Claude Code through its native hook system. When Claude Code performs any action (session start, tool use, turn completion, subagent finish, session exit), it fires a hook that calls a small Node.js script bundled with this project. That script forwards the event over HTTP to the dashboard server, which stores it in SQLite and broadcasts it to the browser over WebSocket.
 
 ```
 Claude Code  →  hook fires  →  hook-handler.js  →  POST /api/hooks/event
@@ -120,7 +120,7 @@ DASHBOARD_PORT=9000 npm run dev
 > [!NOTE]
 > You usually do **not** need to set `DASHBOARD_PORT` manually. `npm run dev` is wrapped by `scripts/dev.js`, which probes both `127.0.0.1` and `::1` (so an SSH `LocalForward` bound to one loopback can't slip past) and picks the first free port in `4820–4859` automatically. The chosen port is propagated to the Vite dev proxy via `DASHBOARD_PORT`, and the Express server writes it to `~/.claude/.agentmonitor.json` so the Claude Code hook handler discovers it without any env var.
 >
-> Multiple dashboards can run side by side — for example `npm run dev` and the desktop app (macOS or Windows) at the same time. Each one appends its `{port, pid, startedAt}` entry to the discovery file, and `scripts/hook-handler.js` fan-outs every hook event to every live entry, so both UIs keep their real-time stream.
+> Multiple dashboards can run side by side — for example `npm run dev` and the desktop app (macOS, Windows, or Linux) at the same time. Each one appends its `{port, pid, startedAt}` entry to the discovery file, and `scripts/hook-handler.js` fan-outs every hook event to every live entry, so both UIs keep their real-time stream.
 >
 > Setting `CLAUDE_DASHBOARD_PORT=N` overrides discovery entirely and forces the hook handler to a single port — useful for tests and container setups where the in-process discovery file isn't reachable from the host.
 >
@@ -190,7 +190,7 @@ installation details.
 
 ### VS Code extension setup
 
-The **AgentMonitor** is available as an integrated VS Code extension for seamless monitoring within your editor.
+The **Agent Monitor** is available as an integrated VS Code extension for seamless monitoring within your editor.
 
 - **Activity Bar View**: Adds a custom "Radar" icon to the activity bar providing real-time agent health, token counts, and session stats.
 - **Status Bar Integration**: Displays live session and agent pulse counts in the bottom bar.
@@ -207,7 +207,7 @@ To install or develop the extension:
 3. For developer details, see [vscode-extension/README.md](./vscode-extension/README.md).
 
 > [!TIP]
-> Extension on VS Code Marketplace: [AgentMonitor](https://marketplace.visualstudio.com/items?itemName=hoangsonw.agentmonitor)
+> Extension on VS Code Marketplace: [Agent Monitor](https://marketplace.visualstudio.com/items?itemName=hoangsonw.agentmonitor)
 
 ### PWA configuration (optional)
 
@@ -228,11 +228,11 @@ The dashboard, landing page, and wiki each ship as independent Progressive Web A
 
 ### Desktop App Setup
 
-The `desktop/` workspace ships the dashboard as a **native desktop app** for both **macOS** (a `.app` distributed as a `.dmg`) and **Windows** (an `.exe` — an NSIS installer plus a no-install portable build), built with Electron 35. It is an Electron shell that **embeds the existing Express server in-process** — it does not reimplement anything. For installation (download a pre-built installer from the [latest GitHub Release](https://github.com/tanvoid0/agent-monitor/releases/latest) or the per-commit `AgentMonitor-dmg` / `AgentMonitor-win` CI artifact, or build one locally — then on macOS mount, drag, Gatekeeper bypass; on Windows run the installer / portable, SmartScreen bypass), see [INSTALL.md → Desktop App (macOS & Windows)](./INSTALL.md#desktop-app-macos--windows-optional). The full user guide is [`DESKTOP.md`](./DESKTOP.md); the contributor / architecture reference is [`desktop/README.md`](./desktop/README.md).
+The `desktop/` workspace ships the dashboard as a **native desktop app** for **macOS** (a `.app` distributed as a `.dmg`), **Windows** (an `.exe` — an NSIS installer plus a no-install portable build), and **Linux** (an x64 `.AppImage` plus a `.deb`), built with Electron 35. It is an Electron shell that **embeds the existing Express server in-process** — it does not reimplement anything. For installation (download a pre-built installer from the [latest GitHub Release](https://github.com/tanvoid0/agent-monitor/releases/latest) or the per-commit `AgentMonitor-dmg` / `AgentMonitor-win` / `AgentMonitor-linux` CI artifact, or build one locally — then on macOS mount, drag, Gatekeeper bypass; on Windows run the installer / portable, SmartScreen bypass; on Linux `chmod +x` the AppImage or `sudo apt install ./AgentMonitor-<ver>-amd64.deb`), see [INSTALL.md → Desktop App (macOS, Windows & Linux)](./INSTALL.md#desktop-app-macos-windows--linux-optional). The full user guide is [`DESKTOP.md`](./DESKTOP.md); the contributor / architecture reference is [`desktop/README.md`](./desktop/README.md).
 
 This section covers the parts of running the desktop app that matter for setup.
 
-**Building and running.** All commands run from the repo root. electron-builder packages for the **host OS** — build the macOS DMG on a Mac (`desktop:dmg*`) and the Windows `.exe` on Windows (`desktop:win*`):
+**Building and running.** All commands run from the repo root. electron-builder packages for the **host OS** — build the macOS DMG on a Mac (`desktop:dmg*`) the Windows `.exe` on Windows (`desktop:win*`), and the Linux AppImage/`.deb` on Linux (`desktop:linux`):
 
 | Script | Command | Description |
 |---|---|---|
@@ -245,14 +245,15 @@ This section covers the parts of running the desktop app that matter for setup.
 | `desktop:dmg:x64` | `npm run desktop:dmg:x64` | **macOS** — Intel-only DMG → `desktop/release/`. **Fast (~1 min).** |
 | `desktop:win` | `npm run desktop:win` | **Windows** — NSIS installer `.exe` (x64) → `desktop/release/`. |
 | `desktop:win:portable` | `npm run desktop:win:portable` | **Windows** — no-install portable `.exe` (x64) → `desktop/release/`. |
+| `desktop:linux` | `npm run desktop:linux` | **Linux** — x64 AppImage + `.deb` → `desktop/release/` (`AgentMonitor-<ver>-x86_64.AppImage`, `AgentMonitor-<ver>-amd64.deb`). |
 
 > [!NOTE]
-> Every `desktop:dmg*` / `desktop:win*` script chains `npm run build` first. Running `electron-builder` bare skips the TypeScript compile and fails with `entry file out/main.js does not exist`. `npm run clean` inside `desktop/` deletes `out/` and `release/` — after a clean you must `npm run desktop:build` again before packaging.
+> Every `desktop:dmg*` / `desktop:win*` / `desktop:linux` script chains `npm run build` first. Running `electron-builder` bare skips the TypeScript compile and fails with `entry file out/main.js does not exist`. `npm run clean` inside `desktop/` deletes `out/` and `release/` — after a clean you must `npm run desktop:build` again before packaging.
 
 > [!TIP]
 > On macOS, building a DMG rebuilds the native `better-sqlite3` module for the **target** architecture, which can leave it built for the wrong CPU arch for your local machine. The desktop `prebuild` step auto-heals this — it rebuilds `better-sqlite3` for the local machine on the next `desktop:build` — so `npm run desktop:dev` and `npm run desktop:test` keep working after a cross-arch DMG build with no manual `npm run desktop:install` needed.
 
-**Hooks are auto-installed by the app.** On its first **owned-server** boot the desktop app writes the Claude Code hook configuration to `~/.claude/settings.json` itself, then starts the background services (update scheduler, `cc-watcher` config watcher, orphaned-run reconciliation) — the same `startBackgroundServices()` that `node server/index.js` runs. An install-only user (macOS or Windows) therefore never needs `npm run install-hooks` from a checkout: just **start a new Claude Code session** after the app is running. (If the app *adopts* an existing server instead of starting its own, that server already did its own hook bootstrap — see port adoption below.)
+**Hooks are auto-installed by the app.** On its first **owned-server** boot the desktop app writes the Claude Code hook configuration to `~/.claude/settings.json` itself, then starts the background services (update scheduler, `cc-watcher` config watcher, orphaned-run reconciliation) — the same `startBackgroundServices()` that `node server/index.js` runs. An install-only user (macOS, Windows, or Linux) therefore never needs `npm run install-hooks` from a checkout: just **start a new Claude Code session** after the app is running. (If the app *adopts* an existing server instead of starting its own, that server already did its own hook bootstrap — see port adoption below.)
 
 **Port-adoption behavior.** When the desktop app launches, its embedded server picks a port:
 
@@ -262,17 +263,18 @@ This section covers the parts of running the desktop app that matter for setup.
 
 The chosen port is shown in the tray menu. The embedded server also honors the dashboard env vars in [Environment variables](#environment-variables) (`DASHBOARD_PORT` is set automatically by the desktop host).
 
-**Data directory.** The packaged app stores its SQLite database and VAPID keys in a per-user app-data directory — `~/Library/Application Support/AgentMonitor/data/` on macOS, `%APPDATA%\AgentMonitor\data\` on Windows — **outside** the app bundle / install dir. The desktop host sets `DASHBOARD_DATA_DIR` to this per-user location automatically. Keeping writable state out of the bundle means a packaged, code-signed (and therefore read-only) `.app` never tries to write inside itself, and your imported history and events **survive app reinstalls and updates** (the Windows NSIS uninstaller keeps this data by default). (Older macOS builds kept the database inside the bundle, which broke History Import; after upgrading from a pre-fix build, re-run **Settings → Import History → Rescan** once to close the one-time data gap.)
+**Data directory.** The packaged app stores its SQLite database and VAPID keys in a per-user app-data directory — `~/Library/Application Support/Agent Monitor/data/` on macOS, `%APPDATA%\Agent Monitor\data\` on Windows, `~/.config/Agent Monitor/data/` on Linux — **outside** the app bundle / install dir. The desktop host sets `DASHBOARD_DATA_DIR` to this per-user location automatically. Keeping writable state out of the bundle means a packaged, code-signed (and therefore read-only) `.app` never tries to write inside itself, and your imported history and events **survive app reinstalls and updates** (the Windows NSIS uninstaller keeps this data by default). (Older macOS builds kept the database inside the bundle, which broke History Import; after upgrading from a pre-fix build, re-run **Settings → Import History → Rescan** once to close the one-time data gap.)
 
 **`claude` CLI resolution.** A Finder/Dock-launched macOS app inherits only launchd's minimal `PATH`, not your login-shell `PATH`. So the app can find and spawn the `claude` CLI for the "Run Claude" feature, the desktop host recovers your login-shell `PATH` at startup. (On Windows the process already inherits the user `PATH`, so no recovery is needed.) If "Run Claude" still reports that `claude` is not on `PATH`, make sure `claude` is a real executable on your shell `PATH` — a shell alias or function cannot be spawned.
 
-**Auto-start at login.** Toggle *Open at Login* from the tray menu or the application menu. On macOS it registers via the first-party `SMAppService` API (Electron's `app.setLoginItemSettings`), so the entry appears under  → *System Settings → General → Login Items*. On Windows it writes a per-user `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` entry, visible in *Task Manager → Startup*. When the app is launched at login, it starts **tray-only** — the dashboard window stays hidden until you click the tray icon.
+**Auto-start at login.** Toggle *Open at Login* from the tray menu or the application menu. On macOS it registers via the first-party `SMAppService` API (Electron's `app.setLoginItemSettings`), so the entry appears under  → *System Settings → General → Login Items*. On Windows it writes a per-user `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` entry, visible in *Task Manager → Startup*. On Linux the toggle is a no-op. When the app is launched at login, it starts **tray-only** — the dashboard window stays hidden until you click the tray icon.
 
 **Logs.** The Electron main process has no terminal when launched from Finder / the Start menu, so it writes to a per-user log file:
 
 ```
-~/Library/Logs/AgentMonitor/desktop.log     # macOS
-%APPDATA%\AgentMonitor\logs\desktop.log      # Windows
+~/Library/Logs/Agent Monitor/desktop.log     # macOS
+%APPDATA%\Agent Monitor\logs\desktop.log      # Windows
+~/.config/Agent Monitor/logs/desktop.log     # Linux
 ```
 
 Open it from the tray menu → **Show Logs**. Set `AM_DESKTOP_VERBOSE=1` to also mirror `info`/`warn` lines to stdout when running via `npm run desktop:dev`.
@@ -685,7 +687,7 @@ You ran `electron-builder` without a TypeScript compile. `npm run clean` (in `de
 The DMG is **ad-hoc signed** by default (the project ships no paid Apple Developer ID), so macOS shows *"Apple could not verify…"* the first time you open the app. Strip the quarantine attribute:
 
 ```bash
-xattr -cr "/Applications/AgentMonitor.app"
+xattr -cr "/Applications/Agent Monitor.app"
 ```
 
 Or open  → *System Settings → Privacy & Security* and click *Open Anyway*. Real Developer ID signing and notarization are opt-in via the `CSC_LINK` / `CSC_KEY_PASSWORD` and `APPLE_ID` / `APPLE_TEAM_ID` / `APPLE_APP_SPECIFIC_PASSWORD` repository secrets — see [`DESKTOP.md`](./DESKTOP.md#notarization-for-the-maintainer).
@@ -700,4 +702,4 @@ The Windows `.exe` (NSIS installer and portable build) is **unsigned** by defaul
 
 ### Desktop app — no sessions appearing
 
-The desktop app installs hooks on its **first owned-server boot**, not before. After the app is running, start a **new** Claude Code session and confirm `~/.claude/settings.json` contains entries referencing `hook-handler.js`. If the app adopted an existing server on `4820`, that server's own hook configuration applies instead. For a blank dashboard window, check the desktop log (`~/Library/Logs/AgentMonitor/desktop.log` on macOS, `%APPDATA%\AgentMonitor\logs\desktop.log` on Windows) via tray → *Show Logs* and use tray → *Restart Server*.
+The desktop app installs hooks on its **first owned-server boot**, not before. After the app is running, start a **new** Claude Code session and confirm `~/.claude/settings.json` contains entries referencing `hook-handler.js`. If the app adopted an existing server on `4820`, that server's own hook configuration applies instead. For a blank dashboard window, check the desktop log (`~/Library/Logs/Agent Monitor/desktop.log` on macOS, `%APPDATA%\Agent Monitor\logs\desktop.log` on Windows, `~/.config/Agent Monitor/logs/desktop.log` on Linux) via tray → *Show Logs* and use tray → *Restart Server*.

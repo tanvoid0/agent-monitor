@@ -1,7 +1,7 @@
 ---
 name: remote-collection
 description: >
-  Configure and troubleshoot AgentMonitor Remote Data Sources that collect Claude Code
+  Configure and troubleshoot Agent Monitor Remote Data Sources that collect Claude Code
   and Codex history over SSH. Use when adding, editing, testing, syncing, or
   removing a remote machine, verifying provider paths, or deciding whether to
   retain or purge imported sessions.
@@ -10,7 +10,7 @@ description: >
 # Remote Collection
 
 1. List current sources with `am remote-sources`.
-2. Validate the host through the user's existing SSH configuration. AgentMonitor stores
+2. Validate the host through the user's existing SSH configuration. Agent Monitor stores
    no passwords or private keys.
 3. Add a source with `remote_home` and `remote_codex_home` only when they differ
    from the provider defaults.

@@ -1,9 +1,9 @@
 # Loads every dashboard JSON under /var/lib/grafana/dashboards on startup — four
-# bundled AgentMonitor boards (Overview, Sessions & Agents, Tokens & Events, Platform Health).
+# bundled Agent Monitor boards (Overview, Sessions & Agents, Tokens & Events, Platform Health).
 apiVersion: 1
 
 providers:
-  - name: AgentMonitor
+  - name: Agent Monitor
     orgId: 1
     type: file
     disableDeletion: false

@@ -1,6 +1,6 @@
 interface:
   display_name: "Remote Collection"
-  short_description: "Configure and troubleshoot AgentMonitor Remote Data Sources..."
-  default_prompt: "Use $remote-collection to inspect AgentMonitor data and complete this workflow safely."
+  short_description: "Configure and troubleshoot Agent Monitor Remote Data Sources..."
+  default_prompt: "Use $remote-collection to inspect Agent Monitor data and complete this workflow safely."
 policy:
   allow_implicit_invocation: false

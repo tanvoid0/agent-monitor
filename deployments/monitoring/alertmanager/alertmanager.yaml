@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Alertmanager configuration for AgentMonitor
+# Alertmanager configuration for Agent Monitor
 #
 # Replace placeholder values (marked with <PLACEHOLDER>) before deploying.
 # ─────────────────────────────────────────────────────────────────────────────

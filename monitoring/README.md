@@ -1,4 +1,4 @@
-# AgentMonitor monitoring stack (Prometheus + Grafana)
+# Agent Monitor monitoring stack (Prometheus + Grafana)
 
 ![Prometheus](https://img.shields.io/badge/Prometheus-3.13-E6522C?style=flat-square&logo=prometheus&logoColor=white)
 ![Grafana](https://img.shields.io/badge/Grafana-13.1-F46800?style=flat-square&logo=grafana&logoColor=white)
@@ -8,7 +8,7 @@
 A turnkey [Prometheus](https://prometheus.io/) + [Grafana](https://grafana.com/)
 stack that scrapes the dashboard's [`GET /api/metrics`](../docs/API.md#metrics)
 endpoint and renders **four auto-provisioned Grafana dashboards** (default home:
-**AgentMonitor — Overview**). Use it to watch live
+**Agent Monitor — Overview**). Use it to watch live
 sessions, agent states, event throughput, and token burn from the same
 observability stack as the rest of your infra.
 
@@ -27,7 +27,7 @@ runs `postinstall` in this folder and pulls official release binaries into
 | Windows | `x64` |
 
 Node.js 22.22+ is the only prerequisite. Node 24 LTS is recommended. On Windows, run the npm commands from
-PowerShell or Command Prompt in the repo root (same as the rest of AgentMonitor).
+PowerShell or Command Prompt in the repo root (same as the rest of Agent Monitor).
 
 ## Grafana login
 
@@ -42,7 +42,7 @@ The admin account is **auto-created on first start** — no manual signup:
 The npm-only local stack uses the development credential in
 [`grafana.defaults.env`](./grafana.defaults.env). Container stacks read the
 password from `deployments/secrets/grafana-admin-password`; they never use the
-development default. **AgentMonitor — Overview** is the default
+development default. **Agent Monitor — Overview** is the default
 home dashboard (`GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_UID=am-overview`) with
 PromQL queries against your live `/api/metrics` scrape — no sample or synthetic
 data. The Prometheus datasource is pre-provisioned, so you land straight in the
@@ -62,7 +62,7 @@ monitoring/
 │   ├── prometheus.yml                     # scrape config for Docker stack
 │   ├── prometheus-docker.yml              # all-Docker stack (docker-compose.full.yml)
 │   ├── am-rules.yml                     # recording rules (derived from live scrapes)
-│   └── consoles/index.html                # Prometheus AgentMonitor console (pre-built graphs)
+│   └── consoles/index.html                # Prometheus Agent Monitor console (pre-built graphs)
 ├── grafana/
 │   ├── provisioning/…                     # Docker datasource + dashboard provider
 │   ├── provisioning-native/…              # npm-managed datasource template
@@ -97,8 +97,8 @@ monitoring/
 
 4. **Open Grafana** at <http://localhost:3000> (the npm-only local login is
    `admin` / `admin`). The
-   **AgentMonitor — Overview** dashboard is already there — no import step. For
-   Prometheus, open the pre-built **AgentMonitor console** at
+   **Agent Monitor — Overview** dashboard is already there — no import step. For
+   Prometheus, open the pre-built **Agent Monitor console** at
    <http://localhost:9090/consoles/index.html> (live graphs + tables), or
    <http://localhost:9090> → **Consoles** → `index.html` (`Status → Targets`:
    `am` should be **UP**).
@@ -186,17 +186,17 @@ Four dashboards are auto-provisioned from `grafana/dashboards/` — all query li
 
 | Dashboard | UID | Focus |
 | --- | --- | --- |
-| **AgentMonitor — Overview** | `am-overview` | Default home — fleet snapshot, totals, breakdowns, rates |
-| **AgentMonitor — Sessions & Agents** | `am-sessions-agents` | Session lifecycle, agent states, WebSocket clients |
-| **AgentMonitor — Tokens & Events** | `am-tokens-events` | Cumulative tokens/events, throughput rates, cache efficiency |
-| **AgentMonitor — Platform Health** | `am-platform` | Scrape/API uptime, process memory, remote sources, build info |
+| **Agent Monitor — Overview** | `am-overview` | Default home — fleet snapshot, totals, breakdowns, rates |
+| **Agent Monitor — Sessions & Agents** | `am-sessions-agents` | Session lifecycle, agent states, WebSocket clients |
+| **Agent Monitor — Tokens & Events** | `am-tokens-events` | Cumulative tokens/events, throughput rates, cache efficiency |
+| **Agent Monitor — Platform Health** | `am-platform` | Scrape/API uptime, process memory, remote sources, build info |
 
 Each board links to the others in the header. After `monitoring:up`, open
 http://localhost:3000/dashboards or land on **Overview** as the home dashboard.
 
 ## What's on the Overview dashboard
 
-The bundled **AgentMonitor — Overview** board uses only metrics from your database.
+The bundled **Agent Monitor — Overview** board uses only metrics from your database.
 **Cumulative stat panels** (total sessions, events, tokens) show substantial
 numbers on the first scrape; **rate panels** need a few minutes of scrape
 history before lines appear.
@@ -214,7 +214,7 @@ See [`docs/API.md` → Metrics](../docs/API.md#metrics) for the full metric list
 
 ## Prometheus quick start
 
-**Open the AgentMonitor console first** — static HTML that queries Prometheus directly
+**Open the Agent Monitor console first** — static HTML that queries Prometheus directly
 (Prometheus 3.x compatible; no deprecated console template libraries):
 
 **http://localhost:9090/consoles/index.html**
@@ -223,7 +223,7 @@ Also reachable from the Prometheus UI menu: **Consoles → index.html**.
 
 The console runs real PromQL against your scraped metrics: session totals,
 cumulative events/tokens, working agents, and drill-down links into the Graph UI.
-If the page warns about a missing scrape target, start AgentMonitor on port 4820 and
+If the page warns about a missing scrape target, start Agent Monitor on port 4820 and
 wait ~15s for the first poll.
 
 ### Graph tab bookmarks

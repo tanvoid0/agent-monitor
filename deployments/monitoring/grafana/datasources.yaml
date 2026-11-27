@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Grafana datasource provisioning for AgentMonitor
+# Grafana datasource provisioning for Agent Monitor
 # ─────────────────────────────────────────────────────────────────────────────
 apiVersion: 1
 

@@ -1,4 +1,4 @@
-# Prometheus scrape config for a NATIVE (non-Docker) AgentMonitor + monitoring stack.
+# Prometheus scrape config for a NATIVE (non-Docker) Agent Monitor + monitoring stack.
 #
 # Use this when Prometheus runs directly on the host (Homebrew, apt, a release
 # tarball, etc.) and the dashboard is a plain `npm start` on loopback :4820.

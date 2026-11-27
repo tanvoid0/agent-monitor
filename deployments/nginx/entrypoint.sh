@@ -11,7 +11,7 @@ if [ -z "$resolver" ]; then
   resolver="$(awk '/^nameserver[[:space:]]+/ { print $2; exit }' /etc/resolv.conf)"
 fi
 if [ -z "$resolver" ]; then
-  echo "AgentMonitor Nginx could not resolve an OCI DNS server" >&2
+  echo "Agent Monitor Nginx could not resolve an OCI DNS server" >&2
   exit 1
 fi
 

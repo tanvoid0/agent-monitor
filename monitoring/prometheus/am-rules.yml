@@ -1,4 +1,4 @@
-# Recording rules derived from live AgentMonitor scrapes — no synthetic data.
+# Recording rules derived from live Agent Monitor scrapes — no synthetic data.
 # Pre-aggregates common queries so Prometheus Graph/Explore autocomplete
 # surfaces useful series immediately after the am target comes up.
 groups:

@@ -1,7 +1,7 @@
 ---
 name: run-history
 description: >
-  Inspect AgentMonitor dashboard-run history and relate live run handles to persisted
+  Inspect Agent Monitor dashboard-run history and relate live run handles to persisted
   Claude Code or Codex sessions. Use when finding a prior launched task,
   checking whether a run is still attached, reviewing start/end status, or
   deciding whether to resume, view, or relaunch work.

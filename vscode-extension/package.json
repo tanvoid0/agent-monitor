@@ -1,6 +1,6 @@
 {
   "name": "agentmonitor",
-  "displayName": "AgentMonitor",
+  "displayName": "Agent Monitor",
   "description": "Professional integrated dashboard for monitoring Claude Code AI agent activity, token usage, and costs directly in VS Code.",
   "version": "1.2.4",
   "publisher": "hoangsonw",
@@ -31,7 +31,7 @@
     "commands": [
       {
         "command": "agentmonitor.openDashboard",
-        "title": "Open AgentMonitor",
+        "title": "Open Agent Monitor",
         "category": "Claude Code",
         "icon": "$(dashboard)"
       },
@@ -58,7 +58,7 @@
       "activitybar": [
         {
           "id": "claude-code-monitor",
-          "title": "AgentMonitor",
+          "title": "Agent Monitor",
           "icon": "icon.svg"
         }
       ]

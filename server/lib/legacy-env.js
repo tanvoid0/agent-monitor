@@ -1,6 +1,6 @@
 /**
  * @file Mirrors legacy `CCAM_*` environment variables onto their `AM_*`
- * successors so hook installs and deployments written before the AgentMonitor
+ * successors so hook installs and deployments written before the Agent Monitor
  * rebrand keep working. A value already set under the new name always wins.
  * @author Tanveer Hoque <tanvoid0@gmail.com>
  */

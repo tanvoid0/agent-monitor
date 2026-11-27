@@ -98,7 +98,7 @@ Un panel profesional para rastrear y visualizar sus sesiones de agente Claude Co
 - [Señales de sonido](#señales-de-sonido)
 - [Modal de estado de conexión](#modal-de-estado-de-conexión)
 - [Extensión de VS Code](#extensión-de-vs-code)
-- [Aplicación para escritorio (macOS y Windows)](#aplicación-de-escritorio-macos-y-windows)
+- [Aplicación para escritorio (macOS, Windows y Linux)](#aplicación-de-escritorio-macos-windows-y-linux)
 - [Almacenamiento de datos](#almacenamiento-de-datos)
 - [Línea de estado](#línea-de-estado)
 - [Arquitectura del servidor](#arquitectura-del-servidor)
@@ -307,7 +307,7 @@ La barra lateral proporciona acceso rápido a las once páginas: el Panel de con
 
 El panel de control ofrece un conjunto completo de funciones para monitorear y analizar sus sesiones y agentes de Claude Code:
 
-> **Sesiones del cursor también (informativas):** AgentMonitor ingiere cualquier transcripción del agente que caiga bajo `~/.claude` - en esta máquina y en los remotos sincronizados. El uso del **Cursor** se cuenta de la misma manera: el **Cursor** por casualidad almacena sus sesiones del agente en esos archivos junto con el Código Claude. AgentMonitor no distingue qué aplicación escribió un archivo.
+> **Sesiones del cursor también (informativas):** Agent Monitor ingiere cualquier transcripción del agente que caiga bajo `~/.claude` - en esta máquina y en los remotos sincronizados. El uso del **Cursor** se cuenta de la misma manera: el **Cursor** por casualidad almacena sus sesiones del agente en esos archivos junto con el Código Claude. Agent Monitor no distingue qué aplicación escribió un archivo.
 
 | Característica                            | Descripción                                                                                                                                                                                                                                                                  |
 |------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -322,7 +322,7 @@ El panel de control ofrece un conjunto completo de funciones para monitorear y a
 | **Navegar por referencia**             | Cada sesión, agente, proyecto, herramienta, tipo de evento y modelo que muestra el panel es un **chip de entidad** (`components/entity/EntityRef.tsx`) que enlaza a su página de origen y lleva un **menú contextual de clic derecho / pulsación larga** — *Abrir sesión*, *Abrir agente*, *Abrir conversación*, *Mostrar en Actividad*, *Sesiones del proyecto*, *Mostrar en el tablero*, *Revelar carpeta*, *Copiar ID*, etc. — reflejado por un **botón ⋯** en cada fila y tarjeta (`components/ui/Clickable.tsx`) para los usuarios de ratón y el orden de tabulación. Los chips y menús se construyen a partir de una única tabla de href tipada (`client/src/lib/routes.ts`), así que cada página es direccionable por URL: `/activity?session_id=&agent_id=&tool_name=&event_type=&status=&q=&from=&to=` (listas separadas por comas), `/sessions?status=&cwd=&cwd=&q=` (`cwd` repetido), `/sessions/:id?tab=agents#agent-<id>`, `?tab=timeline&event=<id>`, `?tab=conversation&transcript=<id\|main>`, `?tool_name=` / `?agent_id=` (semillas de filtro de un solo uso), `/kanban?project=<cwd>[,<cwd>]&density=cards\|rows`, `/workflows?session=&run=`, `/plan/:slug?task=`, `/run?session=&cwd=`. Los destinos de los enlaces profundos se expanden, se desplazan a la vista, se resaltan con un anillo y reciben el foco. Las tarjetas y filas vienen en variantes `card` / `row`, y `Cmd/Ctrl`+clic o clic central en cualquiera de ellas abre una pestaña nueva. |
 | **Un solo atajo**             | `Cmd/Ctrl+K` es la única combinación que reclama el panel, y funciona incluso con el foco dentro de un campo. Una versión anterior incluía toda una capa de atajos —secuencias de navegación con prefijo `g`, teclas de página, una hoja de referencia `?`, una capa de pistas al mantener pulsado el modificador— y se eliminó a propósito: una secuencia es un modo oculto con temporizador, pulsar `g` parecía no hacer nada, y dos mecanismos de navegación dispersan la memoria muscular cuando la paleta ya llega a cada página con búsqueda difusa. Tabby conserva su histórico `Cmd/Ctrl+B` |
 | **Actualizaciones en vivo** | WebSocket push -- sin consultas, actualizaciones instantáneas de la interfaz de usuario                                                                                                                                                                                                                             |
-| **Auto-Descubrimiento** | Las sesiones y los agentes se crean automáticamente a partir de señales del proveedor. Claude Code crea una tarjeta **Esperando** inmediata en `SessionStart`. Codex muestra primero una tarjeta **Esperando** local y solo en memoria al iniciar su TUI interactiva, incluso antes de tener un ID estable. Después, un hook, una fila live-thread o un rollout crea la sesión duradera. Si el usuario selecciona un hilo existente en el selector Resume de Codex, AgentMonitor lee el rollout o writer lock abierto por ese PID exacto y cambia a la sesión duradera reanudada antes del primer mensaje nuevo. La tarjeta temporal nunca se escribe en SQLite, historial, analítica, precios, workflows, alertas ni notificaciones de finalización. |
+| **Auto-Descubrimiento** | Las sesiones y los agentes se crean automáticamente a partir de señales del proveedor. Claude Code crea una tarjeta **Esperando** inmediata en `SessionStart`. Codex muestra primero una tarjeta **Esperando** local y solo en memoria al iniciar su TUI interactiva, incluso antes de tener un ID estable. Después, un hook, una fila live-thread o un rollout crea la sesión duradera. Si el usuario selecciona un hilo existente en el selector Resume de Codex, Agent Monitor lee el rollout o writer lock abierto por ese PID exacto y cambia a la sesión duradera reanudada antes del primer mensaje nuevo. La tarjeta temporal nunca se escribe en SQLite, historial, analítica, precios, workflows, alertas ni notificaciones de finalización. |
 | **Importación de historial** | Importa sesiones de `~/.claude/` al iniciar la sesión. Extracción JSONL mejorada: errores de API (cuota/tarifa/solicitud_invalida), duraciones de turno, punto de entrada (cli/sdk-ts), modos de permiso, conteos de bloqueos de pensamiento, extras de uso (servicio_tier, velocidad, inferencia_geo), errores de resultados de herramientas y archivos JSONL de subagentes (`subagents/agent-*.jsonl` con `.meta.json`). Reabastece sesiones existentes al volver a importar. Los archivos JSONL recientes (< 10 min) se importan como "activos" |
 | **Hierarquía de subagentes** | Árbol de agentes padre-hijo colapsible en el Panel de control y en los Detalles de la sesión. Los agentes con subagentes muestran flechas de expansión/colapso; los agentes hojas muestran un indicador de punto. Se expande automáticamente cuando los subagentes están activos                                                                           |
 | **Agentes de fondo** | Rastrea correctamente a los subagentes con antecedentes sin completar prematuramente                                                                                                                                                                                                         |
@@ -355,7 +355,7 @@ El panel de control ofrece un conjunto completo de funciones para monitorear y a
 | **Tabby**                          | Un compañero de gato flotante atado en la esquina inferior derecha de cada página. Construido enteramente sobre el existente WebSocket `eventBus` — **sin nuevo backend, sin clave API, sin nuevas dependencias**. Una mascota SVG reactiva con ojos que rastrean el cursor y **ocho estados de ánimo** derivados del flujo de la sesión en vivo (`idle`, `watching`, `happy`, `worried`, `stuck`, `thinking`, `sleeping`, `disconnected`), cada uno con su propia animación (golpe de cola, levantamiento de orejas, movimiento de cabeza, sacudida, brillo, zzz, alerta "!"). **Bolas de diálogo automáticas** publican chistes cortos, moderados y coalescidos sobre eventos notables (sesión iniciada/terminada, errores, ejecución completada) y se pueden silenciar. Haz clic en el gato o presiona **⌘B / Ctrl+B** (Esc cierra) para abrir un **panel** con una línea de estado en vivo (`N en vivo · M con errores · estado de conexión`), tres **fichas de estado** pulsables (Activas / En espera / Con error — cada una salta al filtro `/sessions?status=` correspondiente; una ficha con cuenta 0 queda inerte), acciones rápidas (salta a Ejecutar Claude / Actividad / Sesiones / sesiones con errores, silenciar burbujas, eliminar alertas) y una casilla de **Pregunta**: las preguntas de estado simples ("¿qué está ejecutando?", "algunos errores", "estado") se responden localmente a partir de datos caché, mientras que cualquier otra pregunta se envía a la página de **Ejecutar Claude** (enlaces profundos a `/run?prompt=…`) para iniciar una sesión de Claude Code real. Accesible (operable con teclado, burbujas `aria-live`, respeta `prefers-reduced-motion`), degrada de forma segura a un estado tranquilo de `desconectado` si la conexión está rota, puede activarse o desactivarse en **Configuración** (localizado en en/zh/vi/ko/es). La implementación vive en `client/src/components/Tabby/` |
 | **Señales de sonido**              | Retroalimentación de audio discreta para la actividad en vivo, **activada por defecto** y totalmente desactivable. Cada señal se **sintetiza en el navegador con la Web Audio API** — osciladores más envolventes de ganancia — así que **no hay archivos de audio que descargar ni nuevas dependencias**. Siete señales cubren el ciclo de vida de la sesión: una quinta ascendente cuando una sesión empieza, un arpegio mayor que resuelve cuando termina de responder, una tercera menor descendente suave en los errores, un pulso corto al generarse un subagente, una campana desafinada para las notificaciones de Claude Code, dos notas de subida/bajada cuando la conexión en vivo vuelve o se cae, y un tic apenas audible al pulsar botones y enlaces. Las señales están **limitadas en frecuencia** (enfriamiento por señal más un presupuesto global de ráfaga), pasan por un filtro paso bajo para quedarse detrás de tu trabajo y permanecen en silencio hasta tu primera interacción con la página (política de autoreproducción del navegador). **Configuración → Sonido** ofrece un interruptor maestro, un control de volumen y un interruptor por señal con vistas previas instantáneas; las preferencias se guardan en `localStorage` bajo `agent-monitor-sound` (localizado en en/zh/vi/ko/es). La implementación vive en `client/src/lib/sound.ts` y `client/src/hooks/useSoundCues.ts` |
 | **Aplicación web progresiva (PWA)** | Tres PWAs independientes: panel de control, página de destino y wiki, cada una con su propio manifiesto de aplicación web y trabajador de servicios. Instala cualquiera de ellos en tu pantalla de inicio / dock para una experiencia independiente, sin Chrome. El SW del panel de control sirve los paquetes de contenido hashados de Vite bajo `/assets/` primero en la caché (los URL son inmutables por compilación, por lo que los accesos a la caché siempre son correctos) y trata todo lo demás, como las navegaciones, el SW en sí, `manifest.json`, los iconos, la raíz `/`, como primero en la red con fallback de caché. Combinado con encabezados explícitos de `Cache-Control` en el middleware estático de producción Express (`immutable` para `/assets/*`, `no-cache, must-revalidate` para `index.html`, `sw.js`, `manifest.json`), una reconstrucción siempre reemplaza el paquete en el navegador sin una actualización forzosa; un oyente de `controllerchange` en el cliente se carga exactamente una vez cuando un nuevo SW toma el control de una página ya controlada. El canal de notificaciones push de VAPID se conserva. La página de inicio y los SW wiki precargan sus respectivas cáscaras y imágenes de caché lento en la primera visita, lo que permite el acceso sin conexión después de una sola carga. Todas las manifestaciones utilizan iconos SVG (`favicon.svg`) con `sizes="any"` para navegadores modernos, e incluyen etiquetas meta `apple-mobile-web-app-capable` + `apple-touch-icon` para el modo independiente de iOS |
-| **Aplicación de escritorio (macOS y Windows)** | Aplicación de escritorio nativa opcional construida con Electron 35, que vive en el espacio de trabajo `desktop/` junto con `client/`, `server/`, `mcp/` y `vscode-extension/`. Se envía como un `.app` (`.dmg`) de macOS **y** un `.exe` (instalador NSIS + portátil sin instalación) de Windows. Incorpora el servidor Express existente **en proceso** (`require()`s `server/index.js` - sin proceso hijo, sin IPC) y renderiza el cliente React construido en una `BrowserWindow`. Añade una barra de título nativa, un icono de barra de menú / área de notificaciones ( bandeja ) cuya lista desplegable de un solo clic muestra una **captura de estado en vivo** (sesiones, agentes, eventos de hoy) extraída de SQLite en el momento del clic, un menú de aplicación nativo, inicio automático al iniciar sesión (elementos de inicio de sesión de macOS a través de `SMAppService`; Windows `HKCU\…\Run` por usuario), un **dialog de confirmación ⌘Q / Ctrl+Q** (segundo clic por defecto), cierre de ventana que oculta pero mantiene el servidor en ejecución, bloqueo de una sola instancia y acciones de bandeja para **Abrir en el navegador**, **Reiniciar el servidor** y **Mostrar registros**. Prefiere el puerto 4820 (se vuelve al puerto 4821-4829 y luego a un puerto alto aleatorio), adopta un panel de control saludable que ya está funcionando en 4820 en lugar de doble vinculación, y **coexiste con el panel de control web**: tanto `npm run dev` como la aplicación de escritorio pueden ejecutarse juntas con ganchos que se extienden a ambas. Las notificaciones se envían cuando el sistema operativo nativo tosta (Web Push no funciona de forma fiable dentro de Electron). En el primer arranque del servidor, se instalan automáticamente los ganchos de Claude Code y se inician los servicios de fondo, por lo que un usuario que solo instale recibe eventos sin necesidad de configuración manual. Ver [`DESKTOP.md`](./DESKTOP.md) y [`desktop/README.md`](./desktop/README.md) |
+| **Aplicación de escritorio (macOS, Windows y Linux)** | Aplicación de escritorio nativa opcional construida con Electron 35, que vive en el espacio de trabajo `desktop/` junto con `client/`, `server/`, `mcp/` y `vscode-extension/`. Se envía como un `.app` (`.dmg`) de macOS, un `.exe` (instalador NSIS + portátil sin instalación) de Windows **y** paquetes de Linux (AppImage x64 + `.deb`). Incorpora el servidor Express existente **en proceso** (`require()`s `server/index.js` - sin proceso hijo, sin IPC) y renderiza el cliente React construido en una `BrowserWindow`. Añade una barra de título nativa, un icono de barra de menú / área de notificaciones ( bandeja ) cuya lista desplegable de un solo clic muestra una **captura de estado en vivo** (sesiones, agentes, eventos de hoy) extraída de SQLite en el momento del clic, un menú de aplicación nativo, inicio automático al iniciar sesión (elementos de inicio de sesión de macOS a través de `SMAppService`; Windows `HKCU\…\Run` por usuario; sin efecto en Linux), un **dialog de confirmación ⌘Q / Ctrl+Q** (segundo clic por defecto), cierre de ventana que oculta pero mantiene el servidor en ejecución, bloqueo de una sola instancia y acciones de bandeja para **Abrir en el navegador**, **Reiniciar el servidor** y **Mostrar registros**. Prefiere el puerto 4820 (se vuelve al puerto 4821-4829 y luego a un puerto alto aleatorio), adopta un panel de control saludable que ya está funcionando en 4820 en lugar de doble vinculación, y **coexiste con el panel de control web**: tanto `npm run dev` como la aplicación de escritorio pueden ejecutarse juntas con ganchos que se extienden a ambas. Las notificaciones se envían cuando el sistema operativo nativo tosta (Web Push no funciona de forma fiable dentro de Electron). En el primer arranque del servidor, se instalan automáticamente los ganchos de Claude Code y se inician los servicios de fondo, por lo que un usuario que solo instale recibe eventos sin necesidad de configuración manual. Ver [`DESKTOP.md`](./DESKTOP.md) y [`desktop/README.md`](./desktop/README.md) |
 | **Activos alojados por el propio usuario (sin CDN)** | Cada fuente y script se sirve localmente, por lo que el panel de control y los documentos realizan **cero solicitudes de CDN de terceros**: se renderizan completamente sin conexión y no filtran nada a los hosts externos. La aplicación React empaqueta Inter + JetBrains Mono a través de [`@fontsource`](https://fontsource.org/) (subconjunto latino; Vite emite WOFF2 con contenido hashed en `dist/assets/` en el momento de la compilación, sin `<link>` a Google Fonts). La página de inicio y el wiki cargan una hoja `@font-face` `fonts/fonts.css` alojada por el propio usuario desde el directorio `fonts/` de la raíz del repositorio. La Mermaid del wiki se vende localmente como `wiki/mermaid.min.js` (la auténtica `mermaid@10.9.6` minificada) en lugar de jsDelivr, y la página de error de la extensión de VS Code recurre a una pila de fuentes del sistema. No quedan llamadas a `fonts.googleapis.com`, `fonts.gstatic.com` o `cdn.jsdelivr.net` en ningún lugar |
 | **Pantalla de inicio de sesión** | Un breve mensaje de marca al cargar la aplicación (una vez por sesión de navegador): un **saludo con tiempo** (Buenos días / tarde / noche / Trabajando tarde), un lema llamativo, dos subtítulos y una marca de marca gráfica de nodo animada sobre un fondo atmosférico oscuro (luz radial + constelación flotante + grano). Totalmente localizado (en/zh/vi/ko/es). La superposición es **opaca desde el primer pincelazo**, por lo que la aplicación nunca parpadea, permanece unos 2,5 segundos y luego se desvanece; haga clic en cualquier lugar para saltar y respeta `prefers-reduced-motion`. Animaciones solo CSS, sin dependencias adicionales |
 
@@ -444,14 +444,15 @@ npm run seed
 
 Crea 8 sesiones de muestra, 23 agentes y 106 eventos para que puedas explorar la interfaz de usuario inmediatamente.
 
-### Alternativa: Aplicación para escritorio (macOS y Windows)
+### Alternativa: Aplicación para escritorio (macOS, Windows y Linux)
 
-Si prefieres no mantener un terminal abierto, instala la aplicación de escritorio **opcional nativa**. Incorpora el servidor en el proceso, agrega un icono de barra de menú / área de notificaciones ( bandeja) y admite el inicio automático al iniciar sesión (elementos de inicio de sesión de macOS / inicio de sesión de Windows).
+Si prefieres no mantener un terminal abierto, instala la aplicación de escritorio **opcional nativa**. Incorpora el servidor en el proceso, agrega un icono de barra de menú / área de notificaciones ( bandeja) y admite el inicio automático al iniciar sesión (elementos de inicio de sesión de macOS / inicio de sesión de Windows; sin efecto en Linux).
 
 El camino más rápido es **descargar un instalador precompilado** desde la [última versión de GitHub](https://github.com/tanvoid0/agent-monitor/releases/latest) (CI publica automáticamente una `vX.Y.Z` cada vez que `package.json` se actualiza en `main`):
 
-- **macOS** — agarra `AgentMonitor-<version>-arm64.dmg` (Apple Silicon) o `-x64.dmg` (Intel) y arrastra **AgentMonitor.app** a `/Applications`.
+- **macOS** — agarra `AgentMonitor-<version>-arm64.dmg` (Apple Silicon) o `-x64.dmg` (Intel) y arrastra **Agent Monitor.app** a `/Applications`.
 - **Windows** — obtenga `AgentMonitor-Setup-<version>-x64.exe` (instalador) o `AgentMonitor-<version>-x64-portable.exe` (sin instalar) y ejecútelo.
+- **Linux** — obtenga `AgentMonitor-<version>-x86_64.AppImage` (`chmod +x` y ejecútelo) o `AgentMonitor-<version>-amd64.deb` (`sudo apt install ./AgentMonitor-<version>-amd64.deb`).
 
 Para construirlos tú mismo en su lugar:
 
@@ -459,9 +460,10 @@ Para construirlos tú mismo en su lugar:
 npm run desktop:install        # install Electron + electron-builder into desktop/ (preflights native deps; prints setup help on failure)
 npm run desktop:dmg:arm64      # macOS: fast single-arch DMG (Apple Silicon)
 npm run desktop:win            # Windows: NSIS installer .exe (run on Windows)
+npm run desktop:linux          # Linux: x64 AppImage + .deb (run on Linux)
 ```
 
-La cobertura completa de la aplicación de escritorio, incluida la descarga, la instalación, las funciones de bandeja/menú, los comandos de construcción y la firma, se encuentra en la sección [Aplicación de escritorio (macOS y Windows)](#aplicación-de-escritorio-macos-y-windows) a continuación. Consulte también [`DESKTOP.md`](./DESKTOP.md) (guía del usuario) y [`desktop/README.md`](./desktop/README.md) (arquitectura).
+La cobertura completa de la aplicación de escritorio, incluida la descarga, la instalación, las funciones de bandeja/menú, los comandos de construcción y la firma, se encuentra en la sección [Aplicación de escritorio (macOS, Windows y Linux)](#aplicación-de-escritorio-macos-windows-y-linux) a continuación. Consulte también [`DESKTOP.md`](./DESKTOP.md) (guía del usuario) y [`desktop/README.md`](./desktop/README.md) (arquitectura).
 
 ### Alternativa: Docker / Podman
 
@@ -665,7 +667,7 @@ Para los clones de git, el servidor `git fetch` periódicamente `origin` y compa
 
 ## CLI `am`
 
-> **¿Actualizas desde v2.x (CCAM)?** El proyecto pasó a llamarse **AgentMonitor** en v3.0.0. `ccam` sigue funcionando como alias de `am`; las variables de entorno `CCAM_*` heredadas se copian a sus sucesoras `AM_*` al arrancar (el valor definido con el nombre nuevo tiene prioridad); el registro del servidor en vivo pasó de `~/.claude/.agent-dashboard.json` a `~/.claude/.agentmonitor.json` (se reescribe en el siguiente arranque); y el marketplace/ID de plugins cambió de `ccam-*@claude-code-agent-monitor-plugins` a `am-*@agentmonitor-plugins`, así que reinstala los plugins que uses.
+> **¿Actualizas desde v2.x (CCAM)?** El proyecto pasó a llamarse **Agent Monitor** en v3.0.0. `ccam` sigue funcionando como alias de `am`; las variables de entorno `CCAM_*` heredadas se copian a sus sucesoras `AM_*` al arrancar (el valor definido con el nombre nuevo tiene prioridad); el registro del servidor en vivo pasó de `~/.claude/.agent-dashboard.json` a `~/.claude/.agentmonitor.json` (se reescribe en el siguiente arranque); y el marketplace/ID de plugins cambió de `ccam-*@claude-code-agent-monitor-plugins` a `am-*@agentmonitor-plugins`, así que reinstala los plugins que uses.
 
 La superficie completa de funciones del panel de control también está disponible desde cualquier terminal a través de la CLI **`am`** sin dependencias (`bin/am.js`). Se vincula automáticamente por `npm run setup` (a través de `npm link`), después de lo cual `am <command>` funciona desde cualquier directorio. Descubre el panel de control en ejecución a través de `~/.claude/.agentmonitor.json` (el mismo registro de servidor en vivo que utiliza el gestor de ganchos), con las sobrepasadas de las variables de entorno `CLAUDE_DASHBOARD_PORT` / `DASHBOARD_PORT`, cayendo en `http://127.0.0.1:4820`.
 
@@ -727,7 +729,7 @@ am open                         # open the dashboard in your browser
 am version                      # print the CLI version (also --version / -v)
 ```
 
-Los comandos respaldados por API necesitan que el servidor esté en ejecución, cuando no lo está, **los comandos de solo lectura recurren a la lectura directa de `data/dashboard.db`** (con un banner explícito de `⚠ Modo sin conexión`, y las sesiones `activas` almacenadas pero inactivas corregidas por el mismo proceso de detección de actividad que utiliza el rastreador del servidor), mientras que los comandos que no pueden ejecutarse correctamente sin el servidor (`tail` en vivo, análisis/matemáticas de costos, mutaciones) imprimen el indicador `○ El servidor del panel de control NO está en ejecución` con la razón específica y los comandos de inicio; `am start` inicia un servidor de producción en segundo plano. Los comandos de lectura siempre son seguros; el único comando destructivo (`clear-data`) se niega a ejecutarse sin un explícito `--yes`. La salida es una interfaz de usuario completa del terminal: tablas dibujadas en cuadrados con columnas numéricas alineadas a la derecha, iconos de estado (`● activo`, `○ esperando`, `✔ completado`, `✖ error`), gráficos de barras en línea para estadísticas/análisis/costes y árboles de agentes reales `├─`/`└─`: con los colores ANSI habilitados automáticamente en un TTY, desactivados cuando se canalizan y controlables a través de `--no-color` / `NO_COLOR` / `FORCE_COLOR`. Para una sesión de monitoreo en vivo, **`am repl`** (alias `shell` / `i`) abre un shell interactivo donde escribes comandos sin el prefijo `am` — con un banner de bienvenida AgentMonitor, completado de pestañas, historial persistente de teclas de flecha, una solicitud de estado del servidor en vivo (`● host` arriba / `○ offline` abajo), un menú `help` / `help <cmd>` agrupado y un `watch [secs] <cmd>` incorporado que actualiza automáticamente cualquier comando (por ejemplo, `watch 5 kanban`); cada línea se ejecuta como un proceso hijo aislado, por lo que una negativa fuera de línea o un `tail` bloqueante nunca derriba el shell. Si `am` no está en tu PATH (por ejemplo, Se necesitan permisos elevados para `npm link`, ejecute `npm link` una vez desde la raíz del repositorio. Referencia completa: banderas, orden de descubrimiento, el REPL, modelo de seguridad, scripts/códigos de salida, resolución de problemas, en [docs/CLI.md](./docs/CLI.md).
+Los comandos respaldados por API necesitan que el servidor esté en ejecución, cuando no lo está, **los comandos de solo lectura recurren a la lectura directa de `data/dashboard.db`** (con un banner explícito de `⚠ Modo sin conexión`, y las sesiones `activas` almacenadas pero inactivas corregidas por el mismo proceso de detección de actividad que utiliza el rastreador del servidor), mientras que los comandos que no pueden ejecutarse correctamente sin el servidor (`tail` en vivo, análisis/matemáticas de costos, mutaciones) imprimen el indicador `○ El servidor del panel de control NO está en ejecución` con la razón específica y los comandos de inicio; `am start` inicia un servidor de producción en segundo plano. Los comandos de lectura siempre son seguros; el único comando destructivo (`clear-data`) se niega a ejecutarse sin un explícito `--yes`. La salida es una interfaz de usuario completa del terminal: tablas dibujadas en cuadrados con columnas numéricas alineadas a la derecha, iconos de estado (`● activo`, `○ esperando`, `✔ completado`, `✖ error`), gráficos de barras en línea para estadísticas/análisis/costes y árboles de agentes reales `├─`/`└─`: con los colores ANSI habilitados automáticamente en un TTY, desactivados cuando se canalizan y controlables a través de `--no-color` / `NO_COLOR` / `FORCE_COLOR`. Para una sesión de monitoreo en vivo, **`am repl`** (alias `shell` / `i`) abre un shell interactivo donde escribes comandos sin el prefijo `am` — con un banner de bienvenida Agent Monitor, completado de pestañas, historial persistente de teclas de flecha, una solicitud de estado del servidor en vivo (`● host` arriba / `○ offline` abajo), un menú `help` / `help <cmd>` agrupado y un `watch [secs] <cmd>` incorporado que actualiza automáticamente cualquier comando (por ejemplo, `watch 5 kanban`); cada línea se ejecuta como un proceso hijo aislado, por lo que una negativa fuera de línea o un `tail` bloqueante nunca derriba el shell. Si `am` no está en tu PATH (por ejemplo, Se necesitan permisos elevados para `npm link`, ejecute `npm link` una vez desde la raíz del repositorio. Referencia completa: banderas, orden de descubrimiento, el REPL, modelo de seguridad, scripts/códigos de salida, resolución de problemas, en [docs/CLI.md](./docs/CLI.md).
 
 ## Scripts npm
 
@@ -772,6 +774,7 @@ Los comandos respaldados por API necesitan que el servidor esté en ejecución, 
 | `npm run desktop:dmg:universal` | Construye un DMG **universal** fusionado (arm64 + x86_64) - opcional, **más lento**, no es lo que se envía con la versión |
 | `npm run desktop:win` | Construir un instalador **NSIS** para Windows `.exe` (x64) — ejecutar en Windows |
 | `npm run desktop:win:portable` | Construir un **portátil** de Windows (sin instalar) `.exe` (x64) — ejecutar en Windows |
+| `npm run desktop:linux` | Construir el **AppImage** + **.deb** de Linux (x64) — ejecutar en Linux |
 | `npm run monitoring:install` | Ejecuta `npm install` en `monitoring/` — descarga Prometheus + Grafana a través de `postinstall` |
 | `npm run monitoring:setup` | Alias para `monitoring:install` |
 | `npm run monitoring:up` | Iniciar Prometheus (:9090) + Grafana (:3000) en segundo plano (sin Docker) |
@@ -995,7 +998,7 @@ Detalles completos: [mcp/README.md](./mcp/README.md)
 
 ## Capa de planificación
 
-La capa de planificación une el `PROGRESS.md` de un proyecto (hitos → pasos → carriles → casillas) con las propias sesiones, agentes y eventos de AgentMonitor para el `cwd` de ese proyecto, de modo que cada casilla del tablero muestra el agente que la está trabajando en vivo, qué ejecutó, qué falló y cuánto costó — calculado bajo demanda a partir de datos que AgentMonitor ya estaba recopilando, sin necesidad de mantener sincronizado un rastreador aparte. El descubrimiento es automático: cualquier proyecto con un `PROGRESS.md` bajo un `cwd` en el que AgentMonitor haya visto una sesión en los últimos 7 días se detecta y se vigila en busca de cambios, sin ningún paso de registro.
+La capa de planificación une el `PROGRESS.md` de un proyecto (hitos → pasos → carriles → casillas) con las propias sesiones, agentes y eventos de Agent Monitor para el `cwd` de ese proyecto, de modo que cada casilla del tablero muestra el agente que la está trabajando en vivo, qué ejecutó, qué falló y cuánto costó — calculado bajo demanda a partir de datos que Agent Monitor ya estaba recopilando, sin necesidad de mantener sincronizado un rastreador aparte. El descubrimiento es automático: cualquier proyecto con un `PROGRESS.md` bajo un `cwd` en el que Agent Monitor haya visto una sesión en los últimos 7 días se detecta y se vigila en busca de cambios, sin ningún paso de registro.
 
 <p align="center">
   <img src="images/plan.png" alt="Capa de planificación — tablero de construcción" width="100%">
@@ -1062,7 +1065,7 @@ npm run openapi:yaml
 
 ### Métricas de Prometheus y Grafana
 
-`GET /api/metrics` expone los contadores en vivo del panel de control: sesiones/agentes por estado, totales de eventos y tokens, clientes conectados en tiempo real, fuentes remotas configuradas, tiempo de actividad del proceso/memoria y versión de la compilación, en el formato de exposición de texto de Prometheus, para que AgentMonitor pueda ser raspado en su propia pila de observabilidad. Una pila Prometheus + Grafana lista para usar con **cuatro paneles de control auto-provisionados** (página de inicio predeterminada: **AgentMonitor - Visión general**) se encuentra en [`monitoring/`](./monitoring/README.md).
+`GET /api/metrics` expone los contadores en vivo del panel de control: sesiones/agentes por estado, totales de eventos y tokens, clientes conectados en tiempo real, fuentes remotas configuradas, tiempo de actividad del proceso/memoria y versión de la compilación, en el formato de exposición de texto de Prometheus, para que Agent Monitor pueda ser raspado en su propia pila de observabilidad. Una pila Prometheus + Grafana lista para usar con **cuatro paneles de control auto-provisionados** (página de inicio predeterminada: **Agent Monitor - Visión general**) se encuentra en [`monitoring/`](./monitoring/README.md).
 
 **npm (sin Docker - macOS, Linux o Windows):**
 
@@ -1088,21 +1091,21 @@ npm run monitoring:verify
 ```
 
 <p align="center">
-<img src="images/grafana.png" alt="Grafana AgentMonitor — Panel de control general con sesión en vivo, métricas de eventos y tokens" width="100%">
+<img src="images/grafana.png" alt="Grafana Agent Monitor — Panel de control general con sesión en vivo, métricas de eventos y tokens" width="100%">
 <br>
-<em>📊 <strong>Grafana · AgentMonitor — Descripción general</strong> — panel de control principal predeterminado (cuatro tableros provistos automáticamente): instantánea de la flota, totales de la base de datos, gráficos de desglose y tarifas — todo desde raspados en vivo de <code>/api/metrics</code></em>
+<em>📊 <strong>Grafana · Agent Monitor — Descripción general</strong> — panel de control principal predeterminado (cuatro tableros provistos automáticamente): instantánea de la flota, totales de la base de datos, gráficos de desglose y tarifas — todo desde raspados en vivo de <code>/api/metrics</code></em>
 </p>
 
 <p align="center">
-<img src="images/prometheus-console.png" alt="Consola Prometheus AgentMonitor con tarjetas métricas y tablas de sesiones" width="100%">
+<img src="images/prometheus-console.png" alt="Consola Prometheus Agent Monitor con tarjetas métricas y tablas de sesiones" width="100%">
 <br>
-<em>🔥 <strong>Prometheus · Consola AgentMonitor</strong> — página de inicio preconstruida en <code>/consoles/index.html</code> que consulta directamente a Prometheus para obtener la salud de la escraping, los totales de sesiones, los eventos, los tokens y los enlaces de gráfico para profundizar</em>
+<em>🔥 <strong>Prometheus · Consola Agent Monitor</strong> — página de inicio preconstruida en <code>/consoles/index.html</code> que consulta directamente a Prometheus para obtener la salud de la escraping, los totales de sesiones, los eventos, los tokens y los enlaces de gráfico para profundizar</em>
 </p>
 
 <p align="center">
-<img src="images/prometheus-query.png" alt="Interfaz de usuario gráfica de Prometheus con consulta AgentMonitor PromQL" width="100%">
+<img src="images/prometheus-query.png" alt="Interfaz de usuario gráfica de Prometheus con consulta Agent Monitor PromQL" width="100%">
 <br>
-<em>📈 <strong>Prometheus · Gráfico</strong> — ejecute PromQL contra métricas AgentMonitor raspadas (por ejemplo, <code>sum(am_sessions)</code>, <code>am_events_total</code>, <code>rate(am_tokens_total[5m])</code>) con enlaces de inicio desde la consola AgentMonitor y <a href="./monitoring/README.md">monitoring/README.md</a></em>
+<em>📈 <strong>Prometheus · Gráfico</strong> — ejecute PromQL contra métricas Agent Monitor raspadas (por ejemplo, <code>sum(am_sessions)</code>, <code>am_events_total</code>, <code>rate(am_tokens_total[5m])</code>) con enlaces de inicio desde la consola Agent Monitor y <a href="./monitoring/README.md">monitoring/README.md</a></em>
 </p>
 
 Consulte [docs/API.md → Metricas](./docs/API.md#metrics) para obtener la lista completa de métricas y los detalles de scraping/autenticación.
@@ -1710,22 +1713,22 @@ El **Monitor de Agentes del Código Claude** está disponible como una extensió
 Para la configuración detallada del desarrollador, consulte los directorios [.vscode](./.vscode) y [vscode-extension](./vscode-extension).
 
 > [¡CONSEJO!]
-> Extensión en el mercado de VS Code: [AgentMonitor](https://marketplace.visualstudio.com/items?itemName=hoangsonw.agentmonitor)
+> Extensión en el mercado de VS Code: [Agent Monitor](https://marketplace.visualstudio.com/items?itemName=hoangsonw.agentmonitor)
 
 ---
 
-## Aplicación de escritorio (macOS y Windows)
+## Aplicación de escritorio (macOS, Windows y Linux)
 
-El panel de control también se envía como una **aplicación de escritorio nativa opcional** que instales una vez y olvidas - un `.app` de macOS (distribuido como un `.dmg`) y un `.exe` de Windows (un instalador NSIS más una construcción portátil sin instalación). Vive en el espacio de trabajo `desktop/`, un hermano de `client/`, `server/`, `mcp/` y `vscode-extension/`, y está construido con **Electron 35**.
+El panel de control también se envía como una **aplicación de escritorio nativa opcional** que instales una vez y olvidas - un `.app` de macOS (distribuido como un `.dmg`) un `.exe` de Windows (un instalador NSIS más una construcción portátil sin instalación) y paquetes de Linux (un `.AppImage` x64 más un `.deb`). Vive en el espacio de trabajo `desktop/`, un hermano de `client/`, `server/`, `mcp/` y `vscode-extension/`, y está construido con **Electron 35**.
 
 <p align="center">
-<img src="images/macos.png" alt="AgentMonitor ejecutándose como una aplicación de escritorio nativa" width="100%">
+<img src="images/macos.png" alt="Agent Monitor ejecutándose como una aplicación de escritorio nativa" width="100%">
 <br>
 <em>🍎🪟 <strong>Aplicación para escritorio</strong> — shell nativo con una barra de menú / icono de área de notificaciones ( bandeja), Abre al iniciar sesión y un bloqueo de instancia única. El mismo panel de control, en una ventana real del sistema operativo (macOS mostrado).</em>
 </p>
 
 <p align="center">
-<img src="images/windows_app.png" alt="AgentMonitor ejecutándose como una aplicación de escritorio nativa de Windows, mostrando el Feed de Actividad con la barra de menú de la ventana de Windows y el panel Tabby" width="100%">
+<img src="images/windows_app.png" alt="Agent Monitor ejecutándose como una aplicación de escritorio nativa de Windows, mostrando el Feed de Actividad con la barra de menú de la ventana de Windows y el panel Tabby" width="100%">
 <br>
 <em>🪟 El mismo panel de control que una aplicación nativa de Windows: icono de la zona de notificaciones ( bandeja), menú de ventana nativo y Abrir al iniciar sesión.</em>
 </p>
@@ -1738,7 +1741,7 @@ A diferencia de ejecutar el panel de control desde un terminal, la aplicación d
 
 ```mermaid
 flowchart LR
-    subgraph electron["AgentMonitor.app — one Electron process"]
+    subgraph electron["Agent Monitor.app — one Electron process"]
         main["Electron Main Process<br/>Node 22 / Electron 35"]
         host["server-host.ts<br/>port discovery · adoption · ABI patch"]
         express["server/index.js<br/>Express API · SQLite · WebSocket"]
@@ -1772,15 +1775,15 @@ Al iniciar la aplicación:
 
 ### Características
 
-- **Ícono de bandeja** — superficie de estado siempre activa (barra de menú de macOS / área de notificaciones de Windows). Haga clic con el botón izquierdo para alternar la ventana del panel de control; haga clic con el botón derecho para abrir un menú contextual con **Abrir panel de control**, **Abrir en el navegador**, **Reiniciar servidor**, **Mostrar registros**, **Abrir al iniciar sesión** (alternar) y **Salir**. macOS utiliza un glifo de plantilla con tono; Windows utiliza el icono `icon.ico` coloreado (una plantilla negra desaparecería en la barra de tareas oscura).
-- **Icono de ventana y barra de tareas**: el `BrowserWindow` está conectado al logotipo de la aplicación de color (`icon.ico` en Windows, `icon.png` en otro lugar), por lo que la barra de título / barra de tareas muestra el verdadero icono de AgentMonitor: incluso una ejecución de `npm run desktop:dev` sin descomprimir ya no muestra el icono genérico de Electron.
+- **Ícono de bandeja** — superficie de estado siempre activa (barra de menú de macOS / área de notificaciones de Windows / bandeja del sistema de Linux). Haga clic con el botón izquierdo para alternar la ventana del panel de control; haga clic con el botón derecho para abrir un menú contextual con **Abrir panel de control**, **Abrir en el navegador**, **Reiniciar servidor**, **Mostrar registros**, **Abrir al iniciar sesión** (alternar) y **Salir**. macOS utiliza un glifo de plantilla con tono; Windows utiliza el icono `icon.ico` coloreado y Linux el `icon.png` coloreado (una plantilla negra desaparecería en una barra de tareas oscura).
+- **Icono de ventana y barra de tareas**: el `BrowserWindow` está conectado al logotipo de la aplicación de color (`icon.ico` en Windows, `icon.png` en otro lugar), por lo que la barra de título / barra de tareas muestra el verdadero icono de Agent Monitor: incluso una ejecución de `npm run desktop:dev` sin descomprimir ya no muestra el icono genérico de Electron.
 - **Menú de aplicación nativo** — menú estándar de "Acerca de" / "Archivo" / "Editar" / "Ver" / "Ventana" / "Ayuda" con atajos de `⌘` / `Ctrl`. El elemento **Archivo → Abrir Panel de control** (`⌘1`) es **solo para macOS**: macOS mantiene una barra de menú global después de que la ventana se oculte, por lo que puede volver a abrir la ventana: en Windows/Linux el menú está adjunto a la ventana y no se puede ejecutar mientras está oculto, por lo que vuelva a abrir desde el menú **Abrir Panel de control** de la bandeja (que eleva la ventana de forma fiable incluso cuando está minimizada o detrás de otras ventanas).
-- **Inicio automático al iniciar sesión** — alterna **Abrir al iniciar sesión** desde la bandeja o el menú de la aplicación. En macOS se registra a través de la moderna API `SMAppService`, por lo que la entrada aparece en **Configuración del sistema → General → Elementos de inicio de sesión**; en Windows escribe una entrada `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` por usuario, visible en **Gestor de tareas → Inicio**.
+- **Inicio automático al iniciar sesión** — alterna **Abrir al iniciar sesión** desde la bandeja o el menú de la aplicación. En macOS se registra a través de la moderna API `SMAppService`, por lo que la entrada aparece en **Configuración del sistema → General → Elementos de inicio de sesión**; en Windows escribe una entrada `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` por usuario, visible en **Gestor de tareas → Inicio**; en Linux el interruptor no tiene efecto.
 - **El cierre de la ventana oculta, el servidor sigue funcionando**: cerrar la ventana solo la oculta; el servidor y la bandeja permanecen abiertos. Haga clic en la bandeja para volver a mostrar la ventana.
 - **Bloqueo de una sola instancia**: el doble lanzamiento simplemente centra la ventana existente; no hay segundo servidor, no hay colisión de puertos. (Se aplica en todas las plataformas).
-- **Los datos sobreviven a las reinstalaciones y actualizaciones**: la base de datos SQLite y las claves VAPID se encuentran en el directorio de datos de la aplicación por usuario **fuera del paquete de la aplicación / directorio de instalación**: `~/Biblioteca/Soporte de Aplicaciones/AgentMonitor/data/` en macOS, `%APPDATA%\AgentMonitor\data\` en Windows. Un paquete empaquetado es de solo lectura, por lo que escribir la base de datos dentro de él rompería la Importación de Historial y la persistencia de eventos; mantenerla en datos de la aplicación soluciona eso y significa que su historial importado no se ve afectado cuando reemplaza o actualiza la aplicación. (El desinstalador NSIS de Windows guarda estos datos por defecto).
+- **Los datos sobreviven a las reinstalaciones y actualizaciones**: la base de datos SQLite y las claves VAPID se encuentran en el directorio de datos de la aplicación por usuario **fuera del paquete de la aplicación / directorio de instalación**: `~/Biblioteca/Soporte de Aplicaciones/Agent Monitor/data/` en macOS, `%APPDATA%\Agent Monitor\data\` en Windows, `~/.config/Agent Monitor/data/` en Linux. Un paquete empaquetado es de solo lectura, por lo que escribir la base de datos dentro de él rompería la Importación de Historial y la persistencia de eventos; mantenerla en datos de la aplicación soluciona eso y significa que su historial importado no se ve afectado cuando reemplaza o actualiza la aplicación. (El desinstalador NSIS de Windows guarda estos datos por defecto).
 - **`claude` CLI en PATH** — en macOS la aplicación recupera su `PATH` de inicio de sesión en el arranque, por lo que la función **Ejecutar Claude** funciona incluso si una aplicación lanzada desde Finder/Dock de otro modo solo heredaría el `PATH` mínimo de launchd. (En Windows el `PATH` de usuario heredado ya lo incluye).
-- **Registros**: el proceso principal escribe en `~/Biblioteca/Registros/AgentMonitor/desktop.log` (macOS) o `%APPDATA%\AgentMonitor\logs\desktop.log` (Windows); accédalo desde el menú **Mostrar registros** del panel.
+- **Registros**: el proceso principal escribe en `~/Biblioteca/Registros/Agent Monitor/desktop.log` (macOS), `%APPDATA%\Agent Monitor\logs\desktop.log` (Windows) o `~/.config/Agent Monitor/logs/desktop.log` (Linux); accédalo desde el menú **Mostrar registros** del panel.
 
 ### Entiéndelo
 
@@ -1792,8 +1795,10 @@ Al iniciar la aplicación:
 | macOS (Intel) | `AgentMonitor-<ver>-x64.dmg` | arrastrar a `/Applications` |
 | Windows (instalador) | `AgentMonitor-Setup-<ver>-x64.exe` | instalación por usuario, sin administrador |
 | Windows (portátil) | `AgentMonitor-<ver>-x64-portable.exe` | ejecutar sin instalar |
+| Linux (AppImage) | `AgentMonitor-<ver>-x86_64.AppImage` | `chmod +x` y ejecutar |
+| Linux (deb) | `AgentMonitor-<ver>-amd64.deb` | `sudo apt install ./AgentMonitor-<ver>-amd64.deb` |
 
-Las construcciones frescas por compromiso también existen como artefactos CI (se requiere inicio de sesión, retención de 14 días): `AgentMonitor-dmg` del trabajo `🍎 macOS Desktop (DMG)` y `AgentMonitor-win` del trabajo `🪟 Windows Desktop (EXE)`, útiles para probar `main` antes de la próxima etiqueta de lanzamiento.
+Las construcciones frescas por compromiso también existen como artefactos CI (se requiere inicio de sesión, retención de 14 días): `AgentMonitor-dmg` del trabajo `🍎 macOS Desktop (DMG)`, `AgentMonitor-win` del trabajo `🪟 Windows Desktop (EXE)` y `AgentMonitor-linux` del trabajo `🐧 Linux Desktop (AppImage + deb)`, útiles para probar `main` antes de la próxima etiqueta de lanzamiento.
 
 **Opción B: construíselo tú mismo.** Desde la raíz del repositorio:
 
@@ -1803,21 +1808,22 @@ npm run build                # build the React client (client/dist)
 npm run desktop:install      # install Electron + electron-builder into desktop/ (preflights native deps; prints setup help on failure)
 npm run desktop:dmg:arm64    # macOS:   fast single-arch DMG → desktop/release/AgentMonitor-<ver>-arm64.dmg
 npm run desktop:win          # Windows: NSIS installer → desktop/release/AgentMonitor-Setup-<ver>-x64.exe
+npm run desktop:linux        # Linux:   x64 AppImage + .deb → desktop/release/AgentMonitor-<ver>-x86_64.AppImage, …-amd64.deb
 ```
 
 > [!NOTA]
-> **Los DMG se construyen en macOS; los `.exe` de Windows se construyen en Windows** — paquetes electron-builder para el sistema operativo de host. El paquete de construcción `npm run desktop:dmg` de macOS construye la aplicación **dos veces** (una vez por arquitectura) y emite **ambos** DMG por arquitectura (`arm64` + `x64`) — la construcción de lanzamiento; no los fusiona en un binario universal. Para su propio Mac, utilice el `desktop:dmg:arm64` / `desktop:dmg:x64` de arquitectura única. En Windows, `better-sqlite3` se obtiene como un binario Electron preconstruido por `npm run desktop:install`, por lo que no se necesita ninguna cadena de herramientas Visual Studio C++ en el caso común. Si la construcción falla (sin binario preconstruido o cadena de herramientas C++ faltante), `desktop:install` imprime la solución exacta por sistema operativo más una alternativa sin cadena de herramientas y falla ruidosamente en lugar de dejar una instalación rota.
+> **Los DMG se construyen en macOS; los `.exe` de Windows se construyen en Windows; el AppImage/`.deb` se construye en Linux** — paquetes electron-builder para el sistema operativo de host. El paquete de construcción `npm run desktop:dmg` de macOS construye la aplicación **dos veces** (una vez por arquitectura) y emite **ambos** DMG por arquitectura (`arm64` + `x64`) — la construcción de lanzamiento; no los fusiona en un binario universal. Para su propio Mac, utilice el `desktop:dmg:arm64` / `desktop:dmg:x64` de arquitectura única. En Windows, `better-sqlite3` se obtiene como un binario Electron preconstruido por `npm run desktop:install`, por lo que no se necesita ninguna cadena de herramientas Visual Studio C++ en el caso común. Si la construcción falla (sin binario preconstruido o cadena de herramientas C++ faltante), `desktop:install` imprime la solución exacta por sistema operativo más una alternativa sin cadena de herramientas y falla ruidosamente en lugar de dejar una instalación rota.
 
 ### Instálalo
 
 **macOS:**
 
 1. Haga doble clic en el `.dmg` para montarlo.
-2. Arrastra **AgentMonitor.app** a tu carpeta `/Applications`.
+2. Arrastra **Agent Monitor.app** a tu carpeta `/Applications`.
 3. El DMG está **firmado ad hoc** por defecto, por lo que macOS Gatekeeper advierte en la primera vez que se inicia (*"Apple no pudo verificar..."*). Borra el atributo de cuarentena:
 
    ```bash
-   xattr -cr "/Applications/AgentMonitor.app"
+   xattr -cr "/Applications/Agent Monitor.app"
    ```
 
 O abra **Configuración del sistema → Privacidad y seguridad** y haga clic en **Abrir de todos modos**.
@@ -1826,7 +1832,7 @@ O abra **Configuración del sistema → Privacidad y seguridad** y haga clic en 
 
 **Ventanas:**
 
-1. Ejecute `AgentMonitor-Setup-<ver>-x64.exe`. Instala **por usuario** en `%LOCALAPPDATA%\Programas\AgentMonitor` (sin elevación de administrador) y le permite elegir el directorio de instalación; o ejecute `*-portable.exe` para iniciar sin instalar.
+1. Ejecute `AgentMonitor-Setup-<ver>-x64.exe`. Instala **por usuario** en `%LOCALAPPDATA%\Programas\Agent Monitor` (sin elevación de administrador) y le permite elegir el directorio de instalación; o ejecute `*-portable.exe` para iniciar sin instalar.
 2. El instalador está **sin firmar** por defecto, por lo que Windows **SmartScreen** puede mostrar *"Windows protegido su PC"* en la primera vez que se inicie, haga clic en **Más información → Ejecutar de todos modos**.
 3. Lanzar desde el menú Inicio / atajo del escritorio. Aparece el icono de la zona de notificaciones ( bandeja) y se abre la ventana del panel de control.
 
@@ -1848,6 +1854,11 @@ O abra **Configuración del sistema → Privacidad y seguridad** y haga clic en 
 <em>Instalador de Windows · Paso 3 — <strong>Completar la configuración</strong> (Finalizar y lanzar la aplicación).</em>
 </p>
 
+**Linux:**
+
+1. AppImage — `chmod +x AgentMonitor-<ver>-x86_64.AppImage` y ejecútelo. O `.deb` — `sudo apt install ./AgentMonitor-<ver>-amd64.deb` (ejecutable `agentmonitor`, categoría Development).
+2. Lance la aplicación. Aparece el icono de la bandeja (el icono de color de la aplicación) y se abre la ventana del panel.
+
 ### Comandos de construcción
 
 Todos los comandos se ejecutan desde la **raíz del repositorio**:
@@ -1864,8 +1875,9 @@ Todos los comandos se ejecutan desde la **raíz del repositorio**:
 | `npm run desktop:dmg:universal` | **macOS:** construye un DMG **universal** fusionado (arm64 + x86_64) — opcional, **más lento**, no es lo que se envía con la versión |
 | `npm run desktop:win`       | **Windows:** construye el instalador NSIS `.exe` (x64)                             |
 | `npm run desktop:win:portable` | **Windows:** construye el `.exe` portátil sin instalar (x64)                     |
+| `npm run desktop:linux`     | **Linux:** construye el AppImage + `.deb` x64                                  |
 
-El DMG de macOS resultante es **~80 MB** (≈ 250 MB en el disco una vez instalado) y el instalador de Windows es comparable: el impuesto estándar del paquete Electron.
+El DMG de macOS resultante es **~80 MB** (≈ 250 MB en el disco una vez instalado) y el instalador de Windows y los paquetes de Linux son comparables: el impuesto estándar del paquete Electron.
 
 ### Firma y notariedad
 
@@ -1876,7 +1888,7 @@ El DMG de macOS está **firmado ad hoc** por defecto, por lo que cualquiera pued
 - **`better-sqlite3`** es el único módulo nativo en el árbol de dependencias, y un módulo nativo debe compilarse contra la ABI exacta del Nodo A en la que se ejecuta. El espacio de trabajo `desktop/` envía su **propia copia** de `better-sqlite3` reconstruida para la ABI de Electron y utiliza un redireccionamiento `require` local al proceso para apuntar a `server/db.js`; la copia de la raíz del repositorio se mantiene construida para el Nodo del sistema (por lo que `npm run test:server` sigue funcionando).
 - **La construcción de un DMG reconstruye `better-sqlite3` para la arquitectura de destino**, lo que puede dejar la copia del escritorio construida para la otra arquitectura de CPU y romper `npm run desktop:dev` / `npm run desktop:test` con `ERR_DLOPEN_FAILED`. El paso de `prebuild` del escritorio ahora **auto-curará** el módulo nativo para la máquina local en la próxima construcción, por lo que los flujos de desarrollo y prueba de humo siguen funcionando después de una construcción de DMG específica de la arquitectura. El paso de `prebuild` también **falla rápidamente con ayuda de configuración** cuando el binario nativo de `better-sqlite3` falta por completo, convirtiendo un fallo de tiempo de ejecución en un error de tiempo de construcción que se puede copiar y pegar.
 - El **único cambio fuera de `desktop/`** es una refactorización que preserva el comportamiento de `server/index.js`: su post-listen bootstrap (programador de actualización, `cc-watcher`, reconciliación de ejecución huérfana) se extrajo en un `startBackgroundServices()` exportado para que el servidor incorporado ejecute exactamente lo que ejecuta `node server/index.js`. El camino independiente de `node server/index.js` no ha cambiado funcionalmente; `client/`, `scripts/`, `mcp/` y `vscode-extension/` no han sido tocados.
-- Dos trabajos de CI de escritorio filtrados por ruta construyen, prueban con humo y empaquetan la aplicación: **`🍎 macOS Desktop (DMG)`** en `macos-latest` (carga el artefacto `AgentMonitor-dmg` — dos DMG de arquitectura única) y **`🪟 Windows Desktop (EXE)`** en `windows-latest` (carga el artefacto `AgentMonitor-win` — instalador NSIS + portátil). En una actualización de versión a `main`, el trabajo de `release` adjunta **ambos** los DMG de macOS y los `.exe` de Windows a la publicación de la versión `vX.Y.Z` de GitHub. El icono de Windows (`desktop/assets/icon.ico`) se compromete al repositorio (regénéralo desde `icon.png` con `npm run build:win-icon`, PowerShell + .NET, sin herramientas adicionales).
+- Tres trabajos de CI de escritorio filtrados por ruta construyen, prueban con humo y empaquetan la aplicación: **`🍎 macOS Desktop (DMG)`** en `macos-latest` (carga el artefacto `AgentMonitor-dmg` — dos DMG de arquitectura única), **`🪟 Windows Desktop (EXE)`** en `windows-latest` (carga el artefacto `AgentMonitor-win` — instalador NSIS + portátil) y **`🐧 Linux Desktop (AppImage + deb)`** en `ubuntu-latest` (carga el artefacto `AgentMonitor-linux` — AppImage + `.deb`). En una actualización de versión a `main`, el trabajo de `release` adjunta los DMG de macOS, los `.exe` de Windows **y** los archivos de Linux a la publicación de la versión `vX.Y.Z` de GitHub. El icono de Windows (`desktop/assets/icon.ico`) se compromete al repositorio (regénéralo desde `icon.png` con `npm run build:win-icon`, PowerShell + .NET, sin herramientas adicionales).
 
 Para la guía completa del usuario (descargar, instalar, Gatekeeper / SmartScreen, menú de bandeja, inicio automático), consulte [`DESKTOP.md`](./DESKTOP.md); para la referencia del contribuyente / arquitectura (modelo de proceso, ciclo de vida de arranque, descubrimiento de puertos, pipeline de construcción, con diagramas de Mermaid), consulte [`desktop/README.md`](./desktop/README.md).
 
@@ -1955,7 +1967,7 @@ erDiagram
 
 ## Mercado de complementos
 
-AgentMonitor incluye 14 plugins compartidos por Claude Code y Codex, 66 habilidades empaquetadas, 18 subagentes de Claude, 34 comandos de Claude, 3 herramientas CLI, 3 configuraciones de hooks y 2 plugins con MCP. La CLI de skills.sh descubre 76 habilidades en todo el repositorio. Consulta `docs/PLUGINS.md` para el catálogo, la instalación y la validación.
+Agent Monitor incluye 14 plugins compartidos por Claude Code y Codex, 66 habilidades empaquetadas, 18 subagentes de Claude, 34 comandos de Claude, 3 herramientas CLI, 3 configuraciones de hooks y 2 plugins con MCP. La CLI de skills.sh descubre 76 habilidades en todo el repositorio. Consulta `docs/PLUGINS.md` para el catálogo, la instalación y la validación.
 
 ### Agregar el mercado
 
@@ -2195,11 +2207,11 @@ graph LR
     style M_REPL fill:#0f766e,stroke:#14b8a6,color:#fff
 ```
 
-Opcional **aplicación de escritorio (macOS y Windows)**: un solo proceso Electron que hospeda el servidor Express en el proceso (sin terminal, sin proceso hijo):
+Opcional **aplicación de escritorio (macOS, Windows y Linux)**: un solo proceso Electron que hospeda el servidor Express en el proceso (sin terminal, sin proceso hijo):
 
 ```mermaid
 flowchart LR
-    subgraph desktop["Desktop App (macOS & Windows) — 1 Electron process"]
+    subgraph desktop["Desktop App (macOS, Windows & Linux) — 1 Electron process"]
         E_MAIN["Electron Main Process<br/>(Node 22 / Electron 35)"]
         E_HOST["server-host.ts<br/>require() server/index.js"]
         E_SRV["Embedded Express :4820<br/>API · SQLite · WebSocket"]
@@ -2220,7 +2232,7 @@ flowchart LR
 
 ### Implementación en la nube
 
-`deployments/` funciona en cualquier Kubernetes compatible, incluidos EKS, GKE, AKS, OKE y clústeres autogestionados. AgentMonitor usa SQLite, por lo que todos los manifiestos admitidos fuerzan **exactamente un dashboard writer activo por persistent volume** con Recreate. HPA, active-active, múltiples réplicas, blue-green y canary no se admiten mientras SQLite sea el persistence backend.
+`deployments/` funciona en cualquier Kubernetes compatible, incluidos EKS, GKE, AKS, OKE y clústeres autogestionados. Agent Monitor usa SQLite, por lo que todos los manifiestos admitidos fuerzan **exactamente un dashboard writer activo por persistent volume** con Recreate. HPA, active-active, múltiples réplicas, blue-green y canary no se admiten mientras SQLite sea el persistence backend.
 
 - Helm rechaza réplicas múltiples/HPA y admite digest, PVC retenido, Ingress o Gateway API, Secret externo, NetworkPolicy, MCP y ServiceMonitor opcionales.
 - Kustomize proporciona Restricted PSS base, overlays y componentes MCP, monitoring, Gateway API y CSI snapshot.
@@ -2355,7 +2367,7 @@ agentmonitor/
 |   +-- build/                   # Built MCP runtime output
 |-- desktop/
 |   |-- package.json             # Electron + electron-builder dependencies and scripts
-|   |-- electron-builder.yml     # DMG packaging config; signing/notarization hooks
+|   |-- electron-builder.yml     # DMG (macOS) + NSIS/portable (Windows) + AppImage/deb (Linux) targets; signing/notarization hooks
 |   |-- tsconfig.json            # Strict TypeScript (src/ -> out/)
 |   |-- README.md                # Desktop app architecture reference (contributor docs)
 |   |-- assets/                  # icon.svg + generated icon.icns + tray PNGs
@@ -2363,10 +2375,10 @@ agentmonitor/
 |   |   |-- main.ts              # Electron main process entry — lifecycle, wiring
 |   |   |-- server-host.ts       # In-process Express boot, port discovery, adoption, DB close
 |   |   |-- window.ts            # BrowserWindow + persisted window geometry
-|   |   |-- tray.ts              # Menu-bar (tray) icon + context menu
+|   |   |-- tray.ts              # Menu-bar (tray) icon (template PNG on macOS, icon.ico on Windows, icon.png on Linux) + context menu
 |   |   |-- menu.ts              # Native application menu (File ▸ Open Dashboard is macOS-only)
 |   |   |-- login-item.ts        # macOS Login Items auto-start toggle (SMAppService)
-|   |   |-- logger.ts            # File logger -> ~/Library/Logs/AgentMonitor/desktop.log
+|   |   |-- logger.ts            # File logger -> ~/Library/Logs/Agent Monitor/desktop.log
 |   |   |-- constants.ts         # App name, ports, timeouts, window size
 |   |   +-- preload.ts           # Intentionally empty (zero renderer privilege)
 |   |-- scripts/
@@ -2424,9 +2436,9 @@ Todos los colaboradores deben firmar el [Acuerdo de Licencia del Colaborador](ht
 
 ## Agradecimientos
 
-AgentMonitor comenzó como un fork de [Claude-Code-Agent-Monitor](https://github.com/hoangsonww/Claude-Code-Agent-Monitor) de [Son Nguyen](https://github.com/hoangsonww). Gracias por el dashboard original, el pipeline de hooks y la disciplina de documentación que este proyecto sigue manteniendo — su aviso de copyright permanece en [LICENSE](LICENSE).
+Agent Monitor comenzó como un fork de [Claude-Code-Agent-Monitor](https://github.com/hoangsonww/Claude-Code-Agent-Monitor) de [Son Nguyen](https://github.com/hoangsonww). Gracias por el dashboard original, el pipeline de hooks y la disciplina de documentación que este proyecto sigue manteniendo — su aviso de copyright permanece en [LICENSE](LICENSE).
 
-El enlace al fork se eliminó el 2026-09-19: el código había divergido demasiado (renombrado de la CLI, árbol de plugins, UI kit, ingesta de workflows) para seguir fusionando cambios del upstream, así que AgentMonitor se desarrolla ahora como proyecto independiente en [tanvoid0/agent-monitor](https://github.com/tanvoid0/agent-monitor).
+El enlace al fork se eliminó el 2026-09-19: el código había divergido demasiado (renombrado de la CLI, árbol de plugins, UI kit, ingesta de workflows) para seguir fusionando cambios del upstream, así que Agent Monitor se desarrolla ahora como proyecto independiente en [tanvoid0/agent-monitor](https://github.com/tanvoid0/agent-monitor).
 
 ---
 

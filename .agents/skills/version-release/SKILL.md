@@ -5,7 +5,7 @@ description: Choose and apply the correct semantic version bump for this reposit
 
 # Version Release Skill
 
-Apply Semantic Versioning across AgentMonitor:
+Apply Semantic Versioning across Agent Monitor:
 
 - **Patch** (`X.Y.Z+1`): backward-compatible fixes, docs-only work, dependency/security maintenance, refactors, or small improvements without a substantial new capability.
 - **Minor** (`X.Y+1.0`): backward-compatible features or meaningfully larger capabilities such as new workflows, pages, integrations, API fields/routes, or major UX surfaces.

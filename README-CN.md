@@ -1,4 +1,4 @@
-# Claude Code & Codex AgentMonitor（Agent 监控面板）
+# Claude Code & Codex Agent Monitor（Agent 监控面板）
 
 ### Claude Code & Codex Agent 活动实时监控平台 🚀
 
@@ -99,7 +99,7 @@
 - [更新提醒](#更新提醒)
 - [连接状态弹窗](#连接状态弹窗)
 - [VS Code 扩展](#vs-code-扩展)
-- [桌面应用（macOS 与 Windows）](#桌面应用macos-与-windows)
+- [桌面应用（macOS、Windows 与 Linux）](#桌面应用macoswindows-与-linux)
 - [数据存储](#数据存储)
 - [状态栏](#状态栏)
 - [服务端架构](#服务端架构)
@@ -309,7 +309,7 @@ flowchart LR
 
 Dashboard 提供全面的功能来监控和分析你的 Claude Code 会话和 Agent：
 
-> **Cursor 会话（仅供参考）：** AgentMonitor 会导入落在 `~/.claude` 下的所有 Agent 转录——本机以及已同步的远程机器。**Cursor** 的用量同样计入：Cursor 恰好与 Claude Code 使用相同的路径存放 Agent 会话。AgentMonitor 不会区分是哪个应用写入了文件。
+> **Cursor 会话（仅供参考）：** Agent Monitor 会导入落在 `~/.claude` 下的所有 Agent 转录——本机以及已同步的远程机器。**Cursor** 的用量同样计入：Cursor 恰好与 Claude Code 使用相同的路径存放 Agent 会话。Agent Monitor 不会区分是哪个应用写入了文件。
 
 | 功能 | 描述 |
 |------|------|
@@ -324,7 +324,7 @@ Dashboard 提供全面的功能来监控和分析你的 Claude Code 会话和 Ag
 | **按引用导航** | 仪表盘展示的每一个会话、Agent、项目、工具、事件类型和模型都是一枚**实体芯片**（`components/entity/EntityRef.tsx`），链接到它的主页面，并带有**右键 / 长按上下文菜单** —— *打开会话*、*打开 Agent*、*打开对话*、*在活动流中显示*、*项目内的会话*、*在看板上显示*、*显示文件夹*、*复制 ID* 等 —— 每一行和每张卡片上的 **⋯ 菜单按钮**（`components/ui/Clickable.tsx`）为鼠标用户和 Tab 键顺序提供同样的菜单。芯片与菜单都基于同一张类型化的 href 表（`client/src/lib/routes.ts`）构建，因此每个页面都可以通过 URL 直达：`/activity?session_id=&agent_id=&tool_name=&event_type=&status=&q=&from=&to=` (逗号分隔列表), `/sessions?status=&cwd=&cwd=&q=` (可重复的 `cwd`), `/sessions/:id?tab=agents#agent-<id>`, `?tab=timeline&event=<id>`, `?tab=conversation&transcript=<id\|main>`, `?tool_name=` / `?agent_id=` (一次性筛选种子), `/kanban?project=<cwd>[,<cwd>]&density=cards\|rows`, `/workflows?session=&run=`, `/plan/:slug?task=`, `/run?session=&cwd=`。深链接目标会被展开、滚动到可见区域、高亮描边并获得焦点。卡片和行提供 `card` / `row` 两种变体，在任意一个上 `Cmd/Ctrl`+点击或中键点击都会在新标签页打开。 |
 | **唯一的快捷键**             | `Cmd/Ctrl+K` 是仪表盘占用的唯一组合键，即使焦点在输入框中也依然生效。早期版本曾提供完整的快捷键层 —— 以 `g` 开头的导航序列、页面按键、`?` 速查表、按住修饰键的提示层 —— 但已被刻意移除：按键序列是带计时器的隐藏模式，按下 `g` 看起来什么都没发生；而在命令面板已经能用模糊搜索到达每个页面的前提下，两套导航机制只会分散肌肉记忆。Tabby 保留其一直以来的 `Cmd/Ctrl+B` |
 | **实时更新** | WebSocket 推送 — 无轮询，即时 UI 更新 |
-| **自动发现** | 会话和 Agent 会根据提供方信号自动创建。Claude Code 会在 `SessionStart` 立即创建一张**等待中**卡片。Codex 的交互式 TUI 进程一启动，就先显示一张仅存在于本机内存中的**等待中**卡片，即使此时 Codex 还没有分配稳定的会话 ID。随后 Hook、live-thread 行或 rollout 会创建持久会话并替换这张临时卡片。如果用户在 Codex 的 Resume 选择器中选择已有线程，AgentMonitor 会读取该 Codex PID 已打开的 rollout 或 writer lock，并在首条新消息发送前立即切换到持久的已恢复会话。预身份卡片不会写入 SQLite、历史、分析、定价、工作流、告警或完成通知，并会在进程退出时消失。 |
+| **自动发现** | 会话和 Agent 会根据提供方信号自动创建。Claude Code 会在 `SessionStart` 立即创建一张**等待中**卡片。Codex 的交互式 TUI 进程一启动，就先显示一张仅存在于本机内存中的**等待中**卡片，即使此时 Codex 还没有分配稳定的会话 ID。随后 Hook、live-thread 行或 rollout 会创建持久会话并替换这张临时卡片。如果用户在 Codex 的 Resume 选择器中选择已有线程，Agent Monitor 会读取该 Codex PID 已打开的 rollout 或 writer lock，并在首条新消息发送前立即切换到持久的已恢复会话。预身份卡片不会写入 SQLite、历史、分析、定价、工作流、告警或完成通知，并会在进程退出时消失。 |
 | **历史导入** | 面向提供方的 Import History 可从 `~/.claude/` 导入 Claude Code 转录记录，并从 `~/.codex/sessions` 导入 Codex rollout JSONL。每个标签都有自己的默认路径、说明、文件夹扫描和上传流程；两者都复用实时摄取逻辑，保留正确的 Token/成本/工具统计并保持幂等。外部 Codex rollout 会快照到仪表板存储，因此归档或源文件夹删除后仍可查看会话。 |
 | **子 Agent 层级** | Dashboard 和会话详情页可折叠的父子 Agent 树。有子 Agent 的 Agent 显示展开/折叠箭头；叶子 Agent 显示圆点指示器。子 Agent 活跃时自动展开 |
 | **后台 Agent** | 正确追踪后台子 Agent，不会提前标记为完成 |
@@ -358,7 +358,7 @@ Dashboard 提供全面的功能来监控和分析你的 Claude Code 会话和 Ag
 | **启动画面** | 应用加载时每个浏览器会话显示一次的品牌开场画面:根据时间的问候语（早上好 / 下午好 / 晚上好 / 夜深了）、一句醒目的本地化标语与两行副文案,以及深色背景（径向光晕、星座连线、颗粒质感）上带动画的节点图品牌标记。从首帧起即**不透明**（应用内容不会闪现）,停留约 2.5 秒后淡出,点击任意处可跳过,尊重 `prefers-reduced-motion`,已本地化 en/zh/vi/ko/es |
 | **渐进式 Web 应用 (PWA)**          | 三个独立的 PWA — 仪表盘、着陆页和维基 — 每个都有自己的 Web App Manifest 和 Service Worker。将任意一个安装到主屏幕/Dock,获得无浏览器边框的独立应用体验。仪表盘 SW 对 Vite 哈希化的 `/assets/*` 资源采用 cache-first(URL 每次构建都不可变,缓存命中始终正确),其他所有内容(导航、SW 自身、`manifest.json`、图标、根 `/`)采用 network-first 并以缓存兜底。配合生产环境 Express 静态中间件上的显式 `Cache-Control` 头(`/assets/*` 用 `immutable, max-age=31536000`,`index.html`、`sw.js`、`manifest.json` 用 `no-cache, must-revalidate`),重新构建后浏览器中的代码始终自动刷新,无需硬刷新;`client/src/main.tsx` 中的 `controllerchange` 监听器会在新 SW 接管已被控制的页面时恰好重新加载一次(首次安装不会)。VAPID 推送通知管道完全保留。着陆页和维基 SW 预缓存各自的 shell 并在首次访问时延迟缓存图片,单次加载后即可离线访问。所有 manifest 使用 SVG 图标(`favicon.svg`,`sizes="any"`),包含 `apple-mobile-web-app-capable` + `apple-touch-icon` meta 标签以支持 iOS 独立模式 |
 | **自托管资源（无 CDN）**           | 所有字体与脚本均**本地托管,零第三方 CDN 请求**。React 应用通过 `@fontsource` 打包 Inter + JetBrains Mono(latin 子集;由 Vite 输出为带内容哈希的 WOFF2 至 `dist/assets/`)。着陆页与维基加载本地的 `fonts/fonts.css` `@font-face` 样式表(维基用 `../fonts/`)。维基的 Mermaid 改为本地内置(`wiki/mermaid.min.js`,`mermaid@10.9.6`)而非 jsDelivr。VS Code 扩展的错误页改用系统字体栈。移除了所有 `fonts.googleapis.com` / `gstatic` / CDN 调用,因此仪表盘与文档可**完全离线**渲染,不向第三方泄露任何信息 |
-| **桌面应用（macOS 与 Windows）**   | 用 Electron 35 构建的可选原生桌面应用，位于 `desktop/` 工作区，与 `client/`、`server/`、`mcp/`、`vscode-extension/` 平级。以 macOS `.app`（`.dmg`）**以及** Windows `.exe`（NSIS 安装包 + 免安装便携版）形式分发。它将现有的 Express 服务器**以进程内方式嵌入**（直接 `require()` `server/index.js` —— 没有子进程、没有 IPC），并在 `BrowserWindow` 中渲染已构建的 React 客户端。新增了原生标题栏、菜单栏 / 通知区域（托盘）图标（单击其下拉菜单会显示一份在点击时从 SQLite 实时拉取的**状态快照**：会话、Agent、今日事件）、原生应用菜单、开机自启（macOS 通过 `SMAppService` 登录项；Windows 通过按用户的 `HKCU\…\Run`）、一个 **⌘Q / Ctrl+Q 确认对话框**（再按一次即跳过）、关闭窗口只隐藏但服务器继续运行、单实例锁，以及 **在浏览器中打开**、**重启服务器**、**查看日志** 等托盘操作。优先使用端口 4820（回退到 4821–4829，再到随机高位端口），若 4820 上已有健康的 dashboard 在运行则直接采用而不重复绑定，并**与 Web dashboard 共存** —— `npm run dev` 与桌面应用可同时运行，Hook 会同时分发到两者。通知以原生操作系统弹窗（toast）形式触发（Web Push 在 Electron 中无法可靠工作）。首次由应用自有的服务器启动时，它会自动安装 Claude Code Hook 并启动后台服务，因此仅安装应用的用户无需任何手动设置即可让事件流转。详见 [`DESKTOP.md`](./DESKTOP.md) 与 [`desktop/README.md`](./desktop/README.md) |
+| **桌面应用（macOS、Windows 与 Linux）**   | 用 Electron 35 构建的可选原生桌面应用，位于 `desktop/` 工作区，与 `client/`、`server/`、`mcp/`、`vscode-extension/` 平级。以 macOS `.app`（`.dmg`）、Windows `.exe`（NSIS 安装包 + 免安装便携版）**以及** Linux 软件包（x64 AppImage + `.deb`）形式分发。它将现有的 Express 服务器**以进程内方式嵌入**（直接 `require()` `server/index.js` —— 没有子进程、没有 IPC），并在 `BrowserWindow` 中渲染已构建的 React 客户端。新增了原生标题栏、菜单栏 / 通知区域（托盘）图标（单击其下拉菜单会显示一份在点击时从 SQLite 实时拉取的**状态快照**：会话、Agent、今日事件）、原生应用菜单、开机自启（macOS 通过 `SMAppService` 登录项；Windows 通过按用户的 `HKCU\…\Run`；Linux 上为空操作）、一个 **⌘Q / Ctrl+Q 确认对话框**（再按一次即跳过）、关闭窗口只隐藏但服务器继续运行、单实例锁，以及 **在浏览器中打开**、**重启服务器**、**查看日志** 等托盘操作。优先使用端口 4820（回退到 4821–4829，再到随机高位端口），若 4820 上已有健康的 dashboard 在运行则直接采用而不重复绑定，并**与 Web dashboard 共存** —— `npm run dev` 与桌面应用可同时运行，Hook 会同时分发到两者。通知以原生操作系统弹窗（toast）形式触发（Web Push 在 Electron 中无法可靠工作）。首次由应用自有的服务器启动时，它会自动安装 Claude Code Hook 并启动后台服务，因此仅安装应用的用户无需任何手动设置即可让事件流转。详见 [`DESKTOP.md`](./DESKTOP.md) 与 [`desktop/README.md`](./desktop/README.md) |
 
 > **提供方范围与数据位置：** 设置会让 Claude Code / Codex / 两者的选择在整个应用中保持一致，并可在无需重启仪表盘的情况下更改任一会话数据目录。
 >
@@ -450,14 +450,15 @@ npm run seed
 
 创建 8 个示例会话、23 个 Agent 和 106 个事件，让你可以立即浏览 UI。
 
-### 替代方案：桌面应用（macOS 与 Windows）
+### 替代方案：桌面应用（macOS、Windows 与 Linux）
 
-如果你不想一直开着终端窗口，可以安装可选的**原生桌面应用**。它将 Express 服务器以进程内方式嵌入运行，提供菜单栏 / 通知区域（托盘）图标，并支持开机自启（macOS 登录项 / Windows 启动项）。
+如果你不想一直开着终端窗口，可以安装可选的**原生桌面应用**。它将 Express 服务器以进程内方式嵌入运行，提供菜单栏 / 通知区域（托盘）图标，并支持开机自启（macOS 登录项 / Windows 启动项；Linux 上为空操作）。
 
 最快的方式是从 [最新 GitHub Release](https://github.com/tanvoid0/agent-monitor/releases/latest) **下载预构建的安装包**（每当 `main` 上的 `package.json` 版本号被提升时，CI 都会自动发布一个新的 `vX.Y.Z`）：
 
-- **macOS** —— 下载 `AgentMonitor-<version>-arm64.dmg`（Apple Silicon）或 `-x64.dmg`（Intel），并将 **AgentMonitor.app** 拖入 `/Applications`。
+- **macOS** —— 下载 `AgentMonitor-<version>-arm64.dmg`（Apple Silicon）或 `-x64.dmg`（Intel），并将 **Agent Monitor.app** 拖入 `/Applications`。
 - **Windows** —— 下载 `AgentMonitor-Setup-<version>-x64.exe`（安装版）或 `AgentMonitor-<version>-x64-portable.exe`（免安装版），然后运行它。
+- **Linux** —— 下载 `AgentMonitor-<version>-x86_64.AppImage`（先 `chmod +x` 再运行）或 `AgentMonitor-<version>-amd64.deb`（`sudo apt install ./AgentMonitor-<version>-amd64.deb`）。
 
 若希望自行构建：
 
@@ -465,12 +466,13 @@ npm run seed
 npm run desktop:install        # 在 desktop/ 中安装 Electron + electron-builder（预检原生依赖；失败时打印安装帮助）
 npm run desktop:dmg:arm64      # macOS：Apple Silicon 专用 DMG（快速）
 npm run desktop:win            # Windows：NSIS 安装包 .exe（在 Windows 上运行）
+npm run desktop:linux          # Linux：x64 AppImage + .deb（在 Linux 上运行）
 ```
 
 > [!TIP]
 > DMG 在 macOS 上构建，Windows `.exe` 在 Windows 上构建 —— electron-builder 针对宿主操作系统打包。为自己的 Mac 构建时，请使用架构专用命令（`desktop:dmg:arm64` 或 `desktop:dmg:x64`），它们速度快得多；`desktop:dmg` 会按架构把应用构建两次，产出两个按架构的 DMG（arm64 + x64，不做任何合并），仅在制作发布产物时才需要。
 
-完整的生命周期语义、托盘/菜单功能、签名与公证钩子详见下文的 [桌面应用（macOS 与 Windows）](#桌面应用macos-与-windows) 章节，以及 [`DESKTOP.md`](./DESKTOP.md)。
+完整的生命周期语义、托盘/菜单功能、签名与公证钩子详见下文的 [桌面应用（macOS、Windows 与 Linux）](#桌面应用macos-与-windows) 章节，以及 [`DESKTOP.md`](./DESKTOP.md)。
 
 ### 替代方案：Docker / Podman
 
@@ -664,7 +666,7 @@ flowchart LR
 
 ## `am` CLI
 
-> **从 v2.x（CCAM）升级？** 项目在 v3.0.0 更名为 **AgentMonitor**。`ccam` 仍可作为 `am` 的别名使用；旧的 `CCAM_*` 环境变量会在启动时镜像到对应的 `AM_*`（以新名称设置的值优先）；实时服务器注册文件从 `~/.claude/.agent-dashboard.json` 移到 `~/.claude/.agentmonitor.json`（下次启动时重写）；插件市场/ID 从 `ccam-*@claude-code-agent-monitor-plugins` 改为 `am-*@agentmonitor-plugins`，请重新安装你使用的插件。
+> **从 v2.x（CCAM）升级？** 项目在 v3.0.0 更名为 **Agent Monitor**。`ccam` 仍可作为 `am` 的别名使用；旧的 `CCAM_*` 环境变量会在启动时镜像到对应的 `AM_*`（以新名称设置的值优先）；实时服务器注册文件从 `~/.claude/.agent-dashboard.json` 移到 `~/.claude/.agentmonitor.json`（下次启动时重写）；插件市场/ID 从 `ccam-*@claude-code-agent-monitor-plugins` 改为 `am-*@agentmonitor-plugins`，请重新安装你使用的插件。
 
 仪表盘的完整功能面同样可以在终端中使用——零依赖的 **`am`** CLI（`bin/am.js`），由 `npm run setup` 自动链接（失败即降级的 `npm link`）。CLI 通过 `~/.claude/.agentmonitor.json`（与 hook 处理器相同的注册表）自动发现正在运行的服务器，可用 `CLAUDE_DASHBOARD_PORT`/`DASHBOARD_PORT` 覆盖，默认 `http://127.0.0.1:4820`。
 
@@ -727,7 +729,7 @@ am open                         # 在浏览器中打开仪表盘
 am version                      # 打印 CLI 版本（也可用 --version / -v）
 ```
 
-基于 API 的命令需要服务器在运行——未运行时，**只读命令会自动回退为直接读取 `data/dashboard.db`**（显示明确的 `⚠ Offline mode` 横幅，且数据库中已死亡的 `active` 会话会用服务器看门狗所用的同一进程存活性探测在显示层校正），而无法在无服务器时正确运行的命令（实时 `tail`、分析/成本计算、写操作）会打印 `○ Dashboard server is NOT running` 指示、具体原因和启动命令；`am start` 可在后台拉起生产服务器。读取类命令始终安全；唯一的破坏性命令（`clear-data`）没有显式 `--yes` 时拒绝执行。输出是完整的终端 UI——带右对齐数字列的框线表格、状态图标（`● active`、`○ waiting`、`✔ completed`、`✖ error`）、stats/analytics/cost 的内联条形图，以及真正的 `├─`/`└─` 代理树——ANSI 颜色在 TTY 上自动启用、管道输出时自动关闭，并可通过 `--no-color` / `NO_COLOR` / `FORCE_COLOR` 控制。若需持续监控，**`am repl`**（别名 `shell` / `i`）会打开一个交互式 shell，你可以在其中输入命令而无需 `am` 前缀——带有 AgentMonitor 欢迎横幅、Tab 补全、可持久化的方向键历史、实时服务器状态提示符（`● host` 在线 / `○ offline` 离线）、分组的 `help` / `help <cmd>` 菜单，以及可自动刷新任意命令的 `watch [秒] <命令>` 内置命令（例如 `watch 5 kanban`）；每一行都作为独立子进程运行，因此离线拒绝或阻塞的 `tail` 都不会拖垮 shell。若 `am` 不在 PATH 上，在仓库根目录运行一次 `npm link`。完整参考——标志、服务器发现顺序、REPL、安全模型、退出码——见 [docs/CLI.md](./docs/CLI.md)。
+基于 API 的命令需要服务器在运行——未运行时，**只读命令会自动回退为直接读取 `data/dashboard.db`**（显示明确的 `⚠ Offline mode` 横幅，且数据库中已死亡的 `active` 会话会用服务器看门狗所用的同一进程存活性探测在显示层校正），而无法在无服务器时正确运行的命令（实时 `tail`、分析/成本计算、写操作）会打印 `○ Dashboard server is NOT running` 指示、具体原因和启动命令；`am start` 可在后台拉起生产服务器。读取类命令始终安全；唯一的破坏性命令（`clear-data`）没有显式 `--yes` 时拒绝执行。输出是完整的终端 UI——带右对齐数字列的框线表格、状态图标（`● active`、`○ waiting`、`✔ completed`、`✖ error`）、stats/analytics/cost 的内联条形图，以及真正的 `├─`/`└─` 代理树——ANSI 颜色在 TTY 上自动启用、管道输出时自动关闭，并可通过 `--no-color` / `NO_COLOR` / `FORCE_COLOR` 控制。若需持续监控，**`am repl`**（别名 `shell` / `i`）会打开一个交互式 shell，你可以在其中输入命令而无需 `am` 前缀——带有 Agent Monitor 欢迎横幅、Tab 补全、可持久化的方向键历史、实时服务器状态提示符（`● host` 在线 / `○ offline` 离线）、分组的 `help` / `help <cmd>` 菜单，以及可自动刷新任意命令的 `watch [秒] <命令>` 内置命令（例如 `watch 5 kanban`）；每一行都作为独立子进程运行，因此离线拒绝或阻塞的 `tail` 都不会拖垮 shell。若 `am` 不在 PATH 上，在仓库根目录运行一次 `npm link`。完整参考——标志、服务器发现顺序、REPL、安全模型、退出码——见 [docs/CLI.md](./docs/CLI.md)。
 
 ## npm 脚本
 
@@ -769,6 +771,7 @@ am version                      # 打印 CLI 版本（也可用 --version / -v�
 | `npm run desktop:dmg:universal` | **macOS：** 构建**一个**合并的通用（universal）DMG（arm64 + x86_64，单个文件）——可选，**最慢**，不是发布版本附带的内容。 |
 | `npm run desktop:win` | **Windows：** 构建 NSIS **安装包** `.exe`（x64）— 在 Windows 上运行 |
 | `npm run desktop:win:portable` | **Windows：** 构建**免安装便携版** `.exe`（x64）— 在 Windows 上运行 |
+| `npm run desktop:linux` | 构建 Linux **AppImage** + **.deb**（x64）— 在 Linux 上运行 |
 | `npm run monitoring:install` | 在 `monitoring/` 中运行 `npm install` — 通过 `postinstall` 下载 Prometheus + Grafana |
 | `npm run monitoring:setup` | `monitoring:install` 的别名 |
 | `npm run monitoring:up` | 在后台启动 Prometheus（:9090）+ Grafana（:3000）（无需 Docker） |
@@ -1076,7 +1079,7 @@ flowchart TD
 
 ## 计划层
 
-计划层将项目的 `PROGRESS.md`（里程碑 → 步骤 → 通道 → 任务框）与该项目 `cwd` 下 AgentMonitor 自身的会话、Agent 和事件关联起来，让看板上的每个任务框都能显示正在处理它的实时 Agent、它运行了什么、哪里失败了、花费了多少——这些都是按需从 AgentMonitor 已经在采集的数据中计算得到的,无需再维护一个独立的跟踪器。发现是自动的：任何在最近 7 天内 AgentMonitor 见过会话的 `cwd` 下若存在 `PROGRESS.md`，都会被自动纳入并持续监视其变化，无需注册步骤。
+计划层将项目的 `PROGRESS.md`（里程碑 → 步骤 → 通道 → 任务框）与该项目 `cwd` 下 Agent Monitor 自身的会话、Agent 和事件关联起来，让看板上的每个任务框都能显示正在处理它的实时 Agent、它运行了什么、哪里失败了、花费了多少——这些都是按需从 Agent Monitor 已经在采集的数据中计算得到的,无需再维护一个独立的跟踪器。发现是自动的：任何在最近 7 天内 Agent Monitor 见过会话的 `cwd` 下若存在 `PROGRESS.md`，都会被自动纳入并持续监视其变化，无需注册步骤。
 
 <p align="center">
   <img src="images/plan.png" alt="计划层 — 构建看板" width="100%">
@@ -1136,7 +1139,7 @@ API 文档现已**全面覆盖**：每个后端路由都有文档说明（共 82
 
 ### Prometheus 指标与 Grafana
 
-`GET /api/metrics` 以 Prometheus 文本暴露格式（text-exposition format）导出 Dashboard 的实时计数器——按状态划分的会话/Agent、事件与 Token 总数、已连接的实时客户端、已配置的远程数据源、进程运行时长/内存，以及构建版本——因此 AgentMonitor 可被抓取（scrape）到你自己的可观测性栈中。一套开箱即用的 Prometheus + Grafana 组合，**自动配置四个仪表盘**（默认首页：**AgentMonitor — Overview**），位于 [`monitoring/`](./monitoring/README.md)。
+`GET /api/metrics` 以 Prometheus 文本暴露格式（text-exposition format）导出 Dashboard 的实时计数器——按状态划分的会话/Agent、事件与 Token 总数、已连接的实时客户端、已配置的远程数据源、进程运行时长/内存，以及构建版本——因此 Agent Monitor 可被抓取（scrape）到你自己的可观测性栈中。一套开箱即用的 Prometheus + Grafana 组合，**自动配置四个仪表盘**（默认首页：**Agent Monitor — Overview**），位于 [`monitoring/`](./monitoring/README.md)。
 
 **npm（无需 Docker / Homebrew）：**
 
@@ -1154,21 +1157,21 @@ npm run monitoring:docker:up
 ```
 
 <p align="center">
-  <img src="images/grafana.png" alt="Grafana AgentMonitor — Overview 仪表盘，展示实时会话、事件与 Token 指标" width="100%">
+  <img src="images/grafana.png" alt="Grafana Agent Monitor — Overview 仪表盘，展示实时会话、事件与 Token 指标" width="100%">
   <br>
-  <em>📊 <strong>Grafana · AgentMonitor — Overview</strong> — 默认首页仪表盘（自动配置四个看板）：舰队快照、数据库累计总量、分解图与速率 — 全部来自实时 <code>/api/metrics</code> 抓取</em>
+  <em>📊 <strong>Grafana · Agent Monitor — Overview</strong> — 默认首页仪表盘（自动配置四个看板）：舰队快照、数据库累计总量、分解图与速率 — 全部来自实时 <code>/api/metrics</code> 抓取</em>
 </p>
 
 <p align="center">
-  <img src="images/prometheus-console.png" alt="Prometheus AgentMonitor 控制台，展示指标卡片与会话表" width="100%">
+  <img src="images/prometheus-console.png" alt="Prometheus Agent Monitor 控制台，展示指标卡片与会话表" width="100%">
   <br>
-  <em>🔥 <strong>Prometheus · AgentMonitor 控制台</strong> — <code>/consoles/index.html</code> 预置落地页，直接查询 Prometheus 显示抓取状态、会话/事件/Token 总量及 Graph 钻取链接</em>
+  <em>🔥 <strong>Prometheus · Agent Monitor 控制台</strong> — <code>/consoles/index.html</code> 预置落地页，直接查询 Prometheus 显示抓取状态、会话/事件/Token 总量及 Graph 钻取链接</em>
 </p>
 
 <p align="center">
-  <img src="images/prometheus-query.png" alt="Prometheus Graph 界面中的 AgentMonitor PromQL 查询" width="100%">
+  <img src="images/prometheus-query.png" alt="Prometheus Graph 界面中的 Agent Monitor PromQL 查询" width="100%">
   <br>
-  <em>📈 <strong>Prometheus · Graph</strong> — 对已抓取的 AgentMonitor 指标运行 PromQL（如 <code>sum(am_sessions)</code>、<code>am_events_total</code>），可从 AgentMonitor 控制台与 <a href="./monitoring/README.md">monitoring/README.md</a> 的快捷链接打开</em>
+  <em>📈 <strong>Prometheus · Graph</strong> — 对已抓取的 Agent Monitor 指标运行 PromQL（如 <code>sum(am_sessions)</code>、<code>am_events_total</code>），可从 Agent Monitor 控制台与 <a href="./monitoring/README.md">monitoring/README.md</a> 的快捷链接打开</em>
 </p>
 
 完整指标列表以及抓取/认证细节，请参见 [docs/API.md → Metrics](./docs/API.md#metrics)。
@@ -1547,7 +1550,7 @@ flowchart LR
 
 ## VS Code 扩展
 
-**AgentMonitor** 现已作为官方 VS Code 扩展提供，让你无需离开编辑器即可监控 AI Agent。
+**Agent Monitor** 现已作为官方 VS Code 扩展提供，让你无需离开编辑器即可监控 AI Agent。
 
 <p align="center">
   <img src="vscode-extension/vscode.png" alt="VS Code Extension Screenshot" width="100%">
@@ -1569,27 +1572,27 @@ flowchart LR
 有关详细的开发人员配置，请参阅 [.vscode](./.vscode) 和 [vscode-extension](./vscode-extension) 目录。
 
 > [!TIP]
-> Extension on VS Code Marketplace: [AgentMonitor](https://marketplace.visualstudio.com/items?itemName=hoangsonw.agentmonitor)
+> Extension on VS Code Marketplace: [Agent Monitor](https://marketplace.visualstudio.com/items?itemName=hoangsonw.agentmonitor)
 
 ---
 
-## 桌面应用（macOS 与 Windows）
+## 桌面应用（macOS、Windows 与 Linux）
 
-Dashboard 现在还提供一个可选的**原生桌面应用**，将现有的服务端 + 客户端打包进单个应用，安装一次即可长期使用：macOS 版为一个 `.app`（以 `.dmg` 分发），Windows 版为一个 `.exe`（一个 NSIS 安装包，外加一个免安装的便携版）。你在浏览器 `localhost:4820` 看到的全部内容都运行在这个窗口里，并在其上叠加了原生操作系统的生命周期能力：托盘图标、应用菜单、开机自启集成，以及一个能干净关闭服务器的「退出」按钮。
+Dashboard 现在还提供一个可选的**原生桌面应用**，将现有的服务端 + 客户端打包进单个应用，安装一次即可长期使用：macOS 版为一个 `.app`（以 `.dmg` 分发），Windows 版为一个 `.exe`（一个 NSIS 安装包，外加一个免安装的便携版），Linux 版为 x64 `.AppImage` 加一个 `.deb`。你在浏览器 `localhost:4820` 看到的全部内容都运行在这个窗口里，并在其上叠加了原生操作系统的生命周期能力：托盘图标、应用菜单、开机自启集成，以及一个能干净关闭服务器的「退出」按钮。
 
 <p align="center">
-  <img src="images/macos.png" alt="以原生桌面应用运行的 AgentMonitor" width="100%">
+  <img src="images/macos.png" alt="以原生桌面应用运行的 Agent Monitor" width="100%">
   <br>
   <em>🍎🪟 <strong>桌面应用</strong> —— 原生外壳:菜单栏 / 通知区域(托盘)图标、登录项自启动、单实例锁。同一套 Dashboard,运行在真正的操作系统窗口里(图为 macOS)。</em>
 </p>
 
 <p align="center">
-  <img src="images/windows_app.png" alt="以原生 Windows 桌面应用运行的 AgentMonitor，显示活动信息流、Windows 原生窗口菜单栏与 Tabby 面板" width="100%">
+  <img src="images/windows_app.png" alt="以原生 Windows 桌面应用运行的 Agent Monitor，显示活动信息流、Windows 原生窗口菜单栏与 Tabby 面板" width="100%">
   <br>
   <em>🪟 同一套 Dashboard 作为原生 Windows 应用运行 —— 通知区域(托盘)图标、原生窗口菜单与登录项自启动。</em>
 </p>
 
-> **状态：** v1，支持 macOS 与 Windows。Linux 构建作为后续工作跟踪 —— Electron 让它实现起来并不难，但每个平台都需要各自的 QA。自动更新（auto-updater）同样不在 v1 范围内，当前的更新方式是重新下载最新的安装包。
+> **状态：** v1，支持 macOS、Windows 与 Linux。自动更新（auto-updater）同样不在 v1 范围内，当前的更新方式是重新下载最新的安装包。
 
 `desktop/` 是与 `client/`、`server/`、`mcp/`、`vscode-extension/` 平级的同级工作区，使用 **Electron 35** 构建。它**以进程内方式嵌入现有的 Express 服务器**——直接 `require()` `server/index.js`，运行在与 Electron 主进程相同的 Node 运行时中，**没有子进程、没有 IPC**——并在 `BrowserWindow` 中渲染已构建好的 React 客户端。
 
@@ -1644,19 +1647,21 @@ flowchart TD
 | macOS（Intel） | `AgentMonitor-<ver>-x64.dmg` | 拖入 `/Applications` |
 | Windows（安装版） | `AgentMonitor-Setup-<ver>-x64.exe` | 按用户安装，无需管理员权限 |
 | Windows（便携版） | `AgentMonitor-<ver>-x64-portable.exe` | 无需安装即可运行 |
+| Linux（AppImage） | `AgentMonitor-<ver>-x86_64.AppImage` | `chmod +x` 后运行 |
+| Linux（deb） | `AgentMonitor-<ver>-amd64.deb` | `sudo apt install ./AgentMonitor-<ver>-amd64.deb` |
 
-若需要 **每次提交的最新构建**，可改用 CI 产物（需登录，保留 14 天）：来自 `🍎 macOS Desktop (DMG)` 作业的 `AgentMonitor-dmg`，以及来自 `🪟 Windows Desktop (EXE)` 作业的 `AgentMonitor-win`。
+若需要 **每次提交的最新构建**，可改用 CI 产物（需登录，保留 14 天）：来自 `🍎 macOS Desktop (DMG)` 作业的 `AgentMonitor-dmg`、来自 `🪟 Windows Desktop (EXE)` 作业的 `AgentMonitor-win`，以及来自 `🐧 Linux Desktop (AppImage + deb)` 作业的 `AgentMonitor-linux`。
 
 安装：
 
 **macOS：**
 
 1. 双击 `.dmg` 将其挂载。
-2. 将 **AgentMonitor.app** 拖入你的 `/Applications`（应用程序）文件夹。
+2. 将 **Agent Monitor.app** 拖入你的 `/Applications`（应用程序）文件夹。
 3. DMG 默认采用**临时签名（ad-hoc signed）**，因此首次启动时 macOS Gatekeeper 会发出警告（*"Apple could not verify…"*）。清除隔离属性：
 
    ```bash
-   xattr -cr "/Applications/AgentMonitor.app"
+   xattr -cr "/Applications/Agent Monitor.app"
    ```
 
    或者打开 **系统设置 → 隐私与安全性**，点击**仍要打开（Open Anyway）**。
@@ -1665,7 +1670,7 @@ flowchart TD
 
 **Windows：**
 
-1. 运行 `AgentMonitor-Setup-<ver>-x64.exe`。它会**按用户**安装到 `%LOCALAPPDATA%\Programs\AgentMonitor`（无需管理员提权）并允许你选择安装目录；或运行 `*-portable.exe` 无需安装即可启动。
+1. 运行 `AgentMonitor-Setup-<ver>-x64.exe`。它会**按用户**安装到 `%LOCALAPPDATA%\Programs\Agent Monitor`（无需管理员提权）并允许你选择安装目录；或运行 `*-portable.exe` 无需安装即可启动。
 2. 安装包**默认未签名**，因此首次启动时 Windows **SmartScreen** 可能弹出「**Windows 已保护你的电脑**」（*"Windows protected your PC"*）—— 点击**更多信息（More info）→ 仍要运行（Run anyway）**。
 3. 从开始菜单 / 桌面快捷方式启动。通知区域（托盘）图标出现，Dashboard 窗口打开。
 
@@ -1687,6 +1692,11 @@ flowchart TD
   <em>Windows 安装包 · 第 3 步 —— <strong>完成安装</strong>（结束并启动应用）。</em>
 </p>
 
+**Linux：**
+
+1. AppImage —— `chmod +x AgentMonitor-<ver>-x86_64.AppImage`，然后运行。或 `.deb` —— `sudo apt install ./AgentMonitor-<ver>-amd64.deb`（可执行文件 `agentmonitor`，分类为 Development）。
+2. 启动应用。托盘图标（彩色应用图标）出现，Dashboard 窗口打开。
+
 **方式 B —— 本地构建：**
 
 ```bash
@@ -1696,10 +1706,11 @@ npm run build                # 构建 React 客户端（client/dist）
 npm run desktop:install      # 在 desktop/ 中安装 Electron + electron-builder（预检原生依赖；失败时打印安装帮助）
 npm run desktop:dmg:arm64    # macOS：  快速的单架构 DMG → desktop/release/AgentMonitor-<ver>-arm64.dmg
 npm run desktop:win          # Windows：NSIS 安装包 → desktop/release/AgentMonitor-Setup-<ver>-x64.exe
+npm run desktop:linux        # Linux：x64 AppImage + .deb → desktop/release/AgentMonitor-<ver>-x86_64.AppImage、…-amd64.deb
 ```
 
 > [!NOTE]
-> **DMG 在 macOS 上构建，Windows `.exe` 在 Windows 上构建** —— electron-builder 针对宿主操作系统打包。macOS 的 `npm run desktop:dmg` 构建**有意设计得很慢**（它会按架构把应用构建两次，产出两个按架构的 DMG——`AgentMonitor-<ver>-arm64.dmg` 与 `AgentMonitor-<ver>-x64.dmg`，并不做任何合并——发布时即随附这两个按架构的 DMG）；为自己的 Mac 构建时请使用单架构的 `desktop:dmg:arm64` / `desktop:dmg:x64`。在 Windows 上，`npm run desktop:install` 会把 `better-sqlite3` 作为 Electron 预编译二进制拉取，因此常见情况下无需 Visual Studio C++ 工具链。若构建确实失败（没有预编译二进制，或缺少 C++ 工具链），`desktop:install` 会打印准确的分平台修复步骤外加一个无工具链的替代方案，并**显式失败（fail loudly）**，而非留下一个损坏的安装。
+> **DMG 在 macOS 上构建，Windows `.exe` 在 Windows 上构建，AppImage/`.deb` 在 Linux 上构建** —— electron-builder 针对宿主操作系统打包。macOS 的 `npm run desktop:dmg` 构建**有意设计得很慢**（它会按架构把应用构建两次，产出两个按架构的 DMG——`AgentMonitor-<ver>-arm64.dmg` 与 `AgentMonitor-<ver>-x64.dmg`，并不做任何合并——发布时即随附这两个按架构的 DMG）；为自己的 Mac 构建时请使用单架构的 `desktop:dmg:arm64` / `desktop:dmg:x64`。在 Windows 上，`npm run desktop:install` 会把 `better-sqlite3` 作为 Electron 预编译二进制拉取，因此常见情况下无需 Visual Studio C++ 工具链。若构建确实失败（没有预编译二进制，或缺少 C++ 工具链），`desktop:install` 会打印准确的分平台修复步骤外加一个无工具链的替代方案，并**显式失败（fail loudly）**，而非留下一个损坏的安装。
 
 #### 原生依赖预检（preflight）
 
@@ -1731,7 +1742,7 @@ npx electron-builder install-app-deps
 xattr -cr ~/Downloads/AgentMonitor-*.dmg
 
 # 或者在拖入「应用程序」之后去掉应用的隔离属性：
-xattr -cr "/Applications/AgentMonitor.app"
+xattr -cr "/Applications/Agent Monitor.app"
 ```
 
 也可以打开  → *系统设置 → 隐私与安全性*，滚动到被拦截的项目，点击*仍要打开*。
@@ -1769,15 +1780,15 @@ flowchart TD
 
 ### 生命周期语义
 
-- **托盘图标** —— 常驻状态面板（macOS 菜单栏 / Windows 通知区域）。左键单击切换 Dashboard 窗口的显示/隐藏；右键单击打开上下文菜单，包含**打开 Dashboard**、**在浏览器中打开**、**重启服务器**、**查看日志**、**开机自启**（开关）与**退出**。macOS 使用着色的模板图标；Windows 使用彩色的 `icon.ico`（纯黑模板图标在深色任务栏上会看不见）。
-- **窗口与任务栏图标** —— `BrowserWindow` 已绑定彩色的应用 Logo（Windows 上为 `icon.ico`，其他平台为 `icon.png`），因此标题栏 / 任务栏显示的是真正的 AgentMonitor 图标 —— 即便是未打包的 `npm run desktop:dev` 运行，也不再显示通用的 Electron 图标。
+- **托盘图标** —— 常驻状态面板（macOS 菜单栏 / Windows 通知区域 / Linux 系统托盘）。左键单击切换 Dashboard 窗口的显示/隐藏；右键单击打开上下文菜单，包含**打开 Dashboard**、**在浏览器中打开**、**重启服务器**、**查看日志**、**开机自启**（开关）与**退出**。macOS 使用着色的模板图标；Windows 使用彩色的 `icon.ico`，Linux 使用彩色的 `icon.png`（纯黑模板图标在深色任务栏上会看不见）。
+- **窗口与任务栏图标** —— `BrowserWindow` 已绑定彩色的应用 Logo（Windows 上为 `icon.ico`，其他平台为 `icon.png`），因此标题栏 / 任务栏显示的是真正的 Agent Monitor 图标 —— 即便是未打包的 `npm run desktop:dev` 运行，也不再显示通用的 Electron 图标。
 - **原生应用菜单** —— 标准的 `About` / `File` / `Edit` / `View` / `Window` / `Help` 菜单，带 `⌘` / `Ctrl` 快捷键。其中 **File → Open Dashboard**（`⌘1`）项**仅在 macOS 上可用**：macOS 在窗口隐藏后仍保留全局菜单栏，因此该项能重新打开窗口 —— 而在 Windows/Linux 上，菜单是依附于窗口的，窗口隐藏时菜单快捷键无法触发，所以请改从托盘的 **Open Dashboard** 重新打开（即便窗口已最小化或被其他窗口遮挡，它也能可靠地将窗口**调到前台**）。
 - **关闭窗口只是隐藏它。** 服务器继续运行，托盘图标保留。点击托盘即可重新调出窗口。
 - **退出（⌘Q / Ctrl+Q，或托盘 → 退出）** 会优雅关闭嵌入式服务器、干净关闭 SQLite（完成 WAL checkpoint），然后退出。
-- **开机自启开关：** 在托盘菜单（或应用菜单）中切换*开机自启*。在 macOS 上，它通过 `SMAppService` / `ServiceManagement` 框架注册 —— 你会在  → *系统设置 → 通用 → 登录项* 中看到该条目；在 Windows 上，它写入一个按用户的 `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` 项，可在**任务管理器 → 启动**中看到。当应用在登录时被启动时，它以**仅托盘模式**启动，不会有窗口突然弹到用户面前。
+- **开机自启开关：** 在托盘菜单（或应用菜单）中切换*开机自启*。在 macOS 上，它通过 `SMAppService` / `ServiceManagement` 框架注册 —— 你会在  → *系统设置 → 通用 → 登录项* 中看到该条目；在 Windows 上，它写入一个按用户的 `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` 项，可在**任务管理器 → 启动**中看到；在 Linux 上该开关为空操作。当应用在登录时被启动时，它以**仅托盘模式**启动，不会有窗口突然弹到用户面前。
 - **单实例锁：** 重复启动只会聚焦已有窗口，不会产生第二个服务器，也不会发生端口冲突。（适用于所有平台。）
-- **「在浏览器中打开」「重启服务器」「查看日志」** 均可从托盘菜单直接触发。日志位于 `~/Library/Logs/AgentMonitor/desktop.log`（macOS）或 `%APPDATA%\AgentMonitor\logs\desktop.log`（Windows）（菜单中的*查看日志*会打开该位置）。
-- **你的数据**（SQLite 数据库与 VAPID 密钥）保存在按用户的应用数据目录中，位于应用包 / 安装目录**之外** —— macOS 为 `~/Library/Application Support/AgentMonitor/data/`，Windows 为 `%APPDATA%\AgentMonitor\data\`，因此能够**在应用重装与更新后继续保留**。已打包的应用包是只读的，把数据库写在其中会导致「历史导入」（History Import）与事件持久化失败；保存在应用数据目录修复了这一点，并意味着你导入的历史在替换或升级应用时不会受影响。（Windows 的 NSIS 卸载程序默认会保留这些数据。）
+- **「在浏览器中打开」「重启服务器」「查看日志」** 均可从托盘菜单直接触发。日志位于 `~/Library/Logs/Agent Monitor/desktop.log`（macOS）、`%APPDATA%\Agent Monitor\logs\desktop.log`（Windows）或 `~/.config/Agent Monitor/logs/desktop.log`（Linux）（菜单中的*查看日志*会打开该位置）。
+- **你的数据**（SQLite 数据库与 VAPID 密钥）保存在按用户的应用数据目录中，位于应用包 / 安装目录**之外** —— macOS 为 `~/Library/Application Support/Agent Monitor/data/`，Windows 为 `%APPDATA%\Agent Monitor\data\`，Linux 为 `~/.config/Agent Monitor/data/`，因此能够**在应用重装与更新后继续保留**。已打包的应用包是只读的，把数据库写在其中会导致「历史导入」（History Import）与事件持久化失败；保存在应用数据目录修复了这一点，并意味着你导入的历史在替换或升级应用时不会受影响。（Windows 的 NSIS 卸载程序默认会保留这些数据。）
 - **`claude` CLI**：在 macOS 上，应用在启动时会恢复你登录 Shell 的 `PATH` —— 因此即便从 Finder/Dock 启动的 macOS 应用通常只会继承 launchd 提供的极简 `PATH`，「运行 Claude」（Run Claude）功能依然能找到并启动 `claude` CLI。（在 Windows 上，所继承的用户 `PATH` 已包含它。）
 
 ### 构建命令
@@ -1796,13 +1807,14 @@ flowchart TD
 | `npm run desktop:dmg:universal` | **macOS：** 构建**一个**合并的通用（universal）DMG（arm64 + x86_64，单个文件）——可选，**最慢**，不是发布版本附带的内容。 |
 | `npm run desktop:win` | **Windows：** 构建 NSIS 安装包 `.exe`（x64）。 |
 | `npm run desktop:win:portable` | **Windows：** 构建免安装的便携版 `.exe`（x64）。 |
+| `npm run desktop:linux` | **Linux：** 构建 x64 AppImage + `.deb`。 |
 
 > [!NOTE]
 > **DMG 在 macOS 上构建，Windows `.exe` 在 Windows 上构建** —— electron-builder 针对宿主操作系统打包。macOS 的 `npm run desktop:dmg` 构建**有意设计得很慢**（它会按架构把应用构建两次，产出两个按架构的 DMG——`AgentMonitor-<ver>-arm64.dmg` 与 `AgentMonitor-<ver>-x64.dmg`，并不做任何合并——发布时即随附这两个按架构的 DMG）；为自己的 Mac 构建时请使用单架构的 `desktop:dmg:arm64` / `desktop:dmg:x64`。在 Windows 上，`npm run desktop:install` 会把 `better-sqlite3` 作为 Electron 预编译二进制拉取，因此常见情况下无需 Visual Studio C++ 工具链。
 >
 > - 为**自己的 Mac** 构建 → 使用 `desktop:dmg:arm64`（Apple Silicon）或 `desktop:dmg:x64`（Intel）。单架构、无合并，大约 1 分钟即可完成。
-> - 为**所有人构建发布产物** → 使用 `desktop:dmg`（产出两个按架构的 DMG：arm64 + x64），并预期它会耗时较久。CI 已经会构建 macOS DMG 与 Windows `.exe` 并分别上传为 `AgentMonitor-dmg` 与 `AgentMonitor-win` 产物，因此你很少需要在本地构建它们。
-> - 无论哪种方式，macOS DMG 体积约为 **80 MB / 安装后约 250 MB**，Windows 安装包体积相当 —— 这是标准的 Electron 体积成本。
+> - 为**所有人构建发布产物** → 使用 `desktop:dmg`（产出两个按架构的 DMG：arm64 + x64），并预期它会耗时较久。CI 已经会构建 macOS DMG、Windows `.exe` 与 Linux 软件包，并分别上传为 `AgentMonitor-dmg`、`AgentMonitor-win` 与 `AgentMonitor-linux` 产物，因此你很少需要在本地构建它们。
+> - 无论哪种方式，macOS DMG 体积约为 **80 MB / 安装后约 250 MB**，Windows 安装包与 Linux 软件包体积相当 —— 这是标准的 Electron 体积成本。
 
 ### 原生模块与签名
 
@@ -1813,7 +1825,7 @@ flowchart TD
 
 ### 持续集成
 
-`.github/workflows/ci.yml` 中有两个经过**路径过滤**的桌面作业（一个 `changes` 作业用 `dorny/paths-filter` 检测 `desktop/**` 的改动；这些作业也会在任何 `push` 时、或 PR 带有 `desktop` 标签时运行）：运行在 `macos-latest` 上的 `🍎 macOS Desktop (DMG)` 作业会构建**两个按架构的 DMG**（arm64 + x64；对偶发的 `hdiutil detach` 失败会重试）并上传为 `AgentMonitor-dmg` 产物（两个单架构 DMG）；运行在 `windows-latest` 上的 `🪟 Windows Desktop (EXE)` 作业会构建并上传为 `AgentMonitor-win` 产物（NSIS 安装包 + 便携版）。在向 `main` 推送版本号提升时，`release` 作业会把 macOS DMG 与 Windows `.exe` **都**附加到所发布的 `vX.Y.Z` GitHub Release。Windows 图标（`desktop/assets/icon.ico`）已提交到仓库中（可用 `npm run build:win-icon` 从 `icon.png` 重新生成，基于 PowerShell + .NET，无需额外工具）。
+`.github/workflows/ci.yml` 中有三个经过**路径过滤**的桌面作业（一个 `changes` 作业用 `dorny/paths-filter` 检测 `desktop/**` 的改动；这些作业也会在任何 `push` 时、或 PR 带有 `desktop` 标签时运行）：运行在 `macos-latest` 上的 `🍎 macOS Desktop (DMG)` 作业会构建**两个按架构的 DMG**（arm64 + x64；对偶发的 `hdiutil detach` 失败会重试）并上传为 `AgentMonitor-dmg` 产物（两个单架构 DMG）；运行在 `windows-latest` 上的 `🪟 Windows Desktop (EXE)` 作业会构建并上传为 `AgentMonitor-win` 产物（NSIS 安装包 + 便携版）；运行在 `ubuntu-latest` 上的 `🐧 Linux Desktop (AppImage + deb)` 作业会构建并上传为 `AgentMonitor-linux` 产物（AppImage + `.deb`）。在向 `main` 推送版本号提升时，`release` 作业会把 macOS DMG、Windows `.exe` 与 Linux 文件**都**附加到所发布的 `vX.Y.Z` GitHub Release。Windows 图标（`desktop/assets/icon.ico`）已提交到仓库中（可用 `npm run build:win-icon` 从 `icon.png` 重新生成，基于 PowerShell + .NET，无需额外工具）。
 
 ### 桌面应用故障排查
 
@@ -1822,7 +1834,7 @@ flowchart TD
 | 首次启动时 macOS 提示「Apple 无法验证…」 | DMG 默认临时签名。运行 `xattr -cr ~/Downloads/AgentMonitor-*.dmg`（或对已安装的 `.app` 执行），或在*系统设置 → 隐私与安全性*中点击*仍要打开* |
 | 首次启动时 Windows SmartScreen 提示「Windows 已保护你的电脑」 | 安装包默认未签名。点击**更多信息 → 仍要运行**即可启动 |
 | 「运行 Claude」提示 `claude` 不在 PATH 上 | （macOS）从 Finder/Dock 启动的应用只会继承 launchd 的极简 `PATH`，而非你的 Shell `PATH`。已修复 —— 应用在启动时会恢复登录 Shell 的 `PATH`。若问题仍存在，请确认 `claude` 是真正的可执行文件（而非 Shell 别名或函数），并位于你的 Shell `PATH` 上。在 Windows 上，所继承的用户 `PATH` 已包含它 |
-| 更新应用后导入的历史 / 会话消失 | 早期构建把数据库存放在（可被替换的）应用包内部。已修复 —— 数据现保存在 `~/Library/Application Support/AgentMonitor/data/`（macOS）或 `%APPDATA%\AgentMonitor\data\`（Windows），可在重装与更新后保留。从修复前的旧版本升级后，请再执行一次 **Import History → Rescan** |
+| 更新应用后导入的历史 / 会话消失 | 早期构建把数据库存放在（可被替换的）应用包内部。已修复 —— 数据现保存在 `~/Library/Application Support/Agent Monitor/data/`（macOS）或 `%APPDATA%\Agent Monitor\data\`（Windows），可在重装与更新后保留。从修复前的旧版本升级后，请再执行一次 **Import History → Rescan** |
 | `desktop:dev` / `desktop:test` 报 `ERR_DLOPEN_FAILED` | 之前的 DMG 构建留下了为另一 CPU 架构编译的 `better-sqlite3`。预构建步骤会在下次构建时自动修复；如有需要可运行 `npm run desktop:install` |
 
 更多细节请参阅面向用户的 [`DESKTOP.md`](./DESKTOP.md)，以及面向贡献者 / 架构的 [`desktop/README.md`](./desktop/README.md)。
@@ -1902,7 +1914,7 @@ erDiagram
 
 ## 插件市场
 
-AgentMonitor 为 Claude Code 和 Codex 提供 14 个共享插件、66 个插件技能、18 个 Claude 子 Agent、34 个 Claude 命令、3 个 CLI 工具、3 个 Hook 配置和 2 个支持 MCP 的插件。skills.sh CLI 可发现 76 个仓库技能。
+Agent Monitor 为 Claude Code 和 Codex 提供 14 个共享插件、66 个插件技能、18 个 Claude 子 Agent、34 个 Claude 命令、3 个 CLI 工具、3 个 Hook 配置和 2 个支持 MCP 的插件。skills.sh CLI 可发现 76 个仓库技能。
 
 ### 添加市场
 
@@ -2137,7 +2149,7 @@ graph LR
 
 ### 云部署
 
-`deployments/` 可部署到任何兼容 Kubernetes 的平台，包括 EKS、GKE、AKS、OKE 和自建集群。AgentMonitor 使用 SQLite，因此所有受支持的清单都强制 **每个持久卷只有一个活动 Dashboard writer**，并采用 Recreate 更新。只要 SQLite 仍是持久化后端，就不支持 HPA、active-active、多副本、蓝绿或金丝雀。
+`deployments/` 可部署到任何兼容 Kubernetes 的平台，包括 EKS、GKE、AKS、OKE 和自建集群。Agent Monitor 使用 SQLite，因此所有受支持的清单都强制 **每个持久卷只有一个活动 Dashboard writer**，并采用 Recreate 更新。只要 SQLite 仍是持久化后端，就不支持 HPA、active-active、多副本、蓝绿或金丝雀。
 
 - **Helm：** Schema 拒绝多副本/HPA，支持镜像 digest、保留 PVC、Ingress 或 Gateway API、外部 Secret、NetworkPolicy、可选 MCP 与 ServiceMonitor。
 - **Kustomize：** Restricted PSS 基础、dev/staging/production overlay，以及 MCP、监控、Gateway API、CSI Snapshot 组件。
@@ -2304,13 +2316,13 @@ agentmonitor/
 |   +-- skills/                  # Codex 项目技能
 |-- desktop/
 |   |-- README.md                # 桌面应用贡献者 / 架构参考
-|   |-- electron-builder.yml     # DMG 打包配置；签名 / 公证钩子
+|   |-- electron-builder.yml     # DMG（macOS）+ NSIS/便携版（Windows）+ AppImage/deb（Linux）目标；签名 / 公证钩子
 |   |-- src/
 |   |   |-- main.ts              # 主进程入口 —— 生命周期、对话框、装配
 |   |   |-- server-host.ts       # 进程内 Express 启动、端口发现、服务器采用、SQLite 关闭
 |   |   |-- window.ts            # BrowserWindow + 持久化窗口几何状态
 |   |   |-- menu.ts              # 原生应用菜单（File ▸ Open Dashboard 仅在 macOS 上可用）
-|   |   |-- tray.ts              # 菜单栏（托盘）图标 + 上下文菜单
+|   |   |-- tray.ts              # 菜单栏（托盘）图标（macOS 为模板 PNG，Windows 为 icon.ico，Linux 为 icon.png）+ 上下文菜单
 |   |   |-- login-item.ts        # macOS 登录项（SMAppService）开机自启
 |   |   +-- logger.ts            # 写入 desktop.log 的文件日志器
 |   |-- scripts/                 # prebuild 校验、build-icons、notarize 钩子
@@ -2340,9 +2352,9 @@ agentmonitor/
 
 ## 致谢
 
-AgentMonitor 源自 [Son Nguyen](https://github.com/hoangsonww) 的 [Claude-Code-Agent-Monitor](https://github.com/hoangsonww/Claude-Code-Agent-Monitor) 分支。感谢他提供的原始仪表盘、Hook 流水线以及本项目至今沿用的文档规范——他的版权声明仍保留在 [LICENSE](LICENSE) 中。
+Agent Monitor 源自 [Son Nguyen](https://github.com/hoangsonww) 的 [Claude-Code-Agent-Monitor](https://github.com/hoangsonww/Claude-Code-Agent-Monitor) 分支。感谢他提供的原始仪表盘、Hook 流水线以及本项目至今沿用的文档规范——他的版权声明仍保留在 [LICENSE](LICENSE) 中。
 
-分支链接已于 2026-09-19 移除：代码库分歧过大（CLI 重命名、插件树、UI 套件、工作流摄取），已无法继续合并上游变更，因此 AgentMonitor 现作为独立项目在 [tanvoid0/agent-monitor](https://github.com/tanvoid0/agent-monitor) 开发。
+分支链接已于 2026-09-19 移除：代码库分歧过大（CLI 重命名、插件树、UI 套件、工作流摄取），已无法继续合并上游变更，因此 Agent Monitor 现作为独立项目在 [tanvoid0/agent-monitor](https://github.com/tanvoid0/agent-monitor) 开发。
 
 ---
 

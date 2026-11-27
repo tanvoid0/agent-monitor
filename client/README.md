@@ -1,6 +1,6 @@
 # Client Application
 
-Enterprise-grade React + TypeScript dashboard for real-time AgentMonitoring.
+Enterprise-grade React + TypeScript dashboard for real-time Agent Monitor.
 
 ![Claude Code](https://img.shields.io/badge/Claude_Code-orange?style=flat-square&logo=claude&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-%3E%3D22.22-339933?style=flat-square&logo=node.js&logoColor=white)

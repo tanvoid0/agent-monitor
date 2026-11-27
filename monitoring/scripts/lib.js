@@ -89,7 +89,7 @@ function writeGrafanaProvisioning() {
     "apiVersion: 1",
     "",
     "providers:",
-    "  - name: AgentMonitor",
+    "  - name: Agent Monitor",
     "    orgId: 1",
     "    type: file",
     "    disableDeletion: false",

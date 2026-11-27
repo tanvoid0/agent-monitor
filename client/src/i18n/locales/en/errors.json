@@ -15,7 +15,7 @@
     "readyForInput": "Ready for input",
     "sessionCompleted": "Session Completed",
     "sessionClosed": "Session closed",
-    "defaultTitle": "AgentMonitor",
+    "defaultTitle": "Agent Monitor",
     "defaultBody": "Notification"
   },
   "toolLegend": {

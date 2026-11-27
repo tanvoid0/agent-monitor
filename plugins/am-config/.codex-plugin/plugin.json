@@ -13,7 +13,7 @@
   "keywords": ["config", "memory", "governance", "audit", "mcp", "hooks", "claude-code"],
   "skills": "./skills/",
   "interface": {
-    "displayName": "AgentMonitor Config",
+    "displayName": "Agent Monitor Config",
     "shortDescription": "Audit and govern your Claude Code configuration and file-based memory via the Agent Monitor...",
     "longDescription": "Audit and govern your Claude Code configuration and file-based memory via the Agent Monitor Config Explorer API — skills, subagents, commands, MCP servers, hooks, settings, and the per-project memory store. Surfaces sprawl, duplication, risky hooks, and stale facts, all read through the dashboard at http://localhost:4820.",
     "developerName": "Tanveer Hoque",
@@ -21,8 +21,8 @@
     "capabilities": ["Read", "Write"],
     "websiteURL": "https://github.com/tanvoid0/agent-monitor",
     "defaultPrompt": [
-      "Use AgentMonitor Config to inspect the local AgentMonitor dashboard.",
-      "Use AgentMonitor Config to analyze recent agent activity."
+      "Use Agent Monitor Config to inspect the local Agent Monitor dashboard.",
+      "Use Agent Monitor Config to analyze recent agent activity."
     ],
     "brandColor": "#6366F1"
   }

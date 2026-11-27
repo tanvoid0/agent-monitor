@@ -116,15 +116,15 @@ resource "helm_release" "am" {
   lifecycle {
     precondition {
       condition     = try(local.values.replicaCount, 0) == 1
-      error_message = "AgentMonitor requires replicaCount=1 while SQLite is the persistence backend."
+      error_message = "Agent Monitor requires replicaCount=1 while SQLite is the persistence backend."
     }
     precondition {
       condition     = try(local.values.autoscaling.enabled, true) == false
-      error_message = "AgentMonitor does not support HPA while SQLite is the persistence backend."
+      error_message = "Agent Monitor does not support HPA while SQLite is the persistence backend."
     }
     precondition {
       condition     = try(local.values.persistence.enabled, false) == true
-      error_message = "Persistent storage is required for production AgentMonitor deployments."
+      error_message = "Persistent storage is required for production Agent Monitor deployments."
     }
     precondition {
       condition     = !(var.ingress_enabled && var.gateway_api_enabled)

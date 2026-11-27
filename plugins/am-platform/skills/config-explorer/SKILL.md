@@ -2,7 +2,7 @@
 name: config-explorer
 description: >
   Inspect and safely edit the Claude Code and Codex configuration surfaces
-  exposed by AgentMonitor. Use when auditing skills, agents, commands, plugins,
+  exposed by Agent Monitor. Use when auditing skills, agents, commands, plugins,
   marketplaces, MCP servers, hooks, settings, memory, keybindings, profiles,
   rules, or instruction files, and when a backup-backed allowlisted edit is
   required.

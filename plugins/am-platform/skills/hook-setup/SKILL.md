@@ -1,7 +1,7 @@
 ---
 name: hook-setup
 description: >
-  Inspect and install AgentMonitor monitoring hooks for Claude Code and Codex. Use when
+  Inspect and install Agent Monitor monitoring hooks for Claude Code and Codex. Use when
   onboarding a provider, repairing missing hooks, checking which provider is
   active, or validating that installation preserved unrelated user hooks.
 ---
@@ -20,7 +20,7 @@ Replace the placeholder with `claude`, `codex`, or `claude codex` based on the
 user's selected scope and the missing providers reported by `am hooks status`.
 
 4. Read back `am hooks status`.
-5. Start a real provider session and verify a new session/event reaches AgentMonitor.
+5. Start a real provider session and verify a new session/event reaches Agent Monitor.
 
-Installers replace only AgentMonitor-owned entries and preserve unrelated hooks.
+Installers replace only Agent Monitor-owned entries and preserve unrelated hooks.
 Hook execution must remain fail-safe and non-blocking.

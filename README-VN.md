@@ -98,7 +98,7 @@ Tài liệu đã bản địa hóa: [`README.md`](./README.md) · [`README-CN.md
 - [Thông báo trình duyệt](#thông-báo-trình-duyệt)
 - [Thông báo cập nhật](#thông-báo-cập-nhật)
 - [Hộp thoại trạng thái kết nối](#hộp-thoại-trạng-thái-kết-nối)
-- [Ứng dụng máy tính để bàn (macOS & Windows)](#ứng-dụng-máy-tính-để-bàn-macos--windows)
+- [Ứng dụng máy tính để bàn (macOS, Windows & Linux)](#ứng-dụng-máy-tính-để-bàn-macos-windows--linux)
 - [Tiện ích mở rộng VS Code](#tiện-ích-mở-rộng-vs-code)
 - [Lưu trữ dữ liệu](#lưu-trữ-dữ-liệu)
 - [Dòng trạng thái](#dòng-trạng-thái)
@@ -307,7 +307,7 @@ Thanh bên cung cấp quyền truy cập nhanh vào cả mười một trang —
 
 Bảng điều khiển cung cấp một bộ tính năng toàn diện để giám sát và phân tích các phiên và Agent Claude Code & Codex của bạn:
 
-> **Phiên Cursor (chỉ mang tính thông tin):** AgentMonitor nhập mọi transcript agent nằm trong `~/.claude` — trên máy này và trên các máy từ xa đã đồng bộ. **Cursor** cũng được tính tương tự: Cursor tình cờ lưu phiên agent ở cùng các đường dẫn với Claude Code & Codex. AgentMonitor không phân biệt ứng dụng nào ghi file.
+> **Phiên Cursor (chỉ mang tính thông tin):** Agent Monitor nhập mọi transcript agent nằm trong `~/.claude` — trên máy này và trên các máy từ xa đã đồng bộ. **Cursor** cũng được tính tương tự: Cursor tình cờ lưu phiên agent ở cùng các đường dẫn với Claude Code & Codex. Agent Monitor không phân biệt ứng dụng nào ghi file.
 
 | Tính năng                            | Sự miêu tả                                                                                                                                                                                                                                                                  |
 |------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -322,7 +322,7 @@ Bảng điều khiển cung cấp một bộ tính năng toàn diện để giá
 | **Điều hướng theo tham chiếu**             | Mọi phiên, agent, dự án, công cụ, loại sự kiện và mô hình mà dashboard hiển thị đều là một **chip thực thể** (`components/entity/EntityRef.tsx`) liên kết tới trang chủ của nó và mang một **menu ngữ cảnh nhấp chuột phải / nhấn giữ** — *Mở phiên*, *Mở agent*, *Mở hội thoại*, *Hiện trong Hoạt động*, *Phiên trong dự án*, *Hiện trên bảng*, *Mở thư mục*, *Sao chép ID*, v.v. — được phản chiếu bởi một **nút ⋯** trên mọi hàng và thẻ (`components/ui/Clickable.tsx`) dành cho người dùng chuột và thứ tự Tab. Chip và menu được dựng từ một bảng href có kiểu duy nhất (`client/src/lib/routes.ts`), nên mỗi trang đều có thể truy cập bằng URL: `/activity?session_id=&agent_id=&tool_name=&event_type=&status=&q=&from=&to=` (danh sách phân tách bằng dấu phẩy), `/sessions?status=&cwd=&cwd=&q=` (`cwd` lặp lại), `/sessions/:id?tab=agents#agent-<id>`, `?tab=timeline&event=<id>`, `?tab=conversation&transcript=<id\|main>`, `?tool_name=` / `?agent_id=` (mồi bộ lọc dùng một lần), `/kanban?project=<cwd>[,<cwd>]&density=cards\|rows`, `/workflows?session=&run=`, `/plan/:slug?task=`, `/run?session=&cwd=`. Đích của deep link được mở rộng, cuộn vào tầm nhìn, viền sáng và nhận tiêu điểm. Thẻ và hàng có hai biến thể `card` / `row`, và `Cmd/Ctrl`+nhấp hoặc nhấp chuột giữa vào bất kỳ mục nào sẽ mở tab mới. |
 | **Chỉ một phím tắt**             | `Cmd/Ctrl+K` là tổ hợp duy nhất mà dashboard chiếm dụng, và nó vẫn hoạt động ngay cả khi con trỏ đang ở trong một ô nhập liệu. Một bản trước từng có cả lớp phím tắt đầy đủ — chuỗi điều hướng bắt đầu bằng `g`, phím theo trang, bảng tra cứu `?`, lớp gợi ý khi giữ phím bổ trợ — và nó đã bị loại bỏ có chủ đích: chuỗi phím là một chế độ ẩn kèm bộ đếm giờ, nhấn `g` trông như không có gì xảy ra; và khi bảng lệnh đã tới được mọi trang bằng tìm kiếm mờ thì hai cơ chế điều hướng chỉ làm phân tán trí nhớ cơ bắp. Tabby vẫn giữ `Cmd/Ctrl+B` vốn có |
 | **Cập nhật trực tiếp**                   | Đẩy WebSocket -- không bỏ phiếu, cập nhật giao diện người dùng tức thì                                                                                                                                                                                                                             |
-| **Tự động khám phá**                 | Phiên và tác nhân được tạo tự động từ tín hiệu của nhà cung cấp. Claude Code tạo thẻ **Đang chờ** ngay tại `SessionStart`. Codex trước tiên hiển thị một thẻ **Đang chờ** cục bộ chỉ tồn tại trong bộ nhớ ngay khi tiến trình TUI tương tác khởi động, kể cả trước khi Codex cấp ID phiên ổn định. Hook, hàng live-thread hoặc rollout sau đó tạo phiên bền vững và thay thế thẻ tạm thời đó. Nếu người dùng chọn một luồng hiện có trong bộ chọn Resume của Codex, AgentMonitor đọc rollout hoặc writer lock mà chính PID Codex đó đã mở và chuyển ngay sang phiên bền vững được tiếp tục trước tin nhắn mới đầu tiên. Thẻ trước định danh không bao giờ được ghi vào SQLite, lịch sử, phân tích, giá, workflow, cảnh báo hay thông báo hoàn tất, và biến mất khi tiến trình thoát. |
+| **Tự động khám phá**                 | Phiên và tác nhân được tạo tự động từ tín hiệu của nhà cung cấp. Claude Code tạo thẻ **Đang chờ** ngay tại `SessionStart`. Codex trước tiên hiển thị một thẻ **Đang chờ** cục bộ chỉ tồn tại trong bộ nhớ ngay khi tiến trình TUI tương tác khởi động, kể cả trước khi Codex cấp ID phiên ổn định. Hook, hàng live-thread hoặc rollout sau đó tạo phiên bền vững và thay thế thẻ tạm thời đó. Nếu người dùng chọn một luồng hiện có trong bộ chọn Resume của Codex, Agent Monitor đọc rollout hoặc writer lock mà chính PID Codex đó đã mở và chuyển ngay sang phiên bền vững được tiếp tục trước tin nhắn mới đầu tiên. Thẻ trước định danh không bao giờ được ghi vào SQLite, lịch sử, phân tích, giá, workflow, cảnh báo hay thông báo hoàn tất, và biến mất khi tiến trình thoát. |
 | **Nhập lịch sử**                 | Import History theo nhà cung cấp nhập transcript Claude Code từ `~/.claude/` và rollout JSONL Codex từ `~/.codex/sessions`. Mỗi tab có đường dẫn mặc định, hướng dẫn, quét thư mục và tải lên riêng; cả hai dùng lại logic ingest thời gian thực, giữ đúng token/chi phí/tool và bảo đảm bất biến. Rollout Codex từ bên ngoài được snapshot vào bộ nhớ dashboard để hội thoại vẫn mở được sau khi archive hoặc thư mục nguồn bị xóa. |
 | **Phân cấp Subagent**             | Cây tác nhân cha-con có thể thu gọn trên Bảng điều khiển và Chi tiết phiên. Các Agent có các Subagent hiển thị các chữ V mở rộng/thu gọn; tác nhân lá hiển thị một chỉ báo dấu chấm. Tự động mở rộng khi các tác nhân phụ đang hoạt động                                                                           |
 | **Agent nền**              | Theo dõi chính xác các tác nhân phụ có nền mà không cần hoàn thành sớm                                                                                                                                                                                                         |
@@ -356,7 +356,7 @@ Bảng điều khiển cung cấp một bộ tính năng toàn diện để giá
 | **Ứng dụng web tiến bộ (PWA)**    | Ba PWA độc lập — dashboard, trang chủ và wiki — mỗi cái có Web App Manifest và Service Worker riêng. Cài đặt bất kỳ cái nào lên màn hình chính / dock để trải nghiệm standalone không thanh trình duyệt. SW của dashboard phục vụ các bundle có hash của Vite tại `/assets/*` theo kiểu cache-first (URL bất biến theo mỗi build, nên cache hit luôn đúng) và xử lý mọi thứ khác (điều hướng, chính SW, `manifest.json`, icon, root `/`) theo kiểu network-first có cache dự phòng. Kết hợp với các header `Cache-Control` rõ ràng trên Express static middleware sản phẩm (`/assets/*` dùng `immutable, max-age=31536000`; `index.html`, `sw.js`, `manifest.json` dùng `no-cache, must-revalidate`), một bản build mới luôn thay thế bundle trong trình duyệt mà không cần hard refresh; listener `controllerchange` trong `client/src/main.tsx` sẽ tự reload đúng một lần khi SW mới tiếp quản trang đang được điều khiển (lần cài đặt đầu tiên thì không reload). Pipeline thông báo đẩy VAPID được giữ nguyên. SW trang chủ và wiki precache shell tương ứng và lazy-cache hình ảnh khi truy cập lần đầu, cho phép truy cập offline sau một lần tải. Tất cả manifest dùng icon SVG (`favicon.svg`) với `sizes="any"`, kèm meta tag `apple-mobile-web-app-capable` + `apple-touch-icon` cho chế độ standalone trên iOS |
 | **Tài nguyên tự lưu trữ (không CDN)** | Toàn bộ font và script được phục vụ cục bộ — không có một request CDN bên thứ ba nào. Ứng dụng React đóng gói Inter + JetBrains Mono qua `@fontsource` (chỉ subset latin; WOFF2 gắn hash nội dung được Vite phát ra vào `dist/assets/` lúc build). Trang chủ và wiki nạp một bảng `@font-face` tự lưu trữ `fonts/fonts.css` (wiki dùng `../fonts/`). Mermaid của wiki được vendor cục bộ (`wiki/mermaid.min.js`, bản minified thật của `mermaid@10.9.6`) thay cho jsDelivr; trang lỗi của VS Code extension bỏ Google Fonts, lùi về font hệ thống. Loại bỏ mọi lệnh gọi tới `fonts.googleapis.com` / `gstatic` / CDN, nên dashboard và tài liệu render hoàn toàn offline và không rò rỉ gì cho bên thứ ba |
 | **Màn hình splash thương hiệu** | Màn hình splash thương hiệu hiển thị một lần mỗi phiên trình duyệt khi tải ứng dụng — lời chào theo thời điểm trong ngày (Chào buổi sáng / chiều / tối), một dòng tiêu đề đậm cùng hai dòng phụ đã bản địa hóa, và một biểu tượng thương hiệu dạng đồ thị nút có hoạt ảnh trên nền tối (radial glow, chòm sao, hạt nhiễu). Đục hoàn toàn ngay từ khung hình đầu (không lóe nội dung ứng dụng phía sau), giữ ~2.5 giây rồi mờ dần, bấm để bỏ qua, tôn trọng `prefers-reduced-motion`, bản địa hóa en/zh/vi/ko/es |
-| **Ứng dụng máy tính để bàn (macOS & Windows)** | Ứng dụng máy tính để bàn gốc tùy chọn xây bằng Electron 35, nằm trong workspace `desktop/` cùng với `client/`, `server/`, `mcp/` và `vscode-extension/`. Phát hành dưới dạng `.app` macOS (`.dmg`) **và** `.exe` Windows (trình cài NSIS + bản portable không cần cài). Nó **nhúng máy chủ Express hiện có ngay trong tiến trình** (`require()` trực tiếp `server/index.js` — không có tiến trình con, không có IPC) và hiển thị ứng dụng React đã build trong một `BrowserWindow`. Bổ sung thanh tiêu đề gốc, biểu tượng tray ở menu-bar / khu vực thông báo mà nhấp một lần sẽ hiện **ảnh chụp trạng thái trực tiếp** (phiên, agent, sự kiện hôm nay) lấy từ SQLite tại thời điểm nhấp, trình đơn ứng dụng gốc, tự khởi động lúc đăng nhập (macOS Login Items qua `SMAppService`; Windows theo từng người dùng qua `HKCU\…\Run`), hộp thoại xác nhận **⌘Q / Ctrl+Q** (nhấn lần hai để bỏ qua), đóng cửa sổ thì ẩn đi nhưng máy chủ vẫn chạy, khóa một-phiên-bản, cùng các lệnh tray "Open in Browser", "Restart Server" và "Show Logs". Ưu tiên cổng 4820 (lùi về 4821–4829 rồi cổng cao ngẫu nhiên), tiếp quản một máy chủ khỏe mạnh sẵn có trên 4820 thay vì bind trùng, và **cùng tồn tại với dashboard web**. Thông báo bắn ra dưới dạng toast gốc của hệ điều hành (Web Push không hoạt động ổn định bên trong Electron). Lần khởi động đầu tiên với máy chủ do ứng dụng sở hữu sẽ tự cài hook Claude Code và chạy các dịch vụ nền, nên người dùng chỉ-cài-đặt cũng có sự kiện chảy về mà không cần thiết lập thủ công. Xem [`DESKTOP.md`](./DESKTOP.md) và [`desktop/README.md`](./desktop/README.md) |
+| **Ứng dụng máy tính để bàn (macOS, Windows & Linux)** | Ứng dụng máy tính để bàn gốc tùy chọn xây bằng Electron 35, nằm trong workspace `desktop/` cùng với `client/`, `server/`, `mcp/` và `vscode-extension/`. Phát hành dưới dạng `.app` macOS (`.dmg`), `.exe` Windows (trình cài NSIS + bản portable không cần cài) **và** gói Linux (AppImage x64 + `.deb`). Nó **nhúng máy chủ Express hiện có ngay trong tiến trình** (`require()` trực tiếp `server/index.js` — không có tiến trình con, không có IPC) và hiển thị ứng dụng React đã build trong một `BrowserWindow`. Bổ sung thanh tiêu đề gốc, biểu tượng tray ở menu-bar / khu vực thông báo mà nhấp một lần sẽ hiện **ảnh chụp trạng thái trực tiếp** (phiên, agent, sự kiện hôm nay) lấy từ SQLite tại thời điểm nhấp, trình đơn ứng dụng gốc, tự khởi động lúc đăng nhập (macOS Login Items qua `SMAppService`; Windows theo từng người dùng qua `HKCU\…\Run`; không có tác dụng trên Linux), hộp thoại xác nhận **⌘Q / Ctrl+Q** (nhấn lần hai để bỏ qua), đóng cửa sổ thì ẩn đi nhưng máy chủ vẫn chạy, khóa một-phiên-bản, cùng các lệnh tray "Open in Browser", "Restart Server" và "Show Logs". Ưu tiên cổng 4820 (lùi về 4821–4829 rồi cổng cao ngẫu nhiên), tiếp quản một máy chủ khỏe mạnh sẵn có trên 4820 thay vì bind trùng, và **cùng tồn tại với dashboard web**. Thông báo bắn ra dưới dạng toast gốc của hệ điều hành (Web Push không hoạt động ổn định bên trong Electron). Lần khởi động đầu tiên với máy chủ do ứng dụng sở hữu sẽ tự cài hook Claude Code và chạy các dịch vụ nền, nên người dùng chỉ-cài-đặt cũng có sự kiện chảy về mà không cần thiết lập thủ công. Xem [`DESKTOP.md`](./DESKTOP.md) và [`desktop/README.md`](./desktop/README.md) |
 
 > **Phạm vi nhà cung cấp và vị trí dữ liệu:** Cài đặt giữ lựa chọn Claude Code / Codex / Cả hai nhất quán trên toàn ứng dụng và cho phép đổi từng thư mục dữ liệu phiên mà không cần khởi động lại dashboard.
 >
@@ -469,14 +469,15 @@ Các cổng host mặc định chỉ bind loopback: dashboard `4820`, MCP `8819`
 > [!IMPORTANT]
 > Cài hooks trên host. Với remote hook, đặt `AM_DASHBOARD_URL=https://...` và `AM_HOOK_TOKEN`; URL không phải loopback bắt buộc HTTPS. Xem [DEPLOYMENT.md](DEPLOYMENT.md).
 
-### Thay thế: Ứng dụng máy tính để bàn (macOS & Windows)
+### Thay thế: Ứng dụng máy tính để bàn (macOS, Windows & Linux)
 
 Nếu bạn không muốn giữ một cửa sổ terminal mở, hãy cài đặt **ứng dụng máy tính để bàn gốc** tùy chọn. Nó nhúng máy chủ ngay trong tiến trình, thêm biểu tượng tray ở menu-bar / khu vực thông báo và hỗ trợ tự khởi động lúc đăng nhập (macOS Login Items / Windows startup).
 
 Cách nhanh nhất là **tải trình cài dựng sẵn** từ [bản GitHub Release mới nhất](https://github.com/tanvoid0/agent-monitor/releases/latest) (CI tự động phát hành một `vX.Y.Z` mỗi khi `package.json` được nâng phiên bản trên `main`):
 
-- **macOS** — tải `AgentMonitor-<version>-arm64.dmg` (Apple Silicon) hoặc `-x64.dmg` (Intel) rồi kéo **AgentMonitor.app** vào `/Applications`.
+- **macOS** — tải `AgentMonitor-<version>-arm64.dmg` (Apple Silicon) hoặc `-x64.dmg` (Intel) rồi kéo **Agent Monitor.app** vào `/Applications`.
 - **Windows** — tải `AgentMonitor-Setup-<version>-x64.exe` (trình cài) hoặc `AgentMonitor-<version>-x64-portable.exe` (không cần cài) rồi chạy.
+- **Linux** — tải `AgentMonitor-<version>-x86_64.AppImage` (`chmod +x` rồi chạy) hoặc `AgentMonitor-<version>-amd64.deb` (`sudo apt install ./AgentMonitor-<version>-amd64.deb`).
 
 Hoặc nếu bạn muốn tự dựng:
 
@@ -484,10 +485,11 @@ Hoặc nếu bạn muốn tự dựng:
 npm run desktop:install        # cài Electron + electron-builder vào desktop/ (tiền kiểm phụ thuộc gốc; in hướng dẫn thiết lập khi thất bại)
 npm run desktop:dmg:arm64      # macOS: DMG một-kiến-trúc nhanh (Apple Silicon)
 npm run desktop:win            # Windows: trình cài NSIS .exe (chạy trên Windows)
+npm run desktop:linux          # Linux: AppImage x64 + .deb (chạy trên Linux)
 ```
 
 > [!LƯU Ý]
-> DMG dựng trên macOS, còn `.exe` Windows dựng trên Windows — electron-builder đóng gói theo hệ điều hành chủ. Toàn bộ chi tiết, ngữ nghĩa vòng đời, các bước cài đặt và hook ký/công chứng nằm trong mục [Ứng dụng máy tính để bàn (macOS & Windows)](#ứng-dụng-máy-tính-để-bàn-macos--windows) và [`DESKTOP.md`](./DESKTOP.md).
+> DMG dựng trên macOS, `.exe` Windows dựng trên Windows, còn AppImage/`.deb` dựng trên Linux — electron-builder đóng gói theo hệ điều hành chủ. Toàn bộ chi tiết, ngữ nghĩa vòng đời, các bước cài đặt và hook ký/công chứng nằm trong mục [Ứng dụng máy tính để bàn (macOS, Windows & Linux)](#ứng-dụng-máy-tính-để-bàn-macos-windows--linux) và [`DESKTOP.md`](./DESKTOP.md).
 
 ---
 
@@ -662,7 +664,7 @@ flowchart LR
 
 ## CLI `am`
 
-> **Nâng cấp từ v2.x (CCAM)?** Dự án được đổi tên thành **AgentMonitor** ở v3.0.0. `ccam` vẫn hoạt động như bí danh của `am`; các biến môi trường `CCAM_*` cũ được sao chép sang `AM_*` tương ứng khi khởi động (giá trị đặt dưới tên mới được ưu tiên); tệp đăng ký máy chủ đang chạy chuyển từ `~/.claude/.agent-dashboard.json` sang `~/.claude/.agentmonitor.json` (được ghi lại ở lần khởi động tiếp theo); và marketplace/ID plugin đổi từ `ccam-*@claude-code-agent-monitor-plugins` thành `am-*@agentmonitor-plugins`, nên hãy cài lại các plugin bạn dùng.
+> **Nâng cấp từ v2.x (CCAM)?** Dự án được đổi tên thành **Agent Monitor** ở v3.0.0. `ccam` vẫn hoạt động như bí danh của `am`; các biến môi trường `CCAM_*` cũ được sao chép sang `AM_*` tương ứng khi khởi động (giá trị đặt dưới tên mới được ưu tiên); tệp đăng ký máy chủ đang chạy chuyển từ `~/.claude/.agent-dashboard.json` sang `~/.claude/.agentmonitor.json` (được ghi lại ở lần khởi động tiếp theo); và marketplace/ID plugin đổi từ `ccam-*@claude-code-agent-monitor-plugins` thành `am-*@agentmonitor-plugins`, nên hãy cài lại các plugin bạn dùng.
 
 Toàn bộ bề mặt tính năng của dashboard cũng dùng được từ terminal qua CLI **`am`** không phụ thuộc thư viện ngoài (`bin/am.js`), được liên kết tự động bởi `npm run setup` (qua `npm link` kiểu fail-soft). CLI tự tìm server đang chạy qua `~/.claude/.agentmonitor.json` (cùng sổ đăng ký mà hook handler dùng; ghi đè bằng `CLAUDE_DASHBOARD_PORT`/`DASHBOARD_PORT`, mặc định `http://127.0.0.1:4820`).
 
@@ -725,7 +727,7 @@ am open                         # mở dashboard trong trình duyệt
 am version                      # in phiên bản CLI (cũng có --version / -v)
 ```
 
-Các lệnh dựa trên API cần server đang chạy — khi chưa chạy, **các lệnh chỉ-đọc tự động chuyển sang đọc trực tiếp `data/dashboard.db`** (kèm banner `⚠ Offline mode` rõ ràng, và các phiên `active` đã chết trong DB được hiệu chỉnh khi hiển thị bằng chính probe kiểm tra tiến trình mà watchdog của server sử dụng), còn các lệnh không thể chạy đúng nếu thiếu server (`tail` trực tiếp, analytics/tính chi phí, các thao tác ghi) in chỉ báo `○ Dashboard server is NOT running` cùng lý do cụ thể và lệnh khởi động; `am start` đưa server production lên chạy nền. Các lệnh đọc luôn an toàn; lệnh phá hủy duy nhất (`clear-data`) từ chối chạy nếu thiếu `--yes` tường minh. Đầu ra là một giao diện terminal đầy đủ — bảng kẻ khung với cột số căn phải, biểu tượng trạng thái (`● active`, `○ waiting`, `✔ completed`, `✖ error`), biểu đồ thanh inline cho stats/analytics/cost, và cây agent `├─`/`└─` thực thụ — với màu ANSI tự bật trên TTY, tắt khi pipe, và điều khiển được qua `--no-color` / `NO_COLOR` / `FORCE_COLOR`. Để theo dõi liên tục, **`am repl`** (bí danh `shell` / `i`) mở một shell tương tác nơi bạn gõ lệnh mà không cần tiền tố `am` — kèm biểu ngữ chào AgentMonitor, tự hoàn thành bằng Tab, lịch sử phím mũi tên được lưu lại, một dấu nhắc hiển thị trạng thái server trực tiếp (`● host` khi bật / `○ offline` khi tắt), menu `help` / `help <cmd>` phân nhóm, và một built-in `watch [giây] <lệnh>` tự làm mới bất kỳ lệnh nào (ví dụ `watch 5 kanban`); mỗi dòng chạy như một tiến trình con biệt lập, nên việc từ chối khi offline hay một `tail` đang chặn không bao giờ làm sập shell. Nếu `am` chưa có trên PATH, chạy `npm link` một lần từ thư mục gốc của repo. Tài liệu đầy đủ — cờ, thứ tự phát hiện server, REPL, mô hình an toàn, mã thoát — tại [docs/CLI.md](./docs/CLI.md).
+Các lệnh dựa trên API cần server đang chạy — khi chưa chạy, **các lệnh chỉ-đọc tự động chuyển sang đọc trực tiếp `data/dashboard.db`** (kèm banner `⚠ Offline mode` rõ ràng, và các phiên `active` đã chết trong DB được hiệu chỉnh khi hiển thị bằng chính probe kiểm tra tiến trình mà watchdog của server sử dụng), còn các lệnh không thể chạy đúng nếu thiếu server (`tail` trực tiếp, analytics/tính chi phí, các thao tác ghi) in chỉ báo `○ Dashboard server is NOT running` cùng lý do cụ thể và lệnh khởi động; `am start` đưa server production lên chạy nền. Các lệnh đọc luôn an toàn; lệnh phá hủy duy nhất (`clear-data`) từ chối chạy nếu thiếu `--yes` tường minh. Đầu ra là một giao diện terminal đầy đủ — bảng kẻ khung với cột số căn phải, biểu tượng trạng thái (`● active`, `○ waiting`, `✔ completed`, `✖ error`), biểu đồ thanh inline cho stats/analytics/cost, và cây agent `├─`/`└─` thực thụ — với màu ANSI tự bật trên TTY, tắt khi pipe, và điều khiển được qua `--no-color` / `NO_COLOR` / `FORCE_COLOR`. Để theo dõi liên tục, **`am repl`** (bí danh `shell` / `i`) mở một shell tương tác nơi bạn gõ lệnh mà không cần tiền tố `am` — kèm biểu ngữ chào Agent Monitor, tự hoàn thành bằng Tab, lịch sử phím mũi tên được lưu lại, một dấu nhắc hiển thị trạng thái server trực tiếp (`● host` khi bật / `○ offline` khi tắt), menu `help` / `help <cmd>` phân nhóm, và một built-in `watch [giây] <lệnh>` tự làm mới bất kỳ lệnh nào (ví dụ `watch 5 kanban`); mỗi dòng chạy như một tiến trình con biệt lập, nên việc từ chối khi offline hay một `tail` đang chặn không bao giờ làm sập shell. Nếu `am` chưa có trên PATH, chạy `npm link` một lần từ thư mục gốc của repo. Tài liệu đầy đủ — cờ, thứ tự phát hiện server, REPL, mô hình an toàn, mã thoát — tại [docs/CLI.md](./docs/CLI.md).
 
 ## Tập lệnh npm
 
@@ -767,6 +769,7 @@ Các lệnh dựa trên API cần server đang chạy — khi chưa chạy, **c�
 | `npm run desktop:dmg:universal` | **macOS:** Tạo **một** DMG universal hợp nhất (arm64 + x86_64 trong một tệp) — tùy chọn, **chậm nhất**, không phải thứ bản phát hành đi kèm. |
 | `npm run desktop:win`   | **Windows:** Tạo trình cài **NSIS** `.exe` (x64) — chạy trên Windows |
 | `npm run desktop:win:portable` | **Windows:** Tạo bản **portable** (không cần cài) `.exe` (x64) — chạy trên Windows |
+| `npm run desktop:linux` | Tạo **AppImage** + **.deb** cho Linux (x64) — chạy trên Linux |
 | `npm run monitoring:install` | Chạy `npm install` trong `monitoring/` — tải Prometheus + Grafana qua `postinstall` |
 | `npm run monitoring:setup` | Alias của `monitoring:install` |
 | `npm run monitoring:up` | Khởi động Prometheus (:9090) + Grafana (:3000) nền (không cần Docker) |
@@ -1056,7 +1059,7 @@ Chi tiết đầy đủ: [mcp/README.md](./mcp/README.md)
 
 ## Lớp kế hoạch
 
-Lớp kế hoạch (plan layer) khớp nối `PROGRESS.md` của một dự án (cột mốc → bước → làn → hộp việc) với chính các session, agent và event của AgentMonitor cho `cwd` của dự án đó, để mỗi hộp việc trên bảng hiển thị agent đang thực hiện nó, nó đã chạy gì, thất bại ở đâu, và tốn bao nhiêu — tất cả được tính theo yêu cầu từ dữ liệu AgentMonitor đã thu thập sẵn, không cần một bộ theo dõi riêng để giữ đồng bộ. Việc phát hiện là tự động: bất kỳ dự án nào có `PROGRESS.md` dưới một `cwd` mà AgentMonitor đã thấy session trong 7 ngày gần nhất đều được tự động nhận diện và theo dõi thay đổi, không cần bước đăng ký.
+Lớp kế hoạch (plan layer) khớp nối `PROGRESS.md` của một dự án (cột mốc → bước → làn → hộp việc) với chính các session, agent và event củan Agent Monitor cho `cwd` của dự án đó, để mỗi hộp việc trên bảng hiển thị agent đang thực hiện nó, nó đã chạy gì, thất bại ở đâu, và tốn bao nhiêu — tất cả được tính theo yêu cầu từ dữ liệu Agent Monitor đã thu thập sẵn, không cần một bộ theo dõi riêng để giữ đồng bộ. Việc phát hiện là tự động: bất kỳ dự án nào có `PROGRESS.md` dưới một `cwd` mà Agent Monitor đã thấy session trong 7 ngày gần nhất đều được tự động nhận diện và theo dõi thay đổi, không cần bước đăng ký.
 
 <p align="center">
   <img src="images/plan.png" alt="Lớp kế hoạch — bảng xây dựng" width="100%">
@@ -1124,7 +1127,7 @@ Tài liệu API hiện đã **đầy đủ**: mọi route phụ trợ đều đ�
 
 ### Số liệu Prometheus & Grafana
 
-`GET /api/metrics` cung cấp các bộ đếm trực tiếp của dashboard — phiên/agent theo trạng thái, tổng số sự kiện và token, số client thời gian thực đang kết nối, các nguồn từ xa đã cấu hình, thời gian hoạt động/bộ nhớ của tiến trình, và phiên bản build — theo định dạng text-exposition của Prometheus, nên AgentMonitor có thể được scrape vào observability stack của riêng bạn. Một stack Prometheus + Grafana sẵn dùng với **bốn dashboard tự cấp hình** (mặc định: **AgentMonitor — Overview**) nằm trong [`monitoring/`](./monitoring/README.md).
+`GET /api/metrics` cung cấp các bộ đếm trực tiếp của dashboard — phiên/agent theo trạng thái, tổng số sự kiện và token, số client thời gian thực đang kết nối, các nguồn từ xa đã cấu hình, thời gian hoạt động/bộ nhớ của tiến trình, và phiên bản build — theo định dạng text-exposition của Prometheus, nên Agent Monitor có thể được scrape vào observability stack của riêng bạn. Một stack Prometheus + Grafana sẵn dùng với **bốn dashboard tự cấp hình** (mặc định: **Agent Monitor — Overview**) nằm trong [`monitoring/`](./monitoring/README.md).
 
 **npm (không Docker, không Homebrew):**
 
@@ -1142,21 +1145,21 @@ npm run monitoring:docker:up
 ```
 
 <p align="center">
-  <img src="images/grafana.png" alt="Grafana AgentMonitor — Overview dashboard with live session, event, and token metrics" width="100%">
+  <img src="images/grafana.png" alt="Grafana Agent Monitor — Overview dashboard with live session, event, and token metrics" width="100%">
   <br>
-  <em>📊 <strong>Grafana · AgentMonitor — Overview</strong> — bảng điều khiển mặc định (bốn board tự cấp hình): ảnh chụp fleet, tổng tích lũy từ DB, biểu đồ phân tích và tốc độ — tất cả từ scrape <code>/api/metrics</code> trực tiếp</em>
+  <em>📊 <strong>Grafana · Agent Monitor — Overview</strong> — bảng điều khiển mặc định (bốn board tự cấp hình): ảnh chụp fleet, tổng tích lũy từ DB, biểu đồ phân tích và tốc độ — tất cả từ scrape <code>/api/metrics</code> trực tiếp</em>
 </p>
 
 <p align="center">
-  <img src="images/prometheus-console.png" alt="Prometheus AgentMonitor console with metric cards and session tables" width="100%">
+  <img src="images/prometheus-console.png" alt="Prometheus Agent Monitor console with metric cards and session tables" width="100%">
   <br>
-  <em>🔥 <strong>Prometheus · AgentMonitor console</strong> — trang landing dựng sẵn tại <code>/consoles/index.html</code> truy vấn Prometheus trực tiếp cho trạng thái scrape, tổng phiên, sự kiện, token và liên kết Graph</em>
+  <em>🔥 <strong>Prometheus · Agent Monitor console</strong> — trang landing dựng sẵn tại <code>/consoles/index.html</code> truy vấn Prometheus trực tiếp cho trạng thái scrape, tổng phiên, sự kiện, token và liên kết Graph</em>
 </p>
 
 <p align="center">
-  <img src="images/prometheus-query.png" alt="Prometheus Graph UI with AgentMonitor PromQL query" width="100%">
+  <img src="images/prometheus-query.png" alt="Prometheus Graph UI with Agent Monitor PromQL query" width="100%">
   <br>
-  <em>📈 <strong>Prometheus · Graph</strong> — chạy PromQL trên metric AgentMonitor đã scrape (ví dụ <code>sum(am_sessions)</code>, <code>am_events_total</code>) với liên kết khởi đầu từ console AgentMonitor và <a href="./monitoring/README.md">monitoring/README.md</a></em>
+  <em>📈 <strong>Prometheus · Graph</strong> — chạy PromQL trên metric Agent Monitor đã scrape (ví dụ <code>sum(am_sessions)</code>, <code>am_events_total</code>) với liên kết khởi đầu từ console Agent Monitor và <a href="./monitoring/README.md">monitoring/README.md</a></em>
 </p>
 
 Xem [docs/API.md → Metrics](./docs/API.md#metrics) để biết danh sách chỉ số đầy đủ cùng chi tiết scrape/xác thực.
@@ -1529,18 +1532,18 @@ Bấm vào nhãn **Live** / **Disconnected** ở chân thanh bên để mở m�
 
 ---
 
-## Ứng dụng máy tính để bàn (macOS & Windows)
+## Ứng dụng máy tính để bàn (macOS, Windows & Linux)
 
-Bảng điều khiển đi kèm một **ứng dụng máy tính để bàn gốc** tùy chọn mà bạn cài đặt một lần rồi quên đi — một `.app` macOS (phân phối dưới dạng `.dmg`) và một `.exe` Windows (một trình cài NSIS cùng một bản portable không cần cài). Mọi thứ bạn thấy trong trình duyệt tại `localhost:4820` đều nằm bên trong cửa sổ này, cộng thêm vòng đời gốc của hệ điều hành: biểu tượng tray, trình đơn ứng dụng, tích hợp tự khởi động và một nút thoát duy nhất dọn dẹp máy chủ gọn gàng.
+Bảng điều khiển đi kèm một **ứng dụng máy tính để bàn gốc** tùy chọn mà bạn cài đặt một lần rồi quên đi — một `.app` macOS (phân phối dưới dạng `.dmg`) một `.exe` Windows (một trình cài NSIS cùng một bản portable không cần cài) và gói Linux (một `.AppImage` x64 cùng một `.deb`). Mọi thứ bạn thấy trong trình duyệt tại `localhost:4820` đều nằm bên trong cửa sổ này, cộng thêm vòng đời gốc của hệ điều hành: biểu tượng tray, trình đơn ứng dụng, tích hợp tự khởi động và một nút thoát duy nhất dọn dẹp máy chủ gọn gàng.
 
 <p align="center">
-  <img src="images/macos.png" alt="AgentMonitor chạy như một ứng dụng máy tính để bàn gốc" width="100%">
+  <img src="images/macos.png" alt="Agent Monitor chạy như một ứng dụng máy tính để bàn gốc" width="100%">
   <br>
   <em>🍎🪟 <strong>Ứng dụng máy tính để bàn</strong> — vỏ gốc với biểu tượng tray ở menu-bar / khu vực thông báo, Open-at-Login và khoá single-instance. Cùng một bảng điều khiển, chạy trong một cửa sổ hệ điều hành thật (hình minh họa là macOS).</em>
 </p>
 
 <p align="center">
-  <img src="images/windows_app.png" alt="AgentMonitor chạy như một ứng dụng máy tính để bàn gốc trên Windows, hiển thị Activity Feed với thanh trình đơn cửa sổ Windows và bảng Tabby" width="100%">
+  <img src="images/windows_app.png" alt="Agent Monitor chạy như một ứng dụng máy tính để bàn gốc trên Windows, hiển thị Activity Feed với thanh trình đơn cửa sổ Windows và bảng Tabby" width="100%">
   <br>
   <em>🪟 Cùng một bảng điều khiển dưới dạng ứng dụng Windows gốc — biểu tượng tray ở khu vực thông báo, trình đơn cửa sổ gốc và Open-at-Login.</em>
 </p>
@@ -1548,7 +1551,7 @@ Bảng điều khiển đi kèm một **ứng dụng máy tính để bàn gốc
 Workspace `desktop/` là **một workspace ngang hàng** với `client/`, `server/`, `mcp/` và `vscode-extension/` — được xây dựng bằng **Electron 35**. Nó **nhúng máy chủ Express ngay trong tiến trình** (`require()` trực tiếp `server/index.js` — không có tiến trình con, không có IPC) và hiển thị ứng dụng React đã build trong một `BrowserWindow`.
 
 > [!LƯU Ý]
-> **Trạng thái:** v1, hỗ trợ macOS và Windows. Bản dựng Linux và trình tự cập nhật (auto-updater) nằm ngoài phạm vi của phiên bản này và được theo dõi như các việc tiếp nối.
+> **Trạng thái:** v1, hỗ trợ macOS, Windows và Linux. Trình tự cập nhật (auto-updater) nằm ngoài phạm vi của phiên bản này và được theo dõi như một việc tiếp nối.
 
 ### Vị trí của ứng dụng máy tính để bàn trong kho mã
 
@@ -1597,13 +1600,16 @@ Tải từ [**Releases → latest**](https://github.com/tanvoid0/agent-monitor/r
 | macOS (Intel) | `AgentMonitor-<ver>-x64.dmg` | kéo vào `/Applications` |
 | Windows (trình cài) | `AgentMonitor-Setup-<ver>-x64.exe` | cài theo từng người dùng, không cần quyền admin |
 | Windows (portable) | `AgentMonitor-<ver>-x64-portable.exe` | chạy mà không cần cài |
+| Linux (AppImage) | `AgentMonitor-<ver>-x86_64.AppImage` | `chmod +x` rồi chạy |
+| Linux (deb) | `AgentMonitor-<ver>-amd64.deb` | `sudo apt install ./AgentMonitor-<ver>-amd64.deb` |
 
-Nếu cần **bản build theo từng commit**, dùng artifact CI (cần đăng nhập, lưu giữ 14 ngày): `AgentMonitor-dmg` từ job `🍎 macOS Desktop (DMG)` và `AgentMonitor-win` từ job `🪟 Windows Desktop (EXE)`.
+Nếu cần **bản build theo từng commit**, dùng artifact CI (cần đăng nhập, lưu giữ 14 ngày): `AgentMonitor-dmg` từ job `🍎 macOS Desktop (DMG)`, `AgentMonitor-win` từ job `🪟 Windows Desktop (EXE)` và `AgentMonitor-linux` từ job `🐧 Linux Desktop (AppImage + deb)`.
 
 Cài đặt:
 
-- **macOS** — mở (mount) tệp `.dmg`, rồi kéo `AgentMonitor.app` vào thư mục `Applications`. macOS có thể hiện cảnh báo Gatekeeper trong lần chạy đầu tiên — xem mục [Gatekeeper / SmartScreen](#gatekeeper--smartscreen-lần-chạy-đầu-tiên) bên dưới.
-- **Windows** — chạy `AgentMonitor-Setup-<ver>-x64.exe`. Nó cài **theo từng người dùng** vào `%LOCALAPPDATA%\Programs\AgentMonitor` (không cần nâng quyền admin) và cho bạn chọn thư mục cài; hoặc chạy `*-portable.exe` để khởi động mà không cần cài. Windows **SmartScreen** có thể hiện cảnh báo trong lần chạy đầu tiên — xem bên dưới.
+- **macOS** — mở (mount) tệp `.dmg`, rồi kéo `Agent Monitor.app` vào thư mục `Applications`. macOS có thể hiện cảnh báo Gatekeeper trong lần chạy đầu tiên — xem mục [Gatekeeper / SmartScreen](#gatekeeper--smartscreen-lần-chạy-đầu-tiên) bên dưới.
+- **Windows** — chạy `AgentMonitor-Setup-<ver>-x64.exe`. Nó cài **theo từng người dùng** vào `%LOCALAPPDATA%\Programs\Agent Monitor` (không cần nâng quyền admin) và cho bạn chọn thư mục cài; hoặc chạy `*-portable.exe` để khởi động mà không cần cài. Windows **SmartScreen** có thể hiện cảnh báo trong lần chạy đầu tiên — xem bên dưới.
+- **Linux** — AppImage: `chmod +x AgentMonitor-<ver>-x86_64.AppImage` rồi chạy; hoặc `.deb`: `sudo apt install ./AgentMonitor-<ver>-amd64.deb` (tệp thực thi `agentmonitor`, danh mục Development). Biểu tượng tray dùng icon ứng dụng màu.
 
 <p align="center">
   <img src="images/setup_win_wizard.png" alt="Trình cài NSIS bước 1 — Choose Installation Options, chọn cài theo từng người dùng (Only for me) hay cho mọi người dùng" width="100%">
@@ -1632,10 +1638,11 @@ npm run build                # build ứng dụng React
 npm run desktop:install      # cài Electron + electron-builder vào desktop/ (tiền kiểm phụ thuộc gốc; in hướng dẫn thiết lập khi thất bại)
 npm run desktop:dmg:arm64    # macOS: tạo desktop/release/AgentMonitor-<ver>-arm64.dmg (nhanh)
 npm run desktop:win          # Windows: tạo trình cài NSIS .exe (chạy trên Windows)
+npm run desktop:linux        # Linux: AppImage x64 + .deb → desktop/release/AgentMonitor-<ver>-x86_64.AppImage, …-amd64.deb (chạy trên Linux)
 ```
 
 > [!QUAN TRỌNG]
-> **DMG dựng trên macOS, `.exe` Windows dựng trên Windows** — electron-builder đóng gói theo hệ điều hành chủ. Bản dựng `npm run desktop:dmg` của macOS **cố tình chậm** (đóng gói hai lần — mỗi kiến trúc một lần — rồi xuất ra **cả hai** DMG theo kiến trúc `AgentMonitor-<ver>-arm64.dmg` và `AgentMonitor-<ver>-x64.dmg`, không có bước hợp nhất); khi xây dựng cho **chính máy Mac của bạn**, hãy dùng `npm run desktop:dmg:arm64` (Apple Silicon) hoặc `npm run desktop:dmg:x64` (Intel) — chỉ một kiến trúc, hoàn tất trong khoảng một phút. Trên Windows, `npm run desktop:install` tải `better-sqlite3` dưới dạng nhị phân Electron dựng sẵn, nên trường hợp thông thường không cần bộ công cụ Visual Studio C++. Nếu việc dựng có thất bại (không có nhị phân dựng sẵn, hoặc thiếu bộ công cụ C++), `desktop:install` in ra đúng cách khắc phục theo từng hệ điều hành cùng một phương án không cần bộ công cụ rồi báo lỗi rõ ràng thay vì để lại bản cài hỏng. CI đã dựng sẵn cả DMG macOS lẫn `.exe` Windows và tải lên dưới dạng artifact `AgentMonitor-dmg` / `AgentMonitor-win`, nên bạn hiếm khi cần tự dựng. DMG macOS khoảng ~80 MB (~250 MB khi giải nén trên đĩa) và trình cài Windows tương đương.
+> **DMG dựng trên macOS, `.exe` Windows dựng trên Windows, AppImage/`.deb` dựng trên Linux** — electron-builder đóng gói theo hệ điều hành chủ. Bản dựng `npm run desktop:dmg` của macOS **cố tình chậm** (đóng gói hai lần — mỗi kiến trúc một lần — rồi xuất ra **cả hai** DMG theo kiến trúc `AgentMonitor-<ver>-arm64.dmg` và `AgentMonitor-<ver>-x64.dmg`, không có bước hợp nhất); khi xây dựng cho **chính máy Mac của bạn**, hãy dùng `npm run desktop:dmg:arm64` (Apple Silicon) hoặc `npm run desktop:dmg:x64` (Intel) — chỉ một kiến trúc, hoàn tất trong khoảng một phút. Trên Windows, `npm run desktop:install` tải `better-sqlite3` dưới dạng nhị phân Electron dựng sẵn, nên trường hợp thông thường không cần bộ công cụ Visual Studio C++. Nếu việc dựng có thất bại (không có nhị phân dựng sẵn, hoặc thiếu bộ công cụ C++), `desktop:install` in ra đúng cách khắc phục theo từng hệ điều hành cùng một phương án không cần bộ công cụ rồi báo lỗi rõ ràng thay vì để lại bản cài hỏng. CI đã dựng sẵn DMG macOS, `.exe` Windows lẫn gói Linux và tải lên dưới dạng artifact `AgentMonitor-dmg` / `AgentMonitor-win` / `AgentMonitor-linux`, nên bạn hiếm khi cần tự dựng. DMG macOS khoảng ~80 MB (~250 MB khi giải nén trên đĩa) và trình cài Windows và gói Linux tương đương.
 
 ### Điều gì xảy ra khi bạn khởi chạy ứng dụng
 
@@ -1668,14 +1675,14 @@ flowchart TD
 
 ### Biểu tượng tray, trình đơn và tự khởi động
 
-- **Biểu tượng tray** — bề mặt trạng thái luôn-bật (menu-bar trên macOS / khu vực thông báo trên Windows). Trình đơn ngữ cảnh gồm: *Open Dashboard, Open in Browser, Restart Server, Show Logs, Open at Login (chuyển đổi), Quit*. Trình đơn được dựng lại mỗi lần mở nên nhãn cổng và ô đánh dấu *Open at Login* luôn cập nhật. macOS dùng glyph template được tô màu; Windows dùng `icon.ico` màu (một template đen sẽ biến mất trên thanh tác vụ tối). (Mục **File ▸ Open Dashboard** (`⌘1`) trong **trình đơn ứng dụng** gốc **chỉ có trên macOS**: macOS vẫn giữ thanh menu toàn cục sau khi cửa sổ ẩn đi nên mục đó có thể mở lại cửa sổ — còn trên Windows/Linux trình đơn gắn liền với cửa sổ và phím tắt menu không thể kích hoạt khi cửa sổ đang ẩn, nên hãy mở lại từ *Open Dashboard* của tray, vốn luôn **đưa cửa sổ lên trước** một cách đáng tin cậy kể cả khi cửa sổ đã thu nhỏ hay bị các cửa sổ khác che khuất.)
-- **Biểu tượng cửa sổ và thanh tác vụ** — `BrowserWindow` được gắn với logo ứng dụng màu (`icon.ico` trên Windows, `icon.png` ở nơi khác), nên thanh tiêu đề / thanh tác vụ hiển thị đúng biểu tượng AgentMonitor — kể cả khi chạy `npm run desktop:dev` chưa đóng gói cũng không còn hiện biểu tượng Electron chung chung nữa.
+- **Biểu tượng tray** — bề mặt trạng thái luôn-bật (menu-bar trên macOS / khu vực thông báo trên Windows / khay hệ thống trên Linux). Trình đơn ngữ cảnh gồm: *Open Dashboard, Open in Browser, Restart Server, Show Logs, Open at Login (chuyển đổi), Quit*. Trình đơn được dựng lại mỗi lần mở nên nhãn cổng và ô đánh dấu *Open at Login* luôn cập nhật. macOS dùng glyph template được tô màu; Windows dùng `icon.ico` màu và Linux dùng `icon.png` màu (một template đen sẽ biến mất trên thanh tác vụ tối). (Mục **File ▸ Open Dashboard** (`⌘1`) trong **trình đơn ứng dụng** gốc **chỉ có trên macOS**: macOS vẫn giữ thanh menu toàn cục sau khi cửa sổ ẩn đi nên mục đó có thể mở lại cửa sổ — còn trên Windows/Linux trình đơn gắn liền với cửa sổ và phím tắt menu không thể kích hoạt khi cửa sổ đang ẩn, nên hãy mở lại từ *Open Dashboard* của tray, vốn luôn **đưa cửa sổ lên trước** một cách đáng tin cậy kể cả khi cửa sổ đã thu nhỏ hay bị các cửa sổ khác che khuất.)
+- **Biểu tượng cửa sổ và thanh tác vụ** — `BrowserWindow` được gắn với logo ứng dụng màu (`icon.ico` trên Windows, `icon.png` ở nơi khác), nên thanh tiêu đề / thanh tác vụ hiển thị đúng biểu tượng Agent Monitor — kể cả khi chạy `npm run desktop:dev` chưa đóng gói cũng không còn hiện biểu tượng Electron chung chung nữa.
 - **Đóng cửa sổ thì ẩn đi** — máy chủ vẫn chạy, biểu tượng tray vẫn còn. Nhấp tray để đưa cửa sổ trở lại.
 - **Thoát (⌘Q / Ctrl+Q, hoặc tray → Quit)** — tắt máy chủ nhúng một cách gọn gàng, đóng SQLite sạch sẽ (checkpoint WAL) rồi thoát.
 - **Khóa một-phiên-bản** — khởi chạy lần hai chỉ đưa cửa sổ hiện có lên trước, không có máy chủ thứ hai, không xung đột cổng. (Áp dụng trên mọi nền tảng.)
-- **Tự khởi động lúc đăng nhập** — bật/tắt *Open at Login* trong trình đơn tray. Trên macOS nó đăng ký qua API `SMAppService`, nên mục này xuất hiện trong **System Settings → General → Login Items**; trên Windows nó ghi một mục `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` theo từng người dùng, thấy được trong **Task Manager → Startup**. Khi ứng dụng được khởi chạy lúc đăng nhập, nó bắt đầu ở chế độ **chỉ-tray** — không có cửa sổ nhảy ra trước mặt.
-- **Nhật ký** nằm tại `~/Library/Logs/AgentMonitor/desktop.log` (macOS) hoặc `%APPDATA%\AgentMonitor\logs\desktop.log` (Windows) (dùng *Show Logs* trong trình đơn để mở).
-- **Dữ liệu của bạn** (cơ sở dữ liệu SQLite và khóa VAPID) nằm trong thư mục dữ liệu ứng dụng theo từng người dùng, **bên ngoài** gói ứng dụng / thư mục cài — `~/Library/Application Support/AgentMonitor/data/` trên macOS, `%APPDATA%\AgentMonitor\data\` trên Windows — nên dữ liệu **sống sót qua các lần cài lại và cập nhật ứng dụng**. Một gói đã đóng gói là chỉ-đọc, nên ghi cơ sở dữ liệu bên trong sẽ phá vỡ History Import và việc lưu sự kiện; lưu trong thư mục dữ liệu ứng dụng khắc phục điều này và nghĩa là lịch sử đã nhập của bạn không bị ảnh hưởng khi thay thế hoặc nâng cấp ứng dụng. (Trình gỡ cài NSIS của Windows mặc định giữ lại dữ liệu này.)
+- **Tự khởi động lúc đăng nhập** — bật/tắt *Open at Login* trong trình đơn tray. Trên macOS nó đăng ký qua API `SMAppService`, nên mục này xuất hiện trong **System Settings → General → Login Items**; trên Windows nó ghi một mục `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` theo từng người dùng, thấy được trong **Task Manager → Startup**; trên Linux công tắc này không có tác dụng. Khi ứng dụng được khởi chạy lúc đăng nhập, nó bắt đầu ở chế độ **chỉ-tray** — không có cửa sổ nhảy ra trước mặt.
+- **Nhật ký** nằm tại `~/Library/Logs/Agent Monitor/desktop.log` (macOS), `%APPDATA%\Agent Monitor\logs\desktop.log` (Windows) hoặc `~/.config/Agent Monitor/logs/desktop.log` (Linux) (dùng *Show Logs* trong trình đơn để mở).
+- **Dữ liệu của bạn** (cơ sở dữ liệu SQLite và khóa VAPID) nằm trong thư mục dữ liệu ứng dụng theo từng người dùng, **bên ngoài** gói ứng dụng / thư mục cài — `~/Library/Application Support/Agent Monitor/data/` trên macOS, `%APPDATA%\Agent Monitor\data\` trên Windows, `~/.config/Agent Monitor/data/` trên Linux — nên dữ liệu **sống sót qua các lần cài lại và cập nhật ứng dụng**. Một gói đã đóng gói là chỉ-đọc, nên ghi cơ sở dữ liệu bên trong sẽ phá vỡ History Import và việc lưu sự kiện; lưu trong thư mục dữ liệu ứng dụng khắc phục điều này và nghĩa là lịch sử đã nhập của bạn không bị ảnh hưởng khi thay thế hoặc nâng cấp ứng dụng. (Trình gỡ cài NSIS của Windows mặc định giữ lại dữ liệu này.)
 - **CLI `claude`** — trên macOS, ứng dụng khôi phục `PATH` của login-shell lúc khởi động, nên tính năng "Run Claude" hoạt động dù một ứng dụng macOS khởi chạy từ Finder/Dock vốn chỉ thừa hưởng `PATH` tối thiểu của launchd. (Trên Windows, `PATH` người dùng được thừa hưởng đã bao gồm nó.)
 
 ### Module gốc `better-sqlite3`
@@ -1719,6 +1726,7 @@ Tất cả lệnh chạy được từ **thư mục gốc kho mã**. Mọi lện
 | `npm run desktop:dmg:universal` | **macOS:** **một** DMG universal hợp nhất (arm64 + x86_64 trong một tệp) — tùy chọn, **chậm nhất**, không phải thứ bản phát hành đi kèm. |
 | `npm run desktop:win` | **Windows:** trình cài NSIS `.exe` (x64). |
 | `npm run desktop:win:portable` | **Windows:** bản portable không cần cài `.exe` (x64). |
+| `npm run desktop:linux` | **Linux:** AppImage x64 + `.deb`. |
 
 ### Hiệu năng xây dựng — hãy đọc mục này
 
@@ -1757,7 +1765,7 @@ DMG macOS được **ký ad-hoc theo mặc định** (`CSC_IDENTITY_AUTO_DISCOVE
 **macOS** — một DMG ký ad-hoc sẽ kích hoạt cảnh báo Gatekeeper trong lần mở đầu tiên (*"Apple could not verify…"*). Cách giải quyết một dòng:
 
 ```bash
-xattr -cr "/Applications/AgentMonitor.app"
+xattr -cr "/Applications/Agent Monitor.app"
 ```
 
 Hoặc mở  → *System Settings → Privacy & Security*, cuộn tới ứng dụng bị chặn và nhấp *Open Anyway*.
@@ -1766,7 +1774,7 @@ Hoặc mở  → *System Settings → Privacy & Security*, cuộn tới ứng d�
 
 ### Tích hợp liên tục (CI)
 
-`.github/workflows/ci.yml` có hai job desktop được **lọc theo đường dẫn** (một job `changes` dùng `dorny/paths-filter` phát hiện thay đổi trong `desktop/**`; các job này cũng chạy trên mọi `push`, hoặc khi PR gắn nhãn `desktop`): job `🍎 macOS Desktop (DMG)` chạy trên `macos-latest` dựng cả hai DMG theo kiến trúc rồi tải lên dưới dạng artifact `AgentMonitor-dmg` (hai DMG một-kiến-trúc); job `🪟 Windows Desktop (EXE)` chạy trên `windows-latest` dựng rồi tải lên dưới dạng artifact `AgentMonitor-win` (trình cài NSIS + bản portable). Khi đẩy bản nâng phiên bản lên `main`, job `release` đính kèm **cả** DMG macOS lẫn `.exe` Windows vào bản GitHub Release `vX.Y.Z` đã phát hành. Biểu tượng Windows (`desktop/assets/icon.ico`) được commit vào kho mã (tạo lại từ `icon.png` bằng `npm run build:win-icon`, dùng PowerShell + .NET, không cần công cụ phụ).
+`.github/workflows/ci.yml` có ba job desktop được **lọc theo đường dẫn** (một job `changes` dùng `dorny/paths-filter` phát hiện thay đổi trong `desktop/**`; các job này cũng chạy trên mọi `push`, hoặc khi PR gắn nhãn `desktop`): job `🍎 macOS Desktop (DMG)` chạy trên `macos-latest` dựng cả hai DMG theo kiến trúc rồi tải lên dưới dạng artifact `AgentMonitor-dmg` (hai DMG một-kiến-trúc); job `🪟 Windows Desktop (EXE)` chạy trên `windows-latest` dựng rồi tải lên dưới dạng artifact `AgentMonitor-win` (trình cài NSIS + bản portable); job `🐧 Linux Desktop (AppImage + deb)` chạy trên `ubuntu-latest` dựng rồi tải lên dưới dạng artifact `AgentMonitor-linux` (AppImage + `.deb`). Khi đẩy bản nâng phiên bản lên `main`, job `release` đính kèm **cả** DMG macOS, `.exe` Windows lẫn tệp Linux vào bản GitHub Release `vX.Y.Z` đã phát hành. Biểu tượng Windows (`desktop/assets/icon.ico`) được commit vào kho mã (tạo lại từ `icon.png` bằng `npm run build:win-icon`, dùng PowerShell + .NET, không cần công cụ phụ).
 
 ### Thay đổi duy nhất ngoài `desktop/`
 
@@ -1779,7 +1787,7 @@ Thay đổi duy nhất ngoài workspace `desktop/` là một **tái cấu trúc 
 
 ## Tiện ích mở rộng VS Code
 
-**AgentMonitor** hiện đã có sẵn dưới dạng tiện ích mở rộng VS Code chính thức, cho phép bạn giám sát các tác nhân AI của mình mà không cần rời khỏi trình chỉnh sửa.
+**Agent Monitor** hiện đã có sẵn dưới dạng tiện ích mở rộng VS Code chính thức, cho phép bạn giám sát các tác nhân AI của mình mà không cần rời khỏi trình chỉnh sửa.
 
 <p align="center">
   <img src="vscode-extension/vscode.png" alt="VS Code Extension Screenshot" width="100%">
@@ -1801,7 +1809,7 @@ Thay đổi duy nhất ngoài workspace `desktop/` là một **tái cấu trúc 
 Để biết cấu hình chi tiết cho nhà phát triển, hãy xem các thư mục [.vscode](./.vscode) và [vscode-extension](./vscode-extension).
 
 > [!TIP]
-> Extension on VS Code Marketplace: [AgentMonitor](https://marketplace.visualstudio.com/items?itemName=hoangsonw.agentmonitor)
+> Extension on VS Code Marketplace: [Agent Monitor](https://marketplace.visualstudio.com/items?itemName=hoangsonw.agentmonitor)
 
 ---
 
@@ -1878,7 +1886,7 @@ erDiagram
 
 ## Thị trường plugin
 
-AgentMonitor cung cấp 14 plugin dùng chung cho Claude Code và Codex, với 66 skill đóng gói, 18 subagent Claude, 34 lệnh Claude, 3 công cụ CLI, 3 cấu hình hook và 2 plugin có MCP. CLI skills.sh phát hiện 76 skill trong toàn bộ repo. Xem `docs/PLUGINS.md` để biết catalog, lệnh cài đặt, cơ chế skills.sh và quy trình xác thực.
+Agent Monitor cung cấp 14 plugin dùng chung cho Claude Code và Codex, với 66 skill đóng gói, 18 subagent Claude, 34 lệnh Claude, 3 công cụ CLI, 3 cấu hình hook và 2 plugin có MCP. CLI skills.sh phát hiện 76 skill trong toàn bộ repo. Xem `docs/PLUGINS.md` để biết catalog, lệnh cài đặt, cơ chế skills.sh và quy trình xác thực.
 
 ### Thêm thị trường
 
@@ -2088,11 +2096,11 @@ graph LR
     style P_DIST fill:#646CFF,stroke:#818cf8,color:#fff
 ```
 
-Ngoài hai chế độ trên, ứng dụng máy tính để bàn (macOS & Windows) cung cấp một cách chạy thứ ba — máy chủ Express được nhúng ngay trong tiến trình chính Electron, không cần terminal:
+Ngoài hai chế độ trên, ứng dụng máy tính để bàn (macOS, Windows & Linux) cung cấp một cách chạy thứ ba — máy chủ Express được nhúng ngay trong tiến trình chính Electron, không cần terminal:
 
 ```mermaid
 flowchart LR
-    subgraph desktopmode["Desktop App (macOS & Windows) — 1 process (Electron Main)"]
+    subgraph desktopmode["Desktop App (macOS, Windows & Linux) — 1 process (Electron Main)"]
         MAIN["Electron Main<br/>Node 22 / Electron 35"]
         EMB["server/index.js<br/>embedded via require()"]
         WIN["BrowserWindow<br/>React dashboard"]
@@ -2131,7 +2139,7 @@ graph LR
 
 ### Triển khai đám mây
 
-`deployments/` chạy trên mọi Kubernetes tương thích, gồm EKS, GKE, AKS, OKE và cụm tự quản lý. AgentMonitor dùng SQLite, vì vậy mọi manifest được hỗ trợ đều bắt buộc **chính xác một dashboard writer đang hoạt động trên mỗi persistent volume** với Recreate. HPA, active-active, nhiều replica, blue-green và canary không được hỗ trợ khi SQLite vẫn là persistence backend.
+`deployments/` chạy trên mọi Kubernetes tương thích, gồm EKS, GKE, AKS, OKE và cụm tự quản lý. Agent Monitor dùng SQLite, vì vậy mọi manifest được hỗ trợ đều bắt buộc **chính xác một dashboard writer đang hoạt động trên mỗi persistent volume** với Recreate. HPA, active-active, nhiều replica, blue-green và canary không được hỗ trợ khi SQLite vẫn là persistence backend.
 
 - **Helm:** schema chặn nhiều replica/HPA, hỗ trợ image digest, retained PVC, Ingress hoặc Gateway API, external Secret, NetworkPolicy, MCP và ServiceMonitor tùy chọn.
 - **Kustomize:** Restricted PSS base, overlay dev/staging/production, component MCP, monitoring, Gateway API và CSI snapshot.
@@ -2273,14 +2281,14 @@ agentmonitor/
 |   +-- build/                   # Built MCP runtime output
 |-- desktop/
 |   |-- package.json             # Electron + electron-builder
-|   |-- electron-builder.yml     # DMG config; signing/notarization hooks
+|   |-- electron-builder.yml     # DMG (macOS) + NSIS/portable (Windows) + AppImage/deb (Linux) targets; signing/notarization hooks
 |   |-- README.md                # Contributor / architecture reference
 |   |-- assets/                  # icon.icns + tray PNGs (generated from SVG)
 |   |-- src/
 |   |   |-- main.ts              # Main process entry — lifecycle
 |   |   |-- server-host.ts       # In-process Express boot, port discovery, adoption
 |   |   |-- window.ts            # BrowserWindow + persisted geometry
-|   |   |-- tray.ts              # Menu-bar icon + context menu
+|   |   |-- tray.ts              # Menu-bar icon (template PNG on macOS, icon.ico on Windows, icon.png on Linux) + context menu
 |   |   |-- menu.ts              # Native application menu (File ▸ Open Dashboard is macOS-only)
 |   |   |-- login-item.ts        # macOS Login Items (SMAppService) toggle
 |   |   |-- logger.ts            # File logger → ~/Library/Logs/.../desktop.log
@@ -2324,18 +2332,18 @@ agentmonitor/
 | WebSocket bị ngắt kết nối            | Máy khách tự động kết nối lại sau mỗi 2 giây. Kiểm tra xem cổng 4820 có bị tường lửa chặn không                                                                    |
 | Dữ liệu cũ sau khi khởi động lại          | Cơ sở dữ liệu vẫn tồn tại trong suốt quá trình khởi động lại. Chạy `npm run seed` để có dữ liệu demo mới hoặc xóa `data/dashboard.db` để đặt lại                                            |
 | Công cụ MCP không kết nối được         | Xác nhận API bảng điều khiển đã hoạt động trên `MCP_DASHBOARD_BASE_URL` và xây dựng lại/khởi động MCP (`npm run mcp:build`, `npm run mcp:start`)                                         |
-| Lần chạy đầu macOS hiện "Apple could not verify…" | DMG được ký ad-hoc theo mặc định. Chạy `xattr -cr "/Applications/AgentMonitor.app"`, hoặc nhấp *Open Anyway* trong *System Settings → Privacy & Security* |
+| Lần chạy đầu macOS hiện "Apple could not verify…" | DMG được ký ad-hoc theo mặc định. Chạy `xattr -cr "/Applications/Agent Monitor.app"`, hoặc nhấp *Open Anyway* trong *System Settings → Privacy & Security* |
 | Lần chạy đầu Windows hiện "Windows protected your PC" (SmartScreen) | Trình cài không ký theo mặc định. Nhấp **More info → Run anyway** để khởi chạy |
 | "Run Claude" báo `claude` không có trong PATH | (macOS) Một ứng dụng macOS khởi chạy từ Finder/Dock chỉ thừa hưởng `PATH` tối thiểu của launchd. Lỗi này đã được sửa — ứng dụng khôi phục `PATH` của login-shell lúc khởi động. Nếu vẫn còn, hãy chắc chắn `claude` là một tệp thực thi thật (không phải alias/hàm shell) và nằm trên `PATH` của shell. Trên Windows, `PATH` người dùng được thừa hưởng đã bao gồm nó |
-| Lịch sử đã nhập biến mất sau khi cài lại/cập nhật ứng dụng máy tính để bàn | Các bản dựng cũ lưu cơ sở dữ liệu bên trong gói ứng dụng có thể bị thay thế. Lỗi này đã được sửa — dữ liệu nay nằm tại `~/Library/Application Support/AgentMonitor/data/` (macOS) hoặc `%APPDATA%\AgentMonitor\data\` (Windows), bên ngoài gói và sống sót qua các lần cài lại. Sau khi nâng cấp từ bản dựng trước khi sửa lỗi, hãy chạy lại **Import History → Rescan** một lần |
+| Lịch sử đã nhập biến mất sau khi cài lại/cập nhật ứng dụng máy tính để bàn | Các bản dựng cũ lưu cơ sở dữ liệu bên trong gói ứng dụng có thể bị thay thế. Lỗi này đã được sửa — dữ liệu nay nằm tại `~/Library/Application Support/Agent Monitor/data/` (macOS) hoặc `%APPDATA%\Agent Monitor\data\` (Windows), bên ngoài gói và sống sót qua các lần cài lại. Sau khi nâng cấp từ bản dựng trước khi sửa lỗi, hãy chạy lại **Import History → Rescan** một lần |
 
 ---
 
 ## Lời cảm ơn
 
-AgentMonitor khởi đầu là một fork của [Claude-Code-Agent-Monitor](https://github.com/hoangsonww/Claude-Code-Agent-Monitor) do [Son Nguyen](https://github.com/hoangsonww) phát triển. Cảm ơn anh vì dashboard gốc, pipeline hook và kỷ luật tài liệu mà dự án này vẫn tuân theo — thông báo bản quyền của anh vẫn được giữ trong [LICENSE](LICENSE).
+Agent Monitor khởi đầu là một fork của [Claude-Code-Agent-Monitor](https://github.com/hoangsonww/Claude-Code-Agent-Monitor) do [Son Nguyen](https://github.com/hoangsonww) phát triển. Cảm ơn anh vì dashboard gốc, pipeline hook và kỷ luật tài liệu mà dự án này vẫn tuân theo — thông báo bản quyền của anh vẫn được giữ trong [LICENSE](LICENSE).
 
-Liên kết fork đã được gỡ vào ngày 19-09-2026: mã nguồn đã khác biệt quá xa (đổi tên CLI, cây plugin, bộ UI kit, ingest workflow) để tiếp tục merge thay đổi từ upstream, nên AgentMonitor hiện được phát triển như một dự án độc lập tại [tanvoid0/agent-monitor](https://github.com/tanvoid0/agent-monitor).
+Liên kết fork đã được gỡ vào ngày 19-09-2026: mã nguồn đã khác biệt quá xa (đổi tên CLI, cây plugin, bộ UI kit, ingest workflow) để tiếp tục merge thay đổi từ upstream, nên Agent Monitor hiện được phát triển như một dự án độc lập tại [tanvoid0/agent-monitor](https://github.com/tanvoid0/agent-monitor).
 
 ---
 

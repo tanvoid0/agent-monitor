@@ -1,8 +1,8 @@
 # `am` CLI Reference
 
-The complete guide to `am`, the AgentMonitor command-line interface — the full dashboard feature surface, in your terminal.
+The complete guide to `am`, the Agent Monitor command-line interface — the full dashboard feature surface, in your terminal.
 
-> **Upgrading from v2.x (CCAM)?** The project was renamed **AgentMonitor** in v3.0.0. `ccam` still works as an alias of `am`; legacy `CCAM_*` environment variables are mirrored onto their `AM_*` successors at startup (a value set under the new name wins); the live-server registry moved from `~/.claude/.agent-dashboard.json` to `~/.claude/.agentmonitor.json` (rewritten on the next start); and the plugin marketplace/ids changed from `ccam-*@claude-code-agent-monitor-plugins` to `am-*@agentmonitor-plugins`, so reinstall any plugins you use.
+> **Upgrading from v2.x (CCAM)?** The project was renamed **Agent Monitor** in v3.0.0. `ccam` still works as an alias of `am`; legacy `CCAM_*` environment variables are mirrored onto their `AM_*` successors at startup (a value set under the new name wins); the live-server registry moved from `~/.claude/.agent-dashboard.json` to `~/.claude/.agentmonitor.json` (rewritten on the next start); and the plugin marketplace/ids changed from `ccam-*@claude-code-agent-monitor-plugins` to `am-*@agentmonitor-plugins`, so reinstall any plugins you use.
 
 ---
 
@@ -97,14 +97,14 @@ The CLI talks to the local dashboard server — **API-backed commands require it
 
 ### Interactive REPL
 
-`am repl` (also `am shell` / `am i`) opens a persistent prompt where you type commands **without the `am` prefix** — ideal for a monitoring session where you run `sessions`, drill into a `session <id>`, check `kanban`, then `cost`, without re-typing `am` each time. On entry it prints a **AgentMonitor word-mark welcome banner** with the version and live server status.
+`am repl` (also `am shell` / `am i`) opens a persistent prompt where you type commands **without the `am` prefix** — ideal for a monitoring session where you run `sessions`, drill into a `session <id>`, check `kanban`, then `cost`, without re-typing `am` each time. On entry it prints a **Agent Monitor word-mark welcome banner** with the version and live server status.
 
 ```
           _____                    _____                    _____                    _____
          /\    \                  /\    \                  /\    \                  /\    \
         /::\    \                /::\    \                /::\    \                /::\____\
-        …  (AgentMonitor word-mark)  …
-  AgentMonitor · interactive shell · v1.3.0   ● 127.0.0.1:4820
+        …  (Agent Monitor word-mark)  …
+  Agent Monitor · interactive shell · v1.3.0   ● 127.0.0.1:4820
   Type commands without the 'am' prefix — e.g. sessions --limit 5
   help all commands · help <cmd> details · Tab completes · ↑/↓ history · exit to quit
 

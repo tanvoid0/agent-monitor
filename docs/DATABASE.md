@@ -1,6 +1,6 @@
 # Database Schema Reference
 
-Comprehensive database schema documentation for AgentMonitor SQLite database.
+Comprehensive database schema documentation for Agent Monitor SQLite database.
 
 ---
 
@@ -20,7 +20,7 @@ Comprehensive database schema documentation for AgentMonitor SQLite database.
 
 ## Overview
 
-AgentMonitor uses **SQLite 3** as its primary data store with the following characteristics:
+Agent Monitor uses **SQLite 3** as its primary data store with the following characteristics:
 
 - **File-based** - Single database file, portable across systems
 - **Embedded** - No separate server process required

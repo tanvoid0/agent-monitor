@@ -1,4 +1,4 @@
-# Contributing to AgentMonitor
+# Contributing to Agent Monitor
 
 Thanks for taking the time to contribute. Please read this guide before opening a PR or issue.
 

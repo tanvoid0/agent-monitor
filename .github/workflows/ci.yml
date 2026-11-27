@@ -1,4 +1,4 @@
-# CI / CD Pipeline for AgentMonitor
+# CI / CD Pipeline for Agent Monitor
 #
 # This workflow runs on every push and pull request, executing the following stages:
 # 1. Format Check: Ensures code adheres to formatting standards.
@@ -6,9 +6,10 @@
 # 3. Build: Builds the client application and uploads the artifact.
 # 4. Detect Changed Paths: A `dorny/paths-filter` job that flags `desktop/**` (or workflow) changes so the desktop job below stays
 #    path-filtered without hard-coding a branch name.
-# 5. Desktop Apps (DMG + EXE): Builds the Electron desktop app for macOS on `macos-latest` (uploads two
-#    `AgentMonitor-*.dmg` artifacts, arm64 + x64) and for Windows on `windows-latest` (uploads `AgentMonitor-win`:
-#    an NSIS installer + a no-install portable `.exe`). Universal macOS builds were dropped because @electron/universal's
+# 5. Desktop Apps (DMG + EXE + AppImage/deb): Builds the Electron desktop app for macOS on `macos-latest` (uploads two
+#    `AgentMonitor-*.dmg` artifacts, arm64 + x64), for Windows on `windows-latest` (uploads `AgentMonitor-win`:
+#    an NSIS installer + a no-install portable `.exe`), and for Linux on `ubuntu-latest` (uploads `AgentMonitor-linux`:
+#    an x64 AppImage + `.deb`). Universal macOS builds were dropped because @electron/universal's
 #    merge step hangs/errors on this repo's extraResources layout (parent-path sources); two single-arch DMGs ship the same
 #    payload without the merge step. Both jobs run on any push, when the changes job flagged `desktop/**`, or when a PR
 #    carries the `desktop` label. The macOS build is resilient to flaky `hdiutil detach` (retries up to 3 times,
@@ -17,7 +18,7 @@
 #    scans app + MCP images, publishes multi-architecture images with SBOM and provenance,
 #    and keyless-signs pushed digests on the default branch.
 # 7. Release: On a successful push to the default branch, publishes a GitHub Release tagged vX.Y.Z (matching the existing v1.0.0 /
-#    v1.1.0 convention, drawn from the root package.json `version`) with the macOS DMGs and Windows EXEs attached — but only if no
+#    v1.1.0 convention, drawn from the root package.json `version`) with the macOS DMGs, Windows EXEs and Linux AppImage/deb attached — but only if no
 #    release exists for that version yet, so bumping the version is what cuts a new release and re-running master with an unchanged
 #    version is a no-op.
 # 8. Pipeline Summary: Compiles results from all stages and posts a summary to the GitHub Actions step summary, including status
@@ -25,7 +26,7 @@
 # Any failure in the stages will cause the pipeline to fail, ensuring that only well-formatted, tested, and built code is merged and deployed.
 #
 # Author: Tanveer Hoque <tanvoid0@gmail.com>
-name: 🚀 CI / CD Pipeline for AgentMonitor
+name: 🚀 CI / CD Pipeline for Agent Monitor
 
 on:
   push:
@@ -221,7 +222,7 @@ jobs:
             fi
             echo "::endgroup::"
             echo "DMG build attempt ${attempt} failed; detaching stale volumes"
-            for vol in "/Volumes/AgentMonitor"*; do
+            for vol in "/Volumes/Agent Monitor"*; do
               if [ -d "${vol}" ]; then
                 hdiutil detach -force "${vol}" || true
               fi
@@ -365,6 +366,96 @@ jobs:
         with:
           name: AgentMonitor-win
           path: desktop/release/*.exe
+          retention-days: 14
+
+  # ────────────────────────────────────────────────────────────────
+  #  🐧 Linux Desktop App (Electron AppImage + .deb)               #
+  #   Mirrors the other desktop jobs on ubuntu-latest. Produces an #
+  #   AppImage and a .deb, uploaded as AgentMonitor-linux.         #
+  # ────────────────────────────────────────────────────────────────
+  desktop-linux:
+    name: "🐧 Linux Desktop (AppImage + deb)"
+    runs-on: ubuntu-latest
+    needs: [build, changes]
+    if: |
+      github.event_name == 'push' ||
+      needs.changes.outputs.desktop == 'true' ||
+      contains(toJSON(github.event.pull_request.labels.*.name), 'desktop')
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install client dependencies & build client
+        run: |
+          cd client && npm ci
+          cd .. && npm run build
+
+      - name: Install desktop dependencies
+        run: cd desktop && npm ci
+
+      - name: Ensure Electron binary
+        run: |
+          cd desktop
+          for source in primary mirror; do
+            for attempt in 1 2 3; do
+              if [ "$source" = mirror ]; then
+                ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ \
+                  node node_modules/electron/install.js && exit 0
+              elif node node_modules/electron/install.js; then
+                exit 0
+              fi
+              echo "Electron $source download failed (attempt $attempt/3)" >&2
+              sleep $((attempt * 5))
+            done
+          done
+          echo "Electron binary download failed from primary and mirror" >&2
+          exit 1
+
+      - name: Build desktop (tsc)
+        run: cd desktop && npm run build
+
+      - name: Smoke test
+        # Electron on Linux needs an X display even with no window open, and
+        # Ubuntu 24.04's AppArmor blocks the unprivileged user namespaces
+        # Chromium's sandbox uses. Lift that on the throwaway runner and run
+        # under a virtual framebuffer.
+        run: |
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+          cd desktop && xvfb-run --auto-servernum npm test
+
+      - name: Build AppImage + deb
+        # electron-builder fetches its Linux tools (appimagetool, fpm) lazily;
+        # retry on transient CDN failures, falling back to the npm mirror.
+        run: |
+          cd desktop
+          for source in primary mirror; do
+            for attempt in 1 2 3; do
+              if [ "$source" = mirror ]; then
+                ELECTRON_BUILDER_BINARIES_MIRROR=https://npmmirror.com/mirrors/electron-builder-binaries/ \
+                  npm run linux && exit 0
+              elif npm run linux; then
+                exit 0
+              fi
+              echo "Linux $source packaging failed (attempt $attempt/3)" >&2
+              sleep $((attempt * 10))
+            done
+          done
+          echo "Linux packaging failed with primary and mirror downloads" >&2
+          exit 1
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: AgentMonitor-linux
+          path: |
+            desktop/release/*.AppImage
+            desktop/release/*.deb
           retention-days: 14
 
   # Advisory only. The validator reports findings (including npm audit
@@ -532,7 +623,7 @@ jobs:
   release:
     name: "🚢 Publish Release"
     runs-on: ubuntu-latest
-    needs: [desktop, desktop-win, docker]
+    needs: [desktop, desktop-win, desktop-linux, docker]
     if: |
       github.event_name == 'push' &&
       (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
@@ -585,6 +676,13 @@ jobs:
           name: AgentMonitor-win
           path: win
 
+      - name: Download Linux AppImage + deb artifact
+        if: steps.check.outputs.exists == 'false'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: AgentMonitor-linux
+          path: linux
+
       - name: Publish release
         if: steps.check.outputs.exists == 'false'
         env:
@@ -592,13 +690,13 @@ jobs:
         run: |
           TAG="${{ steps.ver.outputs.tag }}"
           echo "Publishing ${TAG} with assets:"
-          ls -la dmg win
+          ls -la dmg win linux
           gh release create "${TAG}" \
             --target "${{ github.sha }}" \
             --title "${TAG}" \
             --generate-notes \
             --latest \
-            dmg/*.dmg win/*.exe
+            dmg/*.dmg win/*.exe linux/*.AppImage linux/*.deb
           echo "Published ${TAG} → ${{ github.server_url }}/${{ github.repository }}/releases/tag/${TAG}"
 
   # ────────────────────────────────────────────────────────────────
@@ -609,7 +707,7 @@ jobs:
     name: "🎉 Pipeline Status"
     if: always()
     runs-on: ubuntu-latest
-    needs: [format, test, build, deployment, desktop, desktop-win, docker, release]
+    needs: [format, test, build, deployment, desktop, desktop-win, desktop-linux, docker, release]
     steps:
       - name: Determine overall result
         id: result
@@ -621,6 +719,7 @@ jobs:
           DEPLOYMENT="${{ needs.deployment.result }}"
           DESKTOP="${{ needs.desktop.result }}"
           DESKTOP_WIN="${{ needs['desktop-win'].result }}"
+          DESKTOP_LINUX="${{ needs['desktop-linux'].result }}"
           DOCKER="${{ needs.docker.result }}"
           RELEASE="${{ needs.release.result }}"
 
@@ -631,6 +730,7 @@ jobs:
             echo "deployment=$DEPLOYMENT"
             echo "desktop=$DESKTOP"
             echo "desktop_win=$DESKTOP_WIN"
+            echo "desktop_linux=$DESKTOP_LINUX"
             echo "docker=$DOCKER"
             echo "release=$RELEASE"
           } >> "$GITHUB_OUTPUT"
@@ -640,9 +740,9 @@ jobs:
           # path-filtered out for non-desktop PRs; release runs only on the
           # default branch). `deployment` is advisory and never gates: its
           # findings are reported as annotations and in the step summary.
-          if [[ "$FORMAT" == "failure" || "$TEST" == "failure" || "$BUILD" == "failure" || "$DESKTOP" == "failure" || "$DESKTOP_WIN" == "failure" || "$DOCKER" == "failure" || "$RELEASE" == "failure" ]]; then
+          if [[ "$FORMAT" == "failure" || "$TEST" == "failure" || "$BUILD" == "failure" || "$DESKTOP" == "failure" || "$DESKTOP_WIN" == "failure" || "$DESKTOP_LINUX" == "failure" || "$DOCKER" == "failure" || "$RELEASE" == "failure" ]]; then
             echo "overall=failure" >> "$GITHUB_OUTPUT"
-          elif [[ "$FORMAT" == "cancelled" || "$TEST" == "cancelled" || "$BUILD" == "cancelled" || "$DESKTOP" == "cancelled" || "$DESKTOP_WIN" == "cancelled" || "$DOCKER" == "cancelled" || "$RELEASE" == "cancelled" ]]; then
+          elif [[ "$FORMAT" == "cancelled" || "$TEST" == "cancelled" || "$BUILD" == "cancelled" || "$DESKTOP" == "cancelled" || "$DESKTOP_WIN" == "cancelled" || "$DESKTOP_LINUX" == "cancelled" || "$DOCKER" == "cancelled" || "$RELEASE" == "cancelled" ]]; then
             echo "overall=cancelled" >> "$GITHUB_OUTPUT"
           else
             echo "overall=success" >> "$GITHUB_OUTPUT"
@@ -667,6 +767,7 @@ jobs:
             echo "deployment=$(icon ${{ steps.result.outputs.deployment }})"
             echo "desktop=$(icon ${{ steps.result.outputs.desktop }})"
             echo "desktop_win=$(icon ${{ steps.result.outputs.desktop_win }})"
+            echo "desktop_linux=$(icon ${{ steps.result.outputs.desktop_linux }})"
             echo "docker=$(icon ${{ steps.result.outputs.docker }})"
             echo "release=$(icon ${{ steps.result.outputs.release }})"
             echo "overall=$(icon ${{ steps.result.outputs.overall }})"
@@ -690,6 +791,7 @@ jobs:
           | Deployment Stack _(advisory)_ | ${{ steps.icons.outputs.deployment }} \`${{ steps.result.outputs.deployment }}\` | \`deployment\` |
           | macOS Desktop | ${{ steps.icons.outputs.desktop }} \`${{ steps.result.outputs.desktop }}\` | \`desktop\` |
           | Windows Desktop | ${{ steps.icons.outputs.desktop_win }} \`${{ steps.result.outputs.desktop_win }}\` | \`desktop-win\` |
+          | Linux Desktop | ${{ steps.icons.outputs.desktop_linux }} \`${{ steps.result.outputs.desktop_linux }}\` | \`desktop-linux\` |
           | Docker | ${{ steps.icons.outputs.docker }} \`${{ steps.result.outputs.docker }}\` | \`docker\` |
           | Release | ${{ steps.icons.outputs.release }} \`${{ steps.result.outputs.release }}\` | \`release\` |
 

@@ -86,6 +86,7 @@
     "desktop:dmg:universal": "npm run build && cd desktop && npm run dmg:universal",
     "desktop:win": "npm run build && cd desktop && npm run win",
     "desktop:win:portable": "npm run build && cd desktop && npm run win:portable",
+    "desktop:linux": "npm run build && cd desktop && npm run linux",
     "desktop:test": "cd desktop && npm test",
     "install-hooks": "node scripts/install-hooks.js",
     "seed": "node scripts/seed.js",

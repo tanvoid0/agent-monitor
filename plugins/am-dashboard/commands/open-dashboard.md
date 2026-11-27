@@ -2,7 +2,7 @@
 description: Print the Agent Monitor dashboard URL and how to start/open it
 ---
 
-Print how to open the AgentMonitor dashboard. Do not start anything
+Print how to open the Agent Monitor dashboard. Do not start anything
 or modify data — just print the URL and the relevant commands.
 
 The dashboard URL is:

@@ -1,6 +1,6 @@
 interface:
   display_name: "Time Of Day"
   short_description: "Discover when you are most active and most productive with..."
-  default_prompt: "Use $time-of-day to inspect AgentMonitor data and complete this workflow safely."
+  default_prompt: "Use $time-of-day to inspect Agent Monitor data and complete this workflow safely."
 policy:
   allow_implicit_invocation: true

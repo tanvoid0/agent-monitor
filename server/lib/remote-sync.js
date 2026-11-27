@@ -2,7 +2,7 @@
  * @file remote-sync.js
  * @description Pull Claude Code and Codex session history from remote machines
  * over SSH so one dashboard can monitor usage collected elsewhere (e.g. a dev
- * box or cloud VM the user drives over SSH while running AgentMonitor on their laptop).
+ * box or cloud VM the user drives over SSH while running Agent Monitor on their laptop).
  *
  * Design (see repo issue "Live remote/multi-machine data collection"):
  *   1. Authentication ALWAYS defers to the host's own SSH stack — ~/.ssh/config,

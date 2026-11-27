@@ -1,5 +1,5 @@
 output "namespace" {
-  description = "Namespace containing AgentMonitor."
+  description = "Namespace containing Agent Monitor."
   value       = kubernetes_namespace_v1.am.metadata[0].name
 }
 

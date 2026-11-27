@@ -1,4 +1,4 @@
-# Prometheus scrape config when BOTH AgentMonitor and Prometheus run in Docker on the
+# Prometheus scrape config when BOTH Agent Monitor and Prometheus run in Docker on the
 # shared `am` network (docker-compose.full.yml). The Host guard on the
 # dashboard must allow `agent-monitor` — set via DASHBOARD_ALLOWED_HOSTS there.
 global:

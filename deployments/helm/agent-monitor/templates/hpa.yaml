@@ -1,4 +1,4 @@
 {{/*
-AgentMonitor's bundled SQLite backend supports one active writer. values.schema.json
+Agent Monitor's bundled SQLite backend supports one active writer. values.schema.json
 rejects autoscaling.enabled=true, so this template intentionally emits nothing.
 */}}

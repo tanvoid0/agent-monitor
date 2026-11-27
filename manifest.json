@@ -1,7 +1,7 @@
 {
   "id": "agentmonitor-landing",
-  "name": "AgentMonitor",
-  "short_name": "AgentMonitor",
+  "name": "Agent Monitor",
+  "short_name": "Agent Monitor",
   "description": "Local-first monitoring dashboard for Claude Code sessions.",
   "author": "Tanveer Hoque",
   "start_url": ".",

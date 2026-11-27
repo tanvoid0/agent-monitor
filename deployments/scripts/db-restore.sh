@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# db-restore.sh – SQLite database restore for AgentMonitor
+# db-restore.sh – SQLite database restore for Agent Monitor
 #
 # Usage:
 #   ./db-restore.sh --env production --input ./backups/agent-monitor_production_20240101_120000.db
@@ -401,7 +401,7 @@ main() {
   trap cleanup EXIT
   echo ""
   echo -e "${BOLD}${YELLOW}╔══════════════════════════════════════════════════╗${NC}"
-  echo -e "${BOLD}${YELLOW}║   AgentMonitor – DB Restore        ║${NC}"
+  echo -e "${BOLD}${YELLOW}║   Agent Monitor – DB Restore       ║${NC}"
   echo -e "${BOLD}${YELLOW}╚══════════════════════════════════════════════════╝${NC}"
   echo ""
 

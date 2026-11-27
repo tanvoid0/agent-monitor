@@ -1,5 +1,5 @@
 /**
- * @file Shared paths and version pins for the AgentMonitor monitoring stack.
+ * @file Shared paths and version pins for the Agent Monitor monitoring stack.
  * Binaries are downloaded into monitoring/.bin/ by ensure-binaries.js so the
  * stack runs with plain npm on macOS, Linux, and Windows — no Homebrew, apt,
  * or global installs required.

@@ -1,4 +1,4 @@
-# AgentMonitor client — served locally by `am` (no fixed public origin,
+# Agent Monitor client — served locally by `am` (no fixed public origin,
 # so no Sitemap directive here; see /sitemap.xml at the project's GitHub
 # Pages site for that).
 User-agent: *

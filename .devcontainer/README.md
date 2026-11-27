@@ -1,6 +1,6 @@
 # Dev Container (optional)
 
-A ready-to-use, **opt-in** development environment for AgentMonitor.
+A ready-to-use, **opt-in** development environment for Agent Monitor.
 It is used **only** when you explicitly choose it — it changes nothing about
 host-based development (`npm run dev` / `npm start` still work exactly as before).
 

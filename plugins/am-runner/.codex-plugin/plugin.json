@@ -13,7 +13,7 @@
   "keywords": ["claude-code", "codex", "run", "launcher", "resume", "agents"],
   "skills": "./skills/",
   "interface": {
-    "displayName": "AgentMonitor Runner",
+    "displayName": "Agent Monitor Runner",
     "shortDescription": "Operate dashboard-launched Claude Code and Codex runs with safe launch, follow-up, stop,...",
     "longDescription": "Operate dashboard-launched Claude Code and Codex runs with safe launch, follow-up, stop, resume, model discovery, and persistent run-history workflows.",
     "developerName": "Tanveer Hoque",
@@ -21,8 +21,8 @@
     "capabilities": ["Read", "Write"],
     "websiteURL": "https://github.com/tanvoid0/agent-monitor",
     "defaultPrompt": [
-      "Use AgentMonitor Runner to inspect the local AgentMonitor dashboard.",
-      "Use AgentMonitor Runner to analyze recent agent activity."
+      "Use Agent Monitor Runner to inspect the local Agent Monitor dashboard.",
+      "Use Agent Monitor Runner to analyze recent agent activity."
     ],
     "brandColor": "#6366F1"
   }

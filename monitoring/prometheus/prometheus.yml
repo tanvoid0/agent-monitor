@@ -1,10 +1,10 @@
-# Prometheus scrape config for the AgentMonitor dashboard's /api/metrics endpoint.
+# Prometheus scrape config for the Agent Monitor dashboard's /api/metrics endpoint.
 #
-# AgentMonitor normally runs on the HOST (a plain `npm start` on port 4820), so from
+# Agent Monitor normally runs on the HOST (a plain `npm start` on port 4820), so from
 # inside the Prometheus container it is reached via host.docker.internal. If the
 # dashboard runs elsewhere or on a different port, edit the `targets` below.
 #
-# IMPORTANT: the AgentMonitor server's DNS-rebinding guard rejects any Host header that
+# IMPORTANT: the Agent Monitor server's DNS-rebinding guard rejects any Host header that
 # is not loopback, so a container scrape gets 403 EBADHOST until you start the
 # server allowing this Host:
 #     DASHBOARD_ALLOWED_HOSTS=host.docker.internal npm start

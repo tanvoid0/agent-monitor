@@ -1,5 +1,5 @@
 /**
- * @file Main extension file for AgentMonitor VSCode extension
+ * @file Main extension file for Agent Monitor VSCode extension
  * Sets up the extension, registers commands, and manages the status bar item.
  * Implements a dynamic dashboard view that checks for active servers on ports 5173 and 4820.
  * Provides real-time status updates in the sidebar and status bar with background polling.
@@ -15,7 +15,7 @@ let statusBarItem;
 let outputChannel;
 
 function activate(context) {
-  outputChannel = vscode.window.createOutputChannel("AgentMonitor");
+  outputChannel = vscode.window.createOutputChannel("Agent Monitor");
   outputChannel.appendLine("[activate] " + new Date().toISOString());
   context.subscriptions.push(outputChannel);
 
@@ -40,7 +40,7 @@ function activate(context) {
     async (target) => {
       const panel = vscode.window.createWebviewPanel(
         "agentMonitor",
-        "AgentMonitor",
+        "Agent Monitor",
         vscode.ViewColumn.One,
         { enableScripts: true, retainContextWhenHidden: true }
       );
@@ -82,7 +82,7 @@ function activate(context) {
   let refreshStatus = vscode.commands.registerCommand("agentmonitor.refreshStatus", () => {
     statusProvider.refresh();
     updateStatusBar();
-    vscode.window.showInformationMessage("AgentMonitor refreshed.");
+    vscode.window.showInformationMessage("Agent Monitor refreshed.");
   });
 
   let clearHistory = vscode.commands.registerCommand("agentmonitor.clearHistory", async () => {
@@ -270,7 +270,7 @@ function getErrorHtml() {
                 </svg>
             </div>
             <h1>Dashboard Offline</h1>
-            <div class="subtitle">Unable to connect to the AgentMonitor server</div>
+            <div class="subtitle">Unable to connect to the Agent Monitor server</div>
         </div>
 
         <div class="main-card">

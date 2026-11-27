@@ -1,7 +1,7 @@
 {
   "name": "am-devtools",
   "version": "3.1.1",
-  "description": "Developer tools for AgentMonitor — session debugging, hook diagnostics, data export, and system health checks for maintaining a healthy monitoring setup.",
+  "description": "Developer tools for Agent Monitor — session debugging, hook diagnostics, data export, and system health checks for maintaining a healthy monitoring setup.",
   "author": {
     "name": "Tanveer Hoque",
     "email": "tanvoid0@gmail.com",
@@ -13,16 +13,16 @@
   "keywords": ["devtools", "debugging", "diagnostics", "export", "health-check", "claude-code"],
   "skills": "./skills/",
   "interface": {
-    "displayName": "AgentMonitor Devtools",
-    "shortDescription": "Developer tools for AgentMonitor — session debugging, hook diagnostics, data export, and...",
-    "longDescription": "Developer tools for AgentMonitor — session debugging, hook diagnostics, data export, and system health checks for maintaining a healthy monitoring setup.",
+    "displayName": "Agent Monitor Devtools",
+    "shortDescription": "Developer tools for Agent Monitor — session debugging, hook diagnostics, data export, and...",
+    "longDescription": "Developer tools for Agent Monitor — session debugging, hook diagnostics, data export, and system health checks for maintaining a healthy monitoring setup.",
     "developerName": "Tanveer Hoque",
     "category": "Developer Tools",
     "capabilities": ["Read"],
     "websiteURL": "https://github.com/tanvoid0/agent-monitor",
     "defaultPrompt": [
-      "Use AgentMonitor Devtools to inspect the local AgentMonitor dashboard.",
-      "Use AgentMonitor Devtools to analyze recent agent activity."
+      "Use Agent Monitor Devtools to inspect the local Agent Monitor dashboard.",
+      "Use Agent Monitor Devtools to analyze recent agent activity."
     ],
     "brandColor": "#6366F1"
   }

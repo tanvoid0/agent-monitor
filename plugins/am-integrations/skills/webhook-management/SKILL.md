@@ -1,7 +1,7 @@
 ---
 name: webhook-management
 description: >
-  Configure and validate AgentMonitor webhook targets across supported chat, incident,
+  Configure and validate Agent Monitor webhook targets across supported chat, incident,
   automation, and generic providers. Use when listing provider requirements,
   creating or updating a target, scoping it to alert rules, sending a test
   notification, reviewing delivery history, or deleting a target.

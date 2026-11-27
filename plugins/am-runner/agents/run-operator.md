@@ -1,6 +1,6 @@
 ---
 name: run-operator
-description: Safely operates monitored Claude Code and Codex processes through AgentMonitor.
+description: Safely operates monitored Claude Code and Codex processes through Agent Monitor.
 model: sonnet
 tools:
   - Bash

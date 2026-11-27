@@ -26,7 +26,7 @@ describe("Sidebar", () => {
 
   it("should render the brand name", () => {
     renderSidebar(true);
-    expect(screen.getByText("AgentMonitor")).toBeInTheDocument();
+    expect(screen.getByText("Agent Monitor")).toBeInTheDocument();
   });
 
   it("should render the subtitle", () => {

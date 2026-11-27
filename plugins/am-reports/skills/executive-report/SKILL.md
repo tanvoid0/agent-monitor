@@ -1,7 +1,7 @@
 ---
 name: executive-report
 description: >
-  Generate a concise stakeholder report from AgentMonitor sessions, analytics, cost,
+  Generate a concise stakeholder report from Agent Monitor sessions, analytics, cost,
   alerts, and workflow intelligence. Use for release summaries, leadership
   updates, operational reviews, or a scoped Markdown report with evidence.
 ---

@@ -1,7 +1,8 @@
-# `desktop/` — Native macOS App (Electron)
+# `desktop/` — Native macOS, Windows & Linux App (Electron)
 
-The **desktop workspace** ships the AgentMonitor dashboard as a
-native macOS `.app` (distributed as a `.dmg`). It is an Electron shell that
+The **desktop workspace** ships the Agent Monitor dashboard as a
+native macOS `.app` (distributed as a `.dmg`), Windows `.exe`, and Linux
+`.AppImage` / `.deb`. It is an Electron shell that
 **embeds the existing Express server in-process** and renders the already-built
 React client in a `BrowserWindow`.
 
@@ -59,12 +60,21 @@ npm run desktop:dmg:x64      # Intel only — fast
 # Build a Windows .exe (run on Windows x64):
 npm run desktop:win          # NSIS installer → release/AgentMonitor-Setup-<ver>-x64.exe
 npm run desktop:win:portable # no-install portable → release/AgentMonitor-<ver>-x64-portable.exe
+
+# Build Linux packages (run on Linux x64):
+npm run desktop:linux        # AppImage + .deb → release/AgentMonitor-<ver>-x86_64.AppImage, AgentMonitor-<ver>-amd64.deb
 ```
 
 > ⚠️ `desktop:dmg` is slower because it builds the app **twice** — once per
 > architecture — and emits **two** per-arch DMGs (`arm64` + `x64`). It does not
 > merge them into a universal binary. For running on your own Mac, use the
 > arch-specific command. See [Build performance](#build-performance--read-this).
+
+> 🐧 **Linux builds run on Linux.** `desktop:linux` emits an x64 AppImage
+> (`chmod +x`, then run) and a `.deb` (`sudo apt install ./AgentMonitor-<ver>-amd64.deb`;
+> executable `agentmonitor`, category Development). On Linux the tray uses the
+> colored `icon.png` (not the macOS template glyph), *Open at Login* is a no-op,
+> and logs + app data live under `~/.config/Agent Monitor/` (logs in `logs/`).
 
 > 🪟 **Windows builds run on Windows** (DMGs build on macOS). `desktop:win`
 > produces an **unsigned** installer — fine to run; SmartScreen may show a
@@ -464,7 +474,7 @@ desktop/
 │   ├── window.ts        # BrowserWindow + persisted geometry; native macOS
 │   │                    #   titleBarStyle: 'default' (clear traffic-light row)
 │   ├── menu.ts          # native application menu
-│   ├── tray.ts          # menu-bar icon + single-click dropdown w/ live
+│   ├── tray.ts          # menu-bar icon (template PNG on macOS, icon.ico on Windows, icon.png on Linux) + single-click dropdown w/ live
 │   │                    #   {sessions, agents, events-today} snapshot
 │   ├── login-item.ts    # macOS Login Items (SMAppService)
 │   ├── shell-path.ts    # recover the user's shell PATH (so `claude` is found)
@@ -482,7 +492,7 @@ desktop/
 ├── assets/              # icon.icns, icon.png, tray-icon-Template*.png, SVGs
 ├── tests/
 │   └── smoke.test.mjs   # spawn Electron + probe /api/health
-├── electron-builder.yml # DMG packaging config
+├── electron-builder.yml # DMG (macOS) + NSIS/portable (Windows) + AppImage/deb (Linux) targets
 ├── tsconfig.json        # strict; src/ → out/
 └── package.json
 ```
@@ -494,13 +504,13 @@ Compiled output lands in `desktop/out/` (git-ignored); packaged artifacts in
 
 ## Packaged app layout
 
-`electron-builder` produces `AgentMonitor.app`. The Electron main
+`electron-builder` produces `Agent Monitor.app`. The Electron main
 process code is packed into `app.asar`; the rest of the repo is shipped as
 **`extraResources`** (plain files under `Resources/app/`):
 
 ```mermaid
 flowchart TD
-    app["AgentMonitor.app"]
+    app["Agent Monitor.app"]
     app --> contents["Contents/"]
     contents --> macos["MacOS/ — Electron binary"]
     contents --> res["Resources/"]
@@ -570,6 +580,7 @@ and fails with *"entry file out/main.js does not exist"*).
 | `npm run desktop:dmg:universal` | `npm run dmg:universal` | **macOS:** one merged universal DMG (arm64 + x86_64 via `@electron/universal`). Optional — not what the release ships. **Slowest.** |
 | `npm run desktop:win` | `npm run win` | **Windows:** NSIS installer `.exe` (x64). |
 | `npm run desktop:win:portable` | `npm run win:portable` | **Windows:** no-install portable `.exe` (x64). |
+| `npm run desktop:linux` | `npm run linux` | **Linux:** x64 AppImage + `.deb`. |
 | — | `npm run build:icons` | **macOS:** regenerate `icon.icns` + tray PNGs from the SVGs. |
 | — | `npm run build:win-icon` | **Windows:** regenerate `icon.ico` from `icon.png` (PowerShell + .NET). |
 | — | `npm run clean` | Remove `out/` and `release/`. |
@@ -662,11 +673,13 @@ flowchart TD
 
 An ad-hoc DMG triggers a Gatekeeper warning on first launch. The one-line
 workaround is in [`../DESKTOP.md`](../DESKTOP.md):
-`xattr -cr "/Applications/AgentMonitor.app"`.
+`xattr -cr "/Applications/Agent Monitor.app"`.
 
 ---
 
 ## Continuous integration
+
+> The Windows (`🪟 Windows Desktop (EXE)` → `AgentMonitor-win`) and Linux (`🐧 Linux Desktop (AppImage + deb)` on `ubuntu-latest` → `AgentMonitor-linux`) jobs run alongside this one; the `release` job attaches all three platforms' files.
 
 The `🍎 macOS Desktop (DMG)` job in `.github/workflows/ci.yml`:
 
@@ -701,6 +714,12 @@ flowchart LR
   attached — but only when no release exists for that version yet, so bumping
   the version is what cuts a release. The result is a permanent, anonymous
   download URL at `releases/latest`.
+
+---
+
+## Upgrading from the AgentMonitor name
+
+The product is now **Agent Monitor** (with a space). Quit the old app first (tray → *Quit*): on first launch the new app moves the old per-user app-data folder (`…/AgentMonitor` → `…/Agent Monitor`) automatically. On Windows an in-place upgrade keeps the existing install folder and re-points an enabled *Open at Login* entry at the renamed `Agent Monitor.exe`. On macOS the new `Agent Monitor.app` lands next to the old `AgentMonitor.app` — delete the old one (and re-toggle *Open at Login* if you used it). The SQLite DB lives in `~/.claude/agentmonitor/` and is unaffected.
 
 ---
 
@@ -752,7 +771,7 @@ else in [`../SETUP.md`](../SETUP.md) applies).
 > **Writable state never lives in the `.app` bundle.** A packaged, code-signed,
 > or app-translocated bundle is read-only; a database written there would break
 > History Import and event persistence. `server-host.ts` points
-> `DASHBOARD_DATA_DIR` at `~/Library/Application Support/AgentMonitor/data/`,
+> `DASHBOARD_DATA_DIR` at `~/Library/Application Support/Agent Monitor/data/`,
 > which is also why your imported history survives an app reinstall or update.
 
 ---
@@ -763,7 +782,7 @@ The Electron main process has no console when launched from Finder, so
 `logger.ts` writes to a per-user file:
 
 ```
-~/Library/Logs/AgentMonitor/desktop.log
+~/Library/Logs/Agent Monitor/desktop.log
 ```
 
 Reach it from the tray menu → **Show Logs**.
@@ -775,11 +794,11 @@ Reach it from the tray menu → **Show Logs**.
 | DMG build seems slow | Not hung — `desktop:dmg` packages two architectures back-to-back. See [Build performance](#build-performance--read-this). Use `dmg:arm64` / `dmg:x64` for a single arch. |
 | `hdiutil detach … exit code 1` in CI | Flaky GitHub runner; the CI step already retries with Spotlight disabled. Re-run the job if it still fails. |
 | Dashboard window is blank | The embedded server failed `/api/health` within 30 s — check `desktop.log`. |
-| Gatekeeper blocks the app | Ad-hoc DMG. `xattr -cr "/Applications/AgentMonitor.app"`. |
+| Gatekeeper blocks the app | Ad-hoc DMG. `xattr -cr "/Applications/Agent Monitor.app"`. |
 | Hooks not firing | The app installs hooks on first owned-server boot; start a **new** Claude Code session afterwards. Verify entries in `~/.claude/settings.json`. |
 | "Run Claude" says `claude` isn't on your PATH | `shell-path.ts` recovers the login-shell PATH at startup. If `claude` is a shell _alias_ or _function_ (not a real binary), it cannot be spawned — install the `claude` CLI as an executable. Check `desktop.log` for the `user PATH resolved` line. |
 | `desktop:dev` / `desktop:test` fail with `ERR_DLOPEN_FAILED` | A prior DMG build left `better-sqlite3` built for the other CPU arch. `prebuild.js` auto-heals this on the next build; if needed, run `npm run desktop:install`. |
-| Imported history disappeared after reinstall | Fixed — the database now lives in `~/Library/Application Support/AgentMonitor/data/`, outside the bundle. A one-time gap exists only across the upgrade from a build that predated this fix; re-run **Import History → Rescan**. |
+| Imported history disappeared after reinstall | Fixed — the database now lives in `~/Library/Application Support/Agent Monitor/data/`, outside the bundle. A one-time gap exists only across the upgrade from a build that predated this fix; re-run **Import History → Rescan**. |
 
 ---
 

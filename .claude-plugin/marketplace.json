@@ -1,6 +1,6 @@
 {
   "name": "agentmonitor-plugins",
-  "description": "Official Claude Code plugin marketplace for AgentMonitor with 14 plugins, 66 skills, 18 agents, 34 commands, and comprehensive local dashboard operations.",
+  "description": "Official Claude Code plugin marketplace for Agent Monitor with 14 plugins, 66 skills, 18 agents, 34 commands, and comprehensive local dashboard operations.",
   "owner": { "name": "tanvoid0", "url": "https://github.com/tanvoid0" },
   "plugins": [
     {
@@ -24,13 +24,13 @@
     {
       "name": "am-dashboard",
       "source": "./plugins/am-dashboard",
-      "description": "Direct MCP integration with the AgentMonitor dashboard — real-time session data access, quick stats, and dashboard health monitoring via Model Context Protocol.",
+      "description": "Direct MCP integration with the Agent Monitor dashboard — real-time session data access, quick stats, and dashboard health monitoring via Model Context Protocol.",
       "tags": ["dashboard", "status", "mcp", "connector"]
     },
     {
       "name": "am-devtools",
       "source": "./plugins/am-devtools",
-      "description": "Developer tools for AgentMonitor — session debugging, hook diagnostics, data export, and system health checks for maintaining a healthy monitoring setup.",
+      "description": "Developer tools for Agent Monitor — session debugging, hook diagnostics, data export, and system health checks for maintaining a healthy monitoring setup.",
       "tags": ["devtools", "debug", "diagnostics", "export"]
     },
     {
@@ -42,13 +42,13 @@
     {
       "name": "am-integrations",
       "source": "./plugins/am-integrations",
-      "description": "Manage AgentMonitor alert rules, universal webhook providers, browser push notifications, and SSH Remote Data Sources with explicit mutation and external-send confirmation.",
+      "description": "Manage Agent Monitor alert rules, universal webhook providers, browser push notifications, and SSH Remote Data Sources with explicit mutation and external-send confirmation.",
       "tags": ["alerts", "webhooks", "push", "remote-sources", "ssh", "integrations"]
     },
     {
       "name": "am-platform",
       "source": "./plugins/am-platform",
-      "description": "Administer AgentMonitor's Claude Code and Codex configuration explorers, provider-aware history import, backup restore, hook installation, home directories, updates, and MCP server.",
+      "description": "Administer Agent Monitor's Claude Code and Codex configuration explorers, provider-aware history import, backup restore, hook installation, home directories, updates, and MCP server.",
       "tags": ["claude-code", "codex", "config", "hooks", "import", "backup"]
     },
     {
@@ -60,13 +60,13 @@
     {
       "name": "am-quality",
       "source": "./plugins/am-quality",
-      "description": "Reliability and error monitoring for Claude Code sessions — surfaces APIError events, hook delivery failures, tool-failure ratios (PreToolUse/PostToolUse gaps), and SLO tracking with error-budget reporting, all derived from the AgentMonitor event stream at http://localhost:4820.",
+      "description": "Reliability and error monitoring for Claude Code sessions — surfaces APIError events, hook delivery failures, tool-failure ratios (PreToolUse/PostToolUse gaps), and SLO tracking with error-budget reporting, all derived from the Agent Monitor event stream at http://localhost:4820.",
       "tags": ["reliability", "errors", "slo", "quality"]
     },
     {
       "name": "am-reports",
       "source": "./plugins/am-reports",
-      "description": "Generate stakeholder-ready AgentMonitor reports from local session, cost, reliability, and workflow data with explicit scope, evidence, and export-friendly Markdown.",
+      "description": "Generate stakeholder-ready Agent Monitor reports from local session, cost, reliability, and workflow data with explicit scope, evidence, and export-friendly Markdown.",
       "tags": ["reports", "executive-summary", "cost", "reliability", "workflows", "am"]
     },
     {

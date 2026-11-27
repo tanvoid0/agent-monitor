@@ -41,7 +41,7 @@ This may be:
    ```json
    {
      "export": {
-       "source": "AgentMonitor",
+       "source": "Agent Monitor",
        "exported_at": "2025-04-11T12:00:00Z",
        "filters": { "type": "sessions", "range": "last 7 days" },
        "count": 42

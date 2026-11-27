@@ -1,6 +1,6 @@
-# AgentMonitor - System Design and Technical Reference
+# Agent Monitor - System Design and Technical Reference
 
-Architectural overview and technical reference for the AgentMonitor system, covering design goals, high-level architecture, data flow, server and client components, database design, WebSocket protocol, hook integration, MCP extension layer, Claude Code plugins & skills, state management, security considerations, performance characteristics, deployment modes, and technology choices.
+Architectural overview and technical reference for the Agent Monitor system, covering design goals, high-level architecture, data flow, server and client components, database design, WebSocket protocol, hook integration, MCP extension layer, Claude Code plugins & skills, state management, security considerations, performance characteristics, deployment modes, and technology choices.
 
 ![Claude Code](https://img.shields.io/badge/Claude_Code-orange?style=flat-square&logo=claude&logoColor=white)
 ![Claude Code Plugins](https://img.shields.io/badge/Claude_Code-Plugins_&_Skills-orange?style=flat-square&logo=anthropic&logoColor=white)
@@ -40,6 +40,7 @@ Architectural overview and technical reference for the AgentMonitor system, cove
 ![macOS](https://img.shields.io/badge/macOS-Desktop_App-000000?style=flat-square&logo=apple&logoColor=white)
 ![Windows](https://img.shields.io/badge/Windows-Desktop_App-0078D6?style=flat-square&logo=windows&logoColor=white)
 ![SMAppService](https://img.shields.io/badge/SMAppService-Login_Items-000000?style=flat-square&logo=apple&logoColor=white)
+![Linux](https://img.shields.io/badge/Linux-AppImage_%2B_deb-FCC624?style=flat-square&logo=linux&logoColor=black)
 ![macOS DMG](https://img.shields.io/badge/macOS_DMG-arm64_%2B_x64-7c3aed?style=flat-square&logo=apple&logoColor=white)
 ![Vitest](https://img.shields.io/badge/Vitest-1.0-646CFF?style=flat-square&logo=vitest&logoColor=white)
 ![React Testing Library](https://img.shields.io/badge/React_Testing_Library-13.0-FF5733?style=flat-square&logo=testinglibrary&logoColor=white)
@@ -87,7 +88,7 @@ Architectural overview and technical reference for the AgentMonitor system, cove
 - [Update Notifier Subsystem](#update-notifier-subsystem)
 - [Tabby Companion Subsystem](#tabby-companion-subsystem)
 - [VS Code Extension Architecture](#vs-code-extension-architecture)
-- [Desktop App Architecture (macOS & Windows / Electron)](#desktop-app-architecture-macos--windows--electron)
+- [Desktop App Architecture (macOS, Windows & Linux / Electron)](#desktop-app-architecture-macos-windows--linux--electron)
 - [Security Considerations](#security-considerations)
 - [Performance Characteristics](#performance-characteristics)
 - [Deployment Modes](#deployment-modes)
@@ -99,9 +100,9 @@ Architectural overview and technical reference for the AgentMonitor system, cove
 
 ## System Overview
 
-AgentMonitor is a local-first monitoring platform for Claude Code sessions. It captures agent lifecycle events via Claude Code's native hook system, persists them in SQLite, and presents them through a React dashboard with real-time WebSocket updates.
+Agent Monitor is a local-first monitoring platform for Claude Code sessions. It captures agent lifecycle events via Claude Code's native hook system, persists them in SQLite, and presents them through a React dashboard with real-time WebSocket updates.
 
-> **Cursor sessions (informational):** The same `~/.claude` transcript paths also pick up **Cursor** agent sessions — Cursor happens to use that layout locally alongside Claude Code. AgentMonitor does not distinguish which editor created a session.
+> **Cursor sessions (informational):** The same `~/.claude` transcript paths also pick up **Cursor** agent sessions — Cursor happens to use that layout locally alongside Claude Code. Agent Monitor does not distinguish which editor created a session.
 
 ```mermaid
 C4Context
@@ -109,7 +110,7 @@ C4Context
 
     Person(user, "Developer", "Uses Claude Code CLI")
     System(claude, "Claude Code", "AI coding assistant with hook system")
-    System(dashboard, "AgentMonitor", "Monitoring platform")
+    System(dashboard, "Agent Monitor", "Monitoring platform")
     SystemDb(sqlite, "SQLite", "Persistent storage")
 
     Rel(user, claude, "Interacts with")
@@ -1802,7 +1803,7 @@ changes.
 
 ## Agent Extension Layer
 
-AgentMonitor uses one shared extension source tree with product-specific manifests:
+Agent Monitor uses one shared extension source tree with product-specific manifests:
 
 - Claude Code project guidance: `CLAUDE.md`, `.claude/rules/`, `.claude/skills/`, `.claude/agents/`
 - Codex project guidance: `AGENTS.md`, `.codex/config.toml`, `.codex/rules/`, `.codex/agents/`, `.codex/skills/`
@@ -1878,7 +1879,7 @@ The MCP server exposes **97 typed tools across 16 domain modules**. It covers ev
 
 ```mermaid
 flowchart LR
-    HOST["Claude Code / Codex / MCP host"] -->|stdio or HTTP| MCP["AgentMonitor MCP server"]
+    HOST["Claude Code / Codex / MCP host"] -->|stdio or HTTP| MCP["Agent Monitor MCP server"]
     HUMAN["Operator"] -->|REPL| MCP
     MCP --> CATALOG["Canonical registerAllTools catalog"]
     CATALOG --> API["Dashboard /api/*"]
@@ -2340,7 +2341,7 @@ Tabby's only contact with the rest of the app is four light, additive touchpoint
 
 ## VS Code Extension Architecture
 
-The **AgentMonitor** VS Code extension provides an integrated monitoring experience directly within the editor. It communicates with the local dashboard server via standard HTTP APIs and renders the dashboard UI in a webview.
+The **Agent Monitor** VS Code extension provides an integrated monitoring experience directly within the editor. It communicates with the local dashboard server via standard HTTP APIs and renders the dashboard UI in a webview.
 
 <p align="center">
   <img src="vscode-extension/vscode.png" alt="VS Code Extension Screenshot" width="100%">
@@ -2392,13 +2393,13 @@ graph TD
 For the extension source code, refer to the [vscode-extension/](./vscode-extension/) directory.
 
 > [!TIP]
-> Extension on VS Code Marketplace: [AgentMonitor](https://marketplace.visualstudio.com/items?itemName=hoangsonw.agentmonitor)
+> Extension on VS Code Marketplace: [Agent Monitor](https://marketplace.visualstudio.com/items?itemName=hoangsonw.agentmonitor)
 
 ---
 
-## Desktop App Architecture (macOS & Windows / Electron)
+## Desktop App Architecture (macOS, Windows & Linux / Electron)
 
-The `desktop/` workspace ships the dashboard as a **native desktop app** for **macOS** (`AgentMonitor.app`, distributed as a `.dmg`) **and Windows** (`AgentMonitor.exe`, distributed as an NSIS installer plus a no-install portable build). It is an Electron shell that **embeds the existing Express server in-process** and renders the already-built React client in a `BrowserWindow`. The desktop app does not reimplement the dashboard -- it `require()`s `server/index.js` directly, in the same Node runtime as the Electron main process, and points a Chromium window at it.
+The `desktop/` workspace ships the dashboard as a **native desktop app** for **macOS** (`Agent Monitor.app`, distributed as a `.dmg`) **Windows** (`Agent Monitor.exe`, distributed as an NSIS installer plus a no-install portable build) **and Linux** (an x64 AppImage plus a `.deb`, executable `agentmonitor`). It is an Electron shell that **embeds the existing Express server in-process** and renders the already-built React client in a `BrowserWindow`. The desktop app does not reimplement the dashboard -- it `require()`s `server/index.js` directly, in the same Node runtime as the Electron main process, and points a Chromium window at it.
 
 For the user-facing guide (download, install, Gatekeeper / SmartScreen, tray menu, auto-start), see [DESKTOP.md](./DESKTOP.md). For the full contributor/architecture reference -- including build performance, code signing, notarization, and CI details -- see [desktop/README.md](./desktop/README.md).
 
@@ -2471,11 +2472,11 @@ flowchart LR
 | --- | --- |
 | **`main.ts`** | Main-process entry. Single-instance lock, app menu + tray wiring, dashboard window, `Restart Server`, lifecycle (`window-all-closed`, `before-quit`). |
 | **`server-host.ts`** | In-process Express boot: port discovery, adoption, `better-sqlite3` ABI patch, `startBackgroundServices()` + hook bootstrap, clean DB close. Returns a `ServerHandle`. |
-| **`window.ts`** | `BrowserWindow` with persisted geometry (`userData/window-state.json`). External links open in the system browser. Sets the window/taskbar `icon` to the colored app logo (`assets/icon.ico` on Windows, `icon.png` elsewhere) so an unpackaged `desktop:dev` run no longer shows the generic Electron icon. |
-| **`menu.ts` / `tray.ts`** | Native application menu and menu-bar / notification-area (tray) icon. `tray.ts` selects a platform tray image — a macOS template glyph that the OS tints for the menu bar, or the colored `assets/icon.ico` for the Windows notification area (a black template would vanish on the dark taskbar). Tray uses a single-click dropdown (left or right) with a **live status snapshot** queried straight from SQLite at click time — server port, active sessions, working agents, events today — followed by *Open Dashboard*, *Open in Browser*, *Restart Server*, *Show Logs*, *Open at Login* (toggle), and *Quit*. The menu is rebuilt on each open so every value stays current. Snapshot rows are enabled and click-to-open-dashboard rather than disabled (which the OS dims). The application menu's *File ▸ Open Dashboard* (⌘1) is **macOS-only** — there the global menu bar persists after the window hides; on Windows/Linux the window-attached menu can't reopen a hidden window, so reopening is the tray's job. `focusOrCreateWindow` calls `show()` unconditionally so the tray reliably raises a backgrounded/minimized window (a bare `focus()` on Windows often only flashes the taskbar). |
-| **`login-item.ts`** | Auto-start-at-login toggle through Electron's first-party `app.setLoginItemSettings` API on every platform. On macOS it drives the modern `SMAppService` Login Items (not a `LaunchAgent` plist); on Windows it writes a per-user `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` entry. Login launches are tagged with a `--am-hidden` arg so the app can stay tray-only at startup — Windows has no `wasOpenedAtLogin` signal, so the arg is the cross-platform detection mechanism. |
+| **`window.ts`** | `BrowserWindow` with persisted geometry (`userData/window-state.json`). External links open in the system browser. Sets the window/taskbar `icon` to the colored app logo (`assets/icon.ico` on Windows, `icon.png` elsewhere, including Linux) so an unpackaged `desktop:dev` run no longer shows the generic Electron icon. |
+| **`menu.ts` / `tray.ts`** | Native application menu and menu-bar / notification-area (tray) icon. `tray.ts` selects a platform tray image — a macOS template glyph that the OS tints for the menu bar, or the colored `assets/icon.ico` (Windows notification area) / `assets/icon.png` (Linux) — a black template would vanish on a dark taskbar. Tray uses a single-click dropdown (left or right) with a **live status snapshot** queried straight from SQLite at click time — server port, active sessions, working agents, events today — followed by *Open Dashboard*, *Open in Browser*, *Restart Server*, *Show Logs*, *Open at Login* (toggle), and *Quit*. The menu is rebuilt on each open so every value stays current. Snapshot rows are enabled and click-to-open-dashboard rather than disabled (which the OS dims). The application menu's *File ▸ Open Dashboard* (⌘1) is **macOS-only** — there the global menu bar persists after the window hides; on Windows/Linux the window-attached menu can't reopen a hidden window, so reopening is the tray's job. `focusOrCreateWindow` calls `show()` unconditionally so the tray reliably raises a backgrounded/minimized window (a bare `focus()` on Windows often only flashes the taskbar). |
+| **`login-item.ts`** | Auto-start-at-login toggle through Electron's first-party `app.setLoginItemSettings` API on every platform. On macOS it drives the modern `SMAppService` Login Items (not a `LaunchAgent` plist); on Windows it writes a per-user `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` entry. Login launches are tagged with a `--am-hidden` arg so the app can stay tray-only at startup — Windows has no `wasOpenedAtLogin` signal, so the arg is the cross-platform detection mechanism. On Linux the toggle is a no-op. |
 | **`shell-path.ts`** | (macOS) Recovers the user's login-shell `PATH` at startup and merges it onto `process.env.PATH`, so the embedded server (and the `claude` CLI it spawns) is not limited to launchd's minimal `PATH`. On Windows the process already inherits the full user `PATH`, so no recovery is needed. |
-| **`logger.ts`** | File logger to `~/Library/Logs/AgentMonitor/desktop.log` (macOS) or `%APPDATA%\AgentMonitor\logs\desktop.log` (Windows) -- the main process has no console when launched from Finder / Explorer. |
+| **`logger.ts`** | File logger to `~/Library/Logs/Agent Monitor/desktop.log` (macOS), `%APPDATA%\Agent Monitor\logs\desktop.log` (Windows), or `~/.config/Agent Monitor/logs/desktop.log` (Linux) -- the main process has no console when launched from Finder / Explorer. |
 | **`constants.ts`** | Shared identifiers, including the `APP_ID` (`tanvoid0.agentmonitor.desktop`) that `main.ts` sets as the Windows AppUserModelId. |
 
 `server-host.ts` resolves the directory containing the bundled `server/` and `client/dist/` via `resolveAppRoot()`: `process.resourcesPath/app` when packaged, or the repo root (one directory up from `desktop/`) in development.
@@ -2533,7 +2534,7 @@ A packaged install directory is **read-only** in practice: on macOS a `.app` bun
 - `server/db.js` honors `DASHBOARD_DATA_DIR` for the SQLite file.
 - `server/lib/push.js` honors it for the persisted VAPID keys.
 
-The resulting per-user location is `~/Library/Application Support/AgentMonitor/data/` on macOS and `%APPDATA%\AgentMonitor\data\` on Windows. Because this lives outside the bundle / install dir, imported history and persisted events **survive an app reinstall or update** (the Windows NSIS uninstaller keeps this data by default). Without this, writing a database into the read-only install location failed on a packaged build and broke History Import and event persistence.
+The resulting per-user location is `~/Library/Application Support/Agent Monitor/data/` on macOS, `%APPDATA%\Agent Monitor\data\` on Windows, and `~/.config/Agent Monitor/data/` on Linux. Because this lives outside the bundle / install dir, imported history and persisted events **survive an app reinstall or update** (the Windows NSIS uninstaller keeps this data by default). Without this, writing a database into the read-only install location failed on a packaged build and broke History Import and event persistence.
 
 The standalone `node server/index.js` path is **unaffected**: `DASHBOARD_DATA_DIR` is unset there, and `server-host.ts` only sets it when it is not already defined -- so `server/db.js` falls back to its usual repo-relative default.
 
@@ -2658,13 +2659,13 @@ sequenceDiagram
 
 ### Packaged App Layout
 
-`electron-builder` produces `AgentMonitor.app` on macOS and `AgentMonitor.exe` (NSIS installer + portable) on Windows. On both platforms the Electron main-process code is compiled (`tsc` → `out/`) and packed into `app.asar`; the rest of the repo is shipped as **`extraResources`** -- plain files under the bundle's `Resources/app/` (macOS) or the install dir's `resources\app\` (Windows). The internal layout is the same shape on both:
+`electron-builder` produces `Agent Monitor.app` on macOS and `Agent Monitor.exe` (NSIS installer + portable) on Windows, and an x64 AppImage + `.deb` on Linux. On every platform the Electron main-process code is compiled (`tsc` → `out/`) and packed into `app.asar`; the rest of the repo is shipped as **`extraResources`** -- plain files under the bundle's `Resources/app/` (macOS) or the install dir's `resources\app\` (Windows). The internal layout is the same shape on both:
 
 ```mermaid
 flowchart TD
-    appbundle["AgentMonitor.app (macOS)<br/>AgentMonitor install dir (Windows)"]
+    appbundle["Agent Monitor.app (macOS)<br/>Agent Monitor install dir (Windows)"]
     appbundle --> contents["Contents/ (macOS)<br/>install root (Windows)"]
-    contents --> macos["MacOS/ — Electron binary (macOS)<br/>AgentMonitor.exe (Windows)"]
+    contents --> macos["MacOS/ — Electron binary (macOS)<br/>Agent Monitor.exe (Windows)"]
     contents --> res["Resources/ (macOS)<br/>resources\ (Windows)"]
     res --> asar["app.asar<br/>(compiled out/**, package.json)"]
     res --> unpacked["app.asar.unpacked/<br/>node_modules/better-sqlite3 (.node)"]
@@ -2679,9 +2680,9 @@ flowchart TD
     style appdir fill:#238636,stroke:#196c2e,color:#fff
 ```
 
-At runtime `server-host.ts` resolves this root as `process.resourcesPath/app` when packaged, on both platforms. Everything under the packaged `app/` is **read-only** on a packaged, signed, or app-translocated macOS bundle and on a Windows install under `%ProgramFiles%` (or a portable build's mount) -- so all writable state (the SQLite database, VAPID keys) lives in the per-user data dir (`~/Library/Application Support/AgentMonitor/data/` on macOS, `%APPDATA%\AgentMonitor\data\` on Windows), **never inside the bundle / install dir** (see [Writable Data Directory](#writable-data-directory)).
+At runtime `server-host.ts` resolves this root as `process.resourcesPath/app` when packaged, on both platforms. Everything under the packaged `app/` is **read-only** on a packaged, signed, or app-translocated macOS bundle and on a Windows install under `%ProgramFiles%` (or a portable build's mount) -- so all writable state (the SQLite database, VAPID keys) lives in the per-user data dir (`~/Library/Application Support/Agent Monitor/data/` on macOS, `%APPDATA%\Agent Monitor\data\` on Windows), **never inside the bundle / install dir** (see [Writable Data Directory](#writable-data-directory)).
 
-On macOS `electron-builder` produces **two per-architecture DMGs** — one `arm64` (Apple Silicon), one `x64` (Intel) — via `--mac --arm64 --x64` (not a merged universal binary; the release ships both), ad-hoc signed by default so anyone can build a working `.dmg` without a paid Apple Developer account; real Developer ID signing and notarization are opt-in via environment variables (`CSC_LINK`, `APPLE_ID`, etc.). On Windows it produces an **NSIS installer `.exe`** and a **no-install portable `.exe`** (both x64), using `assets/icon.ico` (generated from the source PNG by `desktop/scripts/build-win-icon.ps1`) as the application and tray icon. **`electron-builder` packages for the host OS** -- DMGs build on macOS, Windows `.exe`s build on Windows -- so the two artifacts come from two CI jobs (see below). The `desktop/scripts/prebuild.js` guard also **self-heals** a `better-sqlite3` native binary that a prior cross-arch DMG build (`electron-builder --mac --x64/--arm64`) left compiled for the wrong CPU architecture -- it detects the mismatch via `file` and re-runs `electron-builder install-app-deps`, so `desktop:dev` and `desktop:test` do not fail with `ERR_DLOPEN_FAILED`; on Windows it shells the `.cmd` shims for `npm`/`npx`. CI runs a path-filtered `🍎 macOS Desktop (DMG)` job on `macos-latest` (artifact `AgentMonitor-dmg`) and a `🪟 Windows Desktop (EXE)` job on `windows-latest` (artifact `AgentMonitor-win`); the release attaches both. See [`desktop/README.md`](./desktop/README.md) for the full build pipeline, build-performance notes, and signing details.
+On macOS `electron-builder` produces **two per-architecture DMGs** — one `arm64` (Apple Silicon), one `x64` (Intel) — via `--mac --arm64 --x64` (not a merged universal binary; the release ships both), ad-hoc signed by default so anyone can build a working `.dmg` without a paid Apple Developer account; real Developer ID signing and notarization are opt-in via environment variables (`CSC_LINK`, `APPLE_ID`, etc.). On Windows it produces an **NSIS installer `.exe`** and a **no-install portable `.exe`** (both x64), using `assets/icon.ico` (generated from the source PNG by `desktop/scripts/build-win-icon.ps1`) as the application and tray icon. **`electron-builder` packages for the host OS** -- DMGs build on macOS, Windows `.exe`s build on Windows, Linux packages build on Linux (`npm run desktop:linux`) -- so the artifacts come from three CI jobs (see below). On Linux it produces an **x64 AppImage** (`AgentMonitor-<ver>-x86_64.AppImage`) and a **`.deb`** (`AgentMonitor-<ver>-amd64.deb`, category Development, executable `agentmonitor`). The `desktop/scripts/prebuild.js` guard also **self-heals** a `better-sqlite3` native binary that a prior cross-arch DMG build (`electron-builder --mac --x64/--arm64`) left compiled for the wrong CPU architecture -- it detects the mismatch via `file` and re-runs `electron-builder install-app-deps`, so `desktop:dev` and `desktop:test` do not fail with `ERR_DLOPEN_FAILED`; on Windows it shells the `.cmd` shims for `npm`/`npx`. CI runs a path-filtered `🍎 macOS Desktop (DMG)` job on `macos-latest` (artifact `AgentMonitor-dmg`) and a `🪟 Windows Desktop (EXE)` job on `windows-latest` (artifact `AgentMonitor-win`), and a `🐧 Linux Desktop (AppImage + deb)` job on `ubuntu-latest` (artifact `AgentMonitor-linux`); the release attaches all three. On first launch after the rename to **Agent Monitor** (with a space) the app moves the old `…/AgentMonitor` per-user app-data folder to `…/Agent Monitor`; the SQLite DB in `~/.claude/agentmonitor/` is unaffected. See [`desktop/README.md`](./desktop/README.md) for the full build pipeline, build-performance notes, and signing details.
 
 ### Relation to Standalone Deployment
 
@@ -2775,13 +2776,13 @@ graph LR
 | **File watching** | Debounced server watcher + Vite HMR | None                            |
 | **Source maps**   | Inline                               | External files                  |
 
-### Desktop App (macOS & Windows)
+### Desktop App (macOS, Windows & Linux)
 
-The native desktop app (macOS `.app`/`.dmg`, Windows NSIS / portable `.exe`) is a self-contained deployment mode: a single Electron process embeds the Express server in-process and renders the React client in a `BrowserWindow`. No terminal, no separate `npm start`.
+The native desktop app (macOS `.app`/`.dmg`, Windows NSIS / portable `.exe`, Linux AppImage / `.deb`) is a self-contained deployment mode: a single Electron process embeds the Express server in-process and renders the React client in a `BrowserWindow`. No terminal, no separate `npm start`.
 
 ```mermaid
 graph LR
-    LAUNCH["Open AgentMonitor<br/>(.app / .exe)"] --> MAIN["Electron main process<br/>(Node 22 / Electron 35)"]
+    LAUNCH["Open Agent Monitor<br/>(.app / .exe)"] --> MAIN["Electron main process<br/>(Node 22 / Electron 35)"]
     MAIN --> HOST["server-host.ts<br/>port discovery + adopt"]
     HOST --> SERVER["server/index.js (in-process)<br/>Port 4820 → fallback"]
     SERVER -->|serves| DIST["client/dist/<br/>(extraResources)"]
@@ -2841,7 +2842,7 @@ The multi-stage OCI image uses digest-pinned Node 24 LTS on Alpine 3.24, builds 
 ```mermaid
 flowchart LR
   BUILD["server-deps + client-build"] --> RUNTIME["non-root runtime"]
-  RUNTIME --> APP["AgentMonitor :4820"]
+  RUNTIME --> APP["Agent Monitor :4820"]
   DATA[("/app/data")] --> APP
   CONFIG[("/app/config")] --> APP
   CLAUDE["Claude home, read-only"] --> APP
@@ -2875,7 +2876,7 @@ flowchart LR
   IMG --> SUPPLY["Grype scan + SBOM + SLSA provenance + Cosign"]
   SUPPLY --> DEPLOY["Helm / Kustomize / Terraform"]
   DEPLOY --> EDGE["Ingress or Gateway API + TLS"]
-  EDGE --> APP["AgentMonitor, exactly 1 Recreate replica"]
+  EDGE --> APP["Agent Monitor, exactly 1 Recreate replica"]
   APP --> PVC[("retained ReadWriteOnce PVC")]
   PROM["Prometheus Operator"] -->|"Bearer /api/metrics"| APP
 ```
@@ -2978,7 +2979,7 @@ Claude Code invokes this command on each update, piping a JSON payload to stdin.
 | **SQLite** (via `better-sqlite3` or built-in `node:sqlite`) | Zero-config, embedded, no server process. WAL mode gives concurrent reads. Synchronous API is simpler than async alternatives for this use case. Falls back to Node.js built-in `node:sqlite` when `better-sqlite3` cannot be compiled |
 | **Express**                     | Battle-tested, minimal, well-understood. Overkill would be Fastify for this scale; underkill would be raw `http` module                         |
 | **ws**                          | Fastest, most lightweight WebSocket library for Node. No Socket.IO overhead needed since we only push JSON messages                             |
-| **React 19**                    | Current supported client runtime with strong TypeScript support. AgentMonitor remains a client-rendered SPA and does not enable Server Components or RSC |
+| **React 19**                    | Current supported client runtime with strong TypeScript support. Agent Monitor remains a client-rendered SPA and does not enable Server Components or RSC |
 | **Vite**                        | Fast builds, native ESM, excellent dev experience. Proxy config handles the dev server split cleanly                                            |
 | **Tailwind CSS**                | Utility-first approach keeps styles colocated with markup. No CSS module boilerplate. Custom theme config for the dark UI                       |
 | **React Router 8**              | Standard declarative routing for React SPAs. Layout routes with `<Outlet>` give clean shell composition without enabling framework or RSC modes    |

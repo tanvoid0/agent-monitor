@@ -1,4 +1,4 @@
-# Auto-provisions the Prometheus datasource the AgentMonitor dashboard queries. The uid
+# Auto-provisions the Prometheus datasource the Agent Monitor dashboard queries. The uid
 # is fixed so the bundled dashboard JSON can reference it deterministically.
 apiVersion: 1
 

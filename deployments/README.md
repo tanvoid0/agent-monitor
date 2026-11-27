@@ -1,11 +1,11 @@
 # Deployment infrastructure
 
-This directory contains the supported production deployment surface for AgentMonitor.
+This directory contains the supported production deployment surface for Agent Monitor.
 The complete operator guide is [`../DEPLOYMENT.md`](../DEPLOYMENT.md).
 
 ## Supported topology
 
-AgentMonitor uses SQLite and supports **one active dashboard writer per persistent
+Agent Monitor uses SQLite and supports **one active dashboard writer per persistent
 volume**. The deployment assets enforce one replica and a Recreate strategy.
 HPA, active-active replicas, blue-green, and canary deployments are intentionally
 not shipped while SQLite remains the persistence backend.

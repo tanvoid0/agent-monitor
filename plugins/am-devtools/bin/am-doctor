@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# am-doctor — Diagnostic tool for AgentMonitor
+# am-doctor — Diagnostic tool for Agent Monitor
 # Usage: am-doctor [--quick] [--deep] [--fix]
 set -euo pipefail
 
@@ -20,7 +20,7 @@ FAIL=0
 
 usage() {
   cat <<EOF
-am-doctor — AgentMonitor Diagnostic Tool
+am-doctor — Agent Monitor Diagnostic Tool
 
 USAGE:
   am-doctor [OPTIONS]

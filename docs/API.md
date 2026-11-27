@@ -1,6 +1,6 @@
 # API Reference
 
-Complete REST API and WebSocket documentation for AgentMonitor.
+Complete REST API and WebSocket documentation for Agent Monitor.
 
 ---
 
@@ -31,7 +31,7 @@ Complete REST API and WebSocket documentation for AgentMonitor.
 
 ## Overview
 
-The AgentMonitor API provides programmatic access to Claude Code session monitoring data.
+The Agent Monitor API provides programmatic access to Claude Code session monitoring data.
 
 ```mermaid
 graph LR
@@ -720,7 +720,7 @@ scrape_configs:
     #   credentials: "<DASHBOARD_TOKEN>"
 ```
 
-A ready-to-run Prometheus + Grafana stack (four auto-provisioned dashboards; default home **AgentMonitor — Overview**) lives in [`monitoring/`](../monitoring/README.md). **npm path (no Docker):** `npm run monitoring:install` then `npm run monitoring:up` (binaries are pulled via the monitoring package's `postinstall` — there is no official `grafana`/`prometheus` server package on npm). **Docker path:** `npm run monitoring:docker:up` or `npm run docker:full:up` (set `DASHBOARD_ALLOWED_HOSTS=host.docker.internal` on the dashboard when Prometheus runs in a container). Pre-built Prometheus console: `http://localhost:9090/consoles/index.html`.
+A ready-to-run Prometheus + Grafana stack (four auto-provisioned dashboards; default home **Agent Monitor — Overview**) lives in [`monitoring/`](../monitoring/README.md). **npm path (no Docker):** `npm run monitoring:install` then `npm run monitoring:up` (binaries are pulled via the monitoring package's `postinstall` — there is no official `grafana`/`prometheus` server package on npm). **Docker path:** `npm run monitoring:docker:up` or `npm run docker:full:up` (set `DASHBOARD_ALLOWED_HOSTS=host.docker.internal` on the dashboard when Prometheus runs in a container). Pre-built Prometheus console: `http://localhost:9090/consoles/index.html`.
 
 ---
 
@@ -1082,7 +1082,7 @@ POST /api/remote-sources
 | `remote_codex_home` | string | No | Remote Codex home (defaults to remote `~/.codex`) |
 | `enabled` | boolean | No | Whether the source is eligible for syncs (default `true`) |
 
-> **Cursor (informational):** Sessions imported from `~/.claude` include **Cursor** agent usage on that machine too — Cursor happens to use the same paths as Claude Code. AgentMonitor does not tag which app created a session.
+> **Cursor (informational):** Sessions imported from `~/.claude` include **Cursor** agent usage on that machine too — Cursor happens to use the same paths as Claude Code. Agent Monitor does not tag which app created a session.
 
 Returns `{ "source": RemoteSource }` with HTTP **201**.
 
@@ -1470,7 +1470,7 @@ Releases the held hook request. `allow` / `deny` answer on the user's behalf (`m
 const ws = new WebSocket('ws://localhost:4820/ws');
 
 ws.onopen = () => {
-  console.log('Connected to AgentMonitor');
+  console.log('Connected to Agent Monitor');
 };
 
 ws.onmessage = (event) => {
@@ -1937,7 +1937,7 @@ await fetch('http://localhost:4820/api/pricing/my-custom-model', {
 
 ## Summary
 
-The AgentMonitor API provides:
+The Agent Monitor API provides:
 
 - ✅ **RESTful endpoints** for querying sessions, agents, tools, pricing
 - ✅ **WebSocket streaming** for real-time updates

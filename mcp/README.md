@@ -1,14 +1,14 @@
-# AgentMonitor MCP Server Reference
+# Agent Monitor MCP Server Reference
 
-The AgentMonitor (AgentMonitor) MCP server exposes the local dashboard's complete supported action surface as **97 typed tools**. The same canonical catalog is used by stdio, Streamable HTTP, legacy SSE, and the interactive REPL, so tool names, schemas, and policy guards cannot drift between transports.
+The Agent Monitor (Agent Monitor) MCP server exposes the local dashboard's complete supported action surface as **97 typed tools**. The same canonical catalog is used by stdio, Streamable HTTP, legacy SSE, and the interactive REPL, so tool names, schemas, and policy guards cannot drift between transports.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    H["Claude Code / Codex / MCP host"] -->|stdio or HTTP| M["AgentMonitor MCP server"]
+    H["Claude Code / Codex / MCP host"] -->|stdio or HTTP| M["Agent Monitor MCP server"]
     R["Operator"] -->|am mcp repl| M
-    M -->|loopback HTTP| A["AgentMonitor /api/*"]
+    M -->|loopback HTTP| A["Agent Monitor /api/*"]
     A --> D[(SQLite)]
 ```
 
@@ -233,7 +233,7 @@ Claude and Codex plugins use the stable launcher:
 }
 ```
 
-This avoids plugin-cache-relative paths. Run `npm run setup` in the AgentMonitor checkout first so `am` is linked and `mcp/build/index.js` exists.
+This avoids plugin-cache-relative paths. Run `npm run setup` in the Agent Monitor checkout first so `am` is linked and `mcp/build/index.js` exists.
 
 ## Validation
 

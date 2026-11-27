@@ -1,5 +1,5 @@
 ---
-description: AgentMonitor platform status across hooks, config, updates, and MCP prerequisites
+description: Agent Monitor platform status across hooks, config, updates, and MCP prerequisites
 ---
 
 Run `am health`, `am hooks status`, `am config claude overview`,

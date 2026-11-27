@@ -1,12 +1,12 @@
 # Deployment
 
-AgentMonitor supports three production paths:
+Agent Monitor supports three production paths:
 
 1. **Docker or Podman Compose on one Linux host** for the complete dashboard, MCP, Nginx, Prometheus, and Grafana stack.
 2. **Helm or Kustomize on any conformant Kubernetes cluster**, including EKS, GKE, AKS, OKE, and self-managed clusters.
 3. **Terraform against an existing Kubernetes cluster**, using the same validated Helm chart.
 
-The persistence contract is the same everywhere: **one active dashboard writer per SQLite volume**. AgentMonitor does not support HPA, active-active replicas, blue-green, or canary deployments while SQLite is the database. Nginx, Prometheus, Grafana, and MCP can run around the dashboard, but the dashboard itself remains one Recreate-managed writer.
+The persistence contract is the same everywhere: **one active dashboard writer per SQLite volume**. Agent Monitor does not support HPA, active-active replicas, blue-green, or canary deployments while SQLite is the database. Nginx, Prometheus, Grafana, and MCP can run around the dashboard, but the dashboard itself remains one Recreate-managed writer.
 
 ## Production topology
 
@@ -14,7 +14,7 @@ The persistence contract is the same everywhere: **one active dashboard writer p
 flowchart LR
   USER[Browser] --> TLS[Cloud load balancer or TLS terminator]
   TLS --> EDGE[Nginx, Ingress, or Gateway API]
-  EDGE --> APP[AgentMonitor dashboard, exactly 1 replica]
+  EDGE --> APP[Agent Monitor dashboard, exactly 1 replica]
   APP --> PVC[(ReadWriteOnce volume, dashboard.db)]
   MCP[MCP HTTP service] --> APP
   PROM[Prometheus] -->|Bearer-authenticated /api/metrics| APP
@@ -24,7 +24,7 @@ flowchart LR
 
 ### Why one writer
 
-SQLite coordinates concurrent operations inside one process well, but AgentMonitor is not designed for multiple independent application processes writing the same database file over a shared filesystem. The supplied chart schema rejects `replicaCount != 1` and `autoscaling.enabled=true`. Kustomize uses `replicas: 1` plus `strategy.type: Recreate`. Upgrades intentionally have a brief application interruption while the old pod exits and the new pod acquires the volume.
+SQLite coordinates concurrent operations inside one process well, but Agent Monitor is not designed for multiple independent application processes writing the same database file over a shared filesystem. The supplied chart schema rejects `replicaCount != 1` and `autoscaling.enabled=true`. Kustomize uses `replicas: 1` plus `strategy.type: Recreate`. Upgrades intentionally have a brief application interruption while the old pod exits and the new pod acquires the volume.
 
 Availability comes from:
 
@@ -67,7 +67,7 @@ Production deployments use three independent tokens:
 
 The complete Compose stack also needs `grafana-admin-password`.
 
-AgentMonitor consumes these as `DASHBOARD_TOKEN_FILE`,
+Agent Monitor consumes these as `DASHBOARD_TOKEN_FILE`,
 `DASHBOARD_HOOK_TOKEN_FILE`, `MCP_DASHBOARD_API_TOKEN_FILE`, and
 `MCP_HTTP_AUTH_TOKEN_FILE` inside containers and pods.
 
@@ -257,7 +257,7 @@ test -n "${BACKUP_FILE}"
   --input "${BACKUP_FILE}"
 ```
 
-The script verifies the checksum and SQLite integrity, creates a mandatory pre-restore backup, scales the Deployment to zero, mounts the PVC in a restricted helper pod using the current AgentMonitor image, replaces the database, removes WAL/SHM files, verifies integrity again, restores one replica, and runs health checks. If the script exits early after scale-down, an exit trap attempts to restore the writer.
+The script verifies the checksum and SQLite integrity, creates a mandatory pre-restore backup, scales the Deployment to zero, mounts the PVC in a restricted helper pod using the current Agent Monitor image, replaces the database, removes WAL/SHM files, verifies integrity again, restores one replica, and runs health checks. If the script exits early after scale-down, an exit trap attempts to restore the writer.
 
 ## Deploy and rollback
 

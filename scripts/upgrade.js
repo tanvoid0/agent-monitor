@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * @file upgrade.js
- * @description `npm run upgrade` — reinstall AgentMonitor from the current
+ * @description `npm run upgrade` — reinstall Agent Monitor from the current
  * checkout, printing each step like `am doctor` so the operator sees the old
  * install being removed and the new one taking its place. Steps: optional
  * `git pull --ff-only` (`--pull`), unlink the previous global CLI (including

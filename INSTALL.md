@@ -1,6 +1,6 @@
 # Installation
 
-A step-by-step guide to get the AgentMonitor up and running on your machine, with optional sections for importing history, running in a container, and using the native desktop app (macOS & Windows).
+A step-by-step guide to get the Agent Monitor up and running on your machine, with optional sections for importing history, running in a container, and using the native desktop app (macOS, Windows & Linux).
 
 ## Requirements
 
@@ -173,9 +173,9 @@ Open **http://localhost:4820** in your browser.
 
 ---
 
-## Desktop App (macOS & Windows) (optional)
+## Desktop App (macOS, Windows & Linux) (optional)
 
-If you'd rather not keep a terminal window open, the project also ships an Electron 35-based **native desktop app** (the `desktop/` workspace), available for both **macOS** and **Windows**. It embeds the Express server in-process, renders the built React client in a `BrowserWindow`, registers a menu-bar / notification-area (tray) icon, and offers a one-click "Open at Login" toggle. Everything you'd see in the browser at `localhost:4820` lives inside a single app you install once — distributed as a macOS `.app` (in a `.dmg`) and a Windows `.exe` (an NSIS installer plus a no-install portable build).
+If you'd rather not keep a terminal window open, the project also ships an Electron 35-based **native desktop app** (the `desktop/` workspace), available for **macOS**, **Windows**, and **Linux**. It embeds the Express server in-process, renders the built React client in a `BrowserWindow`, registers a menu-bar / notification-area (tray) icon, and offers a one-click "Open at Login" toggle. Everything you'd see in the browser at `localhost:4820` lives inside a single app you install once — distributed as a macOS `.app` (in a `.dmg`) a Windows `.exe` (an NSIS installer plus a no-install portable build), and Linux packages (`.AppImage` + `.deb`).
 
 ### Prerequisites
 
@@ -183,7 +183,9 @@ If you'd rather not keep a terminal window open, the project also ships an Elect
 |---|---|
 | Downloading a pre-built installer (macOS) | macOS — nothing else |
 | Downloading a pre-built installer (Windows) | Windows 10/11 (x64) — nothing else |
+| Downloading a pre-built package (Linux) | Linux x64 — nothing else |
 | Building the DMG locally (macOS) | macOS, Node.js 22.22+ (24 LTS recommended), npm 10+, and **Xcode command-line tools** (`xcode-select --install`) so the native `better-sqlite3` module can be rebuilt for Electron's ABI |
+| Building the AppImage / `.deb` locally (Linux) | Linux, Node.js 22.22+ (24 LTS recommended), npm 10+, and a C/C++ toolchain (`build-essential` + `python3`) if the native `better-sqlite3` module needs rebuilding; `npm run desktop:install` prints the exact fix on failure |
 | Building the `.exe` locally (Windows) | Windows, Node.js 22.22+ (24 LTS recommended), npm 10+. `better-sqlite3` is fetched as a **prebuilt Electron binary** by `npm run desktop:install`, so no Visual Studio C++ toolchain is needed in the common case. If the build _does_ fail, `npm run desktop:install` prints the exact fix (Visual Studio Build Tools + "Desktop development with C++") plus a no-toolchain alternative and exits non-zero rather than failing silently |
 
 ### Way 1 — Download a pre-built installer
@@ -200,26 +202,29 @@ Open [**Releases → latest**](https://github.com/tanvoid0/agent-monitor/release
 | macOS (Intel) | `AgentMonitor-<ver>-x64.dmg` | drag into `/Applications` |
 | Windows (installer) | `AgentMonitor-Setup-<ver>-x64.exe` | per-user install, no admin |
 | Windows (portable) | `AgentMonitor-<ver>-x64-portable.exe` | run without installing |
+| Linux (AppImage) | `AgentMonitor-<ver>-x86_64.AppImage` | `chmod +x`, then run |
+| Linux (deb) | `AgentMonitor-<ver>-amd64.deb` | `sudo apt install ./AgentMonitor-<ver>-amd64.deb` |
 
 **1b. From the per-commit CI artifact** *(useful for testing master before it's tagged — sign-in required, 14-day retention)*
 
-Every green run of the desktop CI jobs uploads a packaged artifact — `AgentMonitor-dmg` from the `🍎 macOS Desktop (DMG)` job and `AgentMonitor-win` from the `🪟 Windows Desktop (EXE)` job:
+Every green run of the desktop CI jobs uploads a packaged artifact — `AgentMonitor-dmg` from the `🍎 macOS Desktop (DMG)` job, `AgentMonitor-win` from the `🪟 Windows Desktop (EXE)` job, and `AgentMonitor-linux` from the `🐧 Linux Desktop (AppImage + deb)` job:
 
-- **Via the GitHub UI:** open the latest passing run under [Actions](https://github.com/tanvoid0/agent-monitor/actions/workflows/ci.yml?query=branch%3Amaster+is%3Asuccess), scroll to **Artifacts**, and download `AgentMonitor-dmg` (macOS) or `AgentMonitor-win` (Windows).
+- **Via the GitHub UI:** open the latest passing run under [Actions](https://github.com/tanvoid0/agent-monitor/actions/workflows/ci.yml?query=branch%3Amaster+is%3Asuccess), scroll to **Artifacts**, and download `AgentMonitor-dmg` (macOS) `AgentMonitor-win` (Windows), or `AgentMonitor-linux` (Linux).
 - **Via the `gh` CLI:**
 
   ```bash
   gh run download <run-id> -R tanvoid0/agent-monitor -n AgentMonitor-dmg   # macOS
   gh run download <run-id> -R tanvoid0/agent-monitor -n AgentMonitor-win   # Windows
+  gh run download <run-id> -R tanvoid0/agent-monitor -n AgentMonitor-linux # Linux
   ```
 
-  Unzip the macOS artifact to get the `.dmg`s, or the Windows artifact to get the NSIS installer + portable `.exe`s.
+  Unzip the macOS artifact to get the `.dmg`s, the Windows artifact to get the NSIS installer + portable `.exe`s, or the Linux artifact to get the AppImage + `.deb`.
 
 Then jump to [Install the app](#install-the-app).
 
 ### Way 2 — Build the installer locally
 
-From the project root, after `git clone`. electron-builder packages for the **host OS**, so build the macOS DMG on a Mac and the Windows `.exe` on Windows. The common prelude is the same:
+From the project root, after `git clone`. electron-builder packages for the **host OS**, so build the macOS DMG on a Mac the Windows `.exe` on Windows, and the Linux packages on Linux. The common prelude is the same:
 
 ```bash
 npm run setup                # install root + client + vscode-extension + MCP deps, build MCP, link am
@@ -231,6 +236,9 @@ npm run desktop:dmg:arm64    # fast single-arch DMG → desktop/release/
 
 # Windows (run on Windows):
 npm run desktop:win          # NSIS installer .exe → desktop/release/
+
+# Linux (run on Linux):
+npm run desktop:linux        # x64 AppImage + .deb → desktop/release/
 ```
 
 The artifact lands in `desktop/release/`. Pick the build command that matches your goal:
@@ -243,19 +251,20 @@ The artifact lands in `desktop/release/`. Pick the build command that matches yo
 | `npm run desktop:dmg:universal` | macOS — one merged universal DMG (arm64 + x86_64) | **Slowest** | Hand-distributing a single file that runs on any Mac (not what the release ships) |
 | `npm run desktop:win` | Windows — NSIS installer `.exe` (x64) | — | Building the per-user installer |
 | `npm run desktop:win:portable` | Windows — portable `.exe` (x64) | — | Building the no-install portable build |
+| `npm run desktop:linux` | Linux — x64 AppImage + `.deb` | — | Building the Linux packages |
 | `npm run desktop:install` | — | — | Install Electron + electron-builder deps; preflights the native `better-sqlite3` build and prints actionable setup help on failure |
 | `npm run desktop:build` | — | — | TypeScript compile only (`out/`) |
 | `npm run desktop:dev` | — | — | Build, then launch Electron locally |
 | `npm run desktop:test` | — | — | Smoke test (spawn Electron, probe `/api/health`) |
 
 > [!IMPORTANT]
-> **DMGs build on macOS; Windows `.exe`s build on Windows** — electron-builder packages for the host OS. On macOS, `npm run desktop:dmg` builds the app **twice** (one tree per architecture) and emits **both** per-arch DMGs (`arm64` + `x64`) — the release build. It does **not** merge them into a single universal binary; the two DMGs are what ship. **When building for your own Mac, use `desktop:dmg:arm64` or `desktop:dmg:x64`** — a single architecture finishes in roughly a minute. CI already builds both DMGs and the Windows `.exe`s for you (see Way 1).
+> **DMGs build on macOS; Windows `.exe`s build on Windows; the AppImage/`.deb` build on Linux** — electron-builder packages for the host OS. On macOS, `npm run desktop:dmg` builds the app **twice** (one tree per architecture) and emits **both** per-arch DMGs (`arm64` + `x64`) — the release build. It does **not** merge them into a single universal binary; the two DMGs are what ship. **When building for your own Mac, use `desktop:dmg:arm64` or `desktop:dmg:x64`** — a single architecture finishes in roughly a minute. CI already builds both DMGs and the Windows `.exe`s and Linux packages for you (see Way 1).
 
 ### Install the app
 
 **macOS.** Each `desktop:dmg*` build wipes `release/` first. `desktop:dmg:arm64`
 → `…-arm64.dmg` and `desktop:dmg:x64` → `…-x64.dmg` each emit a single DMG whose
-mounted-volume title states the architecture (e.g. *AgentMonitor (Apple
+mounted-volume title states the architecture (e.g. *Agent Monitor (Apple
 Silicon)*); `desktop:dmg` emits **both** (`…-arm64.dmg` + `…-x64.dmg`) for
 release. Install the one matching your Mac: an x64 build on Apple Silicon makes
 macOS prompt for Rosetta.
@@ -264,12 +273,12 @@ macOS prompt for Rosetta.
 open desktop/release/AgentMonitor-*-arm64.dmg   # the arch you built
 ```
 
-1. The DMG mounts — drag **AgentMonitor** into your `Applications` folder.
+1. The DMG mounts — drag **Agent Monitor** into your `Applications` folder.
 2. The DMG is ad-hoc signed, so macOS Gatekeeper shows a warning (*"Apple could not verify…"*) on first launch. Strip the quarantine attribute, then open it:
 
    ```bash
-   xattr -cr "/Applications/AgentMonitor.app"
-   open "/Applications/AgentMonitor.app"
+   xattr -cr "/Applications/Agent Monitor.app"
+   open "/Applications/Agent Monitor.app"
    ```
 
    Alternatively, open  → *System Settings → Privacy & Security* and click *Open Anyway*.
@@ -280,10 +289,15 @@ open desktop/release/AgentMonitor-*-arm64.dmg   # the arch you built
 2. The installer is **unsigned** by default, so Windows **SmartScreen** may show *"Windows protected your PC"* on first launch — click **More info → Run anyway**.
 3. Launch from the Start menu / desktop shortcut.
 
+**Linux.** Make the AppImage executable and run it — `chmod +x AgentMonitor-<ver>-x86_64.AppImage && ./AgentMonitor-<ver>-x86_64.AppImage` — or install the `.deb` with `sudo apt install ./AgentMonitor-<ver>-amd64.deb` (executable `agentmonitor`, category Development). The tray uses the colored app icon; *Open at Login* is a no-op on Linux.
+
 Once running, the embedded server boots on port `4820` (or adopts an already-healthy server on `4820`, or falls back to `4821`–`4829` / a random high port), the menu-bar / notification-area (tray) icon appears, and the dashboard window opens. **Hooks are installed automatically on first boot** — an install-only user does not need `npm run install-hooks`; just start a new Claude Code session. Closing the window hides it but keeps the server running; **Quit** from the tray exits.
 
 > [!NOTE]
-> The packaged app stores its SQLite database and VAPID keys in a per-user app-data directory **outside** the app bundle / install dir — `~/Library/Application Support/AgentMonitor/data/` on macOS, `%APPDATA%\AgentMonitor\data\` on Windows. Your imported history and events therefore **survive app reinstalls and updates** (the Windows NSIS uninstaller keeps this data by default). (Older macOS builds kept the database inside the bundle, which is read-only once installed and code-signed — that broke History Import; it is now fixed. If you are upgrading from a pre-fix build, there is a one-time data gap: re-run **Settings → Import History → Rescan** once.)
+> The packaged app stores its SQLite database and VAPID keys in a per-user app-data directory **outside** the app bundle / install dir — `~/Library/Application Support/Agent Monitor/data/` on macOS, `%APPDATA%\Agent Monitor\data\` on Windows, `~/.config/Agent Monitor/data/` on Linux. Your imported history and events therefore **survive app reinstalls and updates** (the Windows NSIS uninstaller keeps this data by default). (Older macOS builds kept the database inside the bundle, which is read-only once installed and code-signed — that broke History Import; it is now fixed. If you are upgrading from a pre-fix build, there is a one-time data gap: re-run **Settings → Import History → Rescan** once.)
+
+> [!NOTE]
+> **Upgrading from the old `AgentMonitor` name:** quit the old app first (tray → *Quit*); on first launch the new app moves the old per-user app-data folder (`…/AgentMonitor` → `…/Agent Monitor`) automatically. On Windows an in-place upgrade keeps the existing install folder and re-points an enabled *Open at Login* entry at the renamed `Agent Monitor.exe`. On macOS the new `Agent Monitor.app` lands next to the old `AgentMonitor.app` — delete the old one (and re-toggle *Open at Login* if you used it). The SQLite DB lives in `~/.claude/agentmonitor/` and is unaffected.
 
 Full user guide: [`DESKTOP.md`](DESKTOP.md). Contributor / architecture reference: [`desktop/README.md`](desktop/README.md). Desktop-specific setup details (logs, auto-start, port adoption) are in [SETUP.md → Desktop App Setup](./SETUP.md#desktop-app-setup).
 
@@ -351,7 +365,7 @@ See [`.codex/README.md`](./.codex/README.md) for Codex extension details.
 
 ## Optional: VS Code extension
 
-The **AgentMonitor** is also available as a dedicated VS Code extension for seamless, integrated monitoring.
+The **Agent Monitor** is also available as a dedicated VS Code extension for seamless, integrated monitoring.
 
 <p align="center">
   <img src="vscode-extension/vscode.png" alt="VS Code Extension Screenshot" width="100%">
@@ -378,7 +392,7 @@ The **AgentMonitor** is also available as a dedicated VS Code extension for seam
 For advanced configuration, refer to the [.vscode](./.vscode) and [vscode-extension](./vscode-extension) directories.
 
 > [!TIP]
-> Extension on VS Code Marketplace: [AgentMonitor](https://marketplace.visualstudio.com/items?itemName=hoangsonw.agentmonitor)
+> Extension on VS Code Marketplace: [Agent Monitor](https://marketplace.visualstudio.com/items?itemName=hoangsonw.agentmonitor)
 
 ---
 
@@ -494,17 +508,17 @@ The Vite dev server and Express server run on different ports. Make sure both ar
 
 See [SETUP.md — Troubleshooting](./SETUP.md#troubleshooting) for detailed hook debugging steps.
 
-### Desktop App (macOS & Windows) issues
+### Desktop App (macOS, Windows & Linux) issues
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| *"Apple could not verify…"* on first launch (macOS) | The DMG is ad-hoc signed (no paid Apple Developer ID) | `xattr -cr "/Applications/AgentMonitor.app"`, then open it — or use *System Settings → Privacy & Security → Open Anyway* |
+| *"Apple could not verify…"* on first launch (macOS) | The DMG is ad-hoc signed (no paid Apple Developer ID) | `xattr -cr "/Applications/Agent Monitor.app"`, then open it — or use *System Settings → Privacy & Security → Open Anyway* |
 | *"Windows protected your PC"* on first launch (Windows) | The `.exe` is unsigned by default, so SmartScreen prompts | Click **More info → Run anyway** |
 | `npm run desktop:dmg` seems slow (macOS) | Not hung — it packages two architectures back-to-back (`arch=x64` then `arch=arm64`) | Wait it out, or use `npm run desktop:dmg:arm64` / `npm run desktop:dmg:x64` for a fast single-arch build |
-| `entry file out/main.js does not exist` | `npm run clean` (in `desktop/`) deleted `out/`; `electron-builder` only packages, it does not compile | Re-run `npm run desktop:build` (or just use a `desktop:dmg*` / `desktop:win*` script, which chains the build) |
-| Desktop window opens but is blank | The embedded server failed `/api/health` within 30 s | Check the desktop log (`~/Library/Logs/AgentMonitor/desktop.log` on macOS, `%APPDATA%\AgentMonitor\logs\desktop.log` on Windows), then tray → *Restart Server* |
+| `entry file out/main.js does not exist` | `npm run clean` (in `desktop/`) deleted `out/`; `electron-builder` only packages, it does not compile | Re-run `npm run desktop:build` (or just use a `desktop:dmg*` / `desktop:win*` / `desktop:linux` script, which chains the build) |
+| Desktop window opens but is blank | The embedded server failed `/api/health` within 30 s | Check the desktop log (`~/Library/Logs/Agent Monitor/desktop.log` on macOS, `%APPDATA%\Agent Monitor\logs\desktop.log` on Windows, `~/.config/Agent Monitor/logs/desktop.log` on Linux), then tray → *Restart Server* |
 | "Run Claude" says `claude` is not on your PATH | A Finder/Dock-launched macOS app only inherits launchd's minimal PATH, not your login-shell PATH (on Windows the process already inherits the user PATH) | The app recovers your login-shell PATH at startup so it can find and spawn the `claude` CLI. If it still fails, make sure `claude` is a real executable on your shell PATH — not a shell alias or function |
-| Imported history vanished after updating the app | Older builds stored the database inside the (replaceable) `.app` bundle | Fixed — data now lives in the per-user app-data dir (`~/Library/Application Support/AgentMonitor/data/` on macOS, `%APPDATA%\AgentMonitor\data\` on Windows) and survives reinstalls/updates. After upgrading from a pre-fix build, re-run **Settings → Import History → Rescan** once |
+| Imported history vanished after updating the app | Older builds stored the database inside the (replaceable) `.app` bundle | Fixed — data now lives in the per-user app-data dir (`~/Library/Application Support/Agent Monitor/data/` on macOS, `%APPDATA%\Agent Monitor\data\` on Windows) and survives reinstalls/updates. After upgrading from a pre-fix build, re-run **Settings → Import History → Rescan** once |
 
 ---
 

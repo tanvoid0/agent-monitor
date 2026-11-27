@@ -1,0 +1,53 @@
+version: 1
+
+# Agent Monitor release, run from Portal (project → Actions → Release card).
+# Shipping = pushing a version bump on main: CI's `release` job then publishes
+# vX.Y.Z with the macOS DMGs, Windows EXEs and Linux AppImage/deb. Bump first
+# (version-release skill, its own commit), then Rehearse, then Ship.
+# Rehearse never pushes: its push/watch actions are separate `--dry-run` ones.
+release:
+  kind: node
+  ship: ship
+  rehearse: rehearse
+
+actions:
+  preflight:
+    name: Preflight (main, clean, in sync, version unreleased)
+    run: node scripts/portal-release.js preflight
+  verify:
+    name: Local gate (npm run verify)
+    run: npm run verify
+  push:
+    name: Push main
+    run: node scripts/portal-release.js push
+  watch:
+    name: Wait for CI to publish the release
+    run: node scripts/portal-release.js watch
+  push-dry:
+    name: Push main (dry run)
+    run: node scripts/portal-release.js push --dry-run
+  watch-dry:
+    name: Wait for CI (dry run)
+    run: node scripts/portal-release.js watch --dry-run
+
+workflows:
+  ship:
+    name: Ship
+    steps:
+      - action: preflight
+      - action: verify
+        needs: [preflight]
+      - action: push
+        needs: [verify]
+      - action: watch
+        needs: [push]
+  rehearse:
+    name: Rehearse
+    steps:
+      - action: preflight
+      - action: verify
+        needs: [preflight]
+      - action: push-dry
+        needs: [verify]
+      - action: watch-dry
+        needs: [push-dry]

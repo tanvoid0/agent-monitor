@@ -179,7 +179,7 @@ export function boardColumnFor(status: PlanTaskStatus): "todo" | "doing" | "repo
 
 /** Badge color per task status, matching the `badge`/`STATUS_CONFIG` palette
  *  convention in `lib/types.ts` (green=live/good, amber=attention, violet=
- *  done, gray=idle) so plan cards read consistently with the rest of AgentMonitor. */
+ *  done, gray=idle) so plan cards read consistently with the rest of Agent Monitor. */
 export const TASK_STATUS_STYLE: Record<PlanTaskStatus, { color: string; bg: string; dot: string }> =
   {
     todo: { color: "text-gray-400", bg: "bg-gray-500/10 border-gray-500/20", dot: "bg-gray-400" },

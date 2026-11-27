@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Prometheus configuration for AgentMonitor
+# Prometheus configuration for Agent Monitor
 # ─────────────────────────────────────────────────────────────────────────────
 global:
   scrape_interval: 15s

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * @file Verifies the AgentMonitor dashboard and optional Prometheus/Grafana stack are up.
+ * @file Verifies the Agent Monitor dashboard and optional Prometheus/Grafana stack are up.
  * Used after `monitoring:up` or `monitoring:docker:up` to confirm scrape health.
  * @author Tanveer Hoque <tanvoid0@gmail.com>
  */
@@ -113,7 +113,7 @@ async function checkPrometheusMetrics() {
       const body = await res.json();
       const series = body?.data?.result;
       if (!Array.isArray(series) || series.length === 0) {
-        results.push({ name, ok: false, detail: "no series (is AgentMonitor scraping?)" });
+        results.push({ name, ok: false, detail: "no series (is Agent Monitor scraping?)" });
         continue;
       }
       const sample = series[0]?.value?.[1];
@@ -129,15 +129,19 @@ async function checkPrometheusConsole() {
   try {
     const res = await fetch(`${PROMETHEUS_URL}/consoles/index.html`);
     if (!res.ok) {
-      return { name: "Prometheus AgentMonitor console", ok: false, detail: `HTTP ${res.status}` };
+      return { name: "Prometheus Agent Monitor console", ok: false, detail: `HTTP ${res.status}` };
     }
     const html = await res.text();
-    if (!html.includes("AgentMonitor")) {
-      return { name: "Prometheus AgentMonitor console", ok: false, detail: "unexpected page body" };
+    if (!html.includes("Agent Monitor")) {
+      return {
+        name: "Prometheus Agent Monitor console",
+        ok: false,
+        detail: "unexpected page body",
+      };
     }
-    return { name: "Prometheus AgentMonitor console", ok: true, detail: "/consoles/index.html" };
+    return { name: "Prometheus Agent Monitor console", ok: true, detail: "/consoles/index.html" };
   } catch (err) {
-    return { name: "Prometheus AgentMonitor console", ok: false, detail: err.message };
+    return { name: "Prometheus Agent Monitor console", ok: false, detail: err.message };
   }
 }
 

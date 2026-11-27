@@ -20,7 +20,7 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "AgentMonitor Analytics",
+    "displayName": "Agent Monitor Analytics",
     "shortDescription": "Deep analytics and monitoring for Claude Code sessions — cost tracking, token usage...",
     "longDescription": "Deep analytics and monitoring for Claude Code sessions — cost tracking, token usage breakdowns, usage trends, and productivity scoring powered by Agent Monitor.",
     "developerName": "Tanveer Hoque",
@@ -28,8 +28,8 @@
     "capabilities": ["Read"],
     "websiteURL": "https://github.com/tanvoid0/agent-monitor",
     "defaultPrompt": [
-      "Use AgentMonitor Analytics to inspect the local AgentMonitor dashboard.",
-      "Use AgentMonitor Analytics to analyze recent agent activity."
+      "Use Agent Monitor Analytics to inspect the local Agent Monitor dashboard.",
+      "Use Agent Monitor Analytics to analyze recent agent activity."
     ],
     "brandColor": "#6366F1"
   }

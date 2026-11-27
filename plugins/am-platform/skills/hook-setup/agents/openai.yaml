@@ -1,6 +1,6 @@
 interface:
   display_name: "Hook Setup"
-  short_description: "Inspect and install AgentMonitor monitoring hooks for Claude..."
-  default_prompt: "Use $hook-setup to inspect AgentMonitor data and complete this workflow safely."
+  short_description: "Inspect and install Agent Monitor monitoring hooks for..."
+  default_prompt: "Use $hook-setup to inspect Agent Monitor data and complete this workflow safely."
 policy:
   allow_implicit_invocation: false

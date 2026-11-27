@@ -13,7 +13,7 @@
   "keywords": ["sessions", "search", "transcript", "replay", "timeline", "cleanup", "claude-code"],
   "skills": "./skills/",
   "interface": {
-    "displayName": "AgentMonitor Sessions",
+    "displayName": "Agent Monitor Sessions",
     "shortDescription": "Search, inspect, replay, and manage Claude Code sessions tracked by the Agent Monitor...",
     "longDescription": "Search, inspect, replay, and manage Claude Code sessions tracked by the Agent Monitor dashboard — find sessions by project, model, status, or date; reconstruct event timelines; walk transcripts turn-by-turn; roll up activity per working directory; and identify stale or empty sessions before cleanup.",
     "developerName": "Tanveer Hoque",
@@ -21,8 +21,8 @@
     "capabilities": ["Read", "Write"],
     "websiteURL": "https://github.com/tanvoid0/agent-monitor",
     "defaultPrompt": [
-      "Use AgentMonitor Sessions to inspect the local AgentMonitor dashboard.",
-      "Use AgentMonitor Sessions to analyze recent agent activity."
+      "Use Agent Monitor Sessions to inspect the local Agent Monitor dashboard.",
+      "Use Agent Monitor Sessions to analyze recent agent activity."
     ],
     "brandColor": "#6366F1"
   }

@@ -130,10 +130,14 @@ export interface ServerSnapshot {
  * the menu bar tints automatically.
  */
 /** Pick the platform-appropriate tray image filename — a colored `.ico` on
- * Windows (a black glyph would vanish on the usually-dark taskbar), or the
- * black "template" PNG on macOS (the menu bar auto-tints it for light/dark). */
+ * Windows (a black glyph would vanish on the usually-dark taskbar), the
+ * black "template" PNG on macOS (the menu bar auto-tints it for light/dark),
+ * and the colored app `icon.png` on Linux (no template tinting there either,
+ * and most desktop panels are dark). */
 function trayImageFile(): string {
-  return process.platform === "win32" ? "icon.ico" : "tray-icon-Template.png";
+  if (process.platform === "win32") return "icon.ico";
+  if (process.platform === "darwin") return "tray-icon-Template.png";
+  return "icon.png";
 }
 
 /** Resolve `trayImageFile()` to an absolute path, branching on dev vs
@@ -164,7 +168,9 @@ function trayImagePath(): string {
  */
 export function createTray(actions: TrayActions): Tray {
   const imagePath = trayImagePath();
-  const image = nativeImage.createFromPath(imagePath);
+  let image = nativeImage.createFromPath(imagePath);
+  // Linux reuses the 1024px app icon; hand the panel a tray-sized copy.
+  if (process.platform === "linux" && !image.isEmpty()) image = image.resize({ width: 32 });
   if (image.isEmpty()) {
     log.warn("tray image is empty; falling back to in-memory placeholder", imagePath);
   } else if (process.platform === "darwin") {
@@ -221,7 +227,7 @@ export function createTray(actions: TrayActions): Tray {
       { type: "separator" },
       { label: `Version ${app.getVersion()}`, enabled: false },
       {
-        label: "Quit AgentMonitor",
+        label: "Quit Agent Monitor",
         accelerator: "CmdOrCtrl+Q",
         click: () => actions.requestQuit(),
       },

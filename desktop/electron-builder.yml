@@ -1,4 +1,4 @@
-# electron-builder configuration for AgentMonitor (macOS + Windows).
+# electron-builder configuration for Agent Monitor (macOS + Windows + Linux).
 #
 # Defaults to ad-hoc signing so the project can build distributable DMGs
 # without a paid Apple Developer account. When the following environment
@@ -14,7 +14,7 @@
 # No code changes are required to enable notarization later.
 
 appId: tanvoid0.agentmonitor.desktop
-productName: AgentMonitor
+productName: Agent Monitor
 copyright: Copyright (c) 2026 Tanveer Hoque. MIT License.
 
 directories:
@@ -63,12 +63,14 @@ extraResources:
   # files at `Resources/assets/`; `trayImagePath()` reads them via
   # `process.resourcesPath` in production. macOS uses the template PNGs; Windows
   # uses the colored `icon.ico` (a template/black glyph would vanish on the
-  # dark Windows taskbar).
+  # dark Windows taskbar); Linux uses the colored `icon.png` for both the tray
+  # and the window icon.
   - from: "assets"
     to: "assets"
     filter:
       - "tray-icon-Template*.png"
       - "icon.ico"
+      - "icon.png"
 
 asar: true
 asarUnpack:
@@ -106,7 +108,7 @@ dmg:
   # inconsistently inside `title` — it yields `-arm64` / an empty string rather
   # than `arm64` / `x64`. The per-arch `dmg:*` scripts in package.json override
   # `dmg.title` with an explicit, clean label instead.
-  title: "AgentMonitor"
+  title: "Agent Monitor"
   icon: assets/icon.icns
   contents:
     # Left slot: the .app bundle. Do NOT set `type: file` here — electron-builder
@@ -152,8 +154,8 @@ nsis:
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
-  shortcutName: "AgentMonitor"
-  uninstallDisplayName: "AgentMonitor ${version}"
+  shortcutName: "Agent Monitor"
+  uninstallDisplayName: "Agent Monitor ${version}"
   artifactName: "AgentMonitor-Setup-${version}-${arch}.${ext}"
   # Keep the per-user SQLite database + settings (under userData) on uninstall,
   # mirroring macOS where dragging the .app to Trash never touches user data.
@@ -161,6 +163,24 @@ nsis:
 
 portable:
   artifactName: "AgentMonitor-${version}-${arch}-portable.${ext}"
+
+linux:
+  # 1024px PNG; electron-builder derives the hicolor icon set from it.
+  icon: assets/icon.png
+  category: Development
+  executableName: agentmonitor
+  synopsis: Local dashboard for Claude Code sessions
+  # AppImage runs anywhere without install; .deb for Debian/Ubuntu. No `arch:`
+  # pinned, same reason as macOS — the `linux` npm script passes `--x64`.
+  target:
+    - AppImage
+    - deb
+
+appImage:
+  artifactName: "AgentMonitor-${version}-${arch}.${ext}"
+
+deb:
+  artifactName: "AgentMonitor-${version}-${arch}.${ext}"
 
 # Notarization runs only when the Apple credentials are present (macOS only;
 # the hook is a no-op on Windows).

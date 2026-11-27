@@ -1,7 +1,7 @@
 ---
 name: mcp-server
 description: >
-  Configure, launch, validate, and troubleshoot AgentMonitor's comprehensive MCP server
+  Configure, launch, validate, and troubleshoot Agent Monitor's comprehensive MCP server
   for Claude Code, Codex, and other MCP hosts. Use when installing dependencies,
   building the server, selecting stdio, HTTP, or REPL transport, setting
   mutation/destructive policy, supplying dashboard authentication, or checking

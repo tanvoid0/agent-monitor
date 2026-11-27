@@ -2,7 +2,7 @@
   "name": "@agentmonitor/monitoring",
   "version": "1.0.0",
   "private": true,
-  "description": "AgentMonitor Prometheus + Grafana stack (npm-managed binaries, no Docker required)",
+  "description": "Agent Monitor Prometheus + Grafana stack (npm-managed binaries, no Docker required)",
   "scripts": {
     "postinstall": "node scripts/ensure-binaries.js",
     "start": "node scripts/start.js --detach",

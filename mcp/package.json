@@ -1,7 +1,7 @@
 {
   "name": "agentmonitor-mcp-server",
   "version": "1.0.0",
-  "description": "Local MCP server for the AgentMonitor",
+  "description": "Local MCP server for the Agent Monitor",
   "private": true,
   "type": "module",
   "bin": {

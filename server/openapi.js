@@ -47,7 +47,7 @@ function createOpenApiSpec() {
   const spec = {
     openapi: "3.0.3",
     info: {
-      title: "AgentMonitor for Claude Code API",
+      title: "Agent Monitor for Claude Code API",
       version: pkg.version || "1.0.0",
       description:
         "HTTP API for real-time Claude Code session monitoring, agent lifecycle tracking, analytics, pricing, hooks ingestion, and workflow intelligence.",

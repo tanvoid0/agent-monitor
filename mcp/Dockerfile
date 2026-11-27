@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-# Multi-stage OCI image for AgentMonitor's MCP server. The repository root is the build
+# Multi-stage OCI image for Agent Monitor's MCP server. The repository root is the build
 # context so the local agentmonitor dependency resolves, while the runtime
 # contains only production dependencies and compiled output under a non-root
 # user.

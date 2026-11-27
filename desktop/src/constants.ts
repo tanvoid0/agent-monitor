@@ -84,7 +84,12 @@
  * ----------------------------------------------------------------------------- */
 
 /** Human-readable product name shown in window title and About menu. */
-export const APP_NAME = "AgentMonitor";
+export const APP_NAME = "Agent Monitor";
+
+/** Product name before the "Agent Monitor" rename. Older builds keyed the
+ * per-user app-data folder and the Windows executable on it; see the
+ * `migrateLegacy*` helpers in main.ts and login-item.ts. */
+export const LEGACY_APP_NAME = "AgentMonitor";
 
 /**
  * Application identifier. Must match `appId` in electron-builder.yml: on Windows

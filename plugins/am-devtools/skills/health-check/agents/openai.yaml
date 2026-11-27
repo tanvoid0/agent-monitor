@@ -1,6 +1,6 @@
 interface:
   display_name: "Health Check"
-  short_description: "Run comprehensive health checks on the AgentMonitor system...."
-  default_prompt: "Use $health-check to inspect AgentMonitor data and complete this workflow safely."
+  short_description: "Run comprehensive health checks on the Agent Monitor system...."
+  default_prompt: "Use $health-check to inspect Agent Monitor data and complete this workflow safely."
 policy:
   allow_implicit_invocation: true

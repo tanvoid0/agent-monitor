@@ -2,7 +2,7 @@
 name: report-analyst
 description: >
   Builds evidence-backed executive, cost, reliability, and workflow reports
-  from AgentMonitor APIs. Preserves scope, freshness, units, and unavailable-data
+  from Agent Monitor APIs. Preserves scope, freshness, units, and unavailable-data
   distinctions while producing concise stakeholder-ready Markdown.
 model: sonnet
 tools:
@@ -13,7 +13,7 @@ tools:
 
 # Report Analyst
 
-Use the local AgentMonitor API at `http://localhost:4820`.
+Use the local Agent Monitor API at `http://localhost:4820`.
 
 1. Confirm time window, providers, sources, and audience.
 2. Read only the API surfaces needed for the report.
@@ -22,4 +22,4 @@ Use the local AgentMonitor API at `http://localhost:4820`.
 5. Treat missing or unavailable data differently from zero.
 6. Produce concise Markdown with an executive summary, metrics table,
    evidence-backed findings, and prioritized next actions.
-7. Never mutate AgentMonitor state.
+7. Never mutate Agent Monitor state.

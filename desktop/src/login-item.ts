@@ -77,7 +77,11 @@
  *
  * ----------------------------------------------------------------------------- */
 
+import * as path from "node:path";
+
 import { app } from "electron";
+
+import { LEGACY_APP_NAME } from "./constants";
 
 /**
  * CLI flag we register the Windows startup entry with, then look for in
@@ -131,6 +135,25 @@ export function setOpenAtLogin(enabled: boolean): void {
     // to appear. The tray icon makes the app's presence obvious. (macOS only;
     // `openAsHidden` is ignored on other platforms.)
     openAsHidden: true,
+  });
+}
+
+/**
+ * Windows: re-point a startup entry left by a pre-rename build. The executable
+ * went from `AgentMonitor.exe` to `Agent Monitor.exe`, so the old Run value
+ * would launch a file the upgrade removed. The value name (the AUMID) is
+ * unchanged, so re-registering overwrites it in place, keeping an entry the
+ * user disabled in Task Manager → Startup disabled.
+ */
+export function migrateLegacyLoginItem(): void {
+  if (process.platform !== "win32") return;
+  const legacyExe = path.join(path.dirname(process.execPath), `${LEGACY_APP_NAME}.exe`);
+  const legacy = app.getLoginItemSettings({ path: legacyExe, args: [WIN_LAUNCH_FLAG] });
+  if (!legacy.openAtLogin) return;
+  app.setLoginItemSettings({
+    openAtLogin: true,
+    args: [WIN_LAUNCH_FLAG],
+    enabled: legacy.executableWillLaunchAtLogin,
   });
 }
 

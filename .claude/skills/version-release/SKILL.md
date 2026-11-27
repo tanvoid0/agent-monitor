@@ -14,7 +14,7 @@ Use Semantic Versioning as the repository-wide release rule:
 When a change fits more than one category, use the highest applicable bump. When uncertain between adjacent categories, prefer the higher bump or ask the user before releasing. Never infer the bump from commit count, diff size, or elapsed time alone.
 When the user explicitly requests a concrete version, that instruction overrides automatic classification. State the override and synchronize the requested version exactly.
 
-## AgentMonitor release workflow
+## Agent Monitor release workflow
 
 1. Read the current root `package.json` version and summarize why the change is patch, minor, or major.
 2. Update the root `package.json` and root lockfile.

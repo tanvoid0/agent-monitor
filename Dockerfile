@@ -1,4 +1,4 @@
-# Multi-stage OCI image for the complete AgentMonitor dashboard runtime. It builds the
+# Multi-stage OCI image for the complete Agent Monitor dashboard runtime. It builds the
 # React client, installs production server dependencies, includes Git and
 # OpenSSH for update checks and Remote Data Sources, and runs the application
 # as a non-root user with explicit writable data and configuration paths.
@@ -31,6 +31,9 @@ COPY client/ ./
 # up from the client dir). Provide it here so the built client shows the real
 # release version; the config falls back gracefully if it is ever absent.
 COPY package.json /app/package.json
+# `tsc -b` typechecks the plan tests too, and they import the shared ledgerflow
+# fixture from the repo root; without it the build fails.
+COPY test/fixtures/plan/ledgerflow/expected/model.json /app/test/fixtures/plan/ledgerflow/expected/model.json
 RUN npm run build
 
 # ── Stage 3: Production runtime ───────────────────────────────────────

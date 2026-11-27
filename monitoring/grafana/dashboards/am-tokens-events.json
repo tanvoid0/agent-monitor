@@ -1,6 +1,6 @@
 {
   "uid": "am-tokens-events",
-  "title": "AgentMonitor — Tokens & Events",
+  "title": "Agent Monitor — Tokens & Events",
   "description": "Cumulative and rate views of hook events and token usage from live /api/metrics scrapes.",
   "tags": ["am", "claude-code", "tokens", "events"],
   "timezone": "browser",

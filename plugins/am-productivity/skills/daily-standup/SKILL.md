@@ -9,7 +9,7 @@ description: >
 
 # Daily Standup
 
-Generate a daily standup report from AgentMonitor data.
+Generate a daily standup report from Agent Monitor data.
 
 ## Input
 

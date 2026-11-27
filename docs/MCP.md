@@ -1,14 +1,14 @@
-# AgentMonitor MCP Server Reference
+# Agent Monitor MCP Server Reference
 
-The AgentMonitor (AgentMonitor) MCP server exposes the local dashboard's complete supported action surface as **97 typed tools**. The same canonical catalog is used by stdio, Streamable HTTP, legacy SSE, and the interactive REPL, so tool names, schemas, and policy guards cannot drift between transports.
+The Agent Monitor (Agent Monitor) MCP server exposes the local dashboard's complete supported action surface as **97 typed tools**. The same canonical catalog is used by stdio, Streamable HTTP, legacy SSE, and the interactive REPL, so tool names, schemas, and policy guards cannot drift between transports.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    H["Claude Code / Codex / MCP host"] -->|stdio or HTTP| M["AgentMonitor MCP server"]
+    H["Claude Code / Codex / MCP host"] -->|stdio or HTTP| M["Agent Monitor MCP server"]
     R["Operator"] -->|am mcp repl| M
-    M -->|loopback HTTP| A["AgentMonitor /api/*"]
+    M -->|loopback HTTP| A["Agent Monitor /api/*"]
     A --> D[(SQLite)]
 ```
 
@@ -47,7 +47,7 @@ npm run mcp:start:repl
 
 ### Stdio lifecycle and orphan shutdown
 
-A stdio server is owned by the host that launched it, and the MCP SDK's stdio transport only reacts to stdin `data`/`error` events. When a host exits without sending `SIGTERM`/`SIGINT` first, stdin simply goes quiet and the server would otherwise linger forever with nothing to talk to. AgentMonitor therefore watches two independent conditions — stdin closing, and the process being re-parented — and shuts the server down the moment either fires:
+A stdio server is owned by the host that launched it, and the MCP SDK's stdio transport only reacts to stdin `data`/`error` events. When a host exits without sending `SIGTERM`/`SIGINT` first, stdin simply goes quiet and the server would otherwise linger forever with nothing to talk to. Agent Monitor therefore watches two independent conditions — stdin closing, and the process being re-parented — and shuts the server down the moment either fires:
 
 | Signal | Logged reason | Fires when |
 | --- | --- | --- |
@@ -259,7 +259,7 @@ Claude and Codex plugins use the stable launcher:
 }
 ```
 
-This avoids plugin-cache-relative paths. Run `npm run setup` in the AgentMonitor checkout first so `am` is linked and `mcp/build/index.js` exists.
+This avoids plugin-cache-relative paths. Run `npm run setup` in the Agent Monitor checkout first so `am` is linked and `mcp/build/index.js` exists.
 
 ## Validation
 

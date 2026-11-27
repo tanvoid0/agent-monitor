@@ -1,6 +1,6 @@
-# AgentMonitor — Desktop App (macOS & Windows)
+# Agent Monitor — Desktop App (macOS, Windows & Linux)
 
-The dashboard ships with an optional **native desktop app** (built with Electron 35) that wraps the existing server + client into a single application you install once and forget — a macOS `.app` (shipped as a `.dmg`) and a Windows `.exe` (an NSIS installer plus a no-install portable build). Everything you see in the browser at `localhost:4820` lives inside this window, with native OS lifecycle on top: a menu-bar / notification-area (tray) icon, a native application menu, auto-start at login, and a single quit button that cleans up the server.
+The dashboard ships with an optional **native desktop app** (built with Electron 35) that wraps the existing server + client into a single application you install once and forget — a macOS `.app` (shipped as a `.dmg`), a Windows `.exe` (an NSIS installer plus a no-install portable build), and Linux packages (an `.AppImage` plus a `.deb`). Everything you see in the browser at `localhost:4820` lives inside this window, with native OS lifecycle on top: a menu-bar / notification-area (tray) icon, a native application menu, auto-start at login, and a single quit button that cleans up the server.
 
 ## Why this exists in addition to the PWA
 
@@ -29,13 +29,16 @@ The two coexist — install whichever fits your workflow.
    | macOS (Intel) | `AgentMonitor-<ver>-x64.dmg` | drag into `/Applications` |
    | Windows (installer) | `AgentMonitor-Setup-<ver>-x64.exe` | per-user install, no admin |
    | Windows (portable) | `AgentMonitor-<ver>-x64-portable.exe` | run without installing |
+   | Linux (AppImage) | `AgentMonitor-<ver>-x86_64.AppImage` | `chmod +x`, then run |
+   | Linux (deb) | `AgentMonitor-<ver>-amd64.deb` | `sudo apt install ./AgentMonitor-<ver>-amd64.deb` |
 
-2. Want a **per-commit build** instead of waiting for a release? Every green CI run uploads a workflow artifact (sign-in required, 14-day retention) — `AgentMonitor-dmg` from the `🍎 macOS Desktop (DMG)` job and `AgentMonitor-win` from the `🪟 Windows Desktop (EXE)` job:
+2. Want a **per-commit build** instead of waiting for a release? Every green CI run uploads a workflow artifact (sign-in required, 14-day retention) — `AgentMonitor-dmg` from the `🍎 macOS Desktop (DMG)` job and `AgentMonitor-win` from the `🪟 Windows Desktop (EXE)` job, `AgentMonitor-linux` from the `🐧 Linux Desktop (AppImage + deb)` job:
    ```bash
-   gh run download <run-id> -R tanvoid0/agent-monitor -n AgentMonitor-dmg   # or AgentMonitor-win
+   gh run download <run-id> -R tanvoid0/agent-monitor -n AgentMonitor-dmg   # or AgentMonitor-win / AgentMonitor-linux
    ```
-3. **macOS:** double-click the DMG → drag `AgentMonitor.app` into your `Applications` folder. Open it; macOS may show a Gatekeeper warning the first time — see [Gatekeeper & SmartScreen](#gatekeeper--smartscreen-first-launch) below.
+3. **macOS:** double-click the DMG → drag `Agent Monitor.app` into your `Applications` folder. Open it; macOS may show a Gatekeeper warning the first time — see [Gatekeeper & SmartScreen](#gatekeeper--smartscreen-first-launch) below.
 4. **Windows:** run `AgentMonitor-Setup-<ver>-x64.exe` (per-user, no admin) and follow the wizard, or just run the `*-portable.exe` to launch without installing. Windows **SmartScreen** may show *"Windows protected your PC"* the first time — see [Gatekeeper & SmartScreen](#gatekeeper--smartscreen-first-launch) below.
+5. **Linux:** `chmod +x AgentMonitor-<ver>-x86_64.AppImage && ./AgentMonitor-<ver>-x86_64.AppImage`, or install the `.deb` with `sudo apt install ./AgentMonitor-<ver>-amd64.deb` (executable `agentmonitor`, category Development).
 
 **Option B — build locally:**
 
@@ -55,6 +58,9 @@ npm run desktop:dmg:universal # ONE merged universal DMG (arm64 + x86_64 in a si
 npm run desktop:win          # NSIS installer → desktop/release/AgentMonitor-Setup-<ver>-x64.exe
 npm run desktop:win:portable # no-install portable → desktop/release/AgentMonitor-<ver>-x64-portable.exe
 
+# Build for Linux (run ON Linux) — x64 AppImage + .deb:
+npm run desktop:linux        # → desktop/release/AgentMonitor-<ver>-x86_64.AppImage + AgentMonitor-<ver>-amd64.deb
+
 # electron-builder packages for the HOST OS — you cannot build a Windows .exe
 # on macOS or a macOS .dmg on Windows.
 
@@ -72,6 +78,10 @@ open desktop/release/AgentMonitor-*-arm64.dmg   # …-x64.dmg for the Intel buil
 > about a minute. CI runs `desktop:dmg` for you and uploads both DMGs as the
 > `AgentMonitor-dmg` artifact, so you rarely need to build them locally.
 
+## Upgrading from the AgentMonitor name
+
+The product is now named **Agent Monitor** (with a space). Quit the old app first (tray → *Quit*): on first launch the new app moves the old per-user app-data folder (`…/AgentMonitor` → `…/Agent Monitor`) automatically. On **Windows**, an in-place upgrade keeps your existing install folder and re-points an enabled *Open at Login* entry at the renamed `Agent Monitor.exe`. On **macOS**, the new `Agent Monitor.app` lands next to the old `AgentMonitor.app` — delete the old one (and re-toggle *Open at Login* if you used it). The SQLite database itself lives in `~/.claude/agentmonitor/` and is unaffected.
+
 ## What happens when you launch the app
 
 1. The Electron main process picks a free port — preferring **4820**, falling back to 4821–4829, then a random high port if all those are taken.
@@ -79,18 +89,18 @@ open desktop/release/AgentMonitor-*-arm64.dmg   # …-x64.dmg for the Intel buil
 3. Otherwise it `require()`s `server/index.js` directly in-process — same Node runtime as the main process, same memory. Boot is typically under two seconds.
 4. On startup the server records its **live port** to `~/.claude/.agentmonitor.json`. The Claude Code hook handler reads that file, so events still reach the dashboard when the app bound a fallback port instead of 4820.
 5. The dashboard window opens — unless the app was launched at login (on macOS via Login Items; on Windows via the `HKCU\…\Run` entry, detected through a `--am-hidden` launch arg since Windows has no `wasOpenedAtLogin`), in which case it stays tray-only.
-6. A tray icon appears — the macOS **menu bar** or the Windows **notification area**. One click opens a dropdown with a **live status snapshot** (server port, active sessions, working agents, events today — all clickable to jump into the dashboard) plus *Open Dashboard*, *Open in Browser*, *Restart Server*, *Show Logs*, *Open at Login* (toggle), and *Quit*.
+6. A tray icon appears — the macOS **menu bar**, the Windows **notification area**, or the Linux system tray. One click opens a dropdown with a **live status snapshot** (server port, active sessions, working agents, events today — all clickable to jump into the dashboard) plus *Open Dashboard*, *Open in Browser*, *Restart Server*, *Show Logs*, *Open at Login* (toggle), and *Quit*.
 
 ## Lifecycle semantics
 
 - **Closing the window hides it.** The server keeps running, the tray icon stays, and (on macOS) the **dock icon stays too** — clicking either re-opens the window. Independent signals that the app is still alive.
-- **Quitting** (⌘Q / Ctrl+Q, *Quit* in the application menu, or *Quit* in the tray menu) pops a confirmation dialog — *"Quit AgentMonitor? Press ⌘Q again to skip this prompt and quit immediately."* Press **Quit** in the dialog, or **press ⌘Q / Ctrl+Q a second time** to bypass the prompt. Either way the SQLite handle is checkpointed cleanly before the process exits.
-- **Tray** — the macOS menu bar / Windows notification area. macOS uses a black template glyph the OS tints for light/dark menu bars; Windows uses the colored `icon.ico`, because a template glyph would vanish on the dark taskbar. A single click (left or right) opens the dropdown, which shows a **live status snapshot** pulled straight from the embedded SQLite handle each time it opens: server port, active sessions, working agents, and events today. Snapshot rows are clickable — they open the dashboard. The tray's *Open Dashboard* reliably **raises** the window even when it is minimized or behind other windows. (The application menu's *File ▸ Open Dashboard* / ⌘1 is **macOS-only** — on Windows/Linux a window-attached menu accelerator can't reopen a hidden window, so reopening is the tray's job there.)
+- **Quitting** (⌘Q / Ctrl+Q, *Quit* in the application menu, or *Quit* in the tray menu) pops a confirmation dialog — *"Quit Agent Monitor? Press ⌘Q again to skip this prompt and quit immediately."* Press **Quit** in the dialog, or **press ⌘Q / Ctrl+Q a second time** to bypass the prompt. Either way the SQLite handle is checkpointed cleanly before the process exits.
+- **Tray** — the macOS menu bar / Windows notification area. macOS uses a black template glyph the OS tints for light/dark menu bars; Windows uses the colored `icon.ico` and Linux the colored `icon.png`, because a template glyph would vanish on a dark taskbar. A single click (left or right) opens the dropdown, which shows a **live status snapshot** pulled straight from the embedded SQLite handle each time it opens: server port, active sessions, working agents, and events today. Snapshot rows are clickable — they open the dashboard. The tray's *Open Dashboard* reliably **raises** the window even when it is minimized or behind other windows. (The application menu's *File ▸ Open Dashboard* / ⌘1 is **macOS-only** — on Windows/Linux a window-attached menu accelerator can't reopen a hidden window, so reopening is the tray's job there.)
 - **Window / taskbar icon** — the `BrowserWindow` sets its `icon` to the colored app logo (`icon.ico` on Windows, `icon.png` elsewhere — the same logo as the macOS Dock, rendered from `assets/icon.svg`), so an unpackaged `desktop:dev` run shows the real app logo in the title bar / taskbar instead of the generic Electron icon. The macOS dev Dock icon is set too; packaged apps already get theirs from the bundle `.icns`/`.exe`.
 - **Open-at-login toggle:** flip *Open at Login* in the tray menu (or the app menu). Both platforms go through Electron's first-party `app.*LoginItemSettings` API — no third-party deps. On **macOS** it registers via the `SMAppService` API, so the entry appears under  → *System Settings → General → Login Items*. On **Windows** it writes a per-user `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` entry, visible under *Task Manager → Startup*; a login-triggered launch is detected via a `--am-hidden` arg (Windows has no `wasOpenedAtLogin`). On Linux the toggle is a no-op (unsupported).
 - **Single-instance:** double-launching just focuses the existing window. No second server, no port collision. (Applies on every platform.)
-- **Logs** live at `~/Library/Logs/AgentMonitor/desktop.log` on macOS and `%APPDATA%\AgentMonitor\logs\desktop.log` on Windows (use *Show Logs* in the tray menu to open the folder).
-- **Your data** (the SQLite database and VAPID keys) lives outside the app bundle / install dir, so it **survives app reinstalls and updates** — `~/Library/Application Support/AgentMonitor/data/` on macOS, `%APPDATA%\AgentMonitor\data\` on Windows. The Windows NSIS uninstaller **keeps this data by default** (`deleteAppDataOnUninstall: false`), mirroring how dragging the `.app` to the Trash on macOS never touches your data.
+- **Logs** live at `~/Library/Logs/Agent Monitor/desktop.log` on macOS and `%APPDATA%\Agent Monitor\logs\desktop.log` on Windows, and `~/.config/Agent Monitor/logs/desktop.log` on Linux (use *Show Logs* in the tray menu to open the folder).
+- **Your data** (the SQLite database and VAPID keys) lives outside the app bundle / install dir, so it **survives app reinstalls and updates** — `~/Library/Application Support/Agent Monitor/data/` on macOS, `%APPDATA%\Agent Monitor\data\` on Windows, `~/.config/Agent Monitor/data/` on Linux. The Windows NSIS uninstaller **keeps this data by default** (`deleteAppDataOnUninstall: false`), mirroring how dragging the `.app` to the Trash on macOS never touches your data.
 - **The `claude` CLI on PATH.** On **macOS** the app resolves it using your login-shell `PATH`, recovered at startup — so "Run Claude" works even though a Finder/Dock-launched app would otherwise only inherit a minimal `PATH`. On **Windows** the inherited user `PATH` already includes it, so no recovery is needed.
 - **Notifications** (including the in-dashboard *Send test notification* button) are delivered as **native OS toasts** on both platforms when running inside the app — the embedded server calls Electron's `Notification` API directly. On Windows the app sets an `AppUserModelId` (`tanvoid0.agentmonitor.desktop`, matching the electron-builder `appId`) so toasts attribute to the app and its taskbar windows group correctly. Web Push doesn't work reliably inside Electron (Chromium-in-Electron ships without Firebase Cloud Messaging credentials, so `pushManager.subscribe` returns endpoints nothing can deliver to), and this path bypasses it entirely. The web dashboard at `npm start` continues to use Web Push as before.
 - **Coexists with the web dashboard.** You can run the desktop app and `npm run dev` (or `npm start`) at the same time. Each server writes its `{port, pid, startedAt, dataDir}` entry to a shared discovery file at `~/.claude/.agentmonitor.json`, and the Claude Code hook handler POSTs to **one ingest target per unique SQLite data directory** (lowest port wins when both share `~/.claude/agentmonitor`, so events are never double-ingested). Servers with **different** databases (e.g. the desktop app's Application Support dir alongside `npm run dev`) still each receive hooks and stay real-time.
@@ -101,13 +111,13 @@ open desktop/release/AgentMonitor-*-arm64.dmg   # …-x64.dmg for the Intel buil
 desktop/
 ├── package.json                # Electron + electron-builder
 ├── tsconfig.json
-├── electron-builder.yml        # macOS (dmg) + Windows (nsis/portable) targets; signing/notarization hooks
+├── electron-builder.yml        # macOS (dmg) + Windows (nsis/portable) + Linux (AppImage/deb) targets; signing/notarization hooks
 ├── assets/                     # icon.svg + generated icon.icns (macOS) + icon.ico (Windows) + tray PNGs
 ├── src/
 │   ├── main.ts                 # main process entry, lifecycle; setAppUserModelId on win32
 │   ├── server-host.ts          # in-process Express boot, port discovery, adopt
 │   ├── window.ts               # BrowserWindow + persisted state
-│   ├── tray.ts                 # tray icon (platform image: template PNG on macOS, icon.ico on Windows) + context menu
+│   ├── tray.ts                 # tray icon (platform image: template PNG on macOS, icon.ico on Windows, icon.png on Linux) + context menu
 │   ├── menu.ts                 # native application menu
 │   ├── login-item.ts           # open-at-login (macOS Login Items + Windows HKCU\…\Run startup)
 │   ├── shell-path.ts           # recover the user's shell PATH (find `claude`)
@@ -190,10 +200,13 @@ npm run desktop:dmg:universal
 # Windows — NSIS installer / no-install portable (run ON Windows):
 npm run desktop:win          # NSIS installer .exe
 npm run desktop:win:portable # no-install portable .exe
+
+# Linux — x64 AppImage + .deb (run ON Linux):
+npm run desktop:linux
 ```
 
-> electron-builder packages for the **host OS** — build DMGs on macOS and the
-> Windows `.exe`s on Windows. The Windows icon regenerates from `icon.png` with
+> electron-builder packages for the **host OS** — build DMGs on macOS, the
+> Windows `.exe`s on Windows, and the AppImage/`.deb` on Linux. The Windows icon regenerates from `icon.png` with
 > `npm run build:win-icon` (PowerShell + .NET); the macOS icns + tray PNGs come
 > from `npm run build:icons`. On Windows, `better-sqlite3` is fetched as a
 > prebuilt Electron binary by `npm run desktop:install` (its postinstall runs
@@ -226,7 +239,7 @@ The smoke test does not exercise the BrowserWindow (no display on headless CI). 
 - **Bundle size** ≈ 80 MB DMG, ≈ 250 MB on disk. The standard Electron tax. The Windows installer is comparable. Tauri would cut this dramatically but at the cost of a sidecar-process model and a Rust toolchain dependency — fair to revisit in a follow-up PR if bundle size becomes a real complaint.
 - **Native modules**: `better-sqlite3` is rebuilt against Electron's Node version automatically via `electron-builder install-app-deps` in the desktop workspace's `postinstall`. On Windows it is fetched as a **prebuilt Electron binary**, so no Visual Studio C++ toolchain is needed in the common case. If that build *does* fail (or the binary is missing afterward), `npm run desktop:install` — and any `desktop:*` build — prints the exact per-OS fix (Windows: Visual Studio Build Tools with the "Desktop development with C++" workload; macOS: `xcode-select --install`; Linux: build-essential + python3) plus a no-toolchain alternative (`npm install --ignore-scripts` → `node node_modules/electron/install.js` → `npx electron-builder install-app-deps`), and exits non-zero — failing loudly at install/build time rather than crashing at runtime. Even so, if the module is unavailable the server falls back to `node:sqlite` (per #37), so the app still boots.
 - **Per-architecture DMGs**: `npm run desktop:dmg` builds **both** macOS DMGs (one `arm64`, one `x64`) — the release build, and slower because it packages each architecture separately. It does **not** produce a merged universal binary; the release ships the two per-arch DMGs. `npm run desktop:dmg:arm64` and `npm run desktop:dmg:x64` build a single architecture instead — much faster, and roughly half the disk. If you specifically want a **single merged universal binary** (both slices in one `.dmg`, `lipo`-fat), `npm run desktop:dmg:universal` produces one via `@electron/universal` — the slowest option, and not what the release ships, but handy for hand-distributing one file that runs on any Mac.
-- **Auto-update**: not wired on either platform. The current update path is *re-download the latest installer* (DMG on macOS, `.exe` on Windows). `electron-updater` + GitHub Releases is the natural follow-up.
+- **Auto-update**: not wired on either platform. The current update path is *re-download the latest installer* (DMG on macOS, `.exe` on Windows, AppImage/`.deb` on Linux). `electron-updater` + GitHub Releases is the natural follow-up.
 
 ## Troubleshooting
 
@@ -234,14 +247,15 @@ The smoke test does not exercise the BrowserWindow (no display on headless CI). 
 |---|---|---|
 | "Apple could not verify…" on first launch (macOS) | Unnotarized DMG | `xattr -cr ~/Downloads/AgentMonitor-*.dmg` |
 | "Windows protected your PC" on first launch (Windows) | The `.exe` is unsigned by default (SmartScreen) | Click **More info → Run anyway**. To remove the prompt for everyone, the maintainer can enable Authenticode signing via `CSC_LINK` + `CSC_KEY_PASSWORD` |
-| macOS prompts to install Rosetta when opening the app | You installed the **x64** build on an Apple Silicon Mac | Check your arch with `uname -m` (`arm64` → Apple Silicon, build with `desktop:dmg:arm64`). The arch-specific `desktop:dmg:arm64` / `desktop:dmg:x64` builds each wipe `release/` and emit a single DMG whose mounted-volume title states the architecture — e.g. *AgentMonitor (Apple Silicon)* — so there is no ambiguous window to drag from. (`desktop:dmg` emits both per-arch DMGs at once, for release.) If stale DMGs from an older build linger, clear them with `rm -rf desktop/release` and rebuild |
-| Window shows but content is blank (macOS) | Server didn't boot — check `~/Library/Logs/AgentMonitor/desktop.log` | Restart from tray → *Restart Server* |
-| Window shows but content is blank (Windows) | Server didn't boot — check `%APPDATA%\AgentMonitor\logs\desktop.log` | Restart from tray → *Restart Server* |
+| macOS prompts to install Rosetta when opening the app | You installed the **x64** build on an Apple Silicon Mac | Check your arch with `uname -m` (`arm64` → Apple Silicon, build with `desktop:dmg:arm64`). The arch-specific `desktop:dmg:arm64` / `desktop:dmg:x64` builds each wipe `release/` and emit a single DMG whose mounted-volume title states the architecture — e.g. *Agent Monitor (Apple Silicon)* — so there is no ambiguous window to drag from. (`desktop:dmg` emits both per-arch DMGs at once, for release.) If stale DMGs from an older build linger, clear them with `rm -rf desktop/release` and rebuild |
+| Window shows but content is blank (macOS) | Server didn't boot — check `~/Library/Logs/Agent Monitor/desktop.log` | Restart from tray → *Restart Server* |
+| Window shows but content is blank (Windows) | Server didn't boot — check `%APPDATA%\Agent Monitor\logs\desktop.log` | Restart from tray → *Restart Server* |
 | Tray icon missing (macOS) | The OS hides tray icons when the menu bar is full | Move other menu-bar items aside, or look in the overflow chevron |
+| Tray icon missing (Linux) | Some desktops (e.g. stock GNOME) hide tray icons without an AppIndicator/StatusNotifier extension | Install/enable your desktop's AppIndicator (system tray) extension |
 | Tray icon missing (Windows) | Windows tucked it into the notification-area overflow | Click the **^** overflow chevron in the taskbar; drag the icon out to keep it pinned |
 | App didn't auto-start at login (macOS) | Login Items entry got revoked by macOS | Toggle *Open at Login* off and on again from the tray menu |
 | App didn't auto-start at login (Windows) | The `HKCU\…\Run` startup entry is missing or was disabled | Toggle *Open at Login* off and on again from the tray menu, then confirm the entry under *Task Manager → Startup* is **Enabled** |
-| `npm run desktop:win` / `:win:portable` fails or produces nothing | electron-builder packages for the host OS — you ran it on macOS/Linux | Build the Windows `.exe` **on Windows** (and DMGs on macOS) |
+| `npm run desktop:win` / `:win:portable` / `:linux` fails or produces nothing | electron-builder packages for the host OS — you ran it on macOS/Linux | Build the Windows `.exe` **on Windows** (DMGs on macOS, the AppImage/`.deb` via `desktop:linux` on Linux) |
 | Desktop build/install fails on `better-sqlite3` / native binary missing | No C++ toolchain, or no prebuilt for your Node version | Run `npm run desktop:install` and follow the printed help, or use the no-toolchain alternative (`npm install --ignore-scripts` → `node node_modules/electron/install.js` → `npx electron-builder install-app-deps`); or use Node LTS 20/22 |
 | Port 4820 already in use, app refuses to start | Something other than the dashboard is on 4820 and it doesn't answer `/api/health` | The app will pick a fallback (4821–4829, then a random high port) — check the tray menu's port indicator |
 | Dashboard stays empty — 0 sessions, 0 agents, no real-time updates | The app bound a fallback port (4820 was taken), and the Claude Code hooks were posting events to the wrong port | Fixed — the server publishes its live port to `~/.claude/.agentmonitor.json` and the hook handler reads it. After upgrading from a pre-fix build, **start a new Claude Code session** so the updated hooks take effect |
@@ -249,5 +263,5 @@ The smoke test does not exercise the BrowserWindow (no display on headless CI). 
 | Build fails: `entry file out/main.js does not exist` | `electron-builder` was run without compiling TypeScript first | Build via `npm run desktop:dmg*` (chains the build); don't invoke `electron-builder` bare |
 | Signing fails with `Application … could not be found` | A code-signing certificate in your keychain was auto-discovered | Fixed — the `package` script sets `CSC_IDENTITY_AUTO_DISCOVERY=false`; build via `npm run desktop:dmg*` |
 | "Run Claude" reports the `claude` CLI isn't on your PATH | A Finder/Dock-launched app inherits launchd's minimal PATH, not your shell PATH | Fixed — the app recovers your login-shell PATH at startup. If it persists, ensure `claude` is a real executable (not a shell alias/function) and on your shell PATH |
-| Imported history / sessions vanished after updating the app | Older builds stored the database inside the (replaceable) app bundle | Fixed — data now lives in `~/Library/Application Support/AgentMonitor/data/` and survives reinstalls. After upgrading from a pre-fix build, re-run **Import History → Rescan** once |
+| Imported history / sessions vanished after updating the app | Older builds stored the database inside the (replaceable) app bundle | Fixed — data now lives in `~/Library/Application Support/Agent Monitor/data/` and survives reinstalls. After upgrading from a pre-fix build, re-run **Import History → Rescan** once |
 | Signing fails: `Application … could not be found` after retries | A keychain code-signing certificate was auto-discovered | Fixed — the `package` script sets `CSC_IDENTITY_AUTO_DISCOVERY=false`; build via `npm run desktop:dmg*` |

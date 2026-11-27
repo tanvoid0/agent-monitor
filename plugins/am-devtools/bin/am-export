@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# am-export — Quick data export from AgentMonitor
+# am-export — Quick data export from Agent Monitor
 # Usage: am-export [sessions|events|analytics|costs|all] [--format json|csv] [--limit N]
 set -euo pipefail
 
@@ -7,7 +7,7 @@ DASHBOARD_URL="${AM_DASHBOARD_URL:-http://localhost:4820}"
 
 usage() {
   cat <<EOF
-am-export — AgentMonitor Data Export
+am-export — Agent Monitor Data Export
 
 USAGE:
   am-export <DATA_TYPE> [OPTIONS]

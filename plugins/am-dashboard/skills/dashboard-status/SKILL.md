@@ -10,7 +10,7 @@ description: >
 
 # Dashboard Status
 
-Quick status check on the AgentMonitor dashboard.
+Quick status check on the Agent Monitor dashboard.
 
 ## Input
 

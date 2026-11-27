@@ -98,7 +98,7 @@ Claude Code & Codex 에이전트 세션, 도구 사용, 서브에이전트 오�
 - [사운드 큐](#사운드-큐)
 - [연결 상태 모달](#연결-상태-모달)
 - [VS Code 확장](#vs-code-확장)
-- [데스크톱 앱 (macOS & Windows)](#데스크톱-앱-macos--windows)
+- [데스크톱 앱 (macOS, Windows & Linux)](#데스크톱-앱-macos-windows--linux)
 - [데이터 저장소](#데이터-저장소)
 - [Statusline](#statusline)
 - [서버 아키텍처](#서버-아키텍처)
@@ -307,7 +307,7 @@ flowchart LR
 
 대시보드는 Claude Code 세션과 에이전트를 모니터링하고 분석하기 위한 포괄적인 기능 세트를 제공합니다:
 
-> **Cursor 세션(안내):** AgentMonitor은 이 머신과 동기화된 원격 머신에서 `~/.claude` 아래에 쌓이는 에이전트 트랜스크립트를 모두 가져옵니다. **Cursor** 사용량도 동일하게 집계됩니다. Cursor는 Claude Code와 같은 경로에 에이전트 세션을 저장하기 때문입니다. AgentMonitor은 어떤 앱이 파일을 썼는지 구분하지 않습니다.
+> **Cursor 세션(안내):** Agent Monitor은 이 머신과 동기화된 원격 머신에서 `~/.claude` 아래에 쌓이는 에이전트 트랜스크립트를 모두 가져옵니다. **Cursor** 사용량도 동일하게 집계됩니다. Cursor는 Claude Code와 같은 경로에 에이전트 세션을 저장하기 때문입니다. Agent Monitor은 어떤 앱이 파일을 썼는지 구분하지 않습니다.
 
 | 기능                               | 설명                                                                                                                                                                                                                                                                          |
 |------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -322,7 +322,7 @@ flowchart LR
 | **참조로 이동**             | 대시보드가 보여주는 모든 세션, 에이전트, 프로젝트, 도구, 이벤트 타입, 모델은 해당 홈으로 연결되는 **엔티티 칩**(`components/entity/EntityRef.tsx`)이며 **우클릭 / 길게 누르기 컨텍스트 메뉴** — *세션 열기*, *에이전트 열기*, *대화 열기*, *활동에서 보기*, *프로젝트의 세션*, *보드에서 보기*, *폴더 열기*, *ID 복사* 등 — 를 갖습니다. 같은 메뉴는 마우스 사용자와 탭 순서를 위해 모든 행과 카드의 **⋯ 케밥 버튼**(`components/ui/Clickable.tsx`)에서도 열립니다. 칩과 메뉴는 하나의 타입이 지정된 href 테이블(`client/src/lib/routes.ts`)로 만들어지므로 모든 페이지를 URL로 지정할 수 있습니다: `/activity?session_id=&agent_id=&tool_name=&event_type=&status=&q=&from=&to=` (쉼표 목록), `/sessions?status=&cwd=&cwd=&q=` (`cwd` 반복), `/sessions/:id?tab=agents#agent-<id>`, `?tab=timeline&event=<id>`, `?tab=conversation&transcript=<id\|main>`, `?tool_name=` / `?agent_id=` (일회성 필터 시드), `/kanban?project=<cwd>[,<cwd>]&density=cards\|rows`, `/workflows?session=&run=`, `/plan/:slug?task=`, `/run?session=&cwd=`. 딥링크 대상은 펼쳐지고, 화면 안으로 스크롤되며, 테두리가 강조되고 포커스를 받습니다. 카드와 행은 `card` / `row` 두 변형으로 제공되며, 어느 것이든 `Cmd/Ctrl`+클릭 또는 가운데 클릭하면 새 탭에서 열립니다. |
 | **단 하나의 단축키**             | `Cmd/Ctrl+K` 는 대시보드가 점유하는 유일한 조합키이며, 입력란에 포커스가 있어도 동작합니다. 이전 빌드에는 완전한 단축키 계층 — `g` 로 시작하는 내비게이션 시퀀스, 페이지 키, `?` 치트시트, 수정 키를 길게 눌러 보는 힌트 레이어 — 이 있었지만 의도적으로 제거했습니다: 시퀀스는 타이머가 달린 숨은 모드이고, `g` 를 눌러도 아무 일도 없어 보였으며, 팔레트가 이미 퍼지 검색으로 모든 페이지에 도달하는 상황에서 두 가지 내비게이션 방식은 근육 기억만 분산시킵니다. Tabby 는 기존의 `Cmd/Ctrl+B` 를 유지합니다 |
 | **실시간 업데이트**               | WebSocket 푸시 -- 폴링 없음, 즉각적인 UI 업데이트                                                                                                                                                                                                                             |
-| **자동 검색**                     | 세션과 에이전트는 공급자 신호에서 자동으로 생성됩니다. Claude Code는 `SessionStart`에서 즉시 **대기 중** 카드를 만듭니다. Codex는 대화형 TUI 프로세스가 시작되는 즉시, 안정적인 세션 ID가 할당되기 전에도 로컬 메모리에만 존재하는 **대기 중** 카드를 먼저 표시합니다. 이후 Hook, live-thread 행 또는 rollout이 영구 세션을 만들고 이 임시 카드를 대체합니다. 사용자가 Codex의 Resume 선택기에서 기존 스레드를 선택하면 AgentMonitor은 해당 Codex PID가 연 rollout 또는 writer lock을 읽고 첫 새 메시지 전에 영구 재개 세션으로 즉시 전환합니다. 사전 식별 카드는 SQLite, 기록, 분석, 가격 계산, 워크플로, 알림 또는 완료 알림에 기록되지 않으며 프로세스가 종료되면 사라집니다. |
+| **자동 검색**                     | 세션과 에이전트는 공급자 신호에서 자동으로 생성됩니다. Claude Code는 `SessionStart`에서 즉시 **대기 중** 카드를 만듭니다. Codex는 대화형 TUI 프로세스가 시작되는 즉시, 안정적인 세션 ID가 할당되기 전에도 로컬 메모리에만 존재하는 **대기 중** 카드를 먼저 표시합니다. 이후 Hook, live-thread 행 또는 rollout이 영구 세션을 만들고 이 임시 카드를 대체합니다. 사용자가 Codex의 Resume 선택기에서 기존 스레드를 선택하면 Agent Monitor은 해당 Codex PID가 연 rollout 또는 writer lock을 읽고 첫 새 메시지 전에 영구 재개 세션으로 즉시 전환합니다. 사전 식별 카드는 SQLite, 기록, 분석, 가격 계산, 워크플로, 알림 또는 완료 알림에 기록되지 않으며 프로세스가 종료되면 사라집니다. |
 | **기록 가져오기**                 | 시작 시 `~/.claude/`에서 세션을 가져옵니다. 향상된 JSONL 추출: API 오류(quota/rate/invalid_request), 턴 소요 시간, 진입점(cli/sdk-ts), 권한 모드, thinking 블록 수, usage 추가 정보(service_tier, speed, inference_geo), 도구 결과 오류, 서브에이전트 JSONL 파일(`subagents/agent-*.jsonl` 및 `.meta.json`). 다시 가져올 때 기존 세션을 백필합니다. 최근 JSONL 파일(10분 미만)은 "활성"으로 가져옵니다 |
 | **서브에이전트 계층**             | 대시보드와 세션 상세의 접을 수 있는 부모-자식 에이전트 트리. 서브에이전트가 있는 에이전트는 펼침/접기 셰브론을 표시하고, 리프 에이전트는 점 표시기를 표시합니다. 서브에이전트가 활성일 때 자동으로 펼쳐집니다                                                                           |
 | **백그라운드 에이전트**           | 백그라운드로 전환된 서브에이전트를 조기 완료 처리 없이 올바르게 추적합니다                                                                                                                                                                                                         |
@@ -354,7 +354,7 @@ flowchart LR
 | **Tabby**                         | 모든 페이지의 오른쪽 아래 모서리에 고정된 떠다니는 고양이 친구. 기존 WebSocket `eventBus` 위에 전적으로 구축 — **새 백엔드 없음, API 키 없음, 새 의존성 없음**. 커서를 추적하는 눈과 라이브 세션 스트림에서 도출되는 **8가지 기분**(`idle`, `watching`, `happy`, `worried`, `stuck`, `thinking`, `sleeping`, `disconnected`)을 가진 반응형 SVG 마스코트로, 각 기분마다 고유한 애니메이션(꼬리 흔들기, 귀 쫑긋, 고개 까딱, 떨림, 반짝임, zzz, 경고 "!")이 있습니다. **자동 표시 말풍선**은 주목할 만한 이벤트(세션 시작/종료, 오류, 실행 완료)에 대해 짧고, 스로틀되고, 합쳐진 한마디를 게시하며 음소거할 수 있습니다. 고양이를 클릭하거나 **⌘B / Ctrl+B**를 누르면(Esc로 닫기) 라이브 상태 줄(`N live · M errored · 연결 상태`), 클릭 가능한 **통계 칩** 3개(실행 중 / 대기 중 / 오류 — 각각 대응하는 `/sessions?status=` 필터로 이동하며, 카운트가 0이면 비활성), 빠른 작업(Run Claude / 활동 / 세션 / 오류 세션으로 이동, 말풍선 음소거, 알림 지우기), **Ask** 상자가 있는 **패널**이 열립니다: 간단한 상태 질문("what's running", "any errors", "status")은 캐시된 데이터에서 로컬로 답변되고, 그 외의 질문은 **Run Claude** 페이지로 넘겨(`/run?prompt=…`로 딥링크) 실제 Claude Code 세션을 생성합니다. 접근성을 갖추었고(키보드 조작 가능, `aria-live` 말풍선, `prefers-reduced-motion` 준수), 소켓이 끊기면 차분한 `disconnected` 상태로 안전하게 저하되며, **설정**에서 토글할 수 있습니다(en/zh/vi/ko/es로 현지화). 구현은 `client/src/components/Tabby/`에 있습니다 |
 | **사운드 큐** | 라이브 활동에 대한 은은한 오디오 피드백. **기본으로 켜져 있으며** 완전히 끌 수 있습니다. 모든 큐는 **브라우저에서 Web Audio API로 합성**됩니다 — 오실레이터와 게인 엔벨로프만 사용하므로 **다운로드할 오디오 파일도, 새 의존성도 없습니다**. 일곱 가지 큐가 세션 수명 주기를 다룹니다: 세션이 시작될 때의 상행 완전5도, 응답을 마쳤을 때의 장3화음 해결, 오류 시 부드러운 하행 단3도, 서브에이전트 생성 시 짧은 플럭, Claude Code 알림에 대한 디튠된 종소리, 실시간 연결이 복구되거나 끊길 때의 두 음 상승/하강, 그리고 버튼과 링크를 누를 때 거의 들리지 않는 틱. 큐에는 **속도 제한**(큐별 쿨다운 + 전역 버스트 예산)이 있고, 로우패스 필터를 거쳐 작업 뒤로 물러나며, 페이지와 처음 상호작용하기 전까지는 무음을 유지합니다(브라우저 자동재생 정책). **설정 → 사운드**에서 마스터 토글, 볼륨 슬라이더, 큐별 스위치와 즉시 미리 듣기를 제공하며, 설정은 `localStorage`의 `agent-monitor-sound` 키에 저장됩니다(en/zh/vi/ko/es 현지화). 구현은 `client/src/lib/sound.ts`와 `client/src/hooks/useSoundCues.ts`에 있습니다 |
 | **프로그레시브 웹 앱(PWA)**       | 세 개의 독립적인 PWA — 대시보드, 랜딩 페이지, 위키 — 각각 자체 Web App Manifest와 Service Worker를 갖습니다. 어느 것이든 홈 화면 / 독에 설치하면 크롬 없는 독립 실행형 경험을 얻습니다. 대시보드 SW는 `/assets/` 아래 Vite의 콘텐츠 해시 번들을 캐시 우선으로 제공하고(URL은 빌드마다 불변이므로 캐시 적중은 항상 정확), 그 외 모든 것 — 내비게이션, SW 자체, `manifest.json`, 아이콘, 루트 `/` — 은 캐시 폴백이 있는 네트워크 우선으로 처리합니다. 프로덕션 Express 정적 미들웨어의 명시적 `Cache-Control` 헤더(`/assets/*`는 `immutable`, `index.html`, `sw.js`, `manifest.json`은 `no-cache, must-revalidate`)와 결합하여 재빌드는 하드 새로고침 없이 항상 브라우저 내 번들을 교체합니다; 클라이언트의 `controllerchange` 리스너는 이미 제어 중인 페이지를 새 SW가 인수할 때 정확히 한 번만 다시 로드합니다. VAPID 푸시 알림 파이프라인은 보존됩니다. 랜딩 페이지와 위키 SW는 각자의 셸을 프리캐시하고 첫 방문 시 이미지를 지연 캐시하여, 한 번만 로드하면 오프라인 접근이 가능합니다. 모든 매니페스트는 최신 브라우저를 위해 `sizes="any"`의 SVG 아이콘(`favicon.svg`)을 사용하고, iOS 독립 실행형 모드를 위한 `apple-mobile-web-app-capable` + `apple-touch-icon` 메타 태그를 포함합니다 |
-| **데스크톱 앱(macOS & Windows)**  | `client/`, `server/`, `mcp/`, `vscode-extension/`과 나란히 `desktop/` 워크스페이스에 있는, Electron 35로 빌드된 선택적 네이티브 데스크톱 앱. macOS `.app`(`.dmg`) **및** Windows `.exe`(NSIS 설치 관리자 + 무설치 포터블)로 제공됩니다. 기존 Express 서버를 **인프로세스로** 임베드하고(`server/index.js`를 `require()` — 자식 프로세스 없음, IPC 없음) 빌드된 React 클라이언트를 `BrowserWindow`에 렌더링합니다. 네이티브 타이틀 바, 클릭 시점에 SQLite에서 가져온 **라이브 상태 스냅샷**(세션, 에이전트, 오늘의 이벤트)을 단일 클릭 드롭다운으로 보여주는 메뉴 바 / 알림 영역(트레이) 아이콘, 네이티브 애플리케이션 메뉴, 로그인 시 자동 시작(macOS는 `SMAppService`를 통한 로그인 항목; Windows는 사용자별 `HKCU\…\Run`), **⌘Q / Ctrl+Q 확인 대화 상자**(두 번째 누름은 우회), 창을 닫아도 서버는 계속 실행되는 동작, 단일 인스턴스 잠금, 그리고 **브라우저에서 열기**, **서버 재시작**, **로그 표시** 트레이 작업이 추가됩니다. 포트 4820을 선호하고(4821–4829, 그다음 임의의 높은 포트로 폴백), 4820에서 이미 실행 중인 정상 대시보드가 있으면 이중 바인딩하는 대신 이를 채택하며, **웹 대시보드와 공존합니다** — `npm run dev`와 데스크톱 앱을 함께 실행할 수 있고 Hook이 양쪽 모두로 전파됩니다. 알림은 네이티브 OS 토스트로 발생합니다(Electron 내부에서 Web Push는 안정적으로 작동하지 않음). 처음으로 자체 서버를 부팅할 때 Claude Code Hook을 자동 설치하고 백그라운드 서비스를 시작하므로, 설치만 한 사용자도 수동 설정 없이 이벤트가 흐릅니다. [`DESKTOP.md`](./DESKTOP.md)와 [`desktop/README.md`](./desktop/README.md)를 참조하세요 |
+| **데스크톱 앱(macOS, Windows & Linux)**  | `client/`, `server/`, `mcp/`, `vscode-extension/`과 나란히 `desktop/` 워크스페이스에 있는, Electron 35로 빌드된 선택적 네이티브 데스크톱 앱. macOS `.app`(`.dmg`), Windows `.exe`(NSIS 설치 관리자 + 무설치 포터블) **및** Linux 패키지(x64 AppImage + `.deb`)로 제공됩니다. 기존 Express 서버를 **인프로세스로** 임베드하고(`server/index.js`를 `require()` — 자식 프로세스 없음, IPC 없음) 빌드된 React 클라이언트를 `BrowserWindow`에 렌더링합니다. 네이티브 타이틀 바, 클릭 시점에 SQLite에서 가져온 **라이브 상태 스냅샷**(세션, 에이전트, 오늘의 이벤트)을 단일 클릭 드롭다운으로 보여주는 메뉴 바 / 알림 영역(트레이) 아이콘, 네이티브 애플리케이션 메뉴, 로그인 시 자동 시작(macOS는 `SMAppService`를 통한 로그인 항목; Windows는 사용자별 `HKCU\…\Run`, Linux에서는 동작 없음), **⌘Q / Ctrl+Q 확인 대화 상자**(두 번째 누름은 우회), 창을 닫아도 서버는 계속 실행되는 동작, 단일 인스턴스 잠금, 그리고 **브라우저에서 열기**, **서버 재시작**, **로그 표시** 트레이 작업이 추가됩니다. 포트 4820을 선호하고(4821–4829, 그다음 임의의 높은 포트로 폴백), 4820에서 이미 실행 중인 정상 대시보드가 있으면 이중 바인딩하는 대신 이를 채택하며, **웹 대시보드와 공존합니다** — `npm run dev`와 데스크톱 앱을 함께 실행할 수 있고 Hook이 양쪽 모두로 전파됩니다. 알림은 네이티브 OS 토스트로 발생합니다(Electron 내부에서 Web Push는 안정적으로 작동하지 않음). 처음으로 자체 서버를 부팅할 때 Claude Code Hook을 자동 설치하고 백그라운드 서비스를 시작하므로, 설치만 한 사용자도 수동 설정 없이 이벤트가 흐릅니다. [`DESKTOP.md`](./DESKTOP.md)와 [`desktop/README.md`](./desktop/README.md)를 참조하세요 |
 | **자체 호스팅 자산(CDN 없음)**    | 모든 폰트와 스크립트가 로컬에서 제공되므로 대시보드와 문서는 **제3자 CDN 요청을 전혀 하지 않습니다** — 완전히 오프라인으로 렌더링되며 외부 호스트에 아무것도 유출하지 않습니다. React 앱은 [`@fontsource`](https://fontsource.org/)를 통해 Inter + JetBrains Mono를 번들합니다(latin 서브셋; Vite가 빌드 시 콘텐츠 해시 WOFF2를 `dist/assets/`에 출력하며 Google Fonts로의 `<link>` 없음). 랜딩 페이지와 위키는 저장소 루트 `fonts/` 디렉터리에서 자체 호스팅 `fonts/fonts.css` `@font-face` 시트를 로드합니다. 위키의 Mermaid는 jsDelivr 대신 `wiki/mermaid.min.js`(정품 축소판 `mermaid@10.9.6`)로 로컬 벤더링되고, VS Code 확장의 오류 페이지는 시스템 폰트 스택으로 폴백합니다. `fonts.googleapis.com`, `fonts.gstatic.com`, `cdn.jsdelivr.net` 호출은 어디에도 남아 있지 않습니다 |
 | **세션 스플래시 화면**            | 앱 로드 시(브라우저 세션당 한 번) 표시되는 짧은 브랜딩 스플래시: **시간 인식 인사말**(Good morning / afternoon / evening / Working late), 굵은 태그라인, 두 개의 부제 텍스트, 어두운 분위기의 배경(방사형 광채 + 떠다니는 별자리 + 그레인) 위의 애니메이션 노드 그래프 브랜드 마크. 완전히 현지화되어 있습니다(en/zh/vi/ko/es). 오버레이는 첫 페인트부터 **불투명**하여 앱이 절대 비쳐 보이지 않으며, 약 2.5초 유지 후 페이드아웃됩니다; 아무 곳이나 클릭하면 건너뛸 수 있고 `prefers-reduced-motion`을 준수합니다. CSS 전용 애니메이션, 추가 의존성 없음 |
 
@@ -445,14 +445,15 @@ npm run seed
 
 8개의 샘플 세션, 23개의 에이전트, 106개의 이벤트를 생성하여 UI를 즉시 탐색할 수 있습니다.
 
-### 대안: 데스크톱 앱 (macOS & Windows)
+### 대안: 데스크톱 앱 (macOS, Windows & Linux)
 
 터미널을 계속 열어 두고 싶지 않다면 선택적 **네이티브 데스크톱 앱**을 설치하세요. 서버를 인프로세스로 임베드하고, 메뉴 바 / 알림 영역(트레이) 아이콘을 추가하며, 로그인 시 자동 시작(macOS 로그인 항목 / Windows 시작 프로그램)을 지원합니다.
 
 가장 빠른 방법은 [최신 GitHub Release](https://github.com/tanvoid0/agent-monitor/releases/latest)에서 **미리 빌드된 설치 파일을 다운로드**하는 것입니다(`main`에서 `package.json` 버전이 올라갈 때마다 CI가 `vX.Y.Z`를 자동 게시합니다):
 
-- **macOS** — `AgentMonitor-<version>-arm64.dmg`(Apple Silicon) 또는 `-x64.dmg`(Intel)를 받아 **AgentMonitor.app**을 `/Applications`로 드래그하세요.
+- **macOS** — `AgentMonitor-<version>-arm64.dmg`(Apple Silicon) 또는 `-x64.dmg`(Intel)를 받아 **Agent Monitor.app**을 `/Applications`로 드래그하세요.
 - **Windows** — `AgentMonitor-Setup-<version>-x64.exe`(설치 관리자) 또는 `AgentMonitor-<version>-x64-portable.exe`(무설치)를 받아 실행하세요.
+- **Linux** — `AgentMonitor-<version>-x86_64.AppImage`(`chmod +x` 후 실행) 또는 `AgentMonitor-<version>-amd64.deb`(`sudo apt install ./AgentMonitor-<version>-amd64.deb`)를 받으세요.
 
 대신 직접 빌드하려면:
 
@@ -460,9 +461,10 @@ npm run seed
 npm run desktop:install        # Electron + electron-builder를 desktop/에 설치 (네이티브 의존성 사전 점검; 실패 시 설정 도움말 출력)
 npm run desktop:dmg:arm64      # macOS: 빠른 단일 아키텍처 DMG (Apple Silicon)
 npm run desktop:win            # Windows: NSIS 설치 관리자 .exe (Windows에서 실행)
+npm run desktop:linux          # Linux: x64 AppImage + .deb (Linux에서 실행)
 ```
 
-데스크톱 앱의 전체 내용 — 다운로드, 설치, 트레이/메뉴 기능, 빌드 명령, 서명 — 은 아래의 [데스크톱 앱 (macOS & Windows)](#데스크톱-앱-macos--windows) 섹션에 있습니다. [`DESKTOP.md`](./DESKTOP.md)(사용자 가이드)와 [`desktop/README.md`](./desktop/README.md)(아키텍처)도 참조하세요.
+데스크톱 앱의 전체 내용 — 다운로드, 설치, 트레이/메뉴 기능, 빌드 명령, 서명 — 은 아래의 [데스크톱 앱 (macOS, Windows & Linux)](#데스크톱-앱-macos-windows--linux) 섹션에 있습니다. [`DESKTOP.md`](./DESKTOP.md)(사용자 가이드)와 [`desktop/README.md`](./desktop/README.md)(아키텍처)도 참조하세요.
 
 ### 대안: Docker / Podman
 
@@ -671,7 +673,7 @@ git 클론의 경우, 서버는 주기적으로 `origin`을 `git fetch`하고 �
 
 ## `am` CLI
 
-> **v2.x(CCAM)에서 업그레이드하시나요?** 프로젝트는 v3.0.0에서 **AgentMonitor**로 이름이 바뀌었습니다. `ccam`은 `am`의 별칭으로 계속 동작합니다. 기존 `CCAM_*` 환경 변수는 시작 시 해당 `AM_*`로 복사됩니다(새 이름으로 설정된 값이 우선). 라이브 서버 레지스트리는 `~/.claude/.agent-dashboard.json`에서 `~/.claude/.agentmonitor.json`으로 이동했습니다(다음 시작 시 다시 기록). 플러그인 마켓플레이스/ID는 `ccam-*@claude-code-agent-monitor-plugins`에서 `am-*@agentmonitor-plugins`로 바뀌었으므로 사용하는 플러그인을 다시 설치하세요.
+> **v2.x(CCAM)에서 업그레이드하시나요?** 프로젝트는 v3.0.0에서 **Agent Monitor**로 이름이 바뀌었습니다. `ccam`은 `am`의 별칭으로 계속 동작합니다. 기존 `CCAM_*` 환경 변수는 시작 시 해당 `AM_*`로 복사됩니다(새 이름으로 설정된 값이 우선). 라이브 서버 레지스트리는 `~/.claude/.agent-dashboard.json`에서 `~/.claude/.agentmonitor.json`으로 이동했습니다(다음 시작 시 다시 기록). 플러그인 마켓플레이스/ID는 `ccam-*@claude-code-agent-monitor-plugins`에서 `am-*@agentmonitor-plugins`로 바뀌었으므로 사용하는 플러그인을 다시 설치하세요.
 
 대시보드의 전체 기능 표면은 의존성 없는 **`am`** CLI(`bin/am.js`)를 통해 어느 터미널에서든 사용할 수 있습니다. `npm run setup`이 (`npm link`를 통해) 자동으로 링크하며, 이후 `am <command>`는 어느 디렉터리에서든 동작합니다. 실행 중인 대시보드는 `~/.claude/.agentmonitor.json`(Hook 핸들러가 사용하는 것과 동일한 라이브 서버 레지스트리)을 통해 발견하며, `CLAUDE_DASHBOARD_PORT` / `DASHBOARD_PORT` env 재정의를 지원하고, `http://127.0.0.1:4820`으로 폴백합니다.
 
@@ -734,7 +736,7 @@ am open                         # 브라우저에서 대시보드 열기
 am version                      # CLI 버전 출력(--version / -v도 가능)
 ```
 
-API 기반 명령어는 서버가 실행 중이어야 합니다 — 서버가 실행 중이 아닐 때, **읽기 전용 명령어는 `data/dashboard.db`를 직접 읽는 방식으로 폴백하며**(명시적인 `⚠ Offline mode` 배너와 함께, 그리고 저장되어 있지만 죽은 `active` 세션은 서버 워치독이 사용하는 것과 동일한 프로세스 활성 상태 프로브로 표시 측에서 보정됩니다), 서버 없이는 올바르게 실행될 수 없는 명령어(라이브 `tail`, analytics/cost 계산, 변경 작업)는 구체적인 이유와 시작 명령어와 함께 `○ Dashboard server is NOT running` 표시기를 출력합니다; `am start`는 프로덕션 서버를 백그라운드에서 띄웁니다. 읽기 명령어는 항상 안전하며, 유일한 파괴적 명령어(`clear-data`)는 명시적인 `--yes` 없이는 실행을 거부합니다. 출력은 완전한 터미널 UI입니다 — 오른쪽 정렬된 숫자 컬럼을 가진 박스 드로잉 테이블, 상태 아이콘(`● active`, `○ waiting`, `✔ completed`, `✖ error`), stats/analytics/cost용 인라인 막대 차트, 그리고 실제 `├─`/`└─` 에이전트 트리 — ANSI 색상은 TTY에서 자동 활성화되고 파이프될 때는 꺼지며 `--no-color` / `NO_COLOR` / `FORCE_COLOR`로 제어할 수 있습니다. 지속적인 모니터링을 위해 **`am repl`**(별칭 `shell` / `i`)은 `am` 접두사 없이 명령어를 입력하는 대화형 셸을 엽니다 — AgentMonitor 환영 배너, Tab 자동 완성, 저장되는 방향키 히스토리, 실시간 서버 상태 프롬프트(`● host` 실행 중 / `○ offline` 중지), 그룹화된 `help` / `help <cmd>` 메뉴, 그리고 아무 명령이나 자동 새로고침하는 `watch [초] <명령>` 내장 기능(예: `watch 5 kanban`)을 제공합니다. 각 줄은 격리된 자식 프로세스로 실행되므로 오프라인 거부나 블로킹되는 `tail`이 셸을 종료시키는 일은 없습니다. `am`이 PATH에 없다면(예: `npm link`에 상승된 권한이 필요했던 경우) 저장소 루트에서 `npm link`를 한 번 실행하십시오. 전체 참조 — 플래그, 발견 순서, REPL, 안전 모델, 스크립팅/종료 코드, 문제 해결 — 는 [docs/CLI.md](./docs/CLI.md)에서 확인할 수 있습니다.
+API 기반 명령어는 서버가 실행 중이어야 합니다 — 서버가 실행 중이 아닐 때, **읽기 전용 명령어는 `data/dashboard.db`를 직접 읽는 방식으로 폴백하며**(명시적인 `⚠ Offline mode` 배너와 함께, 그리고 저장되어 있지만 죽은 `active` 세션은 서버 워치독이 사용하는 것과 동일한 프로세스 활성 상태 프로브로 표시 측에서 보정됩니다), 서버 없이는 올바르게 실행될 수 없는 명령어(라이브 `tail`, analytics/cost 계산, 변경 작업)는 구체적인 이유와 시작 명령어와 함께 `○ Dashboard server is NOT running` 표시기를 출력합니다; `am start`는 프로덕션 서버를 백그라운드에서 띄웁니다. 읽기 명령어는 항상 안전하며, 유일한 파괴적 명령어(`clear-data`)는 명시적인 `--yes` 없이는 실행을 거부합니다. 출력은 완전한 터미널 UI입니다 — 오른쪽 정렬된 숫자 컬럼을 가진 박스 드로잉 테이블, 상태 아이콘(`● active`, `○ waiting`, `✔ completed`, `✖ error`), stats/analytics/cost용 인라인 막대 차트, 그리고 실제 `├─`/`└─` 에이전트 트리 — ANSI 색상은 TTY에서 자동 활성화되고 파이프될 때는 꺼지며 `--no-color` / `NO_COLOR` / `FORCE_COLOR`로 제어할 수 있습니다. 지속적인 모니터링을 위해 **`am repl`**(별칭 `shell` / `i`)은 `am` 접두사 없이 명령어를 입력하는 대화형 셸을 엽니다 — Agent Monitor 환영 배너, Tab 자동 완성, 저장되는 방향키 히스토리, 실시간 서버 상태 프롬프트(`● host` 실행 중 / `○ offline` 중지), 그룹화된 `help` / `help <cmd>` 메뉴, 그리고 아무 명령이나 자동 새로고침하는 `watch [초] <명령>` 내장 기능(예: `watch 5 kanban`)을 제공합니다. 각 줄은 격리된 자식 프로세스로 실행되므로 오프라인 거부나 블로킹되는 `tail`이 셸을 종료시키는 일은 없습니다. `am`이 PATH에 없다면(예: `npm link`에 상승된 권한이 필요했던 경우) 저장소 루트에서 `npm link`를 한 번 실행하십시오. 전체 참조 — 플래그, 발견 순서, REPL, 안전 모델, 스크립팅/종료 코드, 문제 해결 — 는 [docs/CLI.md](./docs/CLI.md)에서 확인할 수 있습니다.
 
 ## npm 스크립트
 
@@ -779,6 +781,7 @@ API 기반 명령어는 서버가 실행 중이어야 합니다 — 서버가 �
 | `npm run desktop:dmg:universal` | **하나의** 병합된 유니버설 DMG(arm64 + x86_64, 단일 파일) 빌드 — 선택 사항, **가장 느림**, 릴리스에 포함되는 것은 아님. |
 | `npm run desktop:win`   | Windows **NSIS 설치 프로그램** `.exe`(x64)를 빌드합니다 — Windows에서 실행 |
 | `npm run desktop:win:portable` | Windows **포터블**(무설치) `.exe`(x64)를 빌드합니다 — Windows에서 실행 |
+| `npm run desktop:linux` | Linux **AppImage** + **.deb**(x64)를 빌드합니다 — Linux에서 실행 |
 | `npm run monitoring:install` | `monitoring/`에서 `npm install` 실행 — `postinstall`로 Prometheus + Grafana 다운로드 |
 | `npm run monitoring:setup` | `monitoring:install` 별칭 |
 | `npm run monitoring:up` | Prometheus(:9090) + Grafana(:3000)를 백그라운드로 시작합니다(Docker 불필요) |
@@ -1002,7 +1005,7 @@ flowchart TD
 
 ## 플랜 레이어
 
-플랜 레이어는 프로젝트의 `PROGRESS.md`(마일스톤 → 단계 → 레인 → 박스)를 해당 프로젝트의 `cwd`에 대한 AgentMonitor 자체 세션, 에이전트, 이벤트와 조인하여, 보드의 모든 박스가 이를 작업 중인 실시간 에이전트, 실행한 내용, 실패한 부분, 비용을 보여주도록 합니다 — 별도의 트래커를 동기화할 필요 없이 AgentMonitor이 이미 수집 중인 데이터로부터 요청 시 계산됩니다. 검색은 자동입니다: 최근 7일 이내에 AgentMonitor이 세션을 본 `cwd` 아래에 `PROGRESS.md`가 있는 프로젝트는 등록 절차 없이 자동으로 인식되어 변경 사항이 감시됩니다.
+플랜 레이어는 프로젝트의 `PROGRESS.md`(마일스톤 → 단계 → 레인 → 박스)를 해당 프로젝트의 `cwd`에 대한 Agent Monitor 자체 세션, 에이전트, 이벤트와 조인하여, 보드의 모든 박스가 이를 작업 중인 실시간 에이전트, 실행한 내용, 실패한 부분, 비용을 보여주도록 합니다 — 별도의 트래커를 동기화할 필요 없이 Agent Monitor이 이미 수집 중인 데이터로부터 요청 시 계산됩니다. 검색은 자동입니다: 최근 7일 이내에 Agent Monitor이 세션을 본 `cwd` 아래에 `PROGRESS.md`가 있는 프로젝트는 등록 절차 없이 자동으로 인식되어 변경 사항이 감시됩니다.
 
 <p align="center">
   <img src="images/plan.png" alt="플랜 레이어 — 빌드 보드" width="100%">
@@ -1069,7 +1072,7 @@ npm run openapi:yaml
 
 ### Prometheus 메트릭 & Grafana
 
-`GET /api/metrics`는 대시보드의 실시간 카운터 — 상태별 세션/에이전트, 이벤트 및 토큰 총계, 연결된 실시간 클라이언트, 구성된 원격 소스, 프로세스 가동 시간/메모리, 빌드 버전 — 를 Prometheus 텍스트 노출 형식으로 공개하므로, AgentMonitor를 자체 관측성 스택으로 스크레이핑할 수 있습니다. **네 개의 자동 프로비저닝 대시보드**(기본 홈: **AgentMonitor — Overview**)를 갖춘 턴키 방식의 Prometheus + Grafana 스택은 [`monitoring/`](./monitoring/README.md)에 있습니다.
+`GET /api/metrics`는 대시보드의 실시간 카운터 — 상태별 세션/에이전트, 이벤트 및 토큰 총계, 연결된 실시간 클라이언트, 구성된 원격 소스, 프로세스 가동 시간/메모리, 빌드 버전 — 를 Prometheus 텍스트 노출 형식으로 공개하므로, Agent Monitor를 자체 관측성 스택으로 스크레이핑할 수 있습니다. **네 개의 자동 프로비저닝 대시보드**(기본 홈: **Agent Monitor — Overview**)를 갖춘 턴키 방식의 Prometheus + Grafana 스택은 [`monitoring/`](./monitoring/README.md)에 있습니다.
 
 **npm(Docker/Homebrew 불필요):**
 
@@ -1087,21 +1090,21 @@ npm run monitoring:docker:up
 ```
 
 <p align="center">
-  <img src="images/grafana.png" alt="Grafana AgentMonitor — Overview 대시보드의 실시간 세션·이벤트·토큰 메트릭" width="100%">
+  <img src="images/grafana.png" alt="Grafana Agent Monitor — Overview 대시보드의 실시간 세션·이벤트·토큰 메트릭" width="100%">
   <br>
-  <em>📊 <strong>Grafana · AgentMonitor — Overview</strong> — 기본 홈 대시보드(네 개 보드 자동 프로비저닝): 플릿 스냅샷, DB 누적 합계, 분해 차트, 속도 — 모두 실시간 <code>/api/metrics</code> 스크레이프</em>
+  <em>📊 <strong>Grafana · Agent Monitor — Overview</strong> — 기본 홈 대시보드(네 개 보드 자동 프로비저닝): 플릿 스냅샷, DB 누적 합계, 분해 차트, 속도 — 모두 실시간 <code>/api/metrics</code> 스크레이프</em>
 </p>
 
 <p align="center">
-  <img src="images/prometheus-console.png" alt="메트릭 카드와 세션 표가 있는 Prometheus AgentMonitor 콘솔" width="100%">
+  <img src="images/prometheus-console.png" alt="메트릭 카드와 세션 표가 있는 Prometheus Agent Monitor 콘솔" width="100%">
   <br>
-  <em>🔥 <strong>Prometheus · AgentMonitor 콘솔</strong> — <code>/consoles/index.html</code> 사전 구성 랜딩 페이지가 스크레이프 상태, 세션/이벤트/토큰 합계 및 Graph 드릴다운 링크를 Prometheus에 직접 조회</em>
+  <em>🔥 <strong>Prometheus · Agent Monitor 콘솔</strong> — <code>/consoles/index.html</code> 사전 구성 랜딩 페이지가 스크레이프 상태, 세션/이벤트/토큰 합계 및 Graph 드릴다운 링크를 Prometheus에 직접 조회</em>
 </p>
 
 <p align="center">
-  <img src="images/prometheus-query.png" alt="AgentMonitor PromQL 쿼리가 있는 Prometheus Graph UI" width="100%">
+  <img src="images/prometheus-query.png" alt="Agent Monitor PromQL 쿼리가 있는 Prometheus Graph UI" width="100%">
   <br>
-  <em>📈 <strong>Prometheus · Graph</strong> — 스크레이프된 AgentMonitor 메트릭에 PromQL 실행(예: <code>sum(am_sessions)</code>, <code>am_events_total</code>) — AgentMonitor 콘솔과 <a href="./monitoring/README.md">monitoring/README.md</a>의 시작 링크 제공</em>
+  <em>📈 <strong>Prometheus · Graph</strong> — 스크레이프된 Agent Monitor 메트릭에 PromQL 실행(예: <code>sum(am_sessions)</code>, <code>am_events_total</code>) — Agent Monitor 콘솔과 <a href="./monitoring/README.md">monitoring/README.md</a>의 시작 링크 제공</em>
 </p>
 
 전체 메트릭 목록과 스크레이프/인증 세부 정보는 [docs/API.md → Metrics](./docs/API.md#metrics)를 참고하세요.
@@ -1677,7 +1680,7 @@ Tabby는 키보드로 조작할 수 있고, 말풍선에 `aria-live`를 사용�
 
 ## VS Code 확장
 
-**AgentMonitor**는 일급 VS Code 확장으로도 제공되어, 에디터를 떠나지 않고 AI 에이전트를 모니터링할 수 있습니다.
+**Agent Monitor**는 일급 VS Code 확장으로도 제공되어, 에디터를 떠나지 않고 AI 에이전트를 모니터링할 수 있습니다.
 
 <p align="center">
   <img src="vscode-extension/vscode.png" alt="VS Code Extension Screenshot" width="100%">
@@ -1699,22 +1702,22 @@ Tabby는 키보드로 조작할 수 있고, 말풍선에 `aria-live`를 사용�
 자세한 개발자 구성은 [.vscode](./.vscode) 및 [vscode-extension](./vscode-extension) 디렉터리를 참조하십시오.
 
 > [!TIP]
-> VS Code Marketplace의 확장: [AgentMonitor](https://marketplace.visualstudio.com/items?itemName=hoangsonw.agentmonitor)
+> VS Code Marketplace의 확장: [Agent Monitor](https://marketplace.visualstudio.com/items?itemName=hoangsonw.agentmonitor)
 
 ---
 
-## 데스크톱 앱 (macOS & Windows)
+## 데스크톱 앱 (macOS, Windows & Linux)
 
-대시보드는 한 번 설치하면 잊어버려도 되는 선택적 **네이티브 데스크톱 애플리케이션**으로도 제공됩니다 — macOS `.app`(`.dmg`로 배포)과 Windows `.exe`(NSIS 설치 프로그램 및 설치가 필요 없는 포터블 빌드)입니다. `client/`, `server/`, `mcp/`, `vscode-extension/`과 나란히 있는 `desktop/` 워크스페이스에 위치하며, **Electron 35**로 빌드됩니다.
+대시보드는 한 번 설치하면 잊어버려도 되는 선택적 **네이티브 데스크톱 애플리케이션**으로도 제공됩니다 — macOS `.app`(`.dmg`로 배포), Windows `.exe`(NSIS 설치 프로그램 및 설치가 필요 없는 포터블 빌드), Linux 패키지(x64 `.AppImage` 및 `.deb`)입니다. `client/`, `server/`, `mcp/`, `vscode-extension/`과 나란히 있는 `desktop/` 워크스페이스에 위치하며, **Electron 35**로 빌드됩니다.
 
 <p align="center">
-  <img src="images/macos.png" alt="AgentMonitor running as a native desktop app" width="100%">
+  <img src="images/macos.png" alt="Agent Monitor running as a native desktop app" width="100%">
   <br>
   <em>🍎🪟 <strong>데스크톱 앱</strong> — 메뉴 바 / 알림 영역(트레이) 아이콘, 로그인 시 열기, 단일 인스턴스 잠금을 갖춘 네이티브 셸입니다. 동일한 대시보드를 실제 OS 창에서 보여줍니다(macOS 화면).</em>
 </p>
 
 <p align="center">
-  <img src="images/windows_app.png" alt="AgentMonitor running as a native Windows desktop app, showing the Activity Feed with the Windows window menu bar and Tabby panel" width="100%">
+  <img src="images/windows_app.png" alt="Agent Monitor running as a native Windows desktop app, showing the Activity Feed with the Windows window menu bar and Tabby panel" width="100%">
   <br>
   <em>🪟 네이티브 Windows 앱으로 실행되는 동일한 대시보드 — 알림 영역(트레이) 아이콘, 네이티브 창 메뉴, 로그인 시 열기.</em>
 </p>
@@ -1727,7 +1730,7 @@ Tabby는 키보드로 조작할 수 있고, 말풍선에 `aria-live`를 사용�
 
 ```mermaid
 flowchart LR
-    subgraph electron["AgentMonitor.app — one Electron process"]
+    subgraph electron["Agent Monitor.app — one Electron process"]
         main["Electron Main Process<br/>Node 22 / Electron 35"]
         host["server-host.ts<br/>port discovery · adoption · ABI patch"]
         express["server/index.js<br/>Express API · SQLite · WebSocket"]
@@ -1761,15 +1764,15 @@ flowchart LR
 
 ### 기능
 
-- **트레이 아이콘** — 항상 켜져 있는 상태 표시 영역입니다(macOS 메뉴 바 / Windows 알림 영역). 왼쪽 클릭은 대시보드 창을 토글하고, 오른쪽 클릭은 **Open Dashboard**, **Open in Browser**, **Restart Server**, **Show Logs**, **Open at Login**(토글), **Quit**이 있는 컨텍스트 메뉴를 엽니다. macOS는 틴트가 적용된 템플릿 글리프를 사용하고, Windows는 컬러 `icon.ico`를 사용합니다(검은색 템플릿은 어두운 작업 표시줄에서 보이지 않게 됩니다).
-- **창 및 작업 표시줄 아이콘** — `BrowserWindow`가 컬러 앱 로고(Windows에서는 `icon.ico`, 그 외에는 `icon.png`)에 연결되어 있어 제목 표시줄 / 작업 표시줄에 실제 AgentMonitor 아이콘이 표시됩니다 — 패키징되지 않은 `npm run desktop:dev` 실행에서도 더 이상 일반 Electron 아이콘이 표시되지 않습니다.
+- **트레이 아이콘** — 항상 켜져 있는 상태 표시 영역입니다(macOS 메뉴 바 / Windows 알림 영역 / Linux 시스템 트레이). 왼쪽 클릭은 대시보드 창을 토글하고, 오른쪽 클릭은 **Open Dashboard**, **Open in Browser**, **Restart Server**, **Show Logs**, **Open at Login**(토글), **Quit**이 있는 컨텍스트 메뉴를 엽니다. macOS는 틴트가 적용된 템플릿 글리프를 사용하고, Windows는 컬러 `icon.ico`, Linux는 컬러 `icon.png`를 사용합니다(검은색 템플릿은 어두운 작업 표시줄에서 보이지 않게 됩니다).
+- **창 및 작업 표시줄 아이콘** — `BrowserWindow`가 컬러 앱 로고(Windows에서는 `icon.ico`, 그 외에는 `icon.png`)에 연결되어 있어 제목 표시줄 / 작업 표시줄에 실제 Agent Monitor 아이콘이 표시됩니다 — 패키징되지 않은 `npm run desktop:dev` 실행에서도 더 이상 일반 Electron 아이콘이 표시되지 않습니다.
 - **네이티브 애플리케이션 메뉴** — `⌘` / `Ctrl` 단축키가 있는 표준 `About` / `File` / `Edit` / `View` / `Window` / `Help` 메뉴입니다. **File → Open Dashboard** 항목(`⌘1`)은 **macOS 전용**입니다: macOS는 창이 숨겨진 후에도 전역 메뉴 바를 유지하므로 창을 다시 열 수 있습니다 — Windows/Linux에서는 메뉴가 창에 붙어 있어 창이 숨겨진 동안에는 동작할 수 없으므로, 대신 트레이의 **Open Dashboard**로 다시 여십시오(최소화되어 있거나 다른 창 뒤에 있어도 창을 안정적으로 앞으로 가져옵니다).
-- **로그인 시 자동 시작** — 트레이 또는 앱 메뉴에서 **Open at Login**을 토글합니다. macOS에서는 최신 `SMAppService` API를 통해 등록되므로 항목이 **시스템 설정 → 일반 → 로그인 항목**에 나타나고, Windows에서는 사용자별 `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` 항목을 기록하며 **작업 관리자 → 시작 프로그램**에서 확인할 수 있습니다.
+- **로그인 시 자동 시작** — 트레이 또는 앱 메뉴에서 **Open at Login**을 토글합니다. macOS에서는 최신 `SMAppService` API를 통해 등록되므로 항목이 **시스템 설정 → 일반 → 로그인 항목**에 나타나고, Windows에서는 사용자별 `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` 항목을 기록하며 **작업 관리자 → 시작 프로그램**에서 확인할 수 있습니다. Linux에서는 이 토글이 동작하지 않습니다.
 - **창 닫기는 숨김일 뿐, 서버는 계속 실행됩니다** — 창을 닫으면 숨겨질 뿐이며, 서버와 트레이는 계속 유지됩니다. 트레이를 클릭하면 창이 다시 나타납니다.
 - **단일 인스턴스 잠금** — 앱을 중복 실행하면 기존 창에 포커스만 이동합니다. 두 번째 서버도, 포트 충돌도 없습니다. (모든 플랫폼에 적용됩니다.)
-- **데이터는 재설치와 업데이트에도 유지됩니다** — SQLite 데이터베이스와 VAPID 키는 **앱 번들 / 설치 디렉터리 외부**의 사용자별 앱 데이터 디렉터리에 저장됩니다 — macOS에서는 `~/Library/Application Support/AgentMonitor/data/`, Windows에서는 `%APPDATA%\AgentMonitor\data\`입니다. 패키징된 번들은 읽기 전용이므로 그 안에 데이터베이스를 기록하면 History Import와 이벤트 영속성이 깨집니다. 앱 데이터에 보관하면 이 문제가 해결되며, 앱을 교체하거나 업그레이드해도 가져온 히스토리가 그대로 유지됩니다. (Windows NSIS 제거 프로그램은 기본적으로 이 데이터를 보존합니다.)
+- **데이터는 재설치와 업데이트에도 유지됩니다** — SQLite 데이터베이스와 VAPID 키는 **앱 번들 / 설치 디렉터리 외부**의 사용자별 앱 데이터 디렉터리에 저장됩니다 — macOS에서는 `~/Library/Application Support/Agent Monitor/data/`, Windows에서는 `%APPDATA%\Agent Monitor\data\`, Linux에서는 `~/.config/Agent Monitor/data/`입니다. 패키징된 번들은 읽기 전용이므로 그 안에 데이터베이스를 기록하면 History Import와 이벤트 영속성이 깨집니다. 앱 데이터에 보관하면 이 문제가 해결되며, 앱을 교체하거나 업그레이드해도 가져온 히스토리가 그대로 유지됩니다. (Windows NSIS 제거 프로그램은 기본적으로 이 데이터를 보존합니다.)
 - **PATH의 `claude` CLI** — macOS에서는 앱이 시작 시 로그인 셸 `PATH`를 복구하므로, Finder/Dock에서 실행된 앱이 원래는 launchd의 최소한의 `PATH`만 상속받더라도 **Run Claude** 기능이 동작합니다. (Windows에서는 상속받은 사용자 `PATH`에 이미 포함되어 있습니다.)
-- **로그** — 메인 프로세스는 `~/Library/Logs/AgentMonitor/desktop.log`(macOS) 또는 `%APPDATA%\AgentMonitor\logs\desktop.log`(Windows)에 기록합니다. 트레이 메뉴의 **Show Logs**에서 접근할 수 있습니다.
+- **로그** — 메인 프로세스는 `~/Library/Logs/Agent Monitor/desktop.log`(macOS), `%APPDATA%\Agent Monitor\logs\desktop.log`(Windows) 또는 `~/.config/Agent Monitor/logs/desktop.log`(Linux)에 기록합니다. 트레이 메뉴의 **Show Logs**에서 접근할 수 있습니다.
 
 ### 받는 방법
 
@@ -1781,8 +1784,10 @@ flowchart LR
 | macOS (Intel) | `AgentMonitor-<ver>-x64.dmg` | `/Applications`로 드래그 |
 | Windows (설치 프로그램) | `AgentMonitor-Setup-<ver>-x64.exe` | 사용자별 설치, 관리자 권한 불필요 |
 | Windows (포터블) | `AgentMonitor-<ver>-x64-portable.exe` | 설치 없이 실행 |
+| Linux (AppImage) | `AgentMonitor-<ver>-x86_64.AppImage` | `chmod +x` 후 실행 |
+| Linux (deb) | `AgentMonitor-<ver>-amd64.deb` | `sudo apt install ./AgentMonitor-<ver>-amd64.deb` |
 
-커밋별 최신 빌드도 CI 아티팩트로 제공됩니다(로그인 필요, 14일 보존): `🍎 macOS Desktop (DMG)` 잡의 `AgentMonitor-dmg`와 `🪟 Windows Desktop (EXE)` 잡의 `AgentMonitor-win`입니다 — 다음 릴리스 태그 전에 `main`를 테스트할 때 유용합니다.
+커밋별 최신 빌드도 CI 아티팩트로 제공됩니다(로그인 필요, 14일 보존): `🍎 macOS Desktop (DMG)` 잡의 `AgentMonitor-dmg`, `🪟 Windows Desktop (EXE)` 잡의 `AgentMonitor-win`, `🐧 Linux Desktop (AppImage + deb)` 잡의 `AgentMonitor-linux`입니다 — 다음 릴리스 태그 전에 `main`를 테스트할 때 유용합니다.
 
 **옵션 B — 직접 빌드하기.** 리포지토리 루트에서:
 
@@ -1792,21 +1797,22 @@ npm run build                # React 클라이언트 빌드 (client/dist)
 npm run desktop:install      # Electron + electron-builder를 desktop/에 설치 (네이티브 의존성 사전 점검; 실패 시 설정 도움말 출력)
 npm run desktop:dmg:arm64    # macOS:   빠른 단일 아키텍처 DMG → desktop/release/AgentMonitor-<ver>-arm64.dmg
 npm run desktop:win          # Windows: NSIS 설치 프로그램 → desktop/release/AgentMonitor-Setup-<ver>-x64.exe
+npm run desktop:linux        # Linux:   x64 AppImage + .deb → desktop/release/AgentMonitor-<ver>-x86_64.AppImage, …-amd64.deb
 ```
 
 > [!NOTE]
-> **DMG는 macOS에서, Windows `.exe`는 Windows에서 빌드됩니다** — electron-builder는 호스트 OS용으로 패키징합니다. macOS `npm run desktop:dmg` 빌드는 의도적으로 **느립니다** — 아키텍처마다 한 번씩(arm64와 x64로 각각) 앱을 빌드하고 임시 서명하여 아키텍처별 DMG 두 개(`AgentMonitor-<ver>-arm64.dmg`와 `AgentMonitor-<ver>-x64.dmg`)를 만들기 때문입니다. 유니버설 바이너리를 만들거나 `@electron/universal`로 병합하지 않으며, 릴리스에는 이 두 아키텍처별 DMG가 함께 제공됩니다. 본인의 Mac에서는 단일 아키텍처 `desktop:dmg:arm64` / `desktop:dmg:x64`를 사용하십시오. Windows에서는 `npm run desktop:install`이 `better-sqlite3`을 사전 빌드된 Electron 바이너리로 가져오므로, 일반적인 경우 Visual Studio C++ 툴체인이 필요 없습니다. 그래도 빌드가 실패하면(사전 빌드 바이너리가 없거나 C++ 툴체인이 없는 경우) `desktop:install`은 OS별 정확한 해결 방법과 툴체인이 필요 없는 대안을 출력하고, 손상된 설치를 남기는 대신 명확하게 실패합니다.
+> **DMG는 macOS에서, Windows `.exe`는 Windows에서, AppImage/`.deb`는 Linux에서 빌드됩니다** — electron-builder는 호스트 OS용으로 패키징합니다. macOS `npm run desktop:dmg` 빌드는 의도적으로 **느립니다** — 아키텍처마다 한 번씩(arm64와 x64로 각각) 앱을 빌드하고 임시 서명하여 아키텍처별 DMG 두 개(`AgentMonitor-<ver>-arm64.dmg`와 `AgentMonitor-<ver>-x64.dmg`)를 만들기 때문입니다. 유니버설 바이너리를 만들거나 `@electron/universal`로 병합하지 않으며, 릴리스에는 이 두 아키텍처별 DMG가 함께 제공됩니다. 본인의 Mac에서는 단일 아키텍처 `desktop:dmg:arm64` / `desktop:dmg:x64`를 사용하십시오. Windows에서는 `npm run desktop:install`이 `better-sqlite3`을 사전 빌드된 Electron 바이너리로 가져오므로, 일반적인 경우 Visual Studio C++ 툴체인이 필요 없습니다. 그래도 빌드가 실패하면(사전 빌드 바이너리가 없거나 C++ 툴체인이 없는 경우) `desktop:install`은 OS별 정확한 해결 방법과 툴체인이 필요 없는 대안을 출력하고, 손상된 설치를 남기는 대신 명확하게 실패합니다.
 
 ### 설치 방법
 
 **macOS:**
 
 1. `.dmg`를 더블클릭하여 마운트합니다.
-2. **AgentMonitor.app**을 `/Applications` 폴더로 드래그합니다.
+2. **Agent Monitor.app**을 `/Applications` 폴더로 드래그합니다.
 3. DMG는 기본적으로 **ad-hoc 서명**되어 있어 macOS Gatekeeper가 첫 실행 시 경고를 표시합니다(*"Apple could not verify…"*). 격리(quarantine) 속성을 제거하십시오:
 
    ```bash
-   xattr -cr "/Applications/AgentMonitor.app"
+   xattr -cr "/Applications/Agent Monitor.app"
    ```
 
    또는 **시스템 설정 → 개인정보 보호 및 보안**을 열고 **그래도 열기**를 클릭하십시오.
@@ -1815,7 +1821,7 @@ npm run desktop:win          # Windows: NSIS 설치 프로그램 → desktop/rel
 
 **Windows:**
 
-1. `AgentMonitor-Setup-<ver>-x64.exe`를 실행합니다. `%LOCALAPPDATA%\Programs\AgentMonitor` 아래에 **사용자별**로 설치되며(관리자 권한 상승 불필요) 설치 디렉터리를 선택할 수 있습니다. 또는 `*-portable.exe`를 실행하면 설치 없이 바로 시작할 수 있습니다.
+1. `AgentMonitor-Setup-<ver>-x64.exe`를 실행합니다. `%LOCALAPPDATA%\Programs\Agent Monitor` 아래에 **사용자별**로 설치되며(관리자 권한 상승 불필요) 설치 디렉터리를 선택할 수 있습니다. 또는 `*-portable.exe`를 실행하면 설치 없이 바로 시작할 수 있습니다.
 2. 설치 프로그램은 기본적으로 **서명되지 않았으므로** Windows **SmartScreen**이 첫 실행 시 *"Windows protected your PC"*를 표시할 수 있습니다 — **추가 정보 → 실행**을 클릭하십시오.
 3. 시작 메뉴 / 바탕화면 바로가기에서 실행합니다. 알림 영역(트레이) 아이콘이 나타나고 대시보드 창이 열립니다.
 
@@ -1837,6 +1843,11 @@ npm run desktop:win          # Windows: NSIS 설치 프로그램 → desktop/rel
   <em>Windows 설치 프로그램 · 3단계 — <strong>Completing Setup</strong>(마침 후 앱 실행).</em>
 </p>
 
+**Linux:**
+
+1. AppImage — `chmod +x AgentMonitor-<ver>-x86_64.AppImage` 후 실행합니다. 또는 `.deb` — `sudo apt install ./AgentMonitor-<ver>-amd64.deb`(실행 파일 `agentmonitor`, 카테고리 Development).
+2. 앱을 실행합니다. 트레이 아이콘(컬러 앱 아이콘)이 나타나고 대시보드 창이 열립니다.
+
 ### 빌드 명령어
 
 모든 명령어는 **리포지토리 루트**에서 실행합니다:
@@ -1853,8 +1864,9 @@ npm run desktop:win          # Windows: NSIS 설치 프로그램 → desktop/rel
 | `npm run desktop:dmg:universal` | **macOS:** **하나의** 병합된 유니버설 DMG(arm64 + x86_64, 단일 파일) 빌드 — 선택 사항, **가장 느림**, 릴리스에 포함되는 것은 아님. |
 | `npm run desktop:win`       | **Windows:** NSIS 설치 프로그램 `.exe`를 빌드합니다 (x64)                      |
 | `npm run desktop:win:portable` | **Windows:** 설치가 필요 없는 포터블 `.exe`를 빌드합니다 (x64)              |
+| `npm run desktop:linux`     | **Linux:** x64 AppImage + `.deb`를 빌드합니다                                  |
 
-결과물인 macOS DMG는 **약 80 MB**(설치 후 디스크에서 약 250 MB)이며 Windows 설치 프로그램도 비슷한 크기입니다 — 표준적인 Electron 번들 오버헤드입니다.
+결과물인 macOS DMG는 **약 80 MB**(설치 후 디스크에서 약 250 MB)이며 Windows 설치 프로그램과 Linux 패키지도 비슷한 크기입니다 — 표준적인 Electron 번들 오버헤드입니다.
 
 ### 서명 및 공증
 
@@ -1865,7 +1877,7 @@ macOS DMG는 기본적으로 **ad-hoc 서명**되므로 유료 Apple Developer �
 - **`better-sqlite3`**은 의존성 트리에서 유일한 네이티브 모듈이며, 네이티브 모듈은 실행되는 정확한 Node ABI에 맞춰 컴파일되어야 합니다. `desktop/` 워크스페이스는 Electron의 ABI에 맞게 다시 빌드된 `better-sqlite3`의 **자체 복사본**을 포함하고, 프로세스 로컬 `require` 리디렉션을 사용해 `server/db.js`가 이를 가리키도록 합니다. 리포지토리 루트의 복사본은 시스템 Node용으로 빌드된 상태를 유지합니다(따라서 `npm run test:server`는 계속 동작합니다).
 - **DMG를 빌드하면 대상 아키텍처에 맞게 `better-sqlite3`이 다시 빌드되는데**, 이로 인해 데스크톱 복사본이 다른 CPU 아키텍처용으로 빌드된 채 남아 `npm run desktop:dev` / `npm run desktop:test`가 `ERR_DLOPEN_FAILED`로 깨질 수 있습니다. 이제 데스크톱 `prebuild` 단계가 다음 빌드 시 로컬 머신에 맞게 네이티브 모듈을 **자동 복구**하므로, 특정 아키텍처용 DMG 빌드 후에도 개발 및 스모크 테스트 흐름이 계속 동작합니다. 또한 `prebuild` 단계는 `better-sqlite3` 네이티브 바이너리가 아예 없을 때 **설정 도움말과 함께 빠르게 실패**하여, 런타임 크래시를 복사해 붙여넣을 수 있는 빌드 타임 오류로 바꿉니다.
 - **`desktop/` 외부의 유일한 변경**은 `server/index.js`의 동작 보존 리팩터링입니다: listen 이후의 부트스트랩(업데이트 스케줄러, `cc-watcher`, 고아 실행 조정)을 내보내기된(exported) `startBackgroundServices()`로 추출하여, 내장 서버가 `node server/index.js`가 실행하는 것과 정확히 동일하게 실행되도록 했습니다. 독립 실행형 `node server/index.js` 경로는 기능적으로 변경되지 않았으며, `client/`, `scripts/`, `mcp/`, `vscode-extension/`은 건드리지 않았습니다.
-- 경로 필터링된 두 개의 데스크톱 CI 잡이 앱을 빌드하고, 스모크 테스트하고, 패키징합니다: `macos-latest`의 **`🍎 macOS Desktop (DMG)`**(`AgentMonitor-dmg` 아티팩트 업로드 — 단일 아키텍처 DMG 2개)과 `windows-latest`의 **`🪟 Windows Desktop (EXE)`**(`AgentMonitor-win` 아티팩트 업로드 — NSIS 설치 프로그램 + 포터블)입니다. `main`로 버전을 올리는 푸시가 있으면 `release` 잡이 macOS DMG와 Windows `.exe` **모두**를 게시된 `vX.Y.Z` GitHub Release에 첨부합니다. Windows 아이콘(`desktop/assets/icon.ico`)은 리포지토리에 커밋되어 있습니다(`npm run build:win-icon`으로 `icon.png`에서 재생성, PowerShell + .NET, 추가 도구 불필요).
+- 경로 필터링된 세 개의 데스크톱 CI 잡이 앱을 빌드하고, 스모크 테스트하고, 패키징합니다: `macos-latest`의 **`🍎 macOS Desktop (DMG)`**(`AgentMonitor-dmg` 아티팩트 업로드 — 단일 아키텍처 DMG 2개)과 `windows-latest`의 **`🪟 Windows Desktop (EXE)`**(`AgentMonitor-win` 아티팩트 업로드 — NSIS 설치 프로그램 + 포터블), `ubuntu-latest`의 **`🐧 Linux Desktop (AppImage + deb)`**(`AgentMonitor-linux` 아티팩트 업로드 — AppImage + `.deb`)입니다. `main`로 버전을 올리는 푸시가 있으면 `release` 잡이 macOS DMG, Windows `.exe`, Linux 파일 **모두**를 게시된 `vX.Y.Z` GitHub Release에 첨부합니다. Windows 아이콘(`desktop/assets/icon.ico`)은 리포지토리에 커밋되어 있습니다(`npm run build:win-icon`으로 `icon.png`에서 재생성, PowerShell + .NET, 추가 도구 불필요).
 
 전체 사용자 가이드(다운로드, 설치, Gatekeeper / SmartScreen, 트레이 메뉴, 자동 시작)는 [`DESKTOP.md`](./DESKTOP.md)를, 기여자 / 아키텍처 레퍼런스(프로세스 모델, 부팅 생명주기, 포트 탐색, 빌드 파이프라인 — Mermaid 다이어그램 포함)는 [`desktop/README.md`](./desktop/README.md)를 참조하십시오.
 
@@ -1944,7 +1956,7 @@ erDiagram
 
 ## 플러그인 마켓플레이스
 
-AgentMonitor은 Claude Code와 Codex가 공유하는 14개 플러그인, 66개 번들 스킬, 18개 Claude 서브에이전트, 34개 Claude 명령, 3개 CLI 도구, 3개 Hook 구성, 2개의 MCP 플러그인을 제공합니다. skills.sh CLI는 저장소 전체에서 76개 스킬을 찾습니다. 전체 카탈로그와 설치 및 검증 절차는 `docs/PLUGINS.md`를 참조하십시오.
+Agent Monitor은 Claude Code와 Codex가 공유하는 14개 플러그인, 66개 번들 스킬, 18개 Claude 서브에이전트, 34개 Claude 명령, 3개 CLI 도구, 3개 Hook 구성, 2개의 MCP 플러그인을 제공합니다. skills.sh CLI는 저장소 전체에서 76개 스킬을 찾습니다. 전체 카탈로그와 설치 및 검증 절차는 `docs/PLUGINS.md`를 참조하십시오.
 
 ### 마켓플레이스 추가
 
@@ -2184,11 +2196,11 @@ graph LR
     style M_REPL fill:#0f766e,stroke:#14b8a6,color:#fff
 ```
 
-선택 사항인 **데스크톱 앱(macOS & Windows)** — Express 서버를 인프로세스로 호스팅하는 단일 Electron 프로세스입니다(터미널 없음, 자식 프로세스 없음):
+선택 사항인 **데스크톱 앱(macOS, Windows & Linux)** — Express 서버를 인프로세스로 호스팅하는 단일 Electron 프로세스입니다(터미널 없음, 자식 프로세스 없음):
 
 ```mermaid
 flowchart LR
-    subgraph desktop["Desktop App (macOS & Windows) — 1 Electron process"]
+    subgraph desktop["Desktop App (macOS, Windows & Linux) — 1 Electron process"]
         E_MAIN["Electron Main Process<br/>(Node 22 / Electron 35)"]
         E_HOST["server-host.ts<br/>require() server/index.js"]
         E_SRV["Embedded Express :4820<br/>API · SQLite · WebSocket"]
@@ -2209,7 +2221,7 @@ flowchart LR
 
 ### 클라우드 배포
 
-`deployments/`는 EKS, GKE, AKS, OKE 및 자체 관리형 클러스터를 포함한 모든 호환 Kubernetes 환경을 대상으로 합니다. AgentMonitor은 SQLite를 사용하므로 모든 지원 manifest는 Recreate 전략과 함께 **persistent volume마다 정확히 하나의 활성 dashboard writer**를 강제합니다. SQLite가 persistence backend인 동안 HPA, active-active, 다중 replica, blue-green, canary는 지원하지 않습니다.
+`deployments/`는 EKS, GKE, AKS, OKE 및 자체 관리형 클러스터를 포함한 모든 호환 Kubernetes 환경을 대상으로 합니다. Agent Monitor은 SQLite를 사용하므로 모든 지원 manifest는 Recreate 전략과 함께 **persistent volume마다 정확히 하나의 활성 dashboard writer**를 강제합니다. SQLite가 persistence backend인 동안 HPA, active-active, 다중 replica, blue-green, canary는 지원하지 않습니다.
 
 - **Helm:** schema가 다중 replica/HPA를 거부하고 image digest, retained PVC, Ingress 또는 Gateway API, 외부 Secret, NetworkPolicy, 선택적 MCP 및 ServiceMonitor를 지원합니다.
 - **Kustomize:** Restricted PSS base, dev/staging/production overlay, MCP·monitoring·Gateway API·CSI snapshot component를 제공합니다.
@@ -2356,7 +2368,7 @@ agentmonitor/
 |   +-- build/                   # 빌드된 MCP 런타임 출력
 |-- desktop/
 |   |-- package.json             # Electron + electron-builder 의존성 및 스크립트
-|   |-- electron-builder.yml     # DMG 패키징 설정; 서명/공증 Hook
+|   |-- electron-builder.yml     # DMG(macOS) + NSIS/포터블(Windows) + AppImage/deb(Linux) 타깃; 서명/공증 Hook
 |   |-- tsconfig.json            # 엄격한 TypeScript (src/ -> out/)
 |   |-- README.md                # 데스크톱 앱 아키텍처 레퍼런스(기여자 문서)
 |   |-- assets/                  # icon.svg + 생성된 icon.icns + 트레이 PNG
@@ -2364,10 +2376,10 @@ agentmonitor/
 |   |   |-- main.ts              # Electron 메인 프로세스 진입점 — 라이프사이클, 연결 구성
 |   |   |-- server-host.ts       # 인프로세스 Express 부팅, 포트 탐색, 기존 서버 인수, DB 종료
 |   |   |-- window.ts            # BrowserWindow + 유지되는 창 위치/크기
-|   |   |-- tray.ts              # 메뉴 막대(트레이) 아이콘 + 컨텍스트 메뉴
+|   |   |-- tray.ts              # 메뉴 막대(트레이) 아이콘(macOS는 템플릿 PNG, Windows는 icon.ico, Linux는 icon.png) + 컨텍스트 메뉴
 |   |   |-- menu.ts              # 네이티브 애플리케이션 메뉴(File ▸ Open Dashboard는 macOS 전용)
 |   |   |-- login-item.ts        # macOS 로그인 항목 자동 시작 전환(SMAppService)
-|   |   |-- logger.ts            # 파일 로거 -> ~/Library/Logs/AgentMonitor/desktop.log
+|   |   |-- logger.ts            # 파일 로거 -> ~/Library/Logs/Agent Monitor/desktop.log
 |   |   |-- constants.ts         # 앱 이름, 포트, 타임아웃, 창 크기
 |   |   +-- preload.ts           # 의도적으로 비어 있음(렌더러 권한 제로)
 |   |-- scripts/
@@ -2428,9 +2440,9 @@ agentmonitor/
 
 ## 감사의 말
 
-AgentMonitor는 [Son Nguyen](https://github.com/hoangsonww)의 [Claude-Code-Agent-Monitor](https://github.com/hoangsonww/Claude-Code-Agent-Monitor) 포크에서 시작했습니다. 원본 대시보드, 훅 파이프라인, 그리고 이 프로젝트가 여전히 따르는 문서 규율에 감사드립니다 — 그의 저작권 고지는 [LICENSE](LICENSE)에 그대로 남아 있습니다.
+Agent Monitor는 [Son Nguyen](https://github.com/hoangsonww)의 [Claude-Code-Agent-Monitor](https://github.com/hoangsonww/Claude-Code-Agent-Monitor) 포크에서 시작했습니다. 원본 대시보드, 훅 파이프라인, 그리고 이 프로젝트가 여전히 따르는 문서 규율에 감사드립니다 — 그의 저작권 고지는 [LICENSE](LICENSE)에 그대로 남아 있습니다.
 
-포크 링크는 2026-09-19에 제거되었습니다. 코드베이스가 너무 많이 갈라져(CLI 이름 변경, 플러그인 트리, UI 키트, 워크플로 수집) 업스트림 변경을 계속 병합할 수 없게 되었기 때문이며, AgentMonitor는 이제 [tanvoid0/agent-monitor](https://github.com/tanvoid0/agent-monitor)에서 독립 프로젝트로 개발됩니다.
+포크 링크는 2026-09-19에 제거되었습니다. 코드베이스가 너무 많이 갈라져(CLI 이름 변경, 플러그인 트리, UI 키트, 워크플로 수집) 업스트림 변경을 계속 병합할 수 없게 되었기 때문이며, Agent Monitor는 이제 [tanvoid0/agent-monitor](https://github.com/tanvoid0/agent-monitor)에서 독립 프로젝트로 개발됩니다.
 
 ---
 
